@@ -162,6 +162,12 @@ button,input,select{font:inherit;color:inherit}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 .wt{margin:0;font-size:12.5px;font-weight:600;color:var(--muted)}
+
+/* page order: new clients see How to use + Your plan first; returning clients go straight to today's session */
+.wrap>.hero{order:0}.wrap>details.how:not(.setup){order:1}.wrap>#setupBox{order:2}.wrap>#phaseContent{order:3}.wrap>.foot{order:9}
+html.mg-ret .wrap>#setupBox{order:5}html.mg-ret .wrap>details.how:not(.setup){order:6}
+html.mg-ret #setupSum::after{content:' · tap to change';color:var(--muted)}
+.weekrow{margin-top:-6px}
 </style>
 <style>
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
@@ -348,12 +354,11 @@ body.timing{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
 
   <div id="phaseContent" style="display:flex;flex-direction:column;gap:18px">
 
+  <div class="step"><span class="stepn">1</span><h2>Today's session</h2></div>
   <div class="weekrow">
     <label for="week">Training week</label>
     <select id="week"></select>
   </div>
-
-  <div class="step"><span class="stepn">1</span><h2>Today's session</h2></div>
   <div class="days" role="tablist" aria-label="Training day" id="dayTabs"></div>
 
 
@@ -739,7 +744,7 @@ $('repCopy').addEventListener('click',function(){
   try{navigator.clipboard.writeText(txt).then(function(){markSent();$('repStatus').textContent='Report copied. Paste it into an email or message to your coach.'},fallback)}catch(e){fallback()}
 });
 
-function setupSum(){var el=$('setupSum');if(!el)return;var ph=PLAN.phases.find(function(p){return p.id===S.phase})||{};el.textContent=(hasName()?S.player.trim()+' · ':'')+levelInfo().name+' · '+(ph.name||'');var sb=$('setupBox');if(sb&&!sb.dataset.init){sb.dataset.init=1;if(hasName()&&Object.keys(S.finished||{}).length){sb.open=false;document.documentElement.classList.add('mg-ret')}}}
+function setupSum(){var el=$('setupSum');if(!el)return;var ph=PLAN.phases.find(function(p){return p.id===S.phase})||{};el.textContent=(hasName()?S.player.trim()+' · ':'')+levelInfo().name+' · '+(ph.name||'');var sb=$('setupBox');if(sb&&!sb.dataset.init){sb.dataset.init=1;if(hasName()){sb.open=false;document.documentElement.classList.add('mg-ret')}}}
 function renderAll(){setupSum();renderControls();if(phase().days){renderWarm(true);renderDay();renderLog();renderReport()}}
 
 /* ---------- EVENTS ---------- */

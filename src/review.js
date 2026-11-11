@@ -142,15 +142,17 @@ function save(blob,fname,msg){var u=URL.createObjectURL(blob),a=document.createE
 
 /* ---------- entry points ---------- */
 function tab(){if(document.querySelector('.rv-tab-btn'))return;var b=document.createElement('button');b.type='button';b.className='rv-tab-btn';b.setAttribute('aria-label','My week or month in review');
-  b.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="15" stroke="currentColor" stroke-width="2.2"/><path d="M4 10h16M9 3v4M15 3v4" stroke="currentColor" stroke-width="2.2"/></svg>My review';
+  b.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="15" stroke="currentColor" stroke-width="2.2"/><path d="M4 10h16M9 3v4M15 3v4" stroke="currentColor" stroke-width="2.2"/></svg>Review';
   b.addEventListener('click',function(){open()});document.body.appendChild(b);place()}
-function place(){var b=document.querySelector('.rv-tab-btn'),pb=document.querySelector('.ux-pbtab');if(!b)return;if(pb){b.style.minWidth=pb.style.minWidth='';var w=Math.max(pb.offsetWidth,b.offsetWidth)+'px';b.style.minWidth=pb.style.minWidth=w;b.style.justifyContent=pb.style.justifyContent='center'}else b.style.bottom='calc(10px + env(safe-area-inset-bottom,0px))'}
+function place(){var b=document.querySelector('.rv-tab-btn'),pb=document.querySelector('.ux-pbtab');if(!b)return;
+  if(pb){var t=[].slice.call(pb.childNodes).filter(function(n){return n.nodeType===3&&/My PBs/.test(n.textContent)})[0];if(t)t.textContent='PBs';b.style.right='calc('+(pb.offsetWidth+16)+'px + env(safe-area-inset-right,0px))'}else b.style.right=''}
 function hookBests(){new MutationObserver(function(){var d=[].slice.call(document.querySelectorAll('.ux-done')).filter(function(x){return /My bests/.test(x.getAttribute('aria-label')||'')&&!x.querySelector('.rv-from')})[0];if(!d)return;
   var last=d.querySelector('.ux-done-in > .ux-btn:last-child');if(!last)return;var b=document.createElement('button');b.type='button';b.className='ux-btn y rv-from';b.textContent='My week & month review';
   b.addEventListener('click',function(e){e.stopPropagation();d.remove();open('week')});last.parentNode.insertBefore(b,last)}).observe(document.body,{childList:true})}
 function css(){if(document.getElementById('rv-css'))return;var s=document.createElement('style');s.id='rv-css';s.textContent=CSS;document.head.appendChild(s)}
 var CSS=[
-'.rv-tab-btn{position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:37;display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 14px;border:0;border-top:3px solid #FFD900;background:#0B0B0B;color:#F4F1EA;font-family:Anton,Impact,sans-serif;font-size:17px;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.35)}',
+'.rv-tab-btn,.ux-pbtab{min-height:42px!important;padding:0 12px!important;font-size:15px!important;gap:6px!important}',
+'.rv-tab-btn{position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:37;display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 14px;border:0;border-top:3px solid #FFD900;background:#0B0B0B;color:#F4F1EA;font-family:Anton,Impact,sans-serif;font-size:17px;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.35)}',
 '.ux-bests-btn{display:none!important}',
 '.rv-tab-btn svg{color:#FFD900}.rv-tab-btn:focus-visible,.rv-wrap button:focus-visible{outline:3px solid #FFD900;outline-offset:2px}',
 'html.rv-lock,html.rv-lock body{overflow:hidden}',
@@ -203,8 +205,8 @@ function inApp(){var u=navigator.userAgent||'';return (/iPhone|iPad|iPod/.test(u
 function lift(){if(!inApp())return;document.documentElement.classList.add('mg-inapp');var s=document.createElement('style');s.textContent=
  'html.mg-inapp .mgs-pill{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}'+
  'html.mg-inapp .ux-pbtab{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}'+
- 'html.mg-inapp .rv-tab-btn{bottom:calc(132px + env(safe-area-inset-bottom,0px))!important}'+
- 'html.mg-inapp body{padding-bottom:150px}'+
+ 'html.mg-inapp .rv-tab-btn{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}'+
+ 'html.mg-inapp body{padding-bottom:96px}'+
  'html.mg-inapp .rv-wrap,html.mg-inapp .mgv-wrap,html.mg-inapp .ux-done{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}';document.head.appendChild(s)}
 function init(){if(!family())return;css();lift();tab();hookBests();setTimeout(place,300);window.addEventListener('resize',place)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else setTimeout(init,0);
