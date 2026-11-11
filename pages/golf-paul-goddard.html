@@ -748,6 +748,7 @@ function bind(){var m=$("main");m.querySelectorAll("[data-act]").forEach(functio
 /* first screen every time he opens the page: warming up for a round, or range practice? */
 var ASK=true,ASKK=null;if(S.last){S.last=null}
 function gateShow(){var g=$("gate");if(!g)return;var on=ASK&&!(S.last);g.hidden=!on;document.body.classList.toggle("gated",on);if(!on)return;
+  var hr=new Date().getHours(),first=(S.player||"Paul").trim().split(/\s+/)[0];$("gHead").innerHTML="Good "+(hr<12?"morning":hr<18?"afternoon":"evening")+", "+esc(first)+"<span>What are you doing today?</span>";
   $("gResumeWrap").hidden=!S.cur;if(S.cur)$("gResumeTxt").textContent=(S.cur.kind==="range"?"Range practice":"Round day warm-up")+" \u00b7 block "+(S.cur.bi+1)+" of "+S.cur.blocks.length;
   g.querySelectorAll("#gKind button").forEach(function(x){x.setAttribute("aria-pressed",String(x.dataset.v===ASKK))});
   $("gOrderWrap").hidden=ASKK!=="round";g.querySelectorAll("#gOrder button").forEach(function(x){x.setAttribute("aria-pressed",String(x.dataset.v===S.order))});
