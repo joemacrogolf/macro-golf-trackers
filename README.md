@@ -74,3 +74,25 @@ Full tracker pages live in `pages/`. A Kajabi Custom Code block only needs:
 | Golf tests (Jack): Putting, Short Game, Long Game | `golf-putting-test`, `golf-short-game-test`, `golf-long-game-test` |
 
 `src/golf-sg.js` (golf pages only) adds strokes gained alongside each golf game's own score: a running total on the board, each shot's strokes gained in the result flash, a per-shot card on the results and a line in the coach report. The baseline is Mark Broadie's strokes-to-hole-out data adjusted by handicap, the same model as the Long Game Test. Each golf page passes its own shot list with `GSG.init({target, shots, note})`.
+
+## 1-to-1 client plans (`clients/` + `templates/` + `tools/build-clients.js`)
+
+New 1-to-1 trackers are built from one shared engine rather than copied pages. Each client is a small config file in `clients/<page>.js` (plan, habits, which features are on), and the build writes `pages/<page>.html`:
+
+```
+node tools/build-clients.js            # build every client
+node tools/build-clients.js rob-seeley # build one
+```
+
+First line of each config: `// @code <6-digit page number>  @name <Client Name>`. The code is the cloud-sync code and the Kajabi page path (`/p-<code>`).
+
+Features (`CLIENT.features`): `checkin` (energy + motivation 1–10, unlocks the day), `weight` (kg weigh-ins with trend), `alcohol` (daily yes/no), `cardio` (logged sessions with type + minutes, counts toward the week), `mobility` (daily tick + which video, remembers past videos). `weeks: 0` makes the plan open-ended.
+
+Exercises use `x(id, name, {sets, reps, rpe, side, kind, inc, note, slot})`. `reps`/`rpe` can be arrays per set (pyramids), `rpe: MAX` is max-intent power work, `rpe: null` means no RPE target. Exercises in a block that share a `slot` become a pick-one dropdown; each choice keeps its own logs and bests.
+
+| Client | Page | Code |
+|---|---|---|
+| Paul Bruce | `paul-bruce` | 318462 |
+| Sam McDowell | `sam-mcdowell` | 527903 |
+| Luis Vega | `luis-vega` | 694218 |
+| Rob Seeley | `rob-seeley` | 741365 |
