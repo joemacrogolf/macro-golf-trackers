@@ -365,6 +365,8 @@ tr.done .ux-rpe{background:#F4F1EA}
 @media (prefers-reduced-motion:reduce){.ux-chip{transition:none}}
 </style>
 <style id="pg-css">
+.viz{border:2px solid #0B0B0B;line-height:0}.viz svg{display:block;width:100%;height:auto}.tap{cursor:crosshair;touch-action:manipulation}
+#main .planlist .t{text-align:left!important}
 /* option buttons: stacked title + one plain line (set explicitly so the Kajabi theme can't centre or inline them) */
 #main .lvl{display:grid!important;gap:10px}
 #main .lvl button{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:4px;width:100%;text-align:left!important;padding:14px 16px!important;letter-spacing:0!important}
@@ -561,7 +563,7 @@ function stats(sess){var o={},L=shotsOf(sess);
     if(b.t==="holeout"&&b.res.length)o.holeout=b.res.filter(Boolean).length;
     if(b.t==="money"&&b.res.length)o.money=b.res.reduce(function(a,x){return a+x},0);
     if(b.t==="ladder"&&b.res.length){o.ladder=b.res.filter(function(x){return x.ok}).length;o.ladderN=b.res.length}
-    if(b.t==="strike"&&b.res.length)o.strike=b.res.filter(function(x){return x==="Centre"}).length;
+    if(b.t==="strike"&&b.res.length)o.strike=b.res.filter(isCentre).length;
     if(b.t==="drive"&&b.res.length){o.fairways=b.res.filter(function(r,i){return Math.abs(r.off)<=b.holes[i].fw}).length;o.drives=b.res.length;o.longest=Math.max.apply(null,b.res.map(function(r){return r.carry}))}
     if(b.t==="wd"&&b.res.length)o.wd=b.res.reduce(function(a,r,i){return a+wdPts(r.target,r.carry,r.off,wdFin(i))},0);
   });
@@ -623,6 +625,32 @@ function timerHtml(b){var left=b.left==null?b.mins*60:b.left;return '<div class=
 function bindTimer(b){var btn=$("tmrBtn");if(!btn)return;btn.onclick=function(){if(TM){stopTimer();save();render();return}
   if(b.left==null)b.left=b.mins*60;TM=setInterval(function(){b.left=Math.max(0,b.left-1);var el=$("tmr");if(el)el.textContent=Math.floor(b.left/60)+":"+String(b.left%60).padStart(2,"0");if(!b.left){stopTimer();save();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}render()}},1000);render()}}
 
+
+/* iron club face for the strike station (same drawing as the Practice Plan): tap where it came off, heat map from 3 strikes */
+var FT=function(x,y,str,o){o=o||{};return '<text x="'+x+'" y="'+y+'" font-family="Inter,Arial,sans-serif" font-size="'+(o.s||10)+'" font-weight="'+(o.w||700)+'" text-anchor="'+(o.a||"middle")+'" fill="'+(o.c||"#FFFFFF")+'" letter-spacing=".5">'+str+'</text>'};
+function faceSVG(hits,heat){
+  let g=`<defs><linearGradient id="ironG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfbfc"/><stop offset=".55" stop-color="#e3e5e8"/><stop offset="1" stop-color="#b9bdc3"/></linearGradient>
+   <linearGradient id="hoselG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d9dce0"/><stop offset=".5" stop-color="#f7f8f9"/><stop offset="1" stop-color="#a9adb3"/></linearGradient>
+   <radialGradient id="hg"><stop offset="0" stop-color="#E0352B" stop-opacity=".55"/><stop offset="1" stop-color="#E0352B" stop-opacity="0"/></radialGradient>
+   <clipPath id="faceClip"><path d="M40 112 C34 80 38 48 70 40 C78 38 88 38 98 39 L214 52 C228 54 236 62 240 74 C244 92 244 114 240 126 C236 136 228 140 216 140 L70 142 C52 142 43 128 40 112 Z"/></clipPath></defs>
+   <rect width="300" height="170" fill="#F1F2F3"/>
+   <path d="M228 72 C240 54 252 32 262 10 C264 6 268 4 272 5 L282 8 C287 10 288 14 286 18 C276 40 266 66 258 92 L248 126 Z" fill="url(#hoselG)" stroke="#9a9ea4" stroke-width="1.5"/>
+   <path d="M40 112 C34 80 38 48 70 40 C78 38 88 38 98 39 L214 52 C228 54 236 62 240 74 C244 92 244 114 240 126 C236 136 228 140 216 140 L70 142 C52 142 43 128 40 112 Z" fill="url(#ironG)" stroke="#8d9198" stroke-width="2"/>
+   <path d="M46 116 C42 88 44 58 72 48 L96 46" fill="none" stroke="#ffffff" stroke-width="2.5" opacity=".9"/>
+   <path d="M52 132 Q60 138 74 138 L214 136" fill="none" stroke="#9fa3a9" stroke-width="2" opacity=".7"/>`;
+  g+=`<g clip-path="url(#faceClip)">`;
+  for(let k=0;k<12;k++){const y=60+k*6,x1=74-(k<3?0:k*.4),x2=200-k*.6;g+=`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y+1.2}" stroke="#a7abb1" stroke-width="1.3" stroke-linecap="round"/>`}
+  g+=`</g><circle cx="138" cy="94" r="15" fill="none" stroke="#0B0B0B" stroke-width="1.2" stroke-dasharray="3 3" opacity=".55"/>`;
+  g+=FT(56,26,"TOE",{c:"#77715F",s:9,a:"start"})+FT(226,160,"HEEL",{c:"#77715F",s:9,a:"end"});
+  if(heat)hits.forEach(h=>{g+=`<circle cx="${h.x}" cy="${h.y}" r="22" fill="url(#hg)"/>`});
+  hits.forEach((h,i)=>{g+=`<circle cx="${h.x}" cy="${h.y}" r="7" fill="#0B0B0B" stroke="#FFD900" stroke-width="1.5"/>`+FT(h.x,h.y+3,i+1,{s:8,c:"#FFFFFF"})});
+  return `<svg viewBox="0 0 300 170" class="tap" role="img" aria-label="Iron club face">${g}</svg>`}
+function faceZone(h){const hz=h.x<108?"Toe":h.x>170?"Heel":"Centre",vz=h.y<74?"high":h.y>114?"low":"";return {hz,vz,centre:hz==="Centre"&&!vz}}
+function faceSummary(hits){if(!hits.length)return "";const z=hits.map(faceZone),c=z.filter(x=>x.centre).length;
+  const cnt={};z.forEach(x=>{if(!x.centre){const k=x.hz+(x.vz?" "+x.vz:"");cnt[k]=(cnt[k]||0)+1}});
+  const mis=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]);return `${c} of ${hits.length} in the middle`+(mis.length?` · most misses ${mis[0].toLowerCase()} (${cnt[mis[0]]})`:"")}
+function isCentre(h){return typeof h==="string"?h==="Centre":faceZone(h).centre}
+function svgPt(e){var svg=e.currentTarget,r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return {x:(e.clientX-r.left)/r.width*vb.width,y:(e.clientY-r.top)/r.height*vb.height}}
 /* ---------- rendering (same layout and components as the Macro Golf games) ---------- */
 function L$(b){return '<ul class="steps">'+b.lines.map(function(l){return "<li>"+esc(l)+"</li>"}).join("")+"</ul>"}
 function nextBtn(label,dis){return '<div class="btns">'+(S.cur.bi?'<button class="ghost" data-act="back">Back</button>':"")+'<button class="primary" data-act="next"'+(dis?" disabled":"")+'>'+label+'</button></div>'}
@@ -659,10 +687,10 @@ function runBlock(b){var h="",done=blockDone(b);
       (done?"":'<div class="fields"><label style="grid-column:1/-1"><span class="label">Where this ball finished (yds)</span><input id="ladIn" inputmode="numeric" placeholder="e.g. '+(top?top+8:15)+'"></label></div>'+
         (b.res.length?'<div class="mm"><button class="made" data-act="lad" data-v="1">Carried to it</button><button class="miss" data-act="lad" data-v="0">Didn’t</button></div>':'<button class="primary" data-act="lad" data-v="1">Enter</button>'))+
       (b.res.length?'<button class="linky" data-act="ladUndo">Undo last</button>':"")+nextBtn(done?"✓ 70 yds reached, next":"Ladder up to 70 yds",!done)}
-  if(b.t==="strike"){var cc=b.res.filter(function(x){return x==="Centre"}).length;
-    h+=callrow(done?"Strike map":"Ball "+(b.res.length+1)+" of "+b.balls,cc,"of "+b.res.length+" centred")+
-      (done?"":'<div class="face">'+["High toe","High","High heel","Toe","Centre","Heel","Low toe","Low","Low heel"].map(function(x){return '<button data-act="face" data-v="'+x+'" class="'+(x==="Centre"?"c":"")+'">'+x+"</button>"}).join("")+"</div>")+
-      chips(b.res.map(function(x){return chip(x==="Centre"?"c3":"c1",x)}))+(b.res.length?'<button class="linky" data-act="faceUndo">Undo last</button>':"")+nextBtn(done?"Next":"Tap all 5 strikes",!done)}
+  if(b.t==="strike"){var hits=b.res.filter(function(x){return typeof x==="object"}),n=b.res.length,cc=b.res.filter(isCentre).length;
+    h+=callrow(done?"Your strike map":"Ball "+(n+1)+" of "+b.balls,cc,"of "+n+" in the middle")+
+      '<div class="viz" id="face">'+faceSVG(hits,done||n>=3)+'</div>'+(done?"":'<p class="preview">Tap where it came off the face.</p>')+
+      (hits.length?'<span class="muted">'+faceSummary(hits)+'</span>':"")+(n?'<button class="linky" data-act="faceUndo">Undo last</button>':"")+nextBtn(done?"Next":"Tap the face "+(b.balls-n)+" more time"+(b.balls-n===1?"":"s"),!done)}
   if(b.t==="drive"){var k=b.res.length,hl=b.holes[k];
     h+=(done?callrow("Driving done",b.res.filter(function(r,i){return Math.abs(r.off)<=b.holes[i].fw}).length,"of 8 fairways"):
       callrow("Drive "+(k+1)+" of 8",hl.L,"yd par "+hl.par,["Driver"])+'<div class="shot"><div class="facts"><span>Fairway '+hl.fw*2+" yds wide</span><span>Pick a fairway on the range</span></div></div>"+lmInputs(S.drv))+
@@ -755,7 +783,8 @@ function render(){var m=$("main");if(!m)return;stopTimerIfLeft();var last=S.last
 function stopTimerIfLeft(){var b=cur();if(TM&&!(b&&b.timer))stopTimer()}
 function bind(){var m=$("main");m.querySelectorAll("[data-act]").forEach(function(el){el.onclick=function(){act(el.dataset.act,el.dataset.v)}});
   ["carryIn","offIn","ladIn"].forEach(function(id){var e=$(id);if(e)e.onkeydown=function(ev){if(ev.key==="Enter"){if(id==="offIn")act("lm");else if(id==="carryIn"){var o=$("offIn");o&&o.focus()}}}});
-  var b=cur();if(b&&b.timer)bindTimer(b)}
+  var b=cur();if(b&&b.timer)bindTimer(b);
+  var fc=$("face");if(b&&b.t==="strike"&&fc){fc.querySelector("svg").addEventListener("click",function(e){if(b.res.length>=b.balls)return;var q=svgPt(e);b.res.push({x:Math.round(q.x),y:Math.round(q.y)});save();render()})}}
 /* first screen every time he opens the page: warming up for a round, or range practice? */
 var ASK=true,ASKK=null;if(S.last){S.last=null}
 function gateShow(){var g=$("gate");if(!g)return;var on=ASK&&!(S.last);g.hidden=!on;document.body.classList.toggle("gated",on);if(!on)return;
