@@ -34,6 +34,7 @@ Put it on a hidden Kajabi page. The coach password is typed at runtime and never
 ## Database (`supabase/`)
 
 - `001-setup.sql`: tables, PIN-checked functions, first clients. Change the coach password line before running.
+- `003-coach-lockout.sql`: same 8-tries / 15-minute lock for the coach password; returns `{rows:[...]}`.
 - `002-pin-lockout-fix.sql`: wrong PINs now count toward the 15-minute lock (errors return `{"error": ...}` with HTTP 200 so the counter commits).
 
 Add a 1-to-1 client:
@@ -61,3 +62,5 @@ Full tracker pages live in `pages/`. A Kajabi Custom Code block only needs:
 | Pure Muscle & Strength (gym / home) | `pure-muscle-strength-gym`, `pure-muscle-strength-home` |
 | Pure Power (gym / home) | `pure-power-gym`, `pure-power-home` |
 | Pure Sequencing (gym / home) | `pure-sequencing-gym`, `pure-sequencing-home` |
+| Dan Jones / Harry / Kevin (1-to-1) | `dan-jones`, `harry`, `kevin` |
+| Coach dashboard | `coach` |

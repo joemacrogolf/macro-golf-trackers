@@ -1050,6 +1050,8 @@ tr.done .ux-rpe{background:#F4F1EA}
 .ux-a2hs-t svg{vertical-align:-2px}
 .ux-a2hs-b{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
 .ux-a2hs .ux-btn{min-height:40px;font-size:16px}
+.ux-pbtab{position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:37;display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 16px;border:0;border-top:3px solid #FFD900;background:#0B0B0B;color:#FFD900;font-family:'Anton',Impact,sans-serif;font-size:17px;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.35)}
+.ux-pbtab:focus-visible{outline:3px solid #FFD900;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.ux-chip{transition:none}}
 </style>
 <script>
@@ -1154,7 +1156,8 @@ function homeSetup(){try{$a('link[rel="apple-touch-icon"],link[rel="apple-touch-
      '<div class="ux-a2hs-b">'+(android?'<button type="button" data-x="install" class="ux-btn y">Add</button>':'')+'<button type="button" data-x="off" class="ux-close">Not now</button></div>';
     document.body.appendChild(c);c.addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(!b)return;
       if(b.dataset.x==='install'&&deferred){deferred.prompt();deferred=null}try{localStorage.setItem('ux-a2hs-off','1')}catch(x){}c.remove()})},2500)}
-return {init:function(o){for(var k in o)CFG[k]=o[k];watch();bestsButton();if(CFG.home)homeSetup()},bests:bests,decorate:decorate,points:points};
+function pbTab(){if(document.querySelector('.ux-pbtab'))return;var b=el('button','ux-pbtab','<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0V4zM5 5H3v2a4 4 0 0 0 4 4M19 5h2v2a4 4 0 0 1-4 4M9 15h6l1 5H8l1-5z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>My PBs');b.type='button';b.setAttribute('aria-label','See my personal bests');b.addEventListener('click',bests);document.body.appendChild(b)}
+return {init:function(o){for(var k in o)CFG[k]=o[k];watch();bestsButton();pbTab();if(CFG.home)homeSetup()},bests:bests,decorate:decorate,points:points};
 })();
 UX.init({family:'pure',home:false});
 </script>

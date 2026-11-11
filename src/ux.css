@@ -42,4 +42,6 @@ tr.done .ux-rpe{background:#F4F1EA}
 .ux-a2hs-t svg{vertical-align:-2px}
 .ux-a2hs-b{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
 .ux-a2hs .ux-btn{min-height:40px;font-size:16px}
+.ux-pbtab{position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:37;display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 16px;border:0;border-top:3px solid #FFD900;background:#0B0B0B;color:#FFD900;font-family:'Anton',Impact,sans-serif;font-size:17px;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.35)}
+.ux-pbtab:focus-visible{outline:3px solid #FFD900;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.ux-chip{transition:none}}

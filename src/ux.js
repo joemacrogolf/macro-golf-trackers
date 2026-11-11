@@ -99,5 +99,6 @@ function homeSetup(){try{$a('link[rel="apple-touch-icon"],link[rel="apple-touch-
      '<div class="ux-a2hs-b">'+(android?'<button type="button" data-x="install" class="ux-btn y">Add</button>':'')+'<button type="button" data-x="off" class="ux-close">Not now</button></div>';
     document.body.appendChild(c);c.addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(!b)return;
       if(b.dataset.x==='install'&&deferred){deferred.prompt();deferred=null}try{localStorage.setItem('ux-a2hs-off','1')}catch(x){}c.remove()})},2500)}
-return {init:function(o){for(var k in o)CFG[k]=o[k];watch();bestsButton();if(CFG.home)homeSetup()},bests:bests,decorate:decorate,points:points};
+function pbTab(){if(document.querySelector('.ux-pbtab'))return;var b=el('button','ux-pbtab','<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0V4zM5 5H3v2a4 4 0 0 0 4 4M19 5h2v2a4 4 0 0 1-4 4M9 15h6l1 5H8l1-5z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>My PBs');b.type='button';b.setAttribute('aria-label','See my personal bests');b.addEventListener('click',bests);document.body.appendChild(b)}
+return {init:function(o){for(var k in o)CFG[k]=o[k];watch();bestsButton();pbTab();if(CFG.home)homeSetup()},bests:bests,decorate:decorate,points:points};
 })();

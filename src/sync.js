@@ -62,16 +62,22 @@ function pull(){if(!cred||busy)return Promise.resolve();setPill('saving');
 function gate(msg){if($q('.mgs-gate'))return;var pure=!!CFG.plan&&!CFG.code,g=document.createElement('div');g.className='mgs-gate';g.setAttribute('role','dialog');g.setAttribute('aria-label','Save your progress');
   g.innerHTML='<form class="mgs-gin"><div class="mgs-gk">Save your progress</div><div class="mgs-gh">'+(pure?'Sign in to keep your training safe':'Set your PIN')+'</div><div class="mgs-gbar"></div>'+
    '<p class="mgs-gp">'+(pure?'Use the same email and PIN on any phone or computer and your logs follow you.':'Pick a 4-digit PIN. Use it on any phone or computer and your training follows you. If you have already set one, enter it.')+'</p>'+
-   (pure?'<label class="mgs-gl">First name<input name="name" autocomplete="given-name" maxlength="40"></label><label class="mgs-gl">Email<input name="email" type="email" autocomplete="email" required></label>':'')+
+   (pure?'<label class="mgs-gl">Your name<input name="pname" autocomplete="name" maxlength="60" placeholder="First and last name"></label><label class="mgs-gl">Email<input name="email" type="email" autocomplete="email" required></label>':'')+
    '<label class="mgs-gl">PIN<input name="pin" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" autocomplete="off" required placeholder="4 digits"></label>'+
    '<p class="mgs-gerr" role="alert">'+esc(msg||'')+'</p><button class="mgs-gy" type="submit">Save to cloud</button><button class="mgs-gn" type="button">Not now</button></form>';
-  document.body.appendChild(g);var f=$q('form',g),pin=f.pin;setTimeout(function(){(f.name||pin).focus()},50);
+  document.body.appendChild(g);var f=$q('form',g),pin=f.pin;var nm=f.elements['pname'];if(nm){var cur=document.getElementById('player');if(cur&&cur.value)nm.value=cur.value}setTimeout(function(){(nm&&!nm.value?nm:(pure?f.elements['email']:pin)).focus()},50);
   $q('.mgs-gn',g).addEventListener('click',function(){ls('mgsync-skip:'+KEY,String(Date.now()));g.remove();setPill('off')});
   f.addEventListener('submit',function(e){e.preventDefault();var p=String(pin.value).replace(/\D/g,'');if(p.length<4){$q('.mgs-gerr',g).textContent='PIN must be at least 4 digits.';return}
-    var code=CFG.code,name=CFG.name||null;if(pure){var em=String(f.email.value).trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){$q('.mgs-gerr',g).textContent='Check your email address.';return}code='pure:'+CFG.plan+':'+em;name=String(f.name.value).trim()||null}
+    var code=CFG.code,name=CFG.name||null;if(pure){var em=String(f.email.value).trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){$q('.mgs-gerr',g).textContent='Check your email address.';return}code='pure:'+CFG.plan+':'+em;name=String(f.elements['pname'].value).trim()||null}
     var btn=$q('.mgs-gy',g);btn.disabled=true;btn.textContent='Checking\u2026';
-    rpc('mg_load',{p_code:code,p_pin:p,p_name:name,p_plan:CFG.planName||CFG.plan||null}).then(function(r){setCred({code:code,pin:p,name:name,base:0});ls('mgsync-skip:'+KEY,null);g.remove();reconcile(r&&r.data)||setPill('ok')})
+    rpc('mg_load',{p_code:code,p_pin:p,p_name:name,p_plan:CFG.planName||CFG.plan||null}).then(function(r){setCred({code:code,pin:p,name:name,base:0});ls('mgsync-skip:'+KEY,null);g.remove();if(name)ls('mgsync-pname:'+KEY,name);if(!reconcile(r&&r.data)){setPill('ok');applyName()}})
     .catch(function(err){btn.disabled=false;btn.textContent='Save to cloud';$q('.mgs-gerr',g).textContent=err.server?(/Wrong PIN/.test(err.message)?'That PIN does not match. Try again.':err.message):'No connection. Try again when you are online.'})})}
+
+/* fill the tracker's own name box from the sign-in, so clients only type it once */
+function applyName(){var n=ls('mgsync-pname:'+KEY);if(!n)return;var el=document.getElementById('player');
+  if(el&&!el.value){el.value=n;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('blur'))}
+  else if(!el&&window.S&&'player' in window.S&&!window.S.player){window.S.player=n;window.save()}
+  ls('mgsync-pname:'+KEY,null)}
 
 /* ---------- status pill ---------- */
 var LBL={ok:'Saved to cloud',saving:'Saving\u2026',offline:'Offline \u00b7 will sync',pin:'PIN needed',off:'Cloud save off'};
@@ -101,6 +107,6 @@ function init(o){if(started)return;started=true;for(var k in o)CFG[k]=o[k];
   window.addEventListener('online',function(){if(cred&&stamp()>(cred.base||0))push()});
   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&cred){if(stamp()>(cred.base||0))push();else pull()}else if(document.visibilityState==='hidden'&&cred&&stamp()>(cred.base||0))push()});
   setInterval(function(){if(cred&&state==='offline')push()},30000);
-  if(cred){pull()}else{var sk=+ls('mgsync-skip:'+KEY)||0;if(Date.now()-sk>3*864e5)setTimeout(function(){gate()},600);else setPill('off')}}
+  if(cred){applyName();pull()}else{var sk=+ls('mgsync-skip:'+KEY)||0;if(Date.now()-sk>3*864e5)setTimeout(function(){gate()},600);else setPill('off')}}
 return {init:init,_merge:merge,_summary:summary,push:push,pull:pull};
 })();
