@@ -3,6 +3,7 @@
 Shared log between Joe's Claude and Jack's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-11 22:58 · Joe's Claude · Warm-up card removed from putting + short-game pages (Joe's call); they keep a slim How to play card where a video exists (golfwarm.js). Re-pinned those 8 pages · live
 2026-11-11 22:30 · Jack's Claude · Golf leaderboard prep: window.MG_SCORE() on all 12 golf pages + `golf` field in sync.js summary() (shared file: one field added, nothing else changed); all 12 golf loaders re-pinned from d41fac8 to d0a77ca (contains d41fac8) · live
 2026-11-11 22:25 · Jack's Claude · Picked up CLAUDE.md and WORKLOG.md. Told Jack. · done
 2026-11-11 22:10 · Joe's Claude · Golf pages: floating buttons lifted above VidApp's toolbar (golfwarm.js); all 12 golf pages re-pinned · live

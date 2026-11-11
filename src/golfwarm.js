@@ -13,7 +13,11 @@ function isDone(){try{return localStorage.getItem('mg-golfwarm')===today()}catch
 function setDone(v){try{if(v)localStorage.setItem('mg-golfwarm',today());else localStorage.removeItem('mg-golfwarm')}catch(e){}}
 function watch(){if(window.MGVideo)MGVideo.open(TITLE,VID);else window.open('https://fast.wistia.net/embed/iframe/'+VID,'_blank','noopener')}
 var PLAY='<svg width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z" fill="currentColor"/></svg>';
-function paint(card){var d=isDone();card.classList.toggle('done',d);
+/* Putting and short-game pages: no warm-up card, just "How to play" where the game has a video */
+var NOWARM={'golf-hole-out':1,'golf-money-stealers':1,'golf-insanity':1,'golf-putting-test':1,'golf-fifty-ft-bank':1,'golf-par-18':1,'golf-wedge-darts':1,'golf-short-game-test':1};
+function page(){var s=document.querySelector('script[data-page]');return s?s.getAttribute('data-page'):''}
+function paint(card){if(NOWARM[page()]){var g=game();card.querySelector('.mgw-body').innerHTML='<div class="mgw-row"><div class="mgw-t"><b>How to play</b><small>Watch the game explained</small></div><button type="button" class="mgw-y" data-w="game">'+PLAY+'Watch</button></div>';card.classList.add('done');return}
+  var d=isDone();card.classList.toggle('done',d);
   card.querySelector('.mgw-body').innerHTML=d?
    '<div class="mgw-row"><span class="mgw-tick" aria-hidden="true">✓</span><div class="mgw-t"><b>Warmed up today</b><small>Express 5-minute golf warm-up</small></div><button type="button" class="mgw-ghost" data-w="watch">Watch again</button>'+howBtn()+'<button type="button" class="mgw-link" data-w="undo">Undo</button></div>':
    '<div class="mgw-k">Before you start</div><div class="mgw-h">Express 5-minute golf warm-up</div><p>Do this before your first ball. It gets your body ready to swing at full speed and helps protect your back.</p>'+
@@ -36,7 +40,7 @@ function css(){if(document.getElementById('mgw-css'))return;var s=document.creat
 /* In-app browsers (VidApp) and phones: keep floating buttons clear of the browser's bottom toolbar (same rule as review.js) */
 function lift(){if(document.getElementById('mgw-lift'))return;var u=navigator.userAgent||'',app=(/iPhone|iPad|iPod/.test(u)&&!/Safari\//.test(u))||/; wv\)/.test(u)||/VidApp/i.test(u)||!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);if(!app)return;
   document.documentElement.classList.add('mg-inapp');var s=document.createElement('style');s.id='mgw-lift';s.textContent='html.mg-inapp .mgs-pill,html.mg-inapp .ux-pbtab{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}html.mg-inapp body{padding-bottom:96px}html.mg-inapp .mgv-wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}';document.head.appendChild(s)}
-function init(){lift();var how=document.getElementById('howto');if(!how||document.querySelector('.mgw'))return;css();
+function init(){lift();var how=document.getElementById('howto');if(!how||document.querySelector('.mgw'))return;if(NOWARM[page()]&&!game())return;css();
   var card=document.createElement('section');card.setAttribute('aria-label','Golf warm-up');var pad=how.classList.contains('pad');
   card.className='mgw'+(pad?' pad':'');card.innerHTML=pad?'<div class="inner"><div class="mgw-body"></div></div>':'<div class="mgw-body"></div>';
   how.parentNode.insertBefore(card,how.nextSibling);paint(card);
