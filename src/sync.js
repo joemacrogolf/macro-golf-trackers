@@ -41,7 +41,7 @@ function summary(){var S=window.S||{},dates=[];
   try{if(window.UX&&UX.points){var P=UX.points(),top={},first={};
     P.forEach(function(p){var b=top[p.id];if(!b||p.w>b.w||(p.w===b.w&&p.r>b.r))top[p.id]=p;if(!first[p.id]||p.date<first[p.id].date||(p.date===first[p.id].date&&p.w>first[p.id].w))first[p.id]=p});
     bests=Object.keys(top).map(function(id){var b=top[id];return {n:b.name,w:b.w,r:b.r,u:b.u,d:b.date,gain:+(b.w-first[id].w).toFixed(1)}}).sort(function(a,b){return b.gain-a.gain||a.n.localeCompare(b.n)}).slice(0,12)}}catch(e){}
-  return {sessions:dates.length,last:dates[dates.length-1]||null,dates:dates.slice(-60),bests:bests,player:S.player||S.name||'',page:CFG.planName||document.title}}
+  return {sessions:dates.length,last:dates[dates.length-1]||null,dates:dates.slice(-60),bests:bests,player:S.player||S.name||'',page:CFG.planName||document.title,golf:(typeof window.MG_SCORE==='function' ? (function(){try{return window.MG_SCORE()}catch(e){return null}})() : null)}}
 
 /* ---------- push / pull ---------- */
 function payload(){var d=JSON.parse(JSON.stringify(window.S||{}));d._mgSummary=summary();return d}

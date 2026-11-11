@@ -1215,6 +1215,33 @@ UX.init({family:'golf',home:false});
   var p=document.getElementById("player"),g=document.getElementById("gName");
   if(p&&g){var fill=function(){if(!g.value.trim()&&p.value.trim()){g.value=p.value;g.dispatchEvent(new Event("input",{bubbles:true}))}};p.addEventListener("input",fill);fill()}})();
 </script>
+<script>/* standard leaderboard score: read by sync.js as _mgSummary.golf. This game keeps only the current card in S, so each
+   finished card is copied into S.mgRounds (synced with S); a card left unfinished or undone is never counted */
+(function(){var GAME="golf-driver-corridor",UNIT="SG",BETTER="high",last=null;
+function mgHcp(){var t=window.S&&S.target;if(t==null||t==="")return null;if(t==="Tour")return -5;var n=+t;return isNaN(n)?null:n}
+function mgPack(R){var best=null,at=null;R=R.filter(function(r){return r&&r.d&&typeof r.s==="number"&&isFinite(r.s)}).slice(-50);
+  R.forEach(function(r){if(best===null||(BETTER==="high"?r.s>best:r.s<best)){best=r.s;at=r.d}});
+  return {game:GAME,unit:UNIT,better:BETTER,best:best,bestAt:at,hcp:mgHcp(),rounds:R.map(function(r){return {d:String(r.d).slice(0,10),s:r.s}})}}
+function games(){return [{key:"dc",n:S.shots.length,done:S.shots.length>=N,s:Math.round(totalSG()*100)/100}]}
+function day(){try{return MGS.today()}catch(e){return new Date().toISOString().slice(0,10)}}
+function track(){try{if(!window.S)return;var ch=false;
+  if(!Array.isArray(S.mgRounds)){S.mgRounds=last?last.slice():[];ch=true}
+  if(!S.mgGid||typeof S.mgGid!=="object"){S.mgGid={};ch=true}
+  games().forEach(function(g){var id=S.mgGid[g.key];
+    if(!g.n){if(id){S.mgGid[g.key]=null;ch=true}return}
+    if(!id){id=S.mgGid[g.key]="g"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);ch=true}
+    var i=-1;S.mgRounds.forEach(function(r,j){if(r.id===id)i=j});
+    if(g.done&&i<0){S.mgRounds.push({id:id,d:day(),s:g.s});ch=true}
+    else if(g.done&&S.mgRounds[i].s!==g.s){S.mgRounds[i].s=g.s;ch=true}
+    else if(!g.done&&i>=0){S.mgRounds.splice(i,1);ch=true}});
+  if(S.mgRounds.length>60){S.mgRounds=S.mgRounds.slice(-60);ch=true}
+  last=S.mgRounds;if(ch&&typeof save==="function")save()}catch(e){}}
+if(typeof window.renderAll==="function"){var r0=window.renderAll;window.renderAll=function(){var x=r0.apply(this,arguments);track();return x}}
+track();
+window.MG_SCORE=function(){try{var R=(window.S&&Array.isArray(S.mgRounds))?S.mgRounds:[];
+  return mgPack(R.slice().sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:0}))}catch(e){return null}};
+})();
+</script>
 <script src="{{BASE}}src/sync.js"></script>
 <script src="{{BASE}}src/golfwarm.js"></script>
 <script src="{{BASE}}src/videos.js"></script>

@@ -1388,6 +1388,16 @@ UX.init({family:'golf',home:false});
 <script>/* strokes gained alongside the game score */
 GSG.init({target:()=>S.target,unit:"hole",flash:false,card:false,shots:()=>S.scores.map((x,i)=>({n:S.plan[i].name,sg:expShot(S.plan[i],S.target)-x}))});
 </script>
+<script>/* standard leaderboard score: read by sync.js as _mgSummary.golf. Finished rounds only (S.history), from window.S alone */
+(function(){var GAME="golf-par-18",UNIT="strokes",BETTER="low";
+function mgHcp(){var t=window.S&&S.target;if(t==null||t==="")return null;if(t==="Tour")return -5;var n=+t;return isNaN(n)?null:n}
+function mgPack(R){var best=null,at=null;R=R.filter(function(r){return r&&r.d&&typeof r.s==="number"&&isFinite(r.s)}).slice(-50);
+  R.forEach(function(r){if(best===null||(BETTER==="high"?r.s>best:r.s<best)){best=r.s;at=r.d}});
+  return {game:GAME,unit:UNIT,better:BETTER,best:best,bestAt:at,hcp:mgHcp(),rounds:R.map(function(r){return {d:String(r.d).slice(0,10),s:r.s}})}}
+window.MG_SCORE=function(){try{var H=(window.S&&Array.isArray(S.history))?S.history:[];
+  return mgPack(H.slice().reverse().map(function(h){return {d:h.date,s:h.score}}))}catch(e){return null}};
+})();
+</script>
 <script src="{{BASE}}src/sync.js"></script>
 <script src="{{BASE}}src/golfwarm.js"></script>
 <script src="{{BASE}}src/videos.js"></script>
