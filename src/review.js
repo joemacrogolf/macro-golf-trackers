@@ -198,7 +198,7 @@ var CSS=[
 ].join('');
 
 /* In-app browsers (VidApp etc.) lay their own toolbar over the bottom of the page: lift our floating buttons above it. */
-function inApp(){var u=navigator.userAgent||'';return (/iPhone|iPad|iPod/.test(u)&&!/Safari\//.test(u))||/; wv\)/.test(u)||/VidApp/i.test(u)}
+function inApp(){var u=navigator.userAgent||'';return (/iPhone|iPad|iPod/.test(u)&&!/Safari\//.test(u))||/; wv\)/.test(u)||/VidApp/i.test(u)||!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches)}
 function lift(){if(!inApp())return;document.documentElement.classList.add('mg-inapp');var s=document.createElement('style');s.textContent=
  'html.mg-inapp .mgs-pill{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}'+
  'html.mg-inapp .ux-pbtab{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}'+
