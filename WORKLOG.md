@@ -3,6 +3,7 @@
 Shared log between Joe's Claude and Jack's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-11 22:15 · Joe's Claude · Template client plans (Paul Bruce, Sam McDowell, Luis Vega, Rob Seeley) get demo videos (templates/parts/70-tail.html + rebuild); slimmer header for returning 1-to-1 clients (review.js); CLAUDE.md theme IDs for newest pages · live
 2026-11-11 21:58 · Joe's Claude · Added CLAUDE.md (shared rulebook) and this worklog · done
 2026-11-11 21:47 · Joe's Claude · Emailed Jack the golf leaderboard prep prompt (MG_SCORE() on all 12 golf pages, `_mgSummary.golf` in sync.js) · waiting on Jack's Claude
 2026-11-11 21:40 · Joe's Claude · VidApp: every game under Practice now opens its scoring page directly. Old game groups detached, not deleted. Joe still needs to press Publish To Preview · done

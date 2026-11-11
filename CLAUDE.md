@@ -75,8 +75,12 @@ If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude h
 | Putting Test | p-350829 | 2168234194 | game / loader |
 | Short Game Test | p-791364 | 2168234195 | game / loader |
 | Long Game Test | p-524617 | 2168234196 | game / loader |
+| Paul Bruce (template build) | p-318462 | 2168241897 | plan / mg_loader |
+| Sam McDowell (template build) | p-527903 | 2168241900 | plan / mg_loader |
+| Luis Vega (template build) | p-694218 | 2168241902 | plan / mg_loader |
+| Rob Seeley (template build) | p-741365 | 2168241904 | plan / mg_loader |
+| Paul Goddard golf plan | p-482615 | 2168242786 | game / loader |
 
-There are also newer pages: Paul Bruce p-318462, Sam McDowell p-527903, Luis Vega p-694218, Rob Seeley p-741365 and Paul Goddard p-482615. Look up their theme with `get_landing_page` and add them to this table.
 
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)
 

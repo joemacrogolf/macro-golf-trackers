@@ -208,7 +208,10 @@ function lift(){if(!inApp())return;document.documentElement.classList.add('mg-in
  'html.mg-inapp .rv-tab-btn{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}'+
  'html.mg-inapp body{padding-bottom:96px}'+
  'html.mg-inapp .rv-wrap,html.mg-inapp .mgv-wrap,html.mg-inapp .ux-done{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}';document.head.appendChild(s)}
-function init(){if(!family())return;css();lift();tab();hookBests();setTimeout(place,300);window.addEventListener('resize',place)}
+/* Returning 1-to-1 clients: slimmer header on phones so today's session is on screen sooner */
+function slim(){var f=family();if(f==='pure')return;try{if(!sessions().length)return}catch(e){return}document.documentElement.classList.add('mg-ret');if(!document.querySelector('.hero .strip select'))document.documentElement.classList.add('mg-nostrip');
+  var s=document.createElement('style');s.textContent='@media (max-width:600px){html.mg-ret.mg-nostrip .hero .strip{display:none!important}html.mg-ret .hero{padding-bottom:22px!important}html.mg-ret .hero h1{font-size:clamp(34px,9.5vw,56px)!important;line-height:.98}html.mg-ret .hero .bar{margin-top:18px!important}}';document.head.appendChild(s)}
+function init(){if(!family())return;css();lift();slim();tab();hookBests();setTimeout(place,300);window.addEventListener('resize',place)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else setTimeout(init,0);
 return {open:open,data:data,sessions:sessions};
 })();
