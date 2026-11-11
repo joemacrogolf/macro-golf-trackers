@@ -365,6 +365,17 @@ tr.done .ux-rpe{background:#F4F1EA}
 @media (prefers-reduced-motion:reduce){.ux-chip{transition:none}}
 </style>
 <style id="pg-css">
+/* option buttons: stacked title + one plain line (set explicitly so the Kajabi theme can't centre or inline them) */
+#main .lvl{display:grid!important;gap:10px}
+#main .lvl button{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:4px;width:100%;text-align:left!important;padding:14px 16px!important;letter-spacing:0!important}
+#main .lvl button b{display:block!important;font-family:var(--display)!important;font-weight:400!important;font-size:22px!important;line-height:1.1!important;text-transform:uppercase;letter-spacing:-0.3px!important;color:#0B0B0B}
+#main .lvl button small{display:block!important;font-family:var(--text)!important;font-size:14px!important;font-weight:400!important;line-height:1.45!important;letter-spacing:0!important;text-transform:none!important;color:#3B3830;text-align:left!important}
+#gate .opts button{display:flex!important;flex-direction:column!important;align-items:flex-start!important;text-align:left!important;width:100%;letter-spacing:0!important}
+#gate .opts button b,#gate .opts button small{display:block!important;text-align:left!important}
+#gate .opts button small{letter-spacing:0!important;font-weight:400!important}
+#main .seg button,#main .ghost,#main .linky{letter-spacing:0!important}
+#main .resume{padding:14px;display:flex;flex-direction:column;gap:6px}
+#main .resume b{font-family:var(--display);font-weight:400;font-size:22px;text-transform:uppercase;color:#0B0B0B;line-height:1.1}
 #gate [hidden]{display:none!important}
 /* Paul's plan: extra pieces, drawn with the games' brand layer */
 #main{display:flex;flex-direction:column}
@@ -710,13 +721,13 @@ function renderHome(){var h="",t=today(),m=monday(t),W=weekOf(t),rounds=W.filter
   var tot=W.reduce(function(a,x){return a+(x.st.sg||0)},0),hs=W.map(function(x){return x.st.hc}).filter(function(x){return x!=null});
   h+=board("This week · SG vs scratch",W.length?sgf(tot):"0",[["Round warm-ups",rounds+" / "+WEEK_ROUNDS],["Avg handicap",hs.length?hcTxt(hs.reduce(function(a,x){return a+x},0)/hs.length):"–"],["Range sessions",range]],rounds/WEEK_ROUNDS*100,
     "Week of "+nice(m)+". Two rounds a week, each with both warm-ups.");
-  if(S.cur)h+='<section class="card"><div class="unlock" style="padding:14px;display:flex;flex-direction:column;gap:10px"><b>You have a session in progress</b><span class="muted">'+(S.cur.kind==="range"?"Range practice":"Round day warm-up")+" · block "+(S.cur.bi+1)+" of "+S.cur.blocks.length+'</span><div class="btns"><button class="primary" data-act="resume">Carry on</button><button class="ghost" data-act="discard">Start again</button></div></div></section>';
+  if(S.cur)h+='<section class="card"><div class="unlock resume"><b>Session in progress</b><span class="muted">'+(S.cur.kind==="range"?"Range practice":"Round day warm-up")+" · block "+(S.cur.bi+1)+" of "+S.cur.blocks.length+'</span><div class="btns"><button class="primary" data-act="resume">Carry on</button><button class="ghost" data-act="discard">Start again</button></div></div></section>';
   var k=S.pick||"round";
-  h+='<section class="card">'+secH("01 / Today","Pick your session")+'<div class="lvl">'+
-    '<button data-act="pick" data-v="round" aria-pressed="'+(k==="round")+'"><b>Round day warm-up</b><small>Putting warm-up: start-line gate, Hole Out and Money Stealers (15 mins). Range warm-up: the Practice Plan 30 min approach and driver, plus your 5 min technical station (35 mins).</small></button>'+
-    '<button data-act="pick" data-v="range" aria-pressed="'+(k==="range")+'"><b>Range practice</b><small>The Practice Plan warm-up and your technical station, then Wedge Darts with strokes gained on every shot. About 45 mins.</small></button></div>'+
-    (k==="round"?'<span class="label">Which warm-up first?</span><div class="seg"><button data-act="order" data-v="putt" aria-pressed="'+(S.order==="putt")+'">Putting first</button><button data-act="order" data-v="range" aria-pressed="'+(S.order==="range")+'">Range first</button></div>':"")+
-    '<button class="primary" data-act="start" data-v="'+k+'">Start '+(k==="round"?"round day warm-up":"range practice")+"</button></section>";
+  h+='<section class="card">'+secH("01 / Today","Start a session")+'<div class="lvl">'+
+    '<button data-act="pick" data-v="round" aria-pressed="'+(k==="round")+'"><b>Round day warm-up</b><small>Putting (15 mins) and range (35 mins) before you play.</small></button>'+
+    '<button data-act="pick" data-v="range" aria-pressed="'+(k==="range")+'"><b>Range practice</b><small>Warm-up, technical station and Wedge Darts. About 45 mins.</small></button></div>'+
+    (k==="round"?'<span class="label">Warm-up order</span><div class="seg"><button data-act="order" data-v="putt" aria-pressed="'+(S.order==="putt")+'">Putting first</button><button data-act="order" data-v="range" aria-pressed="'+(S.order==="range")+'">Range first</button></div>':"")+
+    '<button class="primary" data-act="start" data-v="'+k+'">Start '+(k==="round"?"warm-up":"range practice")+"</button></section>";
   /* week */
   h+='<section class="card">'+secH("02 / This week","Week of "+nice(m))+'<div class="wk">'+[0,1,2,3,4,5,6].map(function(i){var d=addDays(m,i),ss=S.history.filter(function(x){return x.date===d});return '<div class="'+(d===t?"today":"")+'"><b>'+["M","T","W","T","F","S","S"][i]+"</b>"+ss.map(function(x){return '<i class="'+(x.kind==="round"?"r":"p")+'">'+(x.kind==="round"?"Round":"Range")+"</i>"}).join("")+"</div>"}).join("")+"</div>";
   var dow=(new Date().getDay()+6)%7;if(W.length&&dow>=6&&!S.sent[m])h+='<div class="unlock" style="padding:12px 14px">It’s the end of the week. Send your week to Jack.</div>';
