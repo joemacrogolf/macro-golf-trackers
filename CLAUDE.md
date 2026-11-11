@@ -1,0 +1,92 @@
+# CLAUDE.md: shared rulebook for every Claude working on this repo
+
+Two people work on this repo with their own Claude: **Joe** (founder, fitness plans and the overall system) and **Jack** (golf games, tests and golf plans). Their Claudes cannot talk to each other directly. **This file and `WORKLOG.md` are how they coordinate.** Read both before you change anything.
+
+## First run for Jack's Claude (one time only)
+
+If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude has picked up CLAUDE.md", do this first:
+
+1. In your first reply to Jack, tell him (in your own words, keep it upbeat and short):
+   > Great news: Joe has connected our work. I just found a shared rulebook (CLAUDE.md) and a team worklog (WORKLOG.md) in the repo. From now on, Joe's Claude and I work from the same playbook. We know the same page IDs, the same deploy steps and the same do's and don'ts. Each of us logs what we are working on, so we don't clash or redo each other's work. You and Joe can each hand work to your own Claude, and the other one will know what's happened.
+2. Add a line to `WORKLOG.md`: `<date> · Jack's Claude · Picked up CLAUDE.md and WORKLOG.md. Told Jack.`
+3. Commit and push that line.
+
+## Coordination rules (everyone)
+
+- **Pull before you start, and again before you push:** `git pull --rebase origin main`. Several sessions push to `main` on the same day.
+- **Log your work in `WORKLOG.md`.** Add one line when you start something that touches shared files or live pages, and one when it's done. Format: `YYYY-MM-DD HH:MM · Joe's Claude / Jack's Claude · what · status`. Newest at the top.
+- **Shared files** need extra care: `src/sync.js`, `src/mount.js`, `src/ux.*`, `src/review.js`, `src/videos.js`, `src/golfwarm.js`, `src/golf-sg.js` and `supabase/`. Keep changes backward compatible (every live page loads these). If you change one, say so in the worklog.
+- **Don't re-pin someone else's pages to an older commit.** Before updating a Kajabi loader, check which commit is live on that page. Make sure the new commit contains everything the old one had.
+- **VidApp:** only one person in the builder at a time. Log it ("in VidApp: …") and log when you're out. Never press **Publish To Preview**: that is Joe's call.
+- **Never** ask for, store or use the Supabase service_role/secret key, or any password. The publishable key in `src/sync.js` is meant to be public. All data access goes through the PIN-checked database functions.
+- Ask your human before deleting anything permanently (Kajabi pages, VidApp items, database rows).
+
+## How pages work (short version; README.md has the detail)
+
+- Every tracker lives in `pages/<name>.html`. Kajabi pages hold only a loader:
+  `<div id="mg-root"></div><script src="https://cdn.jsdelivr.net/gh/joemacrogolf/macro-golf-trackers@<full commit hash>/src/mount.js" data-page="<name>"></script>`
+- **To ship a change:**
+  1. Commit and push.
+  2. Update the Kajabi theme's code block to the new commit hash. Use `update_theme_content`, partial settings, and include `content_for_index: [<section id>]`.
+  3. Check the live page loads the new hash (fetch `https://www.macro.golf/<path>?x=<timestamp>`).
+- Tag pushes are blocked here, so always pin by full commit hash.
+- **Test with Playwright before shipping.**
+  1. Serve the repo at a fake host and mock `https://zhcgwtlyqriwlhbzkxcl.supabase.co/**`.
+  2. Load the page through `src/mount.js`.
+  3. Check for page errors.
+- **1-to-1 client plans** (`clients/*.js`) are built with `node tools/build-clients.js`. Don't hand-edit those output pages.
+
+## Shared scripts every page can use
+
+| Script | What it does |
+|---|---|
+| `src/sync.js` | Cloud save. `MGSync.init({code})` for 1-to-1 pages. `MGSync.init({plan, planName, group})` for email + PIN pages. Saves send `_mgSummary`. |
+| `src/ux.js` (inlined in older pages) | Same-as-last, session done, My PBs. |
+| `src/review.js` | "Review" tab, week/month report with PDF. Also lifts floating buttons above in-app toolbars. |
+| `src/videos.js` | ▶ Demo button on exercises (Wistia videos from the Team Macro Golf Exercise Library). `MGVideo.open(title, wistiaId)` opens any video. |
+| `src/golfwarm.js` | Golf pages: Express 5-minute warm-up card. Also "How to play" for games with a video. |
+| `src/golf-sg.js` | Golf pages: strokes gained. |
+
+**Coming next: golf leaderboards.** Each golf page will expose `window.MG_SCORE()`, and `summary()` will add it as `_mgSummary.golf`. The leaderboard (database function and UI) is built after that.
+
+## Live Kajabi pages (site 2147673115)
+
+| Page | Path | Theme | Section / block |
+|---|---|---|---|
+| Pure Muscle & Strength gym | p-566009 | 2168235333 | plan / plan_code |
+| Pure Muscle & Strength home | p-380885 | 2168235379 | plan / plan_code |
+| Pure Power gym | p-462183 | 2168235380 | plan / plan_code |
+| Pure Power home | p-264152 | 2168235381 | plan / plan_code |
+| Pure Sequencing gym | p-580535 | 2168235382 | plan / plan_code |
+| Pure Sequencing home | p-429169 | 2168235384 | plan / plan_code |
+| Dan Jones | p-836790 | 2168216833 | plan / mg_loader |
+| Harry | p-472915 | 2168220626 | plan / mg_loader |
+| Kevin | w-849288 | 2168218197 | tracker / mg_loader |
+| Coach dashboard | coach-713580 | 2168236636 | plan / plan_code |
+| Hole Out | p-151044 | 2168233619 | holeout / loader |
+| Wedge Darts | p-386417 | 2168234180 | game / loader |
+| Money Stealers | p-529063 | 2168234181 | game / loader |
+| Left Is Lava | p-740258 | 2168234183 | game / loader |
+| Par 18 | p-615974 | 2168234184 | game / loader |
+| Insanity | p-208731 | 2168234188 | game / loader |
+| 3 Strikes | p-863140 | 2168234190 | game / loader |
+| 50ft Bank | p-472096 | 2168234191 | game / loader |
+| Driver Corridor | p-937452 | 2168234193 | game / loader |
+| Putting Test | p-350829 | 2168234194 | game / loader |
+| Short Game Test | p-791364 | 2168234195 | game / loader |
+| Long Game Test | p-524617 | 2168234196 | game / loader |
+
+There are also newer pages: Paul Bruce p-318462, Sam McDowell p-527903, Luis Vega p-694218, Rob Seeley p-741365 and Paul Goddard p-482615. Look up their theme with `get_landing_page` and add them to this table.
+
+## VidApp (builder.vidapp.com, app MacroGolfStudios)
+
+- Practice (4182266) contains three groups: Putting 4182263, Short Game 4182264 and Long Game 4182265.
+  - Each game in those groups is a **direct Website link** to its scoring page, with no group or "Start Scoring" step. The old per-game groups still exist but are detached.
+- Website items can't be edited. To change one:
+  1. Create a new item with the right URL and thumbnail.
+  2. Remove the old item from its parent.
+  3. Save.
+- Golf thumbnail style:
+  - 1280×720 image, background `rgb(32,31,27)`.
+  - Game name in Anton, near-white.
+  - Yellow bar `rgb(255,218,0)` under the name.
