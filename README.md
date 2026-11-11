@@ -29,6 +29,10 @@ Load after the tracker script (needs its `S`, `KEY` and `save()` globals):
 - `group` (optional, email + PIN pages only): pages in the same group remember the sign-in once per device, so the next page signs itself in. Each page still saves under its own code. Pages without `group` are unchanged.
 - Each save carries a `_mgSummary` (sessions, dates, top bests) for the coach dashboard. `ux.js` must be loaded for bests.
 
+## Week / month review (`src/review.js`)
+
+Loaded by every tracker page after `sync.js`. Adds a "My review" tab above "My PBs" and a button in the bests screen. Clients pick Week or Month, step back through past periods, and tap Download PDF (A4, built in the browser with html2canvas + jsPDF from jsDelivr, loaded only when tapped). On phones the PDF goes to the share sheet; elsewhere it downloads.
+
 ## Coach dashboard (`coach.html`)
 
 Put it on a hidden Kajabi page. The coach password is typed at runtime and never stored.
