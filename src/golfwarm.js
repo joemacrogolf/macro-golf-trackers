@@ -33,7 +33,10 @@ function css(){if(document.getElementById('mgw-css'))return;var s=document.creat
  '.mgw-t{flex:1;min-width:140px}.mgw-t b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:18px}.mgw-t small{display:block;color:#9C988C;font-size:12.5px;margin-top:2px}',
  '.mgw.done button{min-height:40px;font-size:15px}',
  '.mgw button:focus-visible{outline:3px solid #FFD900;outline-offset:2px}'].join('');document.head.appendChild(s)}
-function init(){var how=document.getElementById('howto');if(!how||document.querySelector('.mgw'))return;css();
+/* In-app browsers (VidApp) and phones: keep floating buttons clear of the browser's bottom toolbar (same rule as review.js) */
+function lift(){if(document.getElementById('mgw-lift'))return;var u=navigator.userAgent||'',app=(/iPhone|iPad|iPod/.test(u)&&!/Safari\//.test(u))||/; wv\)/.test(u)||/VidApp/i.test(u)||!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);if(!app)return;
+  document.documentElement.classList.add('mg-inapp');var s=document.createElement('style');s.id='mgw-lift';s.textContent='html.mg-inapp .mgs-pill,html.mg-inapp .ux-pbtab{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}html.mg-inapp body{padding-bottom:96px}html.mg-inapp .mgv-wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}';document.head.appendChild(s)}
+function init(){lift();var how=document.getElementById('howto');if(!how||document.querySelector('.mgw'))return;css();
   var card=document.createElement('section');card.setAttribute('aria-label','Golf warm-up');var pad=how.classList.contains('pad');
   card.className='mgw'+(pad?' pad':'');card.innerHTML=pad?'<div class="inner"><div class="mgw-body"></div></div>':'<div class="mgw-body"></div>';
   how.parentNode.insertBefore(card,how.nextSibling);paint(card);
