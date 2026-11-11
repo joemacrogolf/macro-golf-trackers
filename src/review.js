@@ -151,6 +151,7 @@ function hookBests(){new MutationObserver(function(){var d=[].slice.call(documen
 function css(){if(document.getElementById('rv-css'))return;var s=document.createElement('style');s.id='rv-css';s.textContent=CSS;document.head.appendChild(s)}
 var CSS=[
 '.rv-tab-btn{position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:37;display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 14px;border:0;border-top:3px solid #FFD900;background:#0B0B0B;color:#F4F1EA;font-family:Anton,Impact,sans-serif;font-size:17px;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.35)}',
+'.ux-bests-btn{display:none!important}',
 '.rv-tab-btn svg{color:#FFD900}.rv-tab-btn:focus-visible,.rv-wrap button:focus-visible{outline:3px solid #FFD900;outline-offset:2px}',
 'html.rv-lock,html.rv-lock body{overflow:hidden}',
 '.rv-wrap{position:fixed;inset:0;z-index:46;background:rgba(11,11,11,.97);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(16px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));font-family:Inter,system-ui,sans-serif}',

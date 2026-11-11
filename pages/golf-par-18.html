@@ -1389,4 +1389,6 @@ UX.init({family:'golf',home:false});
 GSG.init({target:()=>S.target,unit:"hole",flash:false,card:false,shots:()=>S.scores.map((x,i)=>({n:S.plan[i].name,sg:expShot(S.plan[i],S.target)-x}))});
 </script>
 <script src="{{BASE}}src/sync.js"></script>
+<script src="{{BASE}}src/golfwarm.js"></script>
+<script src="{{BASE}}src/videos.js"></script>
 <script>MGSync.init({plan:'golf-par-18',planName:'Par 18',group:'golf'})</script>

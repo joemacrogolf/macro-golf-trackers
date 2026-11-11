@@ -128,6 +128,10 @@ button,input,select{font:inherit;color:inherit}
 
 /* Focus + log */
 .focus{border-top:2px solid var(--ink);padding-top:12px}
+.focus-top{border-top:0;padding-top:0;border-left:4px solid var(--yellow);padding-left:12px}
+.setup .body{gap:14px;padding-top:4px}
+.setup .namecard{margin:0}
+@media (max-width:480px){.hero .bar{margin-top:22px}.hero h1{font-size:clamp(40px,11.5vw,76px)}html.mg-ret .hero .strip{display:none}html.mg-ret .hero{padding-bottom:22px}}
 .focus .kick{color:var(--olive)}
 .focus p{margin:8px 0 0;font-size:14.5px;color:var(--body);max-width:62ch}
 .note{background:var(--cream);padding:12px 16px;display:flex;gap:16px;font-size:13.5px}
@@ -290,11 +294,6 @@ body.timing{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
     </div>
   </header>
 
-  <div class="namecard" id="nameCard">
-    <label for="player">Your name</label>
-    <input id="player" type="text" placeholder="Type your name" autocomplete="name">
-    <p id="nameHint">Add your name first. It goes on the report your coach receives.</p>
-  </div>
 
   <details class="how">
     <summary>
@@ -324,9 +323,24 @@ body.timing{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
     </div>
   </details>
 
-  <div class="step"><span class="stepn">1</span><h2>Level, phase and week</h2></div>
-  <div class="seg seg3" role="group" aria-label="Choose level" id="levelSeg"></div>
-  <div class="seg" role="group" aria-label="Choose phase" id="phaseSeg"></div>
+  <details class="how setup" id="setupBox" open>
+    <summary>
+      <div>
+        <div class="disp">Your plan</div>
+        <p id="setupSum">Name, level and phase</p>
+      </div>
+      <span class="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 5 5-5" stroke="#FFD900" stroke-width="2.2" stroke-linecap="square"/></svg></span>
+    </summary>
+    <div class="body">
+  <div class="namecard" id="nameCard">
+    <label for="player">Your name</label>
+    <input id="player" type="text" placeholder="Type your name" autocomplete="name">
+    <p id="nameHint">Add your name first. It goes on the report your coach receives.</p>
+  </div>
+      <div class="seg seg3" role="group" aria-label="Choose level" id="levelSeg"></div>
+      <div class="seg" role="group" aria-label="Choose phase" id="phaseSeg"></div>
+    </div>
+  </details>
 
   <div id="phaseContent" style="display:flex;flex-direction:column;gap:18px">
 
@@ -335,8 +349,16 @@ body.timing{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
     <select id="week"></select>
   </div>
 
-  <div class="step"><span class="stepn">2</span><h2>Today's session</h2></div>
+  <div class="step"><span class="stepn">1</span><h2>Today's session</h2></div>
   <div class="days" role="tablist" aria-label="Training day" id="dayTabs"></div>
+
+
+  <div class="step"><span class="stepn">2</span><div style="min-width:0"><div class="kick" id="dayKick" style="color:var(--olive)">Phase 1 · Week 1 · Day 1</div><h2 id="dayTitle">Day 1</h2></div></div>
+  <p class="objective" id="objective"></p>
+  <div class="focus focus-top">
+    <div class="kick">Session focus</div>
+    <p>Focus on the timing, rhythm and organisation of each exercise. Stay controlled where the drill asks for it and dynamic where it calls for speed. If your coordination or technique drops off, stop the set rather than adding reps.</p>
+  </div>
 
   <details class="warmbox" id="warmBox">
     <summary>
@@ -347,9 +369,6 @@ body.timing{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
     <div class="warm" id="warm"></div>
   </details>
 
-  <div class="step"><span class="stepn">3</span><div style="min-width:0"><div class="kick" id="dayKick" style="color:var(--olive)">Phase 1 · Week 1 · Day 1</div><h2 id="dayTitle">Day 1</h2></div></div>
-  <p class="objective" id="objective"></p>
-
   <section class="live" aria-label="Session progress">
     <div><div class="kick">Sets done</div><div class="num tnum" id="liveSets">0/0</div></div>
     <div><div class="kick">On target</div><div class="num tnum" id="liveOn">–</div></div>
@@ -359,10 +378,6 @@ body.timing{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
 
   <div id="blocks" style="display:flex;flex-direction:column;gap:14px"></div>
 
-  <div class="focus">
-    <div class="kick">Session focus</div>
-    <p>Focus on the timing, rhythm and organisation of each exercise. Stay controlled where the drill asks for it and dynamic where it calls for speed. If your coordination or technique drops off, stop the set rather than adding reps.</p>
-  </div>
 
   <div class="actions">
     <button class="btn primary" id="finish" type="button">Finish session</button>
@@ -371,7 +386,7 @@ body.timing{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
   <div id="confirmSlot"></div>
   <div class="status" id="status" role="status"></div>
 
-  <div class="step"><span class="stepn">4</span><h2 id="repTitle">Send week 1 to your coach</h2></div>
+  <div class="step"><span class="stepn">3</span><h2 id="repTitle">Send week 1 to your coach</h2></div>
   <div class="report">
     <p class="objective" id="repIntro" style="margin:0"></p>
     <label class="kick" for="coachEmail">Coach's email</label>
@@ -702,7 +717,8 @@ $('repCopy').addEventListener('click',function(){
   try{navigator.clipboard.writeText(txt).then(function(){markSent();$('repStatus').textContent='Report copied. Paste it into an email or message to your coach.'},fallback)}catch(e){fallback()}
 });
 
-function renderAll(){renderControls();if(phase().days){renderWarm(true);renderDay();renderLog();renderReport()}}
+function setupSum(){var el=$('setupSum');if(!el)return;var ph=PLAN.phases.find(function(p){return p.id===S.phase})||{};el.textContent=(hasName()?S.player.trim()+' · ':'')+levelInfo().name+' · '+(ph.name||'');var sb=$('setupBox');if(sb&&!sb.dataset.init){sb.dataset.init=1;if(hasName()&&Object.keys(S.finished||{}).length){sb.open=false;document.documentElement.classList.add('mg-ret')}}}
+function renderAll(){setupSum();renderControls();if(phase().days){renderWarm(true);renderDay();renderLog();renderReport()}}
 
 /* ---------- EVENTS ---------- */
 function setVal(exId,i,field,val){
@@ -740,8 +756,8 @@ $('phaseSeg').addEventListener('click',function(e){
 $('week').addEventListener('change',function(e){S.week=+e.target.value;save();renderAll()});
 $('dayTabs').addEventListener('click',function(e){var b=e.target.closest('[data-day]');if(!b)return;S.day=+b.dataset.day;save();renderAll()});
 function hasName(){return String(S.player||'').trim().length>0}
-function updateName(){var c=$('nameCard');c.className='namecard'+(hasName()?' filled':'');$('nameHint').textContent=hasName()?'Saved on this device. It goes on your coach report.':'Add your name first. It goes on the report your coach receives.'}
-function nudgeName(){var c=$('nameCard');c.scrollIntoView({behavior:'smooth',block:'center'});c.classList.remove('nudge');void c.offsetWidth;c.classList.add('nudge');setTimeout(function(){$('player').focus()},400)}
+function updateName(){try{setupSum()}catch(e){}var c=$('nameCard');c.className='namecard'+(hasName()?' filled':'');$('nameHint').textContent=hasName()?'Saved on this device. It goes on your coach report.':'Add your name first. It goes on the report your coach receives.'}
+function nudgeName(){var sb=$('setupBox');if(sb)sb.open=true;var c=$('nameCard');c.scrollIntoView({behavior:'smooth',block:'center'});c.classList.remove('nudge');void c.offsetWidth;c.classList.add('nudge');setTimeout(function(){$('player').focus()},400)}
 $('player').addEventListener('input',function(e){S.player=e.target.value;save();renderReport()});
 $('player').addEventListener('blur',updateName);
 $('levelSeg').addEventListener('click',function(e){var b=e.target.closest('[data-level]');if(!b||b.dataset.level===S.level)return;S.level=b.dataset.level;applyLevel();save();renderAll()});
@@ -1142,4 +1158,5 @@ UX.init({family:'pure',home:false});
 </script>
 <script src="{{BASE}}src/sync.js"></script>
 <script src="{{BASE}}src/review.js"></script>
+<script src="{{BASE}}src/videos.js"></script>
 <script>MGSync.init({plan:"pure-sequencing-gym",planName:"Pure Sequencing (gym)"})</script>
