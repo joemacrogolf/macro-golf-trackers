@@ -2,7 +2,7 @@
 var CLIENT={
   name:'Sam McDowell',first:'Sam',key:'sam-mcdowell',weeks:8,
   kicker:'Strength & Power',subtitle:'October – December 2026 · eight weeks',planName:'Strength & Power Plan',
-  features:{checkin:true,alcohol:true,cardio:true},
+  features:{checkin:true,alcohol:true,cardio:true,weight:true},
   strip:[['Gym','2 / week'],['Cardio','1 / week']],
   streak:{id:'meditate',label:'Meditation streak',name:'Meditation'},
   habits:[
