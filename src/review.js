@@ -197,7 +197,15 @@ var CSS=[
 '@media (max-width:380px){.rv-title{font-size:30px}}'
 ].join('');
 
-function init(){if(!family())return;css();tab();hookBests();setTimeout(place,300);window.addEventListener('resize',place)}
+/* In-app browsers (VidApp etc.) lay their own toolbar over the bottom of the page: lift our floating buttons above it. */
+function inApp(){var u=navigator.userAgent||'';return (/iPhone|iPad|iPod/.test(u)&&!/Safari\//.test(u))||/; wv\)/.test(u)||/VidApp/i.test(u)}
+function lift(){if(!inApp())return;document.documentElement.classList.add('mg-inapp');var s=document.createElement('style');s.textContent=
+ 'html.mg-inapp .mgs-pill{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}'+
+ 'html.mg-inapp .ux-pbtab{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}'+
+ 'html.mg-inapp .rv-tab-btn{bottom:calc(132px + env(safe-area-inset-bottom,0px))!important}'+
+ 'html.mg-inapp body{padding-bottom:150px}'+
+ 'html.mg-inapp .rv-wrap,html.mg-inapp .mgv-wrap,html.mg-inapp .ux-done{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}';document.head.appendChild(s)}
+function init(){if(!family())return;css();lift();tab();hookBests();setTimeout(place,300);window.addEventListener('resize',place)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else setTimeout(init,0);
 return {open:open,data:data,sessions:sessions};
 })();
