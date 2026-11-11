@@ -1,0 +1,26 @@
+(function(){
+  S.mgsWins=S.mgsWins||[];S.mgsDone=S.mgsDone||{};
+  MGS.init({name:CLIENT.name,label:'MACRO GOLF '+(CLIENT.planName||'PERFORMANCE PLAN').toUpperCase(),save:save,list:function(){return S.mgsWins}});
+  var s1=document.createElement('div');s1.className='mgs-slot';$('status').parentNode.insertBefore(s1,$('status').nextSibling);
+  var tr=$('todayRest'),s2=document.createElement('div');s2.className='mgs-slot';tr.insertBefore(s2,tr.firstChild);
+  function who(){return CLIENT.first.toUpperCase()+' · WEEK '+S.week}
+  function sets(k,e){return ((S.logs[k]||{})[e.id]||[]).filter(function(z){return isDone(e,z)}).map(function(z){return {w:num(z.w),r:num(z.r),date:S.finished[k]}})}
+  function onFinish(){var k=curKey();if(!S.finished[k]||S.mgsDone[k])return;S.mgsDone[k]=1;save();var found=[],best=null,o=ord(k);
+    var prevKeys=Object.keys(S.finished).filter(function(z){return ord(z)>=0&&ord(z)<o}).sort(function(a,b){return ord(a)-ord(b)});
+    activeList(S.day,k).forEach(function(a){var e=a.e;if(!e.inc||e.max)return;var prev=[];prevKeys.forEach(function(pk){prev=prev.concat(sets(pk,e))});
+      var p=MGS.pb(e,sets(k,e),prev,e.repsLo);if(p&&(!best||p.score>best.score)){p.id=e.id;best=p}});
+    if(best){best.who=who();found.push(['pb-'+best.id+'-'+k,best])}
+    var n=Object.keys(S.finished).length,st=sessionStats(k,S.day),line=st.on+' of '+st.total+' sets on target today';
+    if(CLIENT.weeks&&n===SESSIONS.length*CLIENT.weeks)found.push(['plan',{tag:'Milestone',kick:'PLAN COMPLETE',big:CLIENT.weeks+' WEEKS',title:'PLAN COMPLETE',line:n+' sessions done',mBig:'<span>Plan</span> complete',mText:'All '+n+' sessions of your '+CLIENT.weeks+'-week plan done.',who:who()}]);
+    else if([5,10,15,20,30,40,50].indexOf(n)>=0)found.push(['ms-'+n,MGS.msWin(n,'sessions',who(),line)]);
+    var fresh=found.filter(function(f){return MGS.add(f[0],f[1])});checkWeek(fresh.length);MGS.banners();if(fresh.length)setTimeout(function(){MGS.celebrate(fresh[0][1])},250)}
+  function checkWeek(quiet){if(S.week!==clampWeek(nowWeek()))return;var c=weekCounts(S.week),W=CLIENT.weekly;
+    if(c.gym>=W.gym&&(!F.cardio||c.cardio>=(W.cardio||1))&&MGS.add('wk-'+S.week,MGS.weekWin(S.week,{who:who(),line:(CLIENT.gymTab||'Gym')+' '+c.gym+(F.cardio?' · Cardio '+c.cardio:''),text:'Every planned session done this week.'}))){MGS.banners();if(!quiet)MGS.celebrate(S.mgsWins[S.mgsWins.length-1].w)}}
+  function checkStreak(){if(!CLIENT.streak)return;var id=CLIENT.streak.id;if(!habitOn(todayIso(),id))return;var n=streak(id),nm=CLIENT.streak.name||'';
+    if([7,14,21,30,42,60,90].indexOf(n)>=0&&MGS.add('st-'+id+'-'+n+'-'+todayIso(),{tag:'Streak',kick:nm.toUpperCase()+' STREAK',big:n+' DAYS',title:'EVERY DAY FOR '+n+' DAYS',line:nm+', '+n+' days running',mBig:'<span>'+n+' days</span> of '+esc(nm.toLowerCase()),mText:'You have done your '+esc(nm.toLowerCase())+' every day for '+n+' days.',who:who()})){MGS.banners();MGS.celebrate(S.mgsWins[S.mgsWins.length-1].w)}}
+  $('finish').addEventListener('click',onFinish);
+  document.addEventListener('change',function(){setTimeout(function(){checkWeek();checkStreak()},0)});
+  document.addEventListener('click',function(e){if(e.target.closest&&(e.target.closest('[data-cell]')||e.target.closest('[data-cdel]')))setTimeout(function(){checkWeek();checkStreak()},0)});
+  $('cForm').addEventListener('submit',function(){setTimeout(checkWeek,0)});
+  MGS.banners();
+})();
