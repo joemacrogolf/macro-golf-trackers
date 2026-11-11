@@ -6,8 +6,8 @@ Shared scripts for Macro Golf client training trackers (hosted pages on www.macr
 - `src/ux.js`, `src/ux.css`: in-gym logging helpers (RPE taps, same as last, ± weight, session done, bests, add to home screen)
 - `src/adapters/`: per-plan hooks that decide when a win is shareable
 
-Pages load these through jsDelivr, pinned to a tagged version:
-`https://cdn.jsdelivr.net/gh/joemacrogolf/macro-golf-trackers@<tag>/src/ux.js`
+Pages load these through jsDelivr, pinned to a commit (immutable):
+`https://cdn.jsdelivr.net/gh/joemacrogolf/macro-golf-trackers@<commit>/src/ux.js`
 
 No secrets live here. The Supabase publishable key is designed to sit in web pages; all data access goes through PIN-checked database functions.
 
@@ -16,7 +16,7 @@ No secrets live here. The Supabase publishable key is designed to sit in web pag
 Load after the tracker script (needs its `S`, `KEY` and `save()` globals):
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/joemacrogolf/macro-golf-trackers@v1.0.0/src/sync.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/joemacrogolf/macro-golf-trackers@<commit>/src/sync.js"></script>
 <script>MGSync.init({code:'836790', name:'Dan Jones'})</script>                      <!-- 1-to-1 page: code = Kajabi page number -->
 <script>MGSync.init({plan:'pure-power-gym', planName:'Pure Power (gym)'})</script>  <!-- Pure plan: client signs in with email + PIN -->
 ```
