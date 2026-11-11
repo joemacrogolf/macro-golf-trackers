@@ -429,7 +429,7 @@ tr.done .ux-rpe{background:#F4F1EA}
       <div><span class="k">Driver carry</span><input id="drvIn" inputmode="numeric" aria-label="Driver carry in yards"></div>
     </div>
   </header>
-  <details class="howto">
+  <details class="howto" id="howto">
     <summary><span><b>How your plan works</b><small>Round days, range practice and how every shot is scored</small></span><span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
     <div class="hb">
       <p class="aim">Two rounds a week with both warm-ups, plus range practice. Every scored shot counts against a scratch golfer.</p>
@@ -759,4 +759,6 @@ render();
 
 </script>
 <script src="{{BASE}}src/sync.js"></script>
+<script src="{{BASE}}src/golfwarm.js"></script>
+<script src="{{BASE}}src/videos.js"></script>
 <script>MGSync.init({plan:'golf-paul-goddard',planName:'Paul Goddard Golf Plan',group:'golf'})</script>
