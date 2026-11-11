@@ -1057,7 +1057,7 @@ tr.done .ux-rpe{background:#F4F1EA}
 </style>
 <script>
 var UX=(function(){
-var CFG={family:'',home:false};
+var CFG={family:'',home:false,rpeTaps:false,steps:false};
 function $q(s,r){return (r||document).querySelector(s)}
 function $a(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
 function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e}
@@ -1077,7 +1077,7 @@ var box=null,obs=null;
 function rowParts(tr){var r={};$a('[data-k]',tr).forEach(function(x){var p=x.dataset.k.split('|');r.id=p[0];r.i=+p[1];r[p[2]]=x});return r}
 function decorate(){
   if(!box)return;
-  $a('select[data-k$="|rpe"]',box).forEach(function(sel){if(sel.dataset.ux)return;sel.dataset.ux=1;sel.classList.add('ux-hid');
+  $a(CFG.rpeTaps?'select[data-k$="|rpe"]':'.ux-none',box).forEach(function(sel){if(sel.dataset.ux)return;sel.dataset.ux=1;sel.classList.add('ux-hid');
     var o=sel.options[sel.selectedIndex],b=el('button','ux-rpe'+(sel.value?' on':''),esc(sel.value?o.text:(sel.options[0]?sel.options[0].text:'RPE')));b.type='button';noBlur(b);
     b.setAttribute('aria-label',sel.getAttribute('aria-label')||'Effort');sel.parentNode.appendChild(b);b.addEventListener('click',function(){chips(sel)})});
   $a('table.sets',box).forEach(function(tb){
@@ -1085,12 +1085,12 @@ function decorate(){
     var cur=null,prev=null;for(var i=0;i<rows.length;i++){var p=rowParts(rows[i]);var done=p.r&&p.r.value&&p.rpe&&p.rpe.value;if(!done){cur=rows[i];prev=i?rows[i-1]:null;break}}
     if(!cur||cur.nextElementSibling&&cur.nextElementSibling.classList.contains('ux-help'))return;
     var c=rowParts(cur),pv=prev?rowParts(prev):null,hasW=c.w&&!c.w.disabled,same=pv&&pv.r&&pv.r.value;
-    if(!hasW&&!same)return;
+    if(!(hasW&&CFG.steps)&&!same)return;
     var tr=el('tr','ux-help'),td=el('td');td.colSpan=4;tr.appendChild(el('td'));tr.firstChild.className='ux-gap';td.colSpan=3;tr.appendChild(td);var box=el('div','ux-hbox');td.appendChild(box);
-    if(hasW){var st=stepOf(c.id);[-st,st].forEach(function(d){var b=el('button','ux-step',(d<0?'−':'+')+f1(Math.abs(d)));b.type='button';noBlur(b);b.setAttribute('aria-label',(d<0?'Less':'More')+' weight');
+    if(hasW&&CFG.steps){var st=stepOf(c.id);[-st,st].forEach(function(d){var b=el('button','ux-step',(d<0?'−':'+')+f1(Math.abs(d)));b.type='button';noBlur(b);b.setAttribute('aria-label',(d<0?'Less':'More')+' weight');
       b.addEventListener('click',function(){var base=n(c.w.value);if(base==null)base=n(c.w.placeholder);if(base==null&&pv&&pv.w)base=n(pv.w.value);if(base==null)base=0;c.w.value=f1(Math.max(0,base+d));fire(c.w,'input');fire(c.w,'change')});box.appendChild(b)})}
     if(same){var lab=(pv.w&&pv.w.value?f1(n(pv.w.value))+'kg × ':'')+pv.r.value;var b=el('button','ux-same','Same as last · '+esc(lab));b.type='button';noBlur(b);
-      b.addEventListener('click',function(){if(c.w&&!c.w.disabled&&pv.w&&pv.w.value){c.w.value=pv.w.value;fire(c.w,'input');fire(c.w,'change')}if(c.r){c.r.value=pv.r.value;fire(c.r,'input');fire(c.r,'change')}if(c.rpe)chips(c.rpe)});box.appendChild(b)}
+      b.addEventListener('click',function(){if(c.w&&!c.w.disabled&&pv.w&&pv.w.value){c.w.value=pv.w.value;fire(c.w,'input');fire(c.w,'change')}if(c.r){c.r.value=pv.r.value;fire(c.r,'input');fire(c.r,'change')}if(c.rpe){if(CFG.rpeTaps)chips(c.rpe);else c.rpe.focus()}});box.appendChild(b)}
     cur.parentNode.insertBefore(tr,cur.nextSibling)});
   if(obs)obs.takeRecords();
 }
