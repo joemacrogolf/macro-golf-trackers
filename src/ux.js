@@ -99,5 +99,5 @@ function homeSetup(){try{$a('link[rel="apple-touch-icon"],link[rel="apple-touch-
      '<div class="ux-a2hs-b">'+(android?'<button type="button" data-x="install" class="ux-btn y">Add</button>':'')+'<button type="button" data-x="off" class="ux-close">Not now</button></div>';
     document.body.appendChild(c);c.addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(!b)return;
       if(b.dataset.x==='install'&&deferred){deferred.prompt();deferred=null}try{localStorage.setItem('ux-a2hs-off','1')}catch(x){}c.remove()})},2500)}
-return {init:function(o){for(var k in o)CFG[k]=o[k];watch();bestsButton();if(CFG.home)homeSetup()},bests:bests,decorate:decorate};
+return {init:function(o){for(var k in o)CFG[k]=o[k];watch();bestsButton();if(CFG.home)homeSetup()},bests:bests,decorate:decorate,points:points};
 })();

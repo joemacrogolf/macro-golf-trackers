@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Coach Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="mgc">
+<style>
+#mgc{--ink:#0B0B0B;--y:#FFD900;--cream:#F4F1EA;--mute:#6f6b62;--line:rgba(11,11,11,.13);--warn:#C8571B;background:var(--cream);color:var(--ink);font-family:Inter,system-ui,sans-serif;min-height:100vh;margin:0;padding:0 0 60px}
+#mgc *{box-sizing:border-box}
+#mgc .top{background:var(--ink);color:var(--cream);padding:22px 16px 20px}
+#mgc .wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+#mgc .top .wrap{padding:0}
+#mgc .kick{font-weight:700;font-size:12px;letter-spacing:2.4px;text-transform:uppercase;color:var(--y)}
+#mgc h1{font-family:Anton,Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:44px;line-height:1;margin:8px 0 12px}
+#mgc .bar{width:74px;height:6px;background:var(--y)}
+#mgc [hidden]{display:none!important}
+#mgc form.login{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;max-width:520px}
+#mgc input[type=password]{flex:1 1 220px;min-height:52px;padding:0 14px;font:400 18px Inter,system-ui,sans-serif;border:1px solid rgba(244,241,234,.35);background:#1a1916;color:var(--cream)}
+#mgc input:focus-visible,#mgc button:focus-visible{outline:3px solid var(--y);outline-offset:2px}
+#mgc .btn{min-height:52px;border:0;background:var(--y);color:var(--ink);font-family:Anton,Impact,sans-serif;text-transform:uppercase;font-size:19px;padding:0 20px;cursor:pointer}
+#mgc .err{color:#ffb27a;margin:10px 0 0;min-height:1.2em;font-size:14px}
+#mgc .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:22px 0 18px}
+#mgc .stats div{background:#fff;padding:14px}
+#mgc .stats span,#mgc .lab{display:block;font-weight:700;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--mute)}
+#mgc .stats b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;font-size:34px;line-height:1;margin-top:8px}
+#mgc .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
+#mgc .seg{display:inline-flex;border:1px solid var(--ink)}
+#mgc .seg button{background:#fff;border:0;min-height:40px;padding:0 14px;font:600 14px Inter,system-ui,sans-serif;cursor:pointer;color:var(--ink)}
+#mgc .seg button[aria-pressed=true]{background:var(--ink);color:var(--cream)}
+#mgc .ghost{background:transparent;border:1px solid var(--ink);min-height:40px;padding:0 14px;font:600 14px Inter,system-ui,sans-serif;cursor:pointer}
+#mgc .list{display:flex;flex-direction:column;gap:10px}
+#mgc .card{background:#fff;border:1px solid var(--line);border-left:6px solid var(--ink)}
+#mgc .card.quiet{border-left-color:var(--warn)}
+#mgc .card.never{border-left-color:#bdb8ad}
+#mgc .row{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,.7fr)) minmax(0,1.2fr) 34px;gap:12px;align-items:center;padding:14px;cursor:pointer;width:100%;background:none;border:0;text-align:left;font:inherit;color:inherit}
+#mgc .nm b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:21px;line-height:1.05}
+#mgc .nm span{display:block;font-size:13px;color:var(--mute);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#mgc .v{font-family:Anton,Impact,sans-serif;font-size:22px;line-height:1}
+#mgc .v small{display:block;font-family:Inter,system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--mute);margin-bottom:5px}
+#mgc .quiet .v.last{color:var(--warn)}
+#mgc .wk{display:flex;align-items:flex-end;gap:3px;height:34px}
+#mgc .wk i{flex:1;background:var(--ink);min-height:2px}
+#mgc .wk i.z{background:#e2ddd2}
+#mgc .chev{width:28px;height:28px;display:grid;place-items:center;transition:transform .15s}
+#mgc .card[open-x] .chev{transform:rotate(180deg)}
+#mgc .more{display:none;padding:0 14px 16px;border-top:1px solid var(--line)}
+#mgc .card[open-x] .more{display:block}
+#mgc .bests{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:12px}
+#mgc .bests div{background:var(--cream);padding:10px 12px}
+#mgc .bests b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:16px}
+#mgc .bests span{font-size:13px;color:var(--mute)}
+#mgc .bests em{font-style:normal;font-weight:700;color:var(--ink);background:var(--y);padding:0 4px;margin-left:4px}
+#mgc .meta{font-size:13px;color:var(--mute);margin-top:12px}
+#mgc .empty{color:var(--mute);padding:20px 0;margin:0}
+#mgc .bests .empty{padding:4px 0}
+#mgc .note{font-size:13px;color:var(--mute);margin-top:18px}
+@media (max-width:760px){#mgc h1{font-size:36px}#mgc .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #mgc .row{grid-template-columns:1fr 1fr 1fr 28px;grid-template-areas:"nm nm nm chev" "wk wk wk wk" "s7 s28 tot tot";row-gap:14px}
+ #mgc .nm span{white-space:normal}
+ #mgc .row .nm{grid-area:nm}#mgc .row .chev{grid-area:chev}#mgc .row .wkc{grid-area:wk}#mgc .row .s7{grid-area:s7}#mgc .row .s28{grid-area:s28}#mgc .row .tot{grid-area:tot}}
+</style>
+<div class="top"><div class="wrap">
+  <div class="kick">Macro Golf · Coach</div><h1>Client dashboard</h1><div class="bar"></div>
+  <form class="login" id="login"><label for="pw" class="lab" style="flex-basis:100%;color:#FFD900">Coach password</label>
+    <input type="password" id="pw" autocomplete="current-password" required><button class="btn" type="submit">Open</button></form>
+  <p class="err" id="err" role="alert"></p>
+</div></div>
+<div class="wrap" id="main" hidden>
+  <div class="stats" id="stats"></div>
+  <div class="tools"><div class="seg" id="seg" role="group" aria-label="Show">
+    <button type="button" data-f="all" aria-pressed="true">All</button><button type="button" data-f="personal" aria-pressed="false">1-to-1</button><button type="button" data-f="pure" aria-pressed="false">Pure plans</button></div>
+    <button type="button" class="ghost" id="refresh">Refresh</button></div>
+  <div class="list" id="list"></div>
+  <p class="note">Orange = no session logged for 7+ days. Grey = has not signed in to cloud save yet. Bars show sessions per week for the last 8 weeks.</p>
+</div>
+</div>
+<script>
+(function(){
+var URL='https://zhcgwtlyqriwlhbzkxcl.supabase.co/rest/v1/rpc/mg_coach_all',KEY='sb_publishable__IBhmrVHOXsLHruU7XJB-g_OSN9Ljne';
+var pass='',rows=[],filter='all';
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function day(d){var p=String(d).slice(0,10).split('-');return new Date(+p[0],+p[1]-1,+p[2],12)}
+function ago(iso){if(!iso)return '—';var n=Math.round((Date.now()-day(iso))/864e5);return n<=0?'Today':n===1?'Yesterday':n+' days'}
+function fmt(ts){if(!ts)return 'never';return new Date(ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+function load(){$('err').textContent='Loading…';
+  return fetch(URL,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({p_pass:pass})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j&&j.message||'Error');return j})})
+  .then(function(j){rows=j||[];$('err').textContent='';$('main').hidden=false;$('login').hidden=true;render()})
+  .catch(function(e){$('err').textContent=/Wrong password/.test(e.message)?'Wrong password.':'Could not load: '+e.message})}
+function info(r){var d=r.data||{},s=d._mgSummary||{},dates=(s.dates||[]).slice().sort(),t0=new Date();t0.setHours(12,0,0,0);
+  function dago(x){return Math.round((t0-day(x))/864e5)}
+  var c7=dates.filter(function(x){return dago(x)<7}).length,c28=dates.filter(function(x){return dago(x)<28}).length,now=Date.now();
+  var wk=[0,0,0,0,0,0,0,0];dates.forEach(function(x){var w=Math.floor(dago(x)/7);if(w>=0&&w<8)wk[7-w]++});
+  var pure=String(r.code).indexOf('pure:')===0,who=pure?String(r.code).split(':').slice(2).join(':'):'Page '+r.code;
+  return {name:r.name||s.player||(pure?who:'Client '+r.code),plan:r.plan||s.page||'',who:who,pure:pure,total:s.sessions||0,last:s.last,c7:c7,c28:c28,wk:wk,bests:s.bests||[],updated:r.updated_at,never:!r.updated_at,quiet:!!r.updated_at&&(!s.last||dago(s.last)>=7)}}
+function render(){var list=rows.map(function(r){var o=info(r);o.r=r;return o}).filter(function(o){return filter==='all'||(filter==='pure')===o.pure});
+  var all=rows.map(info),active=all.filter(function(o){return o.c7>0}).length;
+  $('stats').innerHTML=[['Clients',all.length],['Active this week',active],['Sessions this week',all.reduce(function(a,o){return a+o.c7},0)],['Need a nudge',all.filter(function(o){return o.quiet}).length]].map(function(x){return '<div><span>'+x[0]+'</span><b>'+x[1]+'</b></div>'}).join('');
+  list.sort(function(a,b){return (b.updated||'').localeCompare(a.updated||'')});
+  $('list').innerHTML=list.length?list.map(function(o,i){var mx=Math.max.apply(null,o.wk.concat([1]));
+    return '<div class="card'+(o.never?' never':o.quiet?' quiet':'')+'"><button type="button" class="row" aria-expanded="false" data-i="'+i+'">'+
+     '<div class="nm"><b>'+esc(o.name)+'</b><span>'+esc(o.plan)+' · '+esc(o.who)+'</span></div>'+
+     '<div class="v s7"><small>7 days</small>'+o.c7+'</div><div class="v s28"><small>28 days</small>'+o.c28+'</div><div class="v tot"><small>Total</small>'+o.total+'</div>'+
+     '<div class="wkc"><div class="wk" aria-label="Sessions per week, last 8 weeks: '+o.wk.join(', ')+'">'+o.wk.map(function(n){return '<i class="'+(n?'':'z')+'" style="height:'+Math.max(6,n/mx*100)+'%"></i>'}).join('')+'</div></div>'+
+     '<div class="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M5 9l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.6"/></svg></div></button>'+
+     '<div class="more"><div class="bests">'+(o.bests.length?o.bests.map(function(b){return '<div><b>'+esc(b.n)+'</b><span>'+esc(b.w)+(b.u?' '+esc(b.u):'')+' × '+esc(b.r)+(b.gain>0?'<em>+'+esc(b.gain)+'</em>':'')+'</span></div>'}).join(''):'<p class="empty">No logged lifts yet.</p>')+'</div>'+
+     '<p class="meta">Last session: '+(o.last?ago(o.last)+' ('+esc(o.last)+')':'none yet')+' · Last synced: '+fmt(o.updated)+'</p></div></div>'}).join(''):'<p class="empty">No clients here yet.</p>';
+  [].forEach.call(document.querySelectorAll('#list .row'),function(b){b.addEventListener('click',function(){var c=b.parentNode,open=!c.hasAttribute('open-x');if(open)c.setAttribute('open-x','');else c.removeAttribute('open-x');b.setAttribute('aria-expanded',open)})})}
+$('login').addEventListener('submit',function(e){e.preventDefault();pass=$('pw').value;$('pw').value='';load()});
+$('refresh').addEventListener('click',load);
+[].forEach.call(document.querySelectorAll('#seg button'),function(b){b.addEventListener('click',function(){filter=b.dataset.f;[].forEach.call(document.querySelectorAll('#seg button'),function(x){x.setAttribute('aria-pressed',x===b)});render()})});
+})();
+</script>
+</body>
+</html>
