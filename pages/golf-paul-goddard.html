@@ -365,6 +365,12 @@ tr.done .ux-rpe{background:#F4F1EA}
 @media (prefers-reduced-motion:reduce){.ux-chip{transition:none}}
 </style>
 <style id="pg-css">
+#main .navrow{border-top:1px solid rgba(11,11,11,0.16);padding-top:14px;margin-top:4px}
+#main .navrow .ghost[data-act="back"]{flex:0 0 32%}
+#main .vcard{display:flex!important;align-items:center;gap:14px;width:100%;text-align:left!important;background:#0B0B0B;color:#F4F1EA;border:0;border-left:6px solid #FFD900;padding:18px 16px!important;letter-spacing:0!important;cursor:pointer}
+#main .vcard .vplay{flex:none;width:52px;height:52px;border-radius:50%!important;background:#FFD900;color:#0B0B0B;display:grid;place-items:center}
+#main .vcard b{display:block;font-family:var(--display)!important;font-weight:400!important;font-size:22px;line-height:1.1;text-transform:uppercase;color:#F4F1EA}
+#main .vcard small{display:block;font-family:var(--text);font-size:13px;font-weight:600;color:#FFD900;letter-spacing:1.4px;text-transform:uppercase;margin-top:4px}
 .vizcap{font-family:var(--display);font-size:20px;text-transform:uppercase;color:#0B0B0B;text-align:center;margin:0}
 .viz{border:2px solid #0B0B0B;line-height:0}.viz svg{display:block;width:100%;height:auto}.tap{cursor:crosshair;touch-action:manipulation}
 #main .planlist .t{text-align:left!important}
@@ -506,7 +512,7 @@ function putBlocks(){
       lines:["Three stations, two balls each. The zone is 1 ft short to 2 ft past the hole.","Score each station: both holed 4, holed + zone 3, two in the zone or one holed 2, one in the zone 1, none 0."]}
   ]}
 function warmBlocks(grp){return [
-    {t:"tick",id:"body",grp:grp,title:"Body warm up",mins:5,lines:["Follow the full Macro Golf 5 minute body warm up in the app.","Tick it off when you're done."]},
+    {t:"tick",id:"body",grp:grp,title:"Body warm up",mins:5,lines:["Follow the Express 5-minute golf warm-up video.","Tap Next when you\u2019ve finished."]},
     {t:"ladder",id:"ladder",grp:grp,title:"Ladder up to 70 yds",mins:5,res:[],
       lines:["Start with a short chip. Every shot must carry to where the last ball finished.","Each shot gets longer and the target changes every time, until you reach 70 yds."]},
     {t:"strike",id:"strike",grp:grp,title:"Strike station",mins:2,balls:5,res:[],lines:["Strike set up station: low point check and strike spray (foot spray works too).","Tap where each ball came off the face."]},
@@ -590,6 +596,7 @@ function act(a,v){var b=cur();
   if(a==="start"){newSession(v);return}
   if(a==="resume"){S.view=null;save();render();toEntry();return}
   if(a==="discard"){S.cur=null;save();render();return}
+  if(a==="video"){if(window.MGVideo)MGVideo.open("Express 5 Minute Golf Warm Up","rxkqwwoq0t");else window.open("https://fast.wistia.net/embed/iframe/rxkqwwoq0t","_blank","noopener");return}
   if(a==="skip"){stopTimer();b.done=true;b.skipped=true;save();a="next"}
   if(a==="next"){if(b&&(b.timer||b.t==="tick"))stopTimer();S.flash=null;if(S.cur.bi<S.cur.blocks.length-1){S.cur.bi++;save();render();toEntry()}else finish();return}
   if(a==="back"){if(S.cur.bi>0){stopTimer();S.cur.bi--;S.flash=null;save();render()}return}
@@ -607,7 +614,7 @@ function act(a,v){var b=cur();
     else if(b.t==="wd"){var w=b.res.length,tg=wdFin(w)?(+$("finPick").value||b.plan[w]):b.plan[w];b.res.push({target:tg,carry:c,off:o});var pt=wdPts(tg,c,o,wdFin(w));
       var sg=sgOf({k:"app",d:tg,carry:c,off:o},+GOAL);setFlash(pt>0?"p":pt<0?"m":"z",tg+" yds · "+(pt>0?"+":"")+pt+" pt"+(Math.abs(pt)===1?"":"s")+"<br><b style='font-family:var(--text);font-size:14px'>Strokes gained "+sgf(sg)+" vs scratch</b>",(pt>0?"+":"")+pt)}
     save();render();var ci=$("carryIn");if(ci)ci.focus();return}
-  if(a==="side"){S.side=v;save();document.querySelectorAll('[data-act="side"]').forEach(function(x){x.setAttribute("aria-pressed",String(x.dataset.v===v))});var pc=$("pic");if(pc)pc.innerHTML=shotPic(cur());return}
+  if(a==="side"){S.side=v;save();document.querySelectorAll('[data-act="side"]').forEach(function(x){x.setAttribute("aria-pressed",String(x.dataset.v===v))});var pc=$("pic");if(pc)pc.innerHTML=shotPic(cur(),true);return}
   if(a==="undo"){if(b.res.length){b.res.pop();S.flash=null;save();render()}return}
   if(a==="drv"){var dv=parseFloat(v);if(dv>=150&&dv<=360){S.drv=Math.round(dv);save()}return}
   if(a==="send"){sendWeek(v);return}
@@ -719,13 +726,15 @@ function ladderSVG(b){var W=300,H=120,g='<rect width="'+W+'" height="'+H+'" fill
   g+='<rect x="18" y="'+(H/2-16)+'" width="10" height="28" fill="#0B0B0B"/>';
   b.res.forEach(function(s,i){var x=X(s.c),y=H/2-2+(i%2?-10:10);g+='<circle cx="'+x+'" cy="'+y+'" r="7" fill="'+(s.ok===false?"#E0352B":"#FFFFFF")+'" stroke="#0B0B0B" stroke-width="2"/>'+PT(x,y+3,i+1,{s:8,c:"#0B0B0B"})});
   return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Ladder to 70 yards">'+g+'</svg>'}
-function shotPic(b){if(!b)return "";var c=parseFloat(($("carryIn")||{}).value),o=parseFloat(($("offIn")||{}).value),ball=c>0?{c:c,o:(isNaN(o)?0:(S.side==="L"?-Math.abs(o):Math.abs(o)))}:null,i=b.res.length;
+function shotPic(b,live){if(!b)return "";var c=!live?NaN:parseFloat(($("carryIn")||{}).value),o=parseFloat(($("offIn")||{}).value),ball=c>0?{c:c,o:(isNaN(o)?0:(S.side==="L"?-Math.abs(o):Math.abs(o)))}:null,i=b.res.length;
   if(b.t==="drive"){var hl=b.holes[i];return hl?teeSVG({L:hl.L,fwHalf:hl.fw,haz:null},ball):""}
   var d=b.t==="app"?b.ds[i]:b.t==="wd"?(wdFin(i)&&$("finPick")?+$("finPick").value:b.plan[i]):null;return d?appSVG({d:d,haz:null},ball):""}
 /* ---------- rendering (same layout and components as the Macro Golf games) ---------- */
 function L$(b){return '<ul class="steps">'+b.lines.map(function(l){return "<li>"+esc(l)+"</li>"}).join("")+"</ul>"}
-function nextBtn(label,dis){return '<div class="btns">'+(S.cur.bi?'<button class="ghost" data-act="back">Back</button>':"")+'<button class="primary" data-act="next"'+(dis?" disabled":"")+'>'+label+'</button></div>'}
-function blockDone(b){return b.t==="tick"?!!b.done:b.t==="count"?b.res.length>=b.total:b.t==="holeout"?b.res.length>=b.putts.length:b.t==="money"?b.res.length>=b.st.length:
+/* one button system everywhere: Back on the left, Next on the right, always tappable */
+function nextBtn(){var b=cur(),last=S.cur.bi===S.cur.blocks.length-1,done=blockDone(b);return '<div class="btns navrow">'+(S.cur.bi?'<button class="ghost" data-act="back">Back</button>':"")+
+  (done?'<button class="primary" data-act="next">'+(last?"Finish session":"Next")+'</button>':'<button class="ghost" data-act="next">'+(last?"Skip and finish":"Skip")+'</button>')+'</div>'}
+function blockDone(b){return b.t==="tick"?true:b.t==="count"?b.res.length>=b.total:b.t==="holeout"?b.res.length>=b.putts.length:b.t==="money"?b.res.length>=b.st.length:
   b.t==="ladder"?(b.res.length&&b.res[b.res.length-1].c>=70):b.t==="strike"?b.res.length>=b.balls:b.t==="drive"?b.res.length>=b.holes.length:b.t==="app"?b.res.length>=b.ds.length:b.t==="wd"?b.res.length>=b.plan.length:false}
 function lmInputs(eg){return '<div class="viz" id="pic">'+shotPic(cur())+'</div><p class="preview" style="margin:0">The ball moves as you type the numbers.</p><div class="seg"><button data-act="side" data-v="L" aria-pressed="'+(S.side==="L")+'">Offline left</button><button data-act="side" data-v="R" aria-pressed="'+(S.side!=="L")+'">Offline right</button></div>'+
   '<div class="fields"><label><span class="label">Carry (yds)</span><input id="carryIn" inputmode="decimal" placeholder="e.g. '+eg+'"></label><label><span class="label">Offline (yds)</span><input id="offIn" inputmode="decimal" placeholder="e.g. 3.2"></label></div>'+
@@ -736,11 +745,11 @@ function callrow(lbl,big,unit,pill){return '<div class="callrow"><div><div class
 function undoBtn(b){return b.res.length?'<button class="linky" data-act="undo">Undo last</button>':""}
 function runBlock(b){var h="",done=blockDone(b);
   if(b.feel)h+='<div class="feel"><span class="label">The feel</span><b>'+esc(b.feel)+"</b></div>";
+  if(b.id==="body"){b.lines=["Follow the Express 5-minute golf warm-up video.","Tap Next when you\u2019ve finished."];h+='<button type="button" class="vcard" data-act="video"><span class="vplay">'+'<svg width="22" height="22" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z" fill="currentColor"/></svg>'+'</span><span><b>Express 5-minute golf warm-up</b><small>Watch the video</small></span></button>'}
+  if(b.id==="down")b.lines=["Three balls with your full on-course routine. New target and new club every ball.","Finish on a shot you like, then tap Next."];
+  if(b.id==="tech")b.lines=["Rehearse the feel with no ball, then bring it into the ball with slow-motion swings.","Finish with a few full swings holding the same feel. Start the timer if you want one, then tap Next."];
   h+='<div class="read">'+L$(b)+"</div>";if(b.timer&&b.t!=="tick")h+=timerHtml(b);
-  if(b.t==="tick"){var full=b.mins*60,left=b.left==null?full:b.left,fin=!!b.done;
-    h+='<div class="timer"><b id="tmr">'+Math.floor(left/60)+":"+String(left%60).padStart(2,"0")+'</b><span class="label">'+(fin?(b.skipped?"Skipped":"Time\u2019s up"):TM?"Running":left<full?"Paused":b.mins+" min")+"</span></div>"+
-      '<div class="btns">'+(S.cur.bi?'<button class="ghost" data-act="back">Back</button>':"")+(fin?"":'<button class="ghost" data-act="skip">Skip</button>')+
-      (fin?'<button class="primary" data-act="next">Next</button>':'<button class="primary" id="tmrBtn">'+(TM?"Pause":left<full?"Resume":"Start")+"</button>")+"</div>"}
+  if(b.t==="tick"){if(b.timer)h+=timerHtml(b);h+=nextBtn("Next",false)}
   if(b.t==="count"){var mk=b.res.filter(Boolean).length;
     h+=callrow(done?"Station done":"Putt "+(b.res.length+1)+" of "+b.total,mk,"of "+b.res.length+" through",["4 ft"])+'<div class="viz">'+vizSVG("gate")+'</div><p class="vizcap">Through the gate</p>'+
       (done?"":'<div class="mm"><button class="made" data-act="cnt" data-v="1">Through</button><button class="miss" data-act="cnt" data-v="0">Missed</button></div>')+
@@ -856,7 +865,7 @@ function render(){var m=$("main");if(!m)return;stopTimerIfLeft();var last=S.last
   $("hName").textContent=S.player||"Paul Goddard";gateShow();pbTab();bind()}
 function stopTimerIfLeft(){var b=cur();if(TM&&!(b&&(b.timer||b.t==="tick")))stopTimer()}
 function bind(){var m=$("main");m.querySelectorAll("[data-act]").forEach(function(el){el.onclick=function(){act(el.dataset.act,el.dataset.v)}});
-  ["carryIn","offIn","finPick"].forEach(function(id){var e=$(id);if(e)e.addEventListener("input",function(){var pc=$("pic");if(pc)pc.innerHTML=shotPic(cur())})});
+  ["carryIn","offIn","finPick"].forEach(function(id){var e=$(id);if(e)e.addEventListener("input",function(){var pc=$("pic");if(pc)pc.innerHTML=shotPic(cur(),true)})});
   ["carryIn","offIn","ladIn"].forEach(function(id){var e=$(id);if(e)e.onkeydown=function(ev){if(ev.key==="Enter"){if(id==="offIn")act("lm");else if(id==="carryIn"){var o=$("offIn");o&&o.focus()}}}});
   var b=cur();if(b&&(b.timer||b.t==="tick"))bindTimer(b);
   var fc=$("face");if(b&&b.t==="strike"&&fc){fc.querySelector("svg").addEventListener("click",function(e){if(b.res.length>=b.balls)return;var q=svgPt(e);b.res.push({x:Math.round(q.x),y:Math.round(q.y)});save();render()})}}
