@@ -15,7 +15,7 @@ var PUTT=[[0,1.0],[2,1.01],[3,1.04],[4,1.13],[5,1.23],[6,1.34],[7,1.42],[8,1.50]
 /* [name, number, approach gap at 150 yds, putting gap at 20 ft, drive total, fairway %, penalty %] */
 var LV=[["Tour",-5,0,0,300,.60,.03],["0",0,.15,.06,270,.55,.05],["5",5,.32,.09,255,.52,.06],["10",10,.48,.12,240,.48,.08],["15",15,.63,.15,228,.45,.10],["20",20,.78,.18,215,.42,.12],["25",25,.93,.21,200,.40,.14],["30",30,1.08,.24,185,.38,.16]];
 function interp(t,x){if(x<=t[0][0])return t[0][1];for(var i=1;i<t.length;i++){if(x<=t[i][0]){var a=t[i-1],b=t[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0])}}var a2=t[t.length-2],b2=t[t.length-1];return b2[1]+(b2[1]-a2[1])/(b2[0]-a2[0])*(x-b2[0])}
-function lerpL(a,b,t){function L(i){return a[i]+(b[i]-a[i])*t}return {g:Math.max(-0.2,L(2)),gp:Math.max(-0.05,L(3)),D:L(4)}}
+function lerpL(a,b,t){function L(i){return a[i]+(b[i]-a[i])*t}return {g:Math.max(-0.2,L(2)),gp:Math.max(-0.05,L(3)),D:L(4),fw:L(5),pen:L(6)}}
 function P(n){if(n<=-5)return lerpL(LV[0],LV[1],(n-LV[0][1])/(LV[1][1]-LV[0][1]));
   for(var i=1;i<LV.length;i++)if(n<=LV[i][1])return lerpL(LV[i-1],LV[i],(n-LV[i-1][1])/(LV[i][1]-LV[i-1][1]));
   var a=LV[LV.length-2],b=LV[LV.length-1];return lerpL(a,b,(n-a[1])/(b[1]-a[1]))}
@@ -86,5 +86,5 @@ function init(o){C=o;css();last=list().length;
   if(typeof window.renderAll==="function"){var r=window.renderAll;window.renderAll=function(){var x=r.apply(this,arguments);try{paint()}catch(e){}return x}}
   if(typeof window.buildReport==="function"){var b=window.buildReport;window.buildReport=function(){var t=b.apply(this,arguments);try{var add=reportLines();if(add.length&&typeof t==="string")t=t.replace(/\s+$/,"")+"\n"+add.join("\n")}catch(e){}return t}}
   paint()}
-return {init:init,paint:paint,E:E,num:num,name:hname,lieOf:lieOf,putt:putt,puttSG:puttSG,shortSG:shortSG,approachSG:approachSG,driveSG:driveSG,driveTotal:driveTotal,fmt:fmt};
+return {init:init,paint:paint,E:E,num:num,name:hname,lieOf:lieOf,putt:putt,puttSG:puttSG,shortSG:shortSG,approachSG:approachSG,driveSG:driveSG,driveTotal:driveTotal,fmt:fmt,P:P};
 })();
