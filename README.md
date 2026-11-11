@@ -44,3 +44,20 @@ Reset a forgotten PIN (client sets a new one on next open):
 ```sql
 update public.mg_clients set pin_hash = null, fails = 0, locked_until = null where code = '<code>';
 ```
+
+## Hosted pages (`pages/` + `src/mount.js`)
+
+Full tracker pages live in `pages/`. A Kajabi Custom Code block only needs:
+
+```html
+<div id="mg-root"></div>
+<script src="https://cdn.jsdelivr.net/gh/joemacrogolf/macro-golf-trackers@<commit>/src/mount.js" data-page="pure-power-gym"></script>
+```
+
+`mount.js` fetches `pages/<data-page>.html` from the same commit, swaps `{{BASE}}` for that commit's URL, and runs the page's scripts in order. To ship a fix: commit, then change `<commit>` in the Kajabi block.
+
+| Page | File |
+|---|---|
+| Pure Muscle & Strength (gym / home) | `pure-muscle-strength-gym`, `pure-muscle-strength-home` |
+| Pure Power (gym / home) | `pure-power-gym`, `pure-power-home` |
+| Pure Sequencing (gym / home) | `pure-sequencing-gym`, `pure-sequencing-home` |
