@@ -445,7 +445,7 @@ tr.done .ux-rpe{background:#F4F1EA}
     <div class="goldbar" style="margin-top:28px"></div>
     <h1><span id="hName">Paul Goddard</span><span class="g">Goal: scratch handicap</span></h1>
     <div class="strip">
-      <div><span class="k">Player</span><input id="player" placeholder="Name" aria-label="Player name" autocomplete="name"></div>
+      <div><span class="k">Rounds</span><span class="v">2 / week</span></div>
       <div><span class="k">Goal</span><span class="v">Scratch</span></div>
       <div><span class="k">Driver carry</span><input id="drvIn" inputmode="numeric" aria-label="Driver carry in yards"></div>
     </div>
@@ -483,9 +483,9 @@ tr.done .ux-rpe{background:#F4F1EA}
    Every shot that has a result is strokes gained against scratch (golf-sg.js baseline), and every
    session gets a handicap: the handicap whose average golfer would have gained exactly zero. */
 var KEY="mgPaulGoddard",COACH="jack@macro.golf",GOAL="0",WEEK_ROUNDS=2;
-function blank(){return {player:"",order:"putt",drv:250,history:[],cur:null,sent:{}}}
+function blank(){return {player:"Paul Goddard",order:"putt",drv:250,history:[],cur:null,sent:{}}}
 function load(){try{var v=JSON.parse(localStorage.getItem(KEY));if(v&&Array.isArray(v.history))return v}catch(e){}return null}
-var S=load()||blank();
+var S=load()||blank();S.player="Paul Goddard";
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 var $=function(id){return document.getElementById(id)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
@@ -861,7 +861,7 @@ function pbTab(){if(document.querySelector(".ux-pbtab"))return;var b=document.cr
   b.onclick=pbScreen;document.body.appendChild(b)}
 function render(){var m=$("main");if(!m)return;stopTimerIfLeft();var last=S.last&&S.history.filter(function(x){return x.id===S.last})[0];
   m.innerHTML=last?renderSummary(last):S.cur&&S.view!=="home"?renderRun():renderHome();
-  var p=$("player");if(p&&document.activeElement!==p)p.value=S.player||"";var d=$("drvIn");if(d&&document.activeElement!==d)d.value=S.drv;
+  var d=$("drvIn");if(d&&document.activeElement!==d)d.value=S.drv;
   $("hName").textContent=S.player||"Paul Goddard";gateShow();pbTab();bind()}
 function stopTimerIfLeft(){var b=cur();if(TM&&!(b&&(b.timer||b.t==="tick")))stopTimer()}
 function bind(){var m=$("main");m.querySelectorAll("[data-act]").forEach(function(el){el.onclick=function(){act(el.dataset.act,el.dataset.v)}});
@@ -883,11 +883,14 @@ function gateShow(){var g=$("gate");if(!g)return;var on=ASK&&!(S.last);g.hidden=
   $("gGo").onclick=function(){if(!ASKK)return;ASK=false;S.pick=ASKK;newSession(ASKK);toEntry()};
   $("gResume").onclick=function(){ASK=false;S.view=null;save();render();toEntry()};
   $("gSkip").onclick=function(){ASK=false;S.view=S.cur?"home":null;save();render();window.scrollTo(0,0)};
-  $("player").oninput=function(e){S.player=e.target.value;save();$("hName").textContent=S.player||"Paul Goddard"};
   $("drvIn").onchange=function(e){act("drv",e.target.value);e.target.value=S.drv}})();
 var _act=act;act=function(a,v){if(a==="pick"){S.pick=v;save();render();return}return _act(a,v)};
 render();
 
+</script>
+<script>/* the plan is made for Paul: the sign-in screen only asks for email and PIN */
+(function(){function fix(){var g=document.querySelector(".mgs-gate");if(!g)return;var n=g.querySelector('input[name="pname"]');if(n&&!n.dataset.pg){n.dataset.pg=1;n.value="Paul Goddard";var l=n.closest("label");if(l)l.style.display="none"}}
+  new MutationObserver(fix).observe(document.body,{childList:true,subtree:true});fix()})();
 </script>
 <script src="{{BASE}}src/sync.js"></script>
 <script src="{{BASE}}src/golfwarm.js"></script>
