@@ -1,0 +1,1216 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: Macro Golf house style. Black cover band with yellow bar and stacked caps, black live scoreboard, light inner cards with yellow eyebrow labels */
+:root{
+  --bg:#f3f3f1; --surface:#ffffff; --line:#dddbd4; --fg:#111111; --muted:#5f5d57;
+  --ink:#0d0d0d; --ink-2:#1b1b1b; --on-ink:#ffffff; --on-ink-muted:#a8a59c;
+  --gold:#FFD900; --gold-ink:#7a6800; --gold-soft:#fff5bf;
+  --p4:#14663a; --p3:#1f7a46; --p2:#5a9a3c; --p1:#c48a12; --p0:#b23a2e;
+  --display:Calibri,"Carlito","Segoe UI",Arial,sans-serif;
+  --body:Calibri,"Carlito","Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
+.wrap{max-width:580px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1,h2{font-family:var(--display);margin:0;text-wrap:balance}
+.label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.tnum{font-variant-numeric:tabular-nums}
+
+.cover{background:var(--ink);color:var(--on-ink);border-radius:4px;padding:22px 20px 18px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.cover::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--gold)}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.brand .mark{font-weight:700;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.brand .sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--on-ink-muted)}
+.cover h1{font-weight:700;text-transform:uppercase;line-height:.88;letter-spacing:-.01em;font-size:clamp(40px,11vw,62px)}
+.cover h1 span{display:block}
+.cover h1 .g{color:var(--gold)}
+.goldbar{width:56px;height:5px;background:var(--gold)}
+.strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;border-top:1px solid #2c2c2c;padding-top:12px}
+.strip > div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.strip .k{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--on-ink-muted);font-weight:700}
+.strip .v{font-weight:700;font-size:15px}
+.strip input,.strip select{font:inherit;font-weight:700;font-size:15px;background:transparent;border:0;border-bottom:1px solid #444;color:var(--on-ink);padding:2px 0;width:100%;min-width:0;border-radius:0}
+.strip select option{color:#111;background:#fff}
+.strip input::placeholder{color:#777}
+
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #333;border-radius:3px;overflow:hidden}
+.modes button{background:transparent;color:var(--on-ink-muted);border-radius:0;padding:10px 8px;display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left}
+.modes button b{font-size:15px;letter-spacing:.08em;text-transform:uppercase}
+.modes button small{font-size:12px;font-weight:400;letter-spacing:0}
+.modes button[aria-pressed="true"]{background:var(--gold);color:#111}
+
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-ink)}
+.sec-h{display:flex;flex-direction:column;gap:6px}
+.sec-h h2{font-size:24px;font-weight:700}
+.sec-h h2::after{content:"";display:block;width:36px;height:3px;background:var(--gold);margin-top:6px}
+
+.board{background:var(--ink-2);color:var(--on-ink);border-radius:4px;padding:18px 20px;display:grid;grid-template-columns:1fr auto;gap:6px 14px;align-items:end;border-top:4px solid var(--gold)}
+.board .label{color:var(--on-ink-muted)}
+.total{font-family:var(--display);font-weight:700;font-size:96px;line-height:.82;color:var(--gold)}
+.total small{font-size:28px;color:var(--on-ink-muted);margin-left:4px}
+.board .side{text-align:right}
+.board .side b{font-family:var(--display);font-size:28px;display:block;line-height:1}
+.meter{grid-column:1/-1;position:relative;height:10px;background:#2e2e2e;margin-top:26px}
+.meter .fill{position:absolute;inset:0 auto 0 0;background:var(--gold);transition:width .4s}
+.meter .tick{position:absolute;top:-21px;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--on-ink-muted);white-space:nowrap}
+.meter .tick::after{content:"";position:absolute;left:50%;top:17px;width:2px;height:14px;background:#777}
+.status{grid-column:1/-1;font-size:14px;color:#dcdad3;margin-top:4px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.callrow{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.target{font-family:var(--display);font-weight:700;font-size:70px;line-height:.9}
+.target small{font-size:24px;color:var(--muted);margin-left:4px}
+.pill{display:inline-block;padding:5px 10px;border-radius:3px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:var(--on-ink)}
+.dots{display:flex;gap:6px}
+.dots i{flex:1;height:5px;background:var(--line)}
+.dots i.on{background:var(--gold)}
+.dots i.cur{background:var(--fg)}
+.pts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.pts button{background:var(--bg);color:var(--fg);border:1px solid var(--line);padding:14px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.pts button b{font-size:34px;line-height:1}
+.pts button small{font-size:11px;font-weight:400;color:var(--muted);line-height:1.15;text-align:center}
+.pts button:hover{border-color:var(--gold);background:var(--gold-soft)}
+.key{font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+.key b{color:var(--fg)}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+button{font:inherit;font-weight:700;border:0;border-radius:3px;padding:12px 16px;cursor:pointer;letter-spacing:.04em}
+.primary{background:var(--gold);color:#111;font-size:15px;text-transform:uppercase;letter-spacing:.1em}
+.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+.flash{border-radius:3px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#fff;animation:pop .35s ease}
+.flash b{font-family:var(--display);font-size:42px;line-height:1}
+.flash span{font-size:14px}
+@keyframes pop{from{transform:scale(.96);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none}.meter .fill{transition:none}}
+
+.grid{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line);font-size:14px}
+th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg);font-weight:700;background:var(--gold-soft)}
+tbody tr:nth-child(odd) td{background:color-mix(in srgb,var(--bg) 55%,transparent)}
+td.l,th.l{text-align:left}
+tr.me td{box-shadow:inset 0 -2px 0 var(--gold);font-weight:700}
+.chip{display:inline-block;min-width:30px;padding:3px 6px;border-radius:3px;color:#fff;font-weight:700;font-size:16px}
+.c4{background:var(--p4)}.c3{background:var(--p3)}.c2{background:var(--p2)}.c1{background:var(--p1)}.c0{background:var(--p0)}
+.cx{background:transparent;color:var(--muted);border:1px dashed var(--line)}
+.up{color:var(--p3);font-weight:700}.down{color:var(--p0);font-weight:700}
+.muted{color:var(--muted);font-size:13px}
+.rules{font-size:14px;color:var(--muted)}
+.rules summary{cursor:pointer;font-weight:700;color:var(--fg)}
+.rules ul{padding-left:18px;margin:8px 0 0}
+.rules p{margin:8px 0 0}
+.done{text-align:center;padding:10px 0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.done h2{font-size:48px;color:var(--gold-ink)}
+.done .hc{font-size:18px;font-weight:700}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+.cta{background:var(--ink);color:var(--on-ink);border-radius:4px;padding:18px 20px;display:flex;flex-direction:column;gap:6px;border-bottom:4px solid var(--gold)}
+.cta b{font-size:20px;letter-spacing:.04em;text-transform:uppercase;line-height:1.1}
+.cta b span{color:var(--gold)}
+.cta small{color:var(--on-ink-muted);font-size:12px;letter-spacing:.08em}
+@media (max-width:380px){.pts button small{display:none}}
+.send{display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:16px;text-align:left}
+.send textarea{font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;width:100%;min-width:0;resize:vertical;padding:10px 12px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--fg)}
+.linkbtn{display:inline-flex;align-items:center;justify-content:center;font-weight:700;border-radius:3px;padding:12px 16px;text-decoration:none;letter-spacing:.04em}
+.sendbtn{font-size:17px;text-transform:uppercase;letter-spacing:.1em;padding:15px 16px;text-align:center}
+.sel{user-select:all;color:var(--fg)}
+.notes{display:flex;flex-direction:column;gap:6px}
+.notes textarea{font:inherit;font-size:15px;width:100%;min-width:0;resize:vertical;padding:10px 12px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--fg)}
+.howto{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--gold);border-radius:4px}
+.howto summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px}
+.howto summary::-webkit-details-marker{display:none}
+.howto summary b{font-size:18px;letter-spacing:.06em;text-transform:uppercase}
+.howto summary small{display:block;font-size:13px;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none}
+.howto summary .chev{flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--gold);display:grid;place-items:center;font-weight:700;transition:transform .2s}
+.howto[open] summary .chev{transform:rotate(180deg)}
+.howto .hb{padding:0 16px 16px;display:flex;flex-direction:column;gap:14px;font-size:15px}
+.howto h3{margin:0 0 6px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-ink)}
+.howto ol,.howto ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.howto table{font-size:14px}
+.howto td,.howto th{text-align:left}
+.howto .aim{font-size:16px;font-weight:700;margin:0}
+@media (prefers-reduced-motion:reduce){.howto summary .chev{transition:none}}
+</style>
+
+<style>
+[hidden]{display:none!important}
+.read{border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:3px;padding:12px 14px;background:var(--bg);display:flex;flex-direction:column;gap:8px}
+.read h3{margin:0;font-size:20px;line-height:1.15}
+.read .facts{display:flex;flex-wrap:wrap;gap:6px}
+.read .facts span{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:3px;padding:3px 7px;background:var(--surface)}
+.read p{margin:0;font-size:14px;color:var(--muted)}
+.linky{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;font-weight:400;font-size:13px;letter-spacing:0;cursor:pointer;align-self:flex-start}
+.mm{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mm button{padding:22px 8px;font-size:22px;text-transform:uppercase;letter-spacing:.08em}
+.mm .made{background:var(--p3);color:#fff}
+.mm .miss{background:var(--surface);color:var(--fg);border:2px solid var(--line)}
+.dots20{display:grid;grid-template-columns:repeat(20,minmax(0,1fr));gap:3px}
+.dots20 i{height:6px;background:var(--line)}
+.dots20 i.y{background:var(--p3)}.dots20 i.n{background:var(--p0)}.dots20 i.cur{background:var(--fg)}
+.pdots{display:inline-flex;gap:4px}
+.pdots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);display:block}
+.pdots i.y{background:var(--p3);border-color:var(--p3)}.pdots i.n{background:var(--p0);border-color:var(--p0)}
+/* ===== Macro Golf brand layer (per Document Brand Guide): Anton + Inter, ink / Macro Yellow / paper / cream, square corners ===== */
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --line:rgba(11,11,11,0.16); --fg:#0B0B0B; --muted:#77715F;
+  --ink:#0B0B0B; --ink-2:#0B0B0B; --on-ink:#F4F1EA; --on-ink-muted:#9C988C;
+  --gold:#FFD900; --gold-ink:#8a7f00; --gold-soft:#F4F1EA; --cream:#F4F1EA; --body:#3B3830;
+  --p4:#1FA855; --p3:#1FA855; --p2:#1FA855; --p1:#F5A800; --p0:#E0352B;
+  --display:"Anton","Arial Narrow",Impact,sans-serif; --text:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+body{background:#FFFFFF;color:#3B3830;font-family:var(--text);font-size:15px;line-height:1.55}
+*{border-radius:0!important}
+h1,h2,h3,.target,.total,.done h2,.hcbig .n{font-family:var(--display)!important;font-weight:400!important;text-transform:uppercase;letter-spacing:-0.3px}
+.label,.eyebrow,.k,th{font-family:var(--text)}
+.label{font-size:11px;font-weight:700;letter-spacing:1.6px;color:#77715F}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:2.4px;color:#8a7f00}
+/* cover */
+.cover{background:#0B0B0B;color:#F4F1EA;padding:22px 22px 18px;gap:16px}
+.cover::before{display:none}
+.brand{align-items:center}
+.brand .logo{height:34px;width:auto;display:block}
+.brand .sub{font-family:var(--text);font-size:10px;font-weight:600;letter-spacing:3px;color:rgba(244,241,234,0.62)}
+.goldbar{width:74px;height:7px;background:#FFD900;order:0}
+.cover h1{font-size:clamp(46px,14vw,68px);line-height:0.94;letter-spacing:-1px;color:#F4F1EA}
+.cover h1 .g{color:#FFD900;font-size:.46em;line-height:1.06;letter-spacing:-0.3px;margin-top:6px}
+.strip{border-top:1px solid rgba(244,241,234,0.18);padding-top:12px;gap:0}
+.strip > div{padding:0 12px;border-left:1px solid rgba(244,241,234,0.18)}
+.strip > div:first-child{padding-left:0;border-left:0}
+.strip .k{font-family:var(--text);font-size:10px;font-weight:700;letter-spacing:1.8px;color:#FFD900}
+.strip .v,.strip input,.strip select{font-family:var(--display);font-weight:400;font-size:20px;text-transform:uppercase;color:#F4F1EA;letter-spacing:-0.3px}
+.strip .v,.strip input,.strip select{font-size:16px;line-height:1.15}
+.strip > div{padding:0 10px}
+.strip input,.strip select{border-bottom:1px solid rgba(244,241,234,0.3)}
+.strip input::placeholder{color:#77715F}
+/* how to play: outlined note with yellow left border */
+.howto{background:#FFFFFF;border:1px solid rgba(11,11,11,0.18);border-left:6px solid #FFD900}
+.howto summary b{font-family:var(--display);font-weight:400;font-size:20px;letter-spacing:-0.3px}
+.howto summary small{font-family:var(--text)}
+.howto summary .chev{background:#0B0B0B;color:#FFD900}
+.howto h3{font-family:var(--text)!important;font-weight:700!important;font-size:11px;letter-spacing:2.4px;color:#8a7f00}
+.howto .aim{font-family:var(--text);font-weight:600;color:#0B0B0B}
+.howto .hb{color:#3B3830}
+/* board: black callout */
+.board{background:#0B0B0B;color:#F4F1EA;border-top:0;border-left:6px solid #FFD900}
+.board .label{color:#FFD900;letter-spacing:1.8px}
+.total{color:#F4F1EA;font-size:92px;line-height:.9}
+.total small{font-family:var(--text);font-weight:700;font-size:13px;color:#9C988C;letter-spacing:1.6px;margin-left:6px}
+.board .side b{font-family:var(--display);font-weight:400;font-size:26px;color:#F4F1EA}
+.meter{background:rgba(244,241,234,0.14)}
+.meter .fill{background:#FFD900}
+.status{font-family:var(--text);color:#F4F1EA;opacity:.85}
+/* cards and section headings */
+.card{background:#FFFFFF;border:1px solid rgba(11,11,11,0.16);padding:20px}
+.sec-h h2{font-size:28px;line-height:1.08;color:#0B0B0B}
+.sec-h h2::after{width:74px;height:6px;background:#FFD900;margin-top:14px}
+.q .qh{font-family:var(--text);font-weight:600;color:#0B0B0B}
+.q .qs,.muted{color:#77715F}
+.rangeRow output{font-family:var(--display);font-weight:400;font-size:24px;color:#0B0B0B}
+.rangeRow input[type=range]{accent-color:#0B0B0B}
+.yn{border:1px solid rgba(11,11,11,0.18)}
+.yn button{font-family:var(--display);font-weight:400;font-size:18px;text-transform:uppercase;color:#77715F;background:#FFFFFF}
+.yn button[aria-pressed="true"]{background:#FFD900;color:#0B0B0B}
+.lvl button{background:#FFFFFF;border:1px solid rgba(11,11,11,0.18);border-left:6px solid rgba(11,11,11,0.18)}
+.lvl button b{font-family:var(--display);font-weight:400;font-size:20px;letter-spacing:-0.3px}
+.lvl button small{font-family:var(--text);color:#3B3830}
+.lvl button .rec{font-family:var(--text);background:#0B0B0B;color:#FFD900;font-size:9px;letter-spacing:1.6px;padding:4px 7px}
+.lvl button[aria-pressed="true"]{border-color:#0B0B0B;border-left-color:#FFD900;background:#F4F1EA}
+/* difficulty tags: cream / yellow / ink tiles */
+.seq i{font-family:var(--display);font-weight:400;font-size:12px}
+.dE{background:#F4F1EA!important;color:#0B0B0B!important;border:1px solid rgba(11,11,11,0.18)}
+.dM{background:#FFD900!important;color:#0B0B0B!important}
+.dH{background:#0B0B0B!important;color:#FFD900!important}
+.diffpill{font-family:var(--text);font-size:10px;letter-spacing:1.6px}
+/* buttons */
+button{font-family:var(--text)}
+.primary{background:#FFD900;color:#0B0B0B;font-family:var(--display)!important;font-weight:400!important;font-size:20px!important;letter-spacing:.5px!important;text-transform:uppercase}
+.ghost{background:#FFFFFF;color:#0B0B0B;border:1px solid rgba(11,11,11,0.18);font-weight:600}
+.linky{color:#77715F}
+/* shot card */
+.target{font-size:76px;line-height:.9;color:#0B0B0B}
+.target small{font-family:var(--text);font-weight:700;font-size:13px;letter-spacing:1.6px;color:#77715F;text-transform:uppercase}
+.shot{background:#F4F1EA;border:0;border-left:6px solid #0B0B0B}
+.shot h3{font-size:24px;line-height:1.15;color:#0B0B0B}
+.shot p{font-family:var(--text);color:#3B3830}
+.shot .facts span{font-family:var(--text);background:#FFFFFF;border:1px solid rgba(11,11,11,0.16);color:#0B0B0B;font-size:10px;letter-spacing:1.3px}
+.leave input{font-family:var(--display);font-weight:400;background:#FFFFFF;border:1px solid rgba(11,11,11,0.3)}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #FFD900;outline-offset:2px}
+/* flash: result colours only */
+.flash{font-family:var(--text)}
+.flash b{font-family:var(--display);font-weight:400}
+/* tables: 2px ink top rule, hairlines */
+table{border-top:2px solid #0B0B0B}
+th{background:#FFFFFF;color:#77715F;font-size:10px;letter-spacing:1.6px;border-bottom:1px solid rgba(11,11,11,0.16)}
+td{border-bottom:1px solid rgba(11,11,11,0.13);color:#3B3830;font-family:var(--text)}
+tbody tr:nth-child(odd) td{background:transparent}
+td b{color:#0B0B0B}
+tr.me td{background:#F4F1EA!important;box-shadow:inset 6px 0 0 -0px transparent;font-weight:700;color:#0B0B0B}
+tr.me td:first-child{box-shadow:inset 6px 0 0 #FFD900}
+.up{color:#1FA855}.down{color:#E0352B}
+.rules{color:#3B3830}
+.rules summary{font-family:var(--text);font-weight:700;color:#0B0B0B}
+/* finish + send */
+.done h2{font-size:64px;color:#0B0B0B}
+.done .hc{font-family:var(--display);font-weight:400;font-size:22px;text-transform:uppercase;color:#8a7f00}
+.send textarea,.notes textarea{background:#FFFFFF;border:1px solid rgba(11,11,11,0.18);font-family:var(--text)}
+.sel{color:#0B0B0B}
+/* footer: black closing band */
+.cta{background:#0B0B0B;border-bottom:0;border-top:7px solid #FFD900}
+.cta b{font-family:var(--display);font-weight:400;font-size:24px;letter-spacing:-0.3px;color:#F4F1EA}
+.cta b span{color:#FFD900}
+.cta small{font-family:var(--text);color:#9C988C;letter-spacing:1.6px}
+/* extra components used across the games */
+.modes{border:1px solid rgba(244,241,234,0.18)}
+.modes button{background:transparent;color:#9C988C}
+.modes button b{font-family:var(--display);font-weight:400;font-size:20px;letter-spacing:-0.3px}
+.modes button small{font-family:var(--text)}
+.modes button[aria-pressed="true"]{background:#FFD900;color:#0B0B0B}
+.pill{font-family:var(--text);font-size:10px;letter-spacing:1.6px;background:#0B0B0B;color:#F4F1EA}
+.pill.fin,.pill.shift{background:#FFD900;color:#0B0B0B}
+.pts button,.strokes button{background:#FFFFFF;border:1px solid rgba(11,11,11,0.18);color:#0B0B0B}
+.pts button b,.strokes button b{font-family:var(--display);font-weight:400}
+.pts button small,.strokes button small{font-family:var(--text);color:#77715F}
+.pts button:hover,.strokes button:hover{background:#F4F1EA;border-color:#0B0B0B}
+.key{font-family:var(--text);color:#77715F}.key b{color:#0B0B0B}
+.dots i{background:#E6E1D3}.dots i.on{background:#FFD900}.dots i.cur{background:#0B0B0B}
+.read{background:#F4F1EA;border:0;border-left:6px solid #0B0B0B}
+.read h3{font-size:22px;line-height:1.15;color:#0B0B0B}
+.read p{font-family:var(--text);color:#3B3830}
+.read .facts span{font-family:var(--text);background:#FFFFFF;border:1px solid rgba(11,11,11,0.16);color:#0B0B0B;font-size:10px;letter-spacing:1.3px}
+.mm .made{background:#0B0B0B;color:#FFD900;font-family:var(--display);font-weight:400;font-size:26px}
+.mm .miss{background:#FFFFFF;color:#0B0B0B;border:1px solid rgba(11,11,11,0.3);font-family:var(--display);font-weight:400;font-size:26px}
+.dots20 i{background:#E6E1D3}.dots20 i.cur{background:#0B0B0B}
+.seg{border:1px solid rgba(11,11,11,0.18)}
+.seg button{font-family:var(--text);background:#FFFFFF;color:#77715F}
+.seg button[aria-pressed="true"]{background:#0B0B0B;color:#FFD900}
+.seg button.lavaBtn[aria-pressed="true"]{background:#E0352B;color:#FFFFFF}
+.seg2{border:1px solid rgba(11,11,11,0.18)}
+.seg2 button{font-family:var(--display);font-weight:400;font-size:18px;background:#FFFFFF;color:#77715F}
+.seg2 button[aria-pressed="true"]{background:#FFD900;color:#0B0B0B}
+.fields input,.fields select,.dists input,.warm input,.bigin,.clubin,.prox input{background:#FFFFFF;border:1px solid rgba(11,11,11,0.3);color:#0B0B0B;font-family:var(--display);font-weight:400}
+.clubin{font-family:var(--text);font-weight:600}
+.preview{font-family:var(--text);color:#77715F}
+.beat .n{font-family:var(--display);font-weight:400;color:#0B0B0B}
+.strikes i{border-color:rgba(244,241,234,0.3)}
+.strikes i.on{background:#E0352B;border-color:#E0352B}
+.unlock{background:#F4F1EA;border:0;border-left:6px solid #FFD900}
+.unlock .dots i{border-color:#0B0B0B}
+.bar{background:#E6E1D3}
+.hcbig .n{color:#0B0B0B}
+.conf i{background:#E6E1D3}.conf i.on{background:#FFD900}
+.flash{color:#FFFFFF}
+.coachsel{font-family:var(--text);font-weight:600;font-size:16px;padding:12px;border:1px solid rgba(11,11,11,0.3);background:#FFFFFF;color:#0B0B0B;width:100%;min-width:0}
+/* ===== Edge to edge: no outer gutters or gaps; each band keeps its own inner padding ===== */
+html{background:#0B0B0B}
+body{padding:0!important;background:#FFFFFF}
+.wrap{max-width:none!important;margin:0!important;gap:0!important}
+.wrap > header,.wrap > section,.wrap > footer{margin:0;border-left:0!important;border-right:0!important;border-top:0;
+  padding-left:max(20px,env(safe-area-inset-left,0px))!important;padding-right:max(20px,env(safe-area-inset-right,0px))!important}
+.wrap > header{padding-top:24px;padding-bottom:20px}
+.wrap > section.card{border-bottom:1px solid rgba(11,11,11,0.16)!important;padding-top:22px;padding-bottom:22px}
+.wrap > details.howto{margin:0;border:0!important;border-bottom:1px solid rgba(11,11,11,0.16)!important;box-shadow:inset 6px 0 0 #FFD900}
+.wrap > details.howto summary,.wrap > details.howto .hb{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.wrap > section.board{border:0!important;box-shadow:inset 6px 0 0 #FFD900;padding-top:20px;padding-bottom:20px}
+.wrap > footer.cta{padding-top:20px;padding-bottom:22px}
+.gate{position:fixed;inset:0;z-index:50;background:#0B0B0B;color:#F4F1EA;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.gate-in{min-height:100%;display:flex;flex-direction:column;gap:18px;padding:max(28px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(28px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));max-width:560px;margin:0 auto}
+.gate .logo{height:34px;width:auto;align-self:flex-start}
+.gate h2{font-family:var(--display);font-weight:400;text-transform:uppercase;letter-spacing:-0.5px;font-size:clamp(40px,12vw,60px);line-height:.95;margin:0;color:#F4F1EA}
+.gate h2 span{display:block;color:#FFD900;font-size:.42em;line-height:1.1;margin-top:6px;letter-spacing:-0.3px}
+.gate .bar{width:74px;height:7px;background:#FFD900}
+.gate .fld{display:flex;flex-direction:column;gap:8px}
+.gate .fld > span{font-family:var(--text);font-weight:700;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#FFD900}
+.gate input,.gate select{font-family:var(--text);font-weight:600;font-size:18px;padding:14px;border:1px solid rgba(244,241,234,0.3);background:#141414;color:#F4F1EA;width:100%;min-width:0;border-radius:0}
+.gate select option{color:#0B0B0B;background:#FFFFFF}
+.gate input::placeholder{color:#77715F}
+.gate .opts{display:grid;gap:8px}
+.gate .opts button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;background:#141414;color:#F4F1EA;border:1px solid rgba(244,241,234,0.25);padding:14px;font-family:var(--text)}
+.gate .opts button b{font-family:var(--display);font-weight:400;font-size:20px;text-transform:uppercase;letter-spacing:-0.3px}
+.gate .opts button small{font-size:13px;color:#9C988C;font-weight:400}
+.gate .opts button[aria-pressed="true"]{background:#FFD900;color:#0B0B0B;border-color:#FFD900}
+.gate .opts button[aria-pressed="true"] small{color:#3B3830}
+.gate .note{font-family:var(--text);font-size:13px;color:#9C988C}
+.gate .go{background:#FFD900;color:#0B0B0B;font-family:var(--display)!important;font-weight:400!important;font-size:22px!important;text-transform:uppercase;letter-spacing:.5px;padding:16px;border:0;margin-top:4px}
+.gate .go:disabled{opacity:.35}
+body.gated{overflow:hidden}
+.board[hidden]{display:none!important}
+</style>
+
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Set up Insanity"><div class="gate-in">
+  <svg class="logo" role="img" aria-label="Macro Golf" viewBox="0 0 1000 540" width="63" height="34"><path id="mgLogoP" fill="#FFD900" fill-rule="evenodd" d="M400 538.9C326 530.5 262.6 470.4 250 396.4C240.3 339.9 255.7 284.9 292.3 245.4L300.7 236.3L295 200.9C291.8 181.4 289.1 164.6 288.8 163.5C288.3 161.1 293.2 150.6 235 278.7C209.4 334.9 188.2 381 187.9 381C187.6 381 165.6 331.7 139 271.5C112.4 211.3 90.3 162.3 90 162.8C89.6 163.2 81.3 209.1 71.4 264.7L53.5 366L26.7 366C1.6 366 -0.1 365.9 0.4 364.2C0.9 362.6 45.4 135.6 63.2 43.8C67.8 20.3 71.7 1 72 1C72.3 1 98.6 60.2 130.5 132.5C162.3 204.8 188.7 263.6 189.1 263.2C189.5 262.8 216.7 203.6 249.6 131.6C297.5 26.9 309.6 1.3 310.2 3.1C310.6 4.4 318.6 49.6 328 103.5C337.4 157.4 345.3 202.1 345.5 202.7C345.8 203.6 347.9 203.1 352.5 201C398.4 180.4 459.4 181.9 502.9 204.6C521 214 542.2 230.7 557.7 247.8L564.8 255.6L546.9 272.8C537.1 282.3 528.7 290 528.3 290C527.8 290 525.5 287.5 523.1 284.5C510.8 269.1 490.7 252.9 474.8 245.5C445.1 231.8 407.3 231.5 375.5 244.7C368.3 247.7 355 255.2 355 256.3C355 256.7 359.3 281.3 364.5 310.9C369.7 340.6 374 365.1 374 365.4C374 365.7 362.2 366 347.7 366L321.4 366L317.1 338.8C311.2 301.6 312 304 308.3 313C297.6 338.6 296 373.3 304 402C315.4 442.5 355.2 479.3 398.3 489.2C412.4 492.5 434 492.2 447.5 488.6C474.8 481.4 500.4 462.1 513.4 438.7C517.3 431.7 522.5 416.9 523.5 409.8L524.1 405L481.8 404.8L439.5 404.5L439.2 380.2L439 356L509.6 356L580.3 356L579.7 374.8C578 430.3 565.2 463.1 532.9 495C498.5 529.1 451.3 544.7 400 538.9ZM651 383.5C617.4 376.3 591.1 352.5 581.4 320.5C577.6 307.9 577.2 281.9 580.8 269.7C588 244.6 607.9 221.6 631.5 210.9C653.4 201 681.3 200.3 704 209.1C725.1 217.2 745.9 237.8 754.9 259.5C765.8 285.6 763.2 318.5 748.5 341.6C736.2 360.9 714.4 376.9 693 382.5C684.1 384.8 659.8 385.4 651 383.5ZM795 294L795 206L808.5 206L822 206L822 281.5L822 357L847.5 357L873 357L873 369.5L873 382L834 382L795 382L795 294ZM898.2 294.2L898.5 206.5L942.2 206.2L986 206L986 218.5L986 231L955.5 231L925 231L925 252L925 273L954.5 273L984 273L984 285.5L984 298L954.5 298L925 298L925 340L925 382L911.5 382L898 382L898.2 294.2ZM686.4 358C724.3 348.3 744.9 305.8 730.1 268.2C723.3 250.9 707.9 236.8 689 230.4C680.3 227.4 659 227.7 649.1 230.9C630.7 237 614 253.7 607.9 272.2C604.7 282 604.4 305.3 607.4 314C613.7 332.4 624.6 345 641.3 353.6C654.2 360.2 671.3 361.9 686.4 358ZM586 182.1C565.8 177.7 547.9 166.4 534.6 149.9C498.3 104.4 515 34.7 568.1 10.1C580.4 4.4 587.5 2.8 603.3 2.3C621.9 1.6 631.3 3.4 646.8 10.7L654 14.1L654 30L654 46L648.8 41.9C641.6 36.5 629 30.4 620.5 28.4C610.9 26.2 593.9 26.9 585.3 30C548.6 42.9 531.3 87.8 549.1 124C554.8 135.4 566.1 146.9 577 152.2C600.1 163.6 625.2 161 646.2 145.1C649.9 142.3 653.2 140 653.5 140C653.8 140 653.9 147.1 653.8 155.8L653.5 171.5L647 174.7C629.6 183.2 604.8 186.2 586 182.1ZM887 182.1C863.5 177 839.1 159.6 827.2 139.4C815.8 120.1 812.1 92.3 818 69.5C826.4 37 855 10.3 888.9 3.5C899.3 1.4 922.1 1.9 931.5 4.5C964.6 13.6 991.7 43.4 997.6 77.2C1005.7 123.4 978.2 167 932.3 180.6C920.2 184.2 899.5 184.9 887 182.1ZM350.4 181.3C354.1 171.8 433.5 3.1 434.1 3.7C434.5 4.1 452.7 44.3 474.5 93C496.4 141.7 514.4 181.8 514.7 182.2C514.9 182.7 508.7 183 500.8 183L486.5 183L477.9 162.7L469.2 142.5L432.5 142.5L395.8 142.5L386.7 162.7L377.5 182.9L363.6 183C351 183 349.8 182.9 350.4 181.3ZM687 92.9L687 4.8L712.8 5.3C741.5 5.8 747.8 6.8 759.5 12.3C770.7 17.7 778.1 26 783 38.5C786.4 47.3 786.5 64.6 783.1 74.3C778.8 86.9 767.8 98.6 756 103.1C753 104.2 749.8 105.5 748.9 105.8C747.7 106.4 753.2 114.5 774.2 143.3C788.9 163.6 801 180.3 801 180.6C801 180.8 793.7 180.9 784.8 180.8L768.6 180.5L743.9 145C723.5 115.8 718.6 109.4 716.5 109.2L714 108.9L714 144.9L714 181L700.5 181L687 181L687 92.9ZM927 156.2C946.1 150 961.9 134.3 968.7 114.8C972.1 105.2 972.9 89 970.6 78C965.7 54.4 946.9 34.7 923.9 28.9C912.4 25.9 895.7 26.5 885.3 30.2C848.6 43.2 831.4 86.7 848.7 123C855.8 137.9 873.7 152.6 890.1 157C899.9 159.7 917.4 159.3 927 156.2ZM458 117.4C458 115.3 433.5 61.1 432.9 61.7C432.2 62.4 407 116.9 407 117.7C407 117.9 418.5 118 432.5 118C446.5 118 458 117.7 458 117.4ZM741.3 83C754.2 79 760.9 68.7 759.8 54.5C758.5 38.4 748.4 31.2 725.8 30.2L714 29.7L714 58L714 86.3L724.2 85.7C730.3 85.4 737.3 84.2 741.3 83Z"/></svg>
+  <div class="bar"></div>
+  <h2>Insanity<span>Before you start</span></h2>
+  <label class="fld"><span>Your name</span><input id="gName" autocomplete="name" placeholder="First and last name"></label>
+  <label class="fld"><span>Target handicap</span><select id="gHc"><option value="">Choose a target</option><option value="Tour">Tour</option><option value="0">Scratch</option><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option></select></label>
+  <button class="go" id="gGo" disabled>Continue</button>
+</div></div>
+<div class="wrap">
+  <header class="cover">
+    <div class="brand"><svg class="logo" role="img" aria-label="Macro Golf" viewBox="0 0 1000 540" width="63" height="34"><use href="#mgLogoP"/></svg><span class="sub">Putting challenge</span></div>
+    <div class="goldbar" style="margin-top:28px"></div>
+    <h1><span>Insanity</span><span class="g">Macro Golf practice game</span></h1>
+    <div class="strip">
+      <div><span class="k">Player</span><input id="player" placeholder="Name" aria-label="Player name"></div>
+      <div><span class="k">Target hc</span>
+        <select id="targetHc" aria-label="Target handicap">
+          <option value="Tour">Tour</option><option value="0">Scratch</option><option value="5">5</option>
+          <option value="10">10</option><option value="15">15</option><option value="20">20</option>
+          <option value="25">25</option><option value="30">30</option>
+        </select></div>
+      <div><span class="k">20 putts</span><span class="v">6–12 ft</span></div>
+    </div>
+  </header>
+
+  <details class="howto" id="howto">
+    <summary><span><b>How to play</b><small>The aim, the setup and how every putt is scored</small></span><span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+    <div class="hb">
+      <p class="aim">Hole as many of the 20 putts as you can. These are the lengths that win and lose matches.</p>
+      <div><h3>The game</h3><ol>
+        <li>5 putts each from 6, 8, 10 and 12 ft, starting at 6 ft and working back.</li>
+        <li>Every putt tells you what to set up: uphill, downhill or flat, and whether it is straight or a small, medium or high break, left to right or right to left. Find that putt on the green before you hit.</li>
+        <li>Full routine on every putt, one ball at a time.</li>
+        <li>Tap Made or Missed after each putt.</li>
+        <li>If the green can't give you the putt described, tap "Can't set this up?" for a different one.</li>
+      </ol></div>
+      <div><h3>Scoring</h3>
+        <table><thead><tr><th>Each putt</th><th>Points</th></tr></thead><tbody>
+          <tr><td>Holed</td><td><b>1</b></td></tr>
+          <tr><td>Missed</td><td><b>0</b></td></tr>
+        </tbody></table>
+        <ul style="margin-top:8px"><li>Maximum 20. A PGA Tour player averages about 10.</li></ul></div>
+      <div><h3>Handicap and report</h3><ul>
+        <li>Every putt has a make rate for each handicap, adjusted for slope and break, so the handicap is worked out from the exact putts you were given.</li>
+        <li>At the end, tap Send to coach to send a short report.</li>
+      </ul></div>
+    </div>
+  </details>
+
+  <section class="board" aria-live="polite">
+    <div>
+      <div class="label">Holed</div>
+      <div class="total tnum"><span id="total">0</span><small>/ 20</small></div>
+    </div>
+    <div class="side">
+      <div class="label">Putt</div><b class="tnum" id="puttNo">1 / 20</b>
+      <div class="label" style="margin-top:8px">Putting like</div><b class="tnum" id="playsLike">–</b>
+    </div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section class="card" id="entry">
+    <div class="callrow">
+      <div>
+        <div class="label" id="puttLbl">Putt 1 of 20</div>
+        <div class="target tnum" id="distTxt">6<small>ft</small></div>
+      </div>
+      <span class="pill" id="parPill">Tour makes 70%</span>
+    </div>
+    <div class="dots20" id="dots"></div>
+    <div class="read" aria-live="polite">
+      <h3 id="readTitle"></h3>
+      <div class="facts" id="readFacts"></div>
+      <p id="readTip"></p>
+      <button class="linky" id="rerollBtn" type="button">Can't set this up? Give me a different putt</button>
+    </div>
+    <div class="mm">
+      <button class="made" id="madeBtn">Made</button>
+      <button class="miss" id="missBtn">Missed</button>
+    </div>
+    <div class="btns"><button class="ghost" id="undo">Undo last putt</button></div>
+    <div id="flash"></div>
+  </section>
+
+  <section class="card" id="finished" hidden>
+    <div class="done">
+      <div class="label">Final score</div>
+      <h2 class="tnum" id="finalTxt">0</h2>
+      <div class="hc" id="finalHc"></div>
+      <p class="muted" id="finalMsg"></p>
+    </div>
+    <div class="send">
+      <div class="sec-h"><span class="eyebrow">Send to coach</span><h2>Session report</h2></div>
+      <label class="notes"><span class="label">Notes for your coach (optional)</span>
+        <textarea id="notes" rows="3" placeholder="How did it feel? Anything you noticed with your start line, speed or routine?"></textarea></label>
+      <label class="notes"><span class="label">Your coach</span>
+        <select id="coachSel" class="coachsel" aria-label="Your coach">
+          <option value="">Choose your coach</option>
+          <option value="jack@macro.golf">Jack Seaman</option>
+          <option value="james@macro.golf">James Palmer</option>
+          <option value="joe@macro.golf">Joe Macro</option>
+          <option value="sam@macro.golf">Sam Bennett</option>
+        </select></label>
+      <a class="primary linkbtn sendbtn" id="sendCoach" href="#">Email my coach</a>
+      <div class="btns">
+        <button class="ghost" id="copyBtn">Copy report</button>
+        <a id="mailBtn" href="#" hidden aria-hidden="true"></a>
+        <button class="ghost" id="showBtn" aria-expanded="false">Preview report</button>
+      </div>
+      <textarea id="report" readonly rows="12" aria-label="Session report" hidden></textarea>
+      <p class="muted" style="margin:0" id="coachNote">Choose your coach, then tap Email my coach.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sec-h"><span class="eyebrow">01 / Putts</span><h2>Scorecard</h2></div>
+    <div class="grid"><table id="card"></table></div>
+    <p class="muted" id="cardNote"></p>
+  </section>
+
+  <section class="card">
+    <div class="sec-h"><span class="eyebrow">02 / Benchmarks</span><h2>Handicap guide</h2></div>
+    <p class="muted" style="margin:0">Make rates on a flat, gentle-breaking putt, and the expected score out of 20 for an average set of putts.</p>
+    <div class="grid"><table id="bench"></table></div>
+    <details class="rules">
+      <summary>How these numbers were worked out</summary>
+      <p>PGA Tour make rates come from ShotLink: about 70% from 6 ft, 53% from 8 ft, 41% from 10 ft and 30% from 12 ft.</p>
+      <p>Amateur rates come from Shot Scope data by handicap. For example, from 6–9 ft scratch golfers hole 49%, 10 handicaps 39% and 20 handicaps 33%. From 9–12 ft it is 34%, 26% and 18%. Each exact distance was read off between those bands.</p>
+      <p>Each putt is then adjusted: uphill putts are about 10% easier and downhill putts about 15% harder; a straight putt is about 15% easier and a high break about 15% harder. Your expected score is built from the exact 20 putts you were given, so a tough set counts for more.</p>
+      <p>20 putts still varies a lot from one session to the next, so judge the average over several sessions.</p>
+    </details>
+    <div class="confirm" id="newWrap"></div>
+  </section>
+
+  <footer class="cta">
+    <b>Six to twelve. <span>Hole them all.</span></b>
+    <small>COPYRIGHT MACRO GOLF STUDIOS LTD · MACRO.GOLF</small>
+  </footer>
+</div>
+
+<script>
+var DISTS=[6,8,10,12], PER=5, TOTAL=20;
+/* Make % on a neutral putt. Tour: ShotLink. Amateurs: Shot Scope bands interpolated to each distance. */
+var RATE={Tour:[70.2,52.9,41.3,30.1],"0":[62.5,46.5,36.5,29],"5":[55.5,42.3,35.7,28],"10":[52,36.8,28.2,23.3],
+  "15":[47.5,33.7,24.3,20],"20":[44,30.5,20.5,16.7],"25":[39,27.8,19.2,15.3],"30":[35,25,17,14]};
+var HCS=["Tour","0","5","10","15","20","25","30"];
+var HCNUM={Tour:-5,"0":0,"5":5,"10":10,"15":15,"20":20,"25":25,"30":30};
+var hcName=h=>h==="Tour"?"Tour":h==="0"?"Scratch":h+" hc";
+var SLOPE_M={Uphill:1.1,Flat:1.05,Downhill:0.85};
+var BRK_M={Straight:1.15,"Small break":1.05,"Medium break":0.95,"High break":0.85};
+var SLOPES=["Uphill","Uphill","Downhill","Downhill","Flat"];
+var BREAKS=["Left to right","Right to left","Left to right","Right to left","Straight"];
+var AMTS=["Small break","Medium break","High break"];
+var pickR=a=>a[Math.floor(Math.random()*a.length)];
+function makeRead(){let sl=pickR(SLOPES),br=pickR(BREAKS);if(sl==="Flat"&&br==="Straight")br=pickR(["Left to right","Right to left"]);return {slope:sl,brk:br,amt:br==="Straight"?null:pickR(AMTS)}}
+var rKey=r=>r.slope+r.brk+(r.amt||"");
+function makePlan(){const p=[];DISTS.forEach(d=>{for(let i=0;i<PER;i++){let r;do{r=makeRead()}while(p.length&&rKey(r)===rKey(p[p.length-1]));p.push({d,...r})}});return p}
+function prob(h,pt){const p=RATE[h][DISTS.indexOf(pt.d)]/100*SLOPE_M[pt.slope]*BRK_M[pt.amt||"Straight"];return Math.min(0.97,p)}
+function readTxt(r){return `${r.slope.toLowerCase()}, ${r.brk==="Straight"?"straight":r.amt.toLowerCase()+" "+r.brk.toLowerCase()}`}
+function readTip(r){
+  const pace=r.slope==="Downhill"?"Downhill: die it at the hole, as anything firm will run well past.":r.slope==="Uphill"?"Uphill: be positive and firm, as this is one to attack.":"Flat: a normal pace, finishing a foot past.";
+  if(r.brk==="Straight")return pace+" Straight putt: start it at the hole.";
+  return pace+` Start it ${r.amt==="Small break"?"just":r.amt==="Medium break"?"well":"a long way"} ${r.brk==="Left to right"?"left":"right"} of the hole and let it feed in.`;
+}
+
+var $=id=>document.getElementById(id);
+var S;
+function blank(){return {player:"",target:"10",plan:makePlan(),res:[],notes:""}}
+function save(){try{localStorage.setItem("insanity",JSON.stringify(S))}catch(e){}}
+function load(){try{const v=JSON.parse(localStorage.getItem("insanity"));if(v&&v.plan&&v.res)return v}catch(e){}return null}
+var fmt=x=>(Math.round(x*10)/10).toFixed(1);
+var sum=a=>a.reduce((x,y)=>x+y,0);
+var n=()=>S.res.length;
+var made=()=>sum(S.res);
+function expSoFar(h,k=n()){return sum(S.plan.slice(0,k).map(pt=>prob(h,pt)))}
+function playsLike(pts,k){
+  if(!k)return null;const v=HCS.map(h=>({h,v:expSoFar(h,k)}));
+  if(pts>=v[0].v)return"Tour+";
+  if(pts<=v[v.length-1].v)return"30+ hc";
+  for(let i=0;i<v.length-1;i++){const a=v[i],b=v[i+1];if(pts<=a.v&&pts>=b.v){const t=(a.v-pts)/((a.v-b.v)||1),hc=Math.round(HCNUM[a.h]+t*(HCNUM[b.h]-HCNUM[a.h]));return hc<0?"+"+(-hc):hc===0?"Scratch":hc+" hc"}}
+  return null;
+}
+function avgDraw(h){let t=0;DISTS.forEach((d,i)=>{const base=RATE[h][i]/100;t+=PER*base*0.99*0.99});return t}
+
+function renderBoard(){
+  const k=n(),m=made();
+  $("total").textContent=m;
+  $("puttNo").textContent=k>=TOTAL?"20 / 20":`${k+1} / 20`;
+  $("playsLike").textContent=playsLike(m,k)||"–";
+  const full=expSoFar(S.target,TOTAL),now=expSoFar(S.target),d=m-now;
+  let msg;
+  if(!k)msg=`${hcName(S.target)} would expect to hole ${fmt(full)} of these 20 putts. Tour would expect ${fmt(expSoFar("Tour",TOTAL))}.`;
+  else if(k>=TOTAL)msg=m>=full?`Beat ${hcName(S.target)} (${fmt(full)}) by ${fmt(m-full)}.`:`${fmt(full-m)} short of ${hcName(S.target)} (${fmt(full)}).`;
+  else msg=`${d>=0?fmt(d)+" ahead of":fmt(-d)+" behind"} ${hcName(S.target)} with ${TOTAL-k} putt${TOTAL-k>1?"s":""} left.`;
+  $("status").textContent=msg;
+}
+function renderEntry(){
+  const k=n(),done=k>=TOTAL;
+  $("entry").hidden=done;$("finished").hidden=!done;
+  $("dots").innerHTML=S.plan.map((_,i)=>`<i class="${i<k?(S.res[i]?"y":"n"):i===k?"cur":""}"></i>`).join("");
+  if(done){
+    const m=made(),full=expSoFar(S.target,TOTAL),pl=playsLike(m,TOTAL);
+    $("finalTxt").textContent=m+" / 20";
+    $("finalHc").textContent="Putting like: "+(pl||"–");
+    const msg=`${m>=full?fmt(m-full)+" above":fmt(full-m)+" below"} ${hcName(S.target)} on this set of putts. Send your session report to your coach below.`;
+    $("finalMsg").textContent=S.player?S.player+", "+msg:msg[0].toUpperCase()+msg.slice(1);
+    if(document.activeElement!==$("notes"))$("notes").value=S.notes||"";
+    refreshReport();return;
+  }
+  const pt=S.plan[k];
+  $("puttLbl").textContent=`Putt ${k+1} of 20`;
+  $("distTxt").innerHTML=`${pt.d}<small>ft</small>`;
+  $("parPill").textContent=`${hcName(S.target)}: ${Math.round(prob(S.target,pt)*100)}%`;
+  $("readTitle").textContent=`${pt.d} ft · ${pt.slope.toLowerCase()} putt`;
+  $("readFacts").innerHTML=[pt.slope,pt.brk==="Straight"?"Straight":"Breaks "+pt.brk.toLowerCase(),pt.amt].filter(Boolean).map(x=>`<span>${x}</span>`).join("");
+  $("readTip").textContent=readTip(pt)+` Tour holes this ${Math.round(prob("Tour",pt)*100)}% of the time.`;
+}
+function renderCard(){
+  let h=`<thead><tr><th class="l">Distance</th><th>Putts</th><th>Holed</th><th>${hcName(S.target)}</th><th>Tour</th></tr></thead><tbody>`;
+  DISTS.forEach((d,j)=>{
+    const idx=[0,1,2,3,4].map(i=>j*PER+i),done=idx.filter(i=>i<n());
+    const dots=idx.map(i=>`<i class="${i<n()?(S.res[i]?"y":"n"):""}" title="${readTxt(S.plan[i])}"></i>`).join("");
+    const m=sum(done.map(i=>S.res[i])),eT=sum(idx.map(i=>prob(S.target,S.plan[i]))),eTour=sum(idx.map(i=>prob("Tour",S.plan[i])));
+    h+=`<tr><td class="l"><b>${d} ft</b></td><td><span class="pdots">${dots}</span></td><td><b>${done.length?m+"/"+done.length:"–"}</b></td><td>${fmt(eT)}</td><td>${fmt(eTour)}</td></tr>`;
+  });
+  h+=`<tr><td class="l"><b>Total</b></td><td></td><td><b>${n()?made()+"/"+n():"–"}</b></td><td>${fmt(expSoFar(S.target,TOTAL))}</td><td>${fmt(expSoFar("Tour",TOTAL))}</td></tr></tbody>`;
+  $("card").innerHTML=h;
+  const k=n();
+  if(k){const up=S.plan.slice(0,k).map((p,i)=>({p,r:S.res[i]}));
+    const rate=f=>{const m=up.filter(x=>f(x.p));return m.length?Math.round(sum(m.map(x=>x.r))/m.length*100)+"% ("+m.length+")":"–"};
+    $("cardNote").textContent=`Uphill ${rate(p=>p.slope==="Uphill")} · downhill ${rate(p=>p.slope==="Downhill")} · left to right ${rate(p=>p.brk==="Left to right")} · right to left ${rate(p=>p.brk==="Right to left")}`;
+  }else $("cardNote").textContent="Expected makes are for this exact set of putts.";
+}
+function renderBench(){
+  let h=`<thead><tr><th class="l">Handicap</th>${DISTS.map(d=>`<th>${d} ft</th>`).join("")}<th>Out of 20</th></tr></thead><tbody>`;
+  HCS.forEach(k=>{h+=`<tr class="${k===S.target?"me":""}"><td class="l">${hcName(k)}</td>${RATE[k].map(r=>`<td>${Math.round(r)}%</td>`).join("")}<td><b>${fmt(avgDraw(k))}</b></td></tr>`});
+  $("bench").innerHTML=h+"</tbody>";
+}
+function renderNew(){
+  $("newWrap").innerHTML=`<button class="ghost" id="newBtn">New game</button>`;
+  $("newBtn").onclick=()=>{
+    if(!n()||n()>=TOTAL){newGame();return}
+    $("newWrap").innerHTML=`<span>Clear this game?</span><button class="primary" id="yes">Yes, new game</button><button class="ghost" id="no">Cancel</button>`;
+    $("yes").onclick=newGame;$("no").onclick=renderNew;
+  };
+}
+function renderAll(){renderBoard();renderEntry();renderCard();renderBench();renderNew()}
+function newGame(){S.plan=makePlan();S.res=[];S.notes="";$("flash").innerHTML="";save();renderAll();window.scrollTo({top:0,behavior:"smooth"})}
+function enter(r){
+  if(n()>=TOTAL)return;const pt=S.plan[n()];S.res.push(r?1:0);save();
+  $("flash").innerHTML=`<div class="flash ${r?"c4":"c0"}"><span>${pt.d} ft · ${readTxt(pt)}<br>${r?"Holed":"Missed"}</span><b>${r?"+1":"0"}</b></div>`;
+  renderAll();
+}
+function undo(){if(!n())return;S.res.pop();save();$("flash").innerHTML="";renderAll()}
+
+var COACH_EMAIL="jack@macro.golf", COACH_WA="447590387896";
+function buildReport(){
+  const m=made(),full=expSoFar(S.target,TOTAL),pl=playsLike(m,TOTAL);
+  const by=DISTS.map((d,j)=>({d,m:sum(S.res.slice(j*PER,j*PER+PER)),e:sum(S.plan.slice(j*PER,j*PER+PER).map(p=>prob(S.target,p)))}));
+  const best=by.slice().sort((a,b)=>(b.m-b.e)-(a.m-a.e))[0],worst=by.slice().sort((a,b)=>(a.m-a.e)-(b.m-b.e))[0];
+  const all=S.plan.map((p,i)=>({p,r:S.res[i]}));
+  const rate=f=>{const x=all.filter(o=>f(o.p));return x.length?{v:sum(x.map(o=>o.r))/x.length,n:x.length}:null};
+  const up=rate(p=>p.slope==="Uphill"),dn=rate(p=>p.slope==="Downhill"),lr=rate(p=>p.brk==="Left to right"),rl=rate(p=>p.brk==="Right to left"),big=rate(p=>p.amt==="High break"),st=rate(p=>p.brk==="Straight"||p.amt==="Small break");
+  const pc=x=>Math.round(x*100)+"%";
+  const trends=[];
+  if(lr&&rl&&Math.abs(lr.v-rl.v)>=0.2)trends.push(`Holes more ${lr.v>rl.v?"left to right":"right to left"} (${pc(Math.max(lr.v,rl.v))} vs ${pc(Math.min(lr.v,rl.v))}).`);
+  if(up&&dn&&Math.abs(up.v-dn.v)>=0.2)trends.push(`${up.v>dn.v?"Better uphill than downhill":"Better downhill than uphill"} (${pc(Math.max(up.v,dn.v))} vs ${pc(Math.min(up.v,dn.v))}).`);
+  if(big&&st&&st.v-big.v>=0.3)trends.push(`High-break putts are costing most (${pc(big.v)} holed).`);
+  if(!trends.length)trends.push("Make rate held steady across slopes and breaks.");
+  const L=[];
+  L.push("MACRO GOLF · INSANITY");
+  L.push(`${S.player||"Player"} · ${new Date().toLocaleDateString("en-GB")}`);
+  L.push("");
+  L.push(`Score: ${m} / 20 · putting like ${pl||"–"}`);
+  L.push(`${m>=full?"Beat":"Missed"} ${hcName(S.target)} (expected ${fmt(full)}) · Tour expected ${fmt(expSoFar("Tour",TOTAL))}`);
+  L.push(`6 ft ${by[0].m}/5 · 8 ft ${by[1].m}/5 · 10 ft ${by[2].m}/5 · 12 ft ${by[3].m}/5`);
+  L.push("");
+  L.push(`Best: ${best.d} ft · Weakest: ${worst.d} ft`);
+  L.push("");
+  L.push("Trends");
+  trends.slice(0,2).forEach(x=>L.push("• "+x));
+  const notes=(S.notes||"").trim();
+  if(notes){L.push("");L.push("Player notes: "+notes)}
+  return L.join("\n");
+}
+function refreshReport(){
+  const rep=buildReport();$("report").value=rep;
+  $("mailBtn").href="mailto:"+COACH_EMAIL+"?subject="+encodeURIComponent("Insanity session report: "+(S.player||"Player")+", "+made()+" / 20")+"&body="+encodeURIComponent(rep);
+}
+
+$("madeBtn").addEventListener("click",()=>enter(true));
+$("missBtn").addEventListener("click",()=>enter(false));
+$("undo").addEventListener("click",undo);
+$("rerollBtn").addEventListener("click",()=>{const k=n();if(k>=TOTAL)return;const old=S.plan[k];let r;do{r=makeRead()}while(rKey(r)===rKey(old));S.plan[k]={d:old.d,...r};save();renderAll()});
+$("player").addEventListener("input",e=>{S.player=e.target.value;save();if(n()>=TOTAL)refreshReport()});
+$("targetHc").addEventListener("change",e=>{S.target=e.target.value;save();renderAll()});
+$("notes").addEventListener("input",e=>{S.notes=e.target.value;save();refreshReport()});
+$("showBtn").addEventListener("click",()=>{const r=$("report"),open=r.hidden;r.hidden=!open;$("showBtn").setAttribute("aria-expanded",String(open));$("showBtn").textContent=open?"Hide report":"Preview report"});
+$("copyBtn").addEventListener("click",()=>{
+  const ta=$("report"),done=()=>{$("copyBtn").textContent="Copied";setTimeout(()=>{$("copyBtn").textContent="Copy report"},2000)};
+  const fallback=()=>{ta.hidden=false;ta.focus();ta.select();$("copyBtn").textContent="Selected: press copy"};
+  try{navigator.clipboard.writeText(ta.value).then(done,fallback)}catch(e){fallback()}
+});
+
+S=load()||blank();
+$("player").value=S.player||"";$("targetHc").value=S.target;
+renderAll();
+
+/* ---------- Coach picker: email only ---------- */
+(function(){
+  const sel=$("coachSel"),btn=$("sendCoach"),note=$("coachNote");
+  try{const v=localStorage.getItem("macroCoach");if(v)sel.value=v}catch(e){}
+  const addr=()=>sel.value;
+  function sync(){
+    const mb=$("mailBtn");const base=mb.getAttribute("href")||"#";
+    btn.href=addr()&&base.startsWith("mailto:")?base.replace(/^mailto:[^?]*/,"mailto:"+addr()):"#";
+    note.innerHTML=addr()?`Tapping the button also copies your report. If your email doesn't open, paste it into a new email to <b class="sel">${addr()}</b>.`:"Choose your coach, then tap Email my coach.";
+  }
+  sel.addEventListener("change",()=>{try{localStorage.setItem("macroCoach",sel.value)}catch(e){}sync()});
+  new MutationObserver(sync).observe($("mailBtn"),{attributes:true,attributeFilter:["href"]});
+  btn.addEventListener("click",e=>{
+    if(!addr()){e.preventDefault();note.textContent="Choose your coach first.";sel.focus();return}
+    sync();const ta=$("report");ta.hidden=false;
+    const ok=()=>{note.innerHTML=`Report copied. If your email didn't open, start a new email to <b class="sel">${addr()}</b> and paste it in.`};
+    const fb=()=>{ta.focus();ta.select();note.innerHTML=`Copy the report below, then paste it into a new email to <b class="sel">${addr()}</b>.`};
+    try{navigator.clipboard.writeText(ta.value).then(ok,fb)}catch(err){fb()}
+  });
+  sync();
+})();
+
+/* ---------- First screen: name, target handicap and difficulty are required ---------- */
+(function(){
+  const KEY="macroGate_ins",LV={},hasT=true,hasL=Object.keys(LV).length>0;
+  let saved={};try{saved=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
+  const g=$("gate"),nm=$("gName"),hc=hasT?$("gHc"):null,go=$("gGo");
+  let lvl=saved.lvl||"";
+  const locked=()=>{try{return false}catch(e){return false}};
+  nm.value=saved.name||"";if(hc)hc.value=saved.hc||"";
+  function paint(){
+    if(hasL){const lk=locked();if(lk){try{lvl=''}catch(e){}}
+      document.querySelectorAll("#gLvl button").forEach(b=>{b.setAttribute("aria-pressed",String(b.dataset.v===lvl));b.disabled=lk});
+      $("gLvlNote").hidden=!lk}
+    go.disabled=!(nm.value.trim()&&(!hasT||hc.value)&&(!hasL||lvl||locked()));
+  }
+  nm.addEventListener("input",paint);if(hc)hc.addEventListener("change",paint);
+  if(hasL)document.querySelectorAll("#gLvl button").forEach(b=>b.addEventListener("click",()=>{if(locked())return;lvl=b.dataset.v;paint()}));
+  go.addEventListener("click",()=>{
+    const p=$("player");p.value=nm.value.trim();p.dispatchEvent(new Event("input",{bubbles:true}));
+    if(hasT){const t=$("targetHc");t.value=hc.value;t.dispatchEvent(new Event("change",{bubbles:true}))}
+    if(hasL&&!locked()&&LV[lvl])$(LV[lvl]).click();
+    try{localStorage.setItem(KEY,JSON.stringify({name:nm.value.trim(),hc:hc?hc.value:"",lvl}))}catch(e){}
+    g.hidden=true;document.body.classList.remove("gated");window.scrollTo(0,0);
+  });
+  document.body.classList.add("gated");paint();setTimeout(()=>nm.focus(),50);
+})();
+
+/* ---------- Live board only once the game has started ---------- */
+function boardVis(){const b=document.querySelector(".board");if(b)b.hidden=!(S.res.length>0)}
+{const _ra=renderAll;renderAll=function(){_ra();boardVis()}}
+boardVis();
+</script>
+<style>
+.mgs-slot{display:flex;flex-direction:column;gap:10px}
+.mgs-slot:empty{display:none}
+.mgs-win{background:#0B0B0B;color:#F4F1EA;border-left:6px solid #FFD900;padding:14px;display:flex;gap:14px;align-items:flex-start}
+.mgs-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.mgs-thumb{flex-shrink:0;width:84px;padding:0;border:0;background:transparent;cursor:pointer;transform:rotate(-3deg);margin-top:4px}
+.mgs-thumb img{display:block;width:100%;height:auto;border:2px solid #FFD900;box-shadow:0 8px 18px rgba(0,0,0,.5)}
+.mgs-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mgs-tag{background:#FFD900;color:#0B0B0B;font-weight:800;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;padding:4px 8px}
+.mgs-x{background:transparent;border:0;color:#9C988C;font:inherit;font-size:12px;font-weight:600;cursor:pointer;min-height:36px;padding:0 4px}
+.mgs-big{font-family:'Anton',Impact,'Arial Narrow Bold',sans-serif;text-transform:uppercase;font-size:30px;line-height:1.02;color:#F4F1EA}
+.mgs-big span{color:#FFD900}
+.mgs-win p{margin:0;font-size:13.5px;color:#9C988C}
+.mgs-go{border:0;background:#FFD900;color:#0B0B0B;font-family:'Anton',Impact,'Arial Narrow Bold',sans-serif;text-transform:uppercase;font-size:17px;padding:12px 14px;min-height:50px;cursor:pointer;margin-top:4px;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:10px;animation:mgsPulse 1.8s ease-out 4}
+@keyframes mgsPulse{0%{box-shadow:0 0 0 0 rgba(255,217,0,.75)}70%{box-shadow:0 0 0 14px rgba(255,217,0,0)}100%{box-shadow:0 0 0 0 rgba(255,217,0,0)}}
+@media (prefers-reduced-motion:reduce){.mgs-go{animation:none}}
+.mgs-sheet{position:fixed;inset:0;z-index:50;background:rgba(11,11,11,.97);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;
+  padding:calc(12px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.mgs-sheet[hidden]{display:none!important}
+.mgs-in{width:100%;max-width:440px;display:flex;flex-direction:column;gap:12px;color:#F4F1EA;font-family:'Inter',system-ui,sans-serif}
+.mgs-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.mgs-hero{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.mgs-hero b{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:34px;line-height:1;color:#FFD900}
+.mgs-hero p{margin:0;font-size:14px;color:#F4F1EA}
+.mgs-close{background:transparent;border:1px solid rgba(244,241,234,.3);color:#F4F1EA;font:inherit;font-weight:600;font-size:14px;min-height:40px;padding:0 14px;cursor:pointer}
+.mgs-prev{display:flex;justify-content:center}
+.mgs-prev canvas,.mgs-prev img{display:block;max-width:100%;max-height:58vh;width:auto;height:auto;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.mgs-prev canvas{max-height:58vh}
+.mgs-ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mgs-photo{position:relative;background:#F4F1EA;color:#0B0B0B;font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:16px;padding:10px 14px;min-height:44px;display:inline-flex;align-items:center;cursor:pointer}
+.mgs-photo input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.mgs-seg{display:inline-flex;border:1px solid rgba(244,241,234,.4)}
+.mgs-seg button{background:transparent;border:0;color:#F4F1EA;font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:15px;padding:0 12px;min-height:42px;cursor:pointer}
+.mgs-seg button[aria-pressed="true"]{background:#F4F1EA;color:#0B0B0B}
+.mgs-hide{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#9C988C;min-height:44px;cursor:pointer}
+.mgs-hide[hidden]{display:none}
+.mgs-hide input{width:20px;height:20px;accent-color:#FFD900}
+.mgs-share{border:0;background:#FFD900;color:#0B0B0B;font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:22px;min-height:58px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.mgs-apps{margin:-6px 0 0;text-align:center;font-size:12.5px;color:#9C988C}
+.mgs-confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+.mgs-save{background:transparent;border:1px solid rgba(244,241,234,.35);color:#F4F1EA;font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:17px;min-height:46px;cursor:pointer}
+.mgs-st{margin:0;font-size:13px;color:#9C988C;min-height:1.2em}
+.mgs-sheet :focus-visible,.mgs-win :focus-visible{outline:3px solid #FFD900;outline-offset:2px}
+</style>
+<style>
+.ux-hid{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+.ux-rpe{width:100%;min-width:0;height:44px;border:1px solid rgba(11,11,11,.18);background:#fff;font-family:'Anton',Impact,'Arial Narrow Bold',sans-serif;font-size:17px;color:#0B0B0B;cursor:pointer;padding:0 4px;text-transform:uppercase}
+.ux-rpe:not(.on){color:#a7a294}
+tr.done .ux-rpe{background:#F4F1EA}
+.ux-chiprow td{padding:0 0 10px!important;border-bottom:0!important}
+.ux-chips{display:flex;flex-wrap:wrap;gap:6px;background:#0B0B0B;padding:8px}
+.ux-chip{flex:1 0 auto;min-width:46px;min-height:44px;border:0;background:#1f1e1b;color:#F4F1EA;font-family:'Anton',Impact,sans-serif;font-size:18px;cursor:pointer;padding:0 8px}
+.ux-chip.on,.ux-chip:active{background:#FFD900;color:#0B0B0B}
+.ux-help td{padding:2px 6px 10px 0!important;border-bottom:1px solid rgba(11,11,11,.13)}
+.ux-help td.ux-gap{padding:0!important}
+.ux-hbox{display:flex;flex-wrap:wrap;gap:6px;align-items:stretch}
+.ux-step{min-width:56px;min-height:38px;border:1px solid #0B0B0B;background:#fff;color:#0B0B0B;font-family:'Anton',Impact,sans-serif;font-size:16px;cursor:pointer;padding:0 8px}
+.ux-same{min-height:38px;border:0;background:#0B0B0B;color:#FFD900;font-weight:700;font-size:11.5px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;padding:0 10px;white-space:nowrap;font-family:'Inter',system-ui,sans-serif}
+.ux-bests-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;border:2px solid #0B0B0B;background:#fff;color:#0B0B0B;font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:17px;cursor:pointer}
+.ux-done{position:fixed;inset:0;z-index:45;background:rgba(11,11,11,.97);overflow-y:auto;display:flex;justify-content:center;align-items:flex-start;
+  padding:calc(24px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.ux-done-in{width:100%;max-width:460px;display:flex;flex-direction:column;gap:14px;color:#F4F1EA;font-family:'Inter',system-ui,sans-serif}
+.ux-kick{font-weight:700;font-size:12px;letter-spacing:2.4px;text-transform:uppercase;color:#FFD900}
+.ux-h{font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:40px;line-height:.98;color:#F4F1EA;margin-top:6px}
+.ux-bar{width:74px;height:6px;background:#FFD900}
+.ux-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.ux-cells{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:rgba(244,241,234,.18);border:1px solid rgba(244,241,234,.18)}
+.ux-cells>div{background:#0B0B0B;padding:14px}
+.ux-cells span,.ux-next span{display:block;font-weight:700;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:#FFD900}
+.ux-cells b{display:block;font-family:'Anton',Impact,sans-serif;font-weight:400;font-size:34px;line-height:1;margin-top:8px;color:#F4F1EA}
+.ux-next{border-left:6px solid #FFD900;background:#1a1916;padding:12px 14px}
+.ux-next b{display:block;font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:20px;line-height:1.1;margin-top:6px}
+.ux-btn{min-height:52px;border:1px solid rgba(244,241,234,.35);background:transparent;color:#F4F1EA;font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:19px;cursor:pointer;padding:0 16px}
+.ux-btn.y{background:#FFD900;border-color:#FFD900;color:#0B0B0B}
+.ux-close{background:transparent;border:1px solid rgba(244,241,234,.3);color:#F4F1EA;font:inherit;font-weight:600;font-size:14px;min-height:40px;padding:0 14px;cursor:pointer;font-family:'Inter',system-ui,sans-serif}
+.ux-best{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(244,241,234,.14)}
+.ux-bn{flex:1;min-width:0}
+.ux-bn b{display:block;font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:19px;line-height:1.1}
+.ux-bn span{display:block;font-size:13px;color:#9C988C;margin-top:4px}
+.ux-bn em{font-style:normal;color:#FFD900;font-weight:600}
+.ux-spark{width:120px;height:36px;flex-shrink:0}
+.ux-empty{color:#9C988C;margin:0}
+.ux-a2hs{position:fixed;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:40;background:#0B0B0B;color:#F4F1EA;border-top:4px solid #FFD900;padding:14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 10px 30px rgba(0,0,0,.4);font-family:'Inter',system-ui,sans-serif;max-width:520px;margin:0 auto}
+.ux-a2hs img{width:52px;height:52px;flex-shrink:0}
+.ux-a2hs-t{flex:1;min-width:0;font-size:13.5px;color:#d9d5cb}
+.ux-a2hs-t>b{display:block;font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:18px;color:#FFD900;margin-bottom:4px}
+.ux-a2hs-t svg{vertical-align:-2px}
+.ux-a2hs-b{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.ux-a2hs .ux-btn{min-height:40px;font-size:16px}
+.ux-pbtab{position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:37;display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 16px;border:0;border-top:3px solid #FFD900;background:#0B0B0B;color:#FFD900;font-family:'Anton',Impact,sans-serif;font-size:17px;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.35)}
+.ux-pbtab:focus-visible{outline:3px solid #FFD900;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.ux-chip{transition:none}}
+</style>
+<style id="mg-golf-css">
+/* golf.css: golf-page layer on top of module.css + ux.css */
+.mgs-slot{margin:0 0 4px}
+.mgs-win{background:#FFD900;color:#0B0B0B;border-left:0;padding:16px;gap:16px;animation:gxPulse 1.8s ease-out 5;box-shadow:0 0 0 0 rgba(255,217,0,.8)}
+@keyframes gxPulse{0%{box-shadow:0 0 0 0 rgba(255,217,0,.85)}70%{box-shadow:0 0 0 16px rgba(255,217,0,0)}100%{box-shadow:0 0 0 0 rgba(255,217,0,0)}}
+.mgs-win .mgs-tag{background:#0B0B0B;color:#FFD900}
+.mgs-win .mgs-x{color:#3B3830;min-height:44px}
+.mgs-win .mgs-big{color:#0B0B0B;font-size:32px}
+.mgs-win .mgs-big span{color:#0B0B0B;text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:4px}
+.mgs-win p{color:#3B3830;font-size:14px}
+.mgs-win .mgs-go{background:#0B0B0B;color:#FFD900;font-size:19px;min-height:56px;width:100%;animation:none}
+.mgs-thumb{width:96px}
+.mgs-thumb img{border-color:#0B0B0B}
+@media (prefers-reduced-motion:reduce){.mgs-win{animation:none}}
+.ux-bests-btn{margin:0}
+.gx-per{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(244,241,234,.14)}
+.gx-per>span{font-size:13px;color:#9C988C}
+.gx-per .ux-hbox{align-items:center}
+.gx-per .ux-step{min-width:52px;min-height:48px;font-size:22px;background:#F4F1EA}
+.gx-pn{font-family:'Anton',Impact,sans-serif;font-weight:400;font-size:26px;min-width:34px;text-align:center;color:#F4F1EA}
+button{-webkit-tap-highlight-color:transparent}
+.mgs-sheet [hidden],.mgs-slot [hidden],.ux-done [hidden]{display:none!important}
+</style>
+<script id="mgs-golf">
+var MGS=(function(){
+var LOGO=new Path2D('M400 538.9C326 530.5 262.6 470.4 250 396.4C240.3 339.9 255.7 284.9 292.3 245.4L300.7 236.3L295 200.9C291.8 181.4 289.1 164.6 288.8 163.5C288.3 161.1 293.2 150.6 235 278.7C209.4 334.9 188.2 381 187.9 381C187.6 381 165.6 331.7 139 271.5C112.4 211.3 90.3 162.3 90 162.8C89.6 163.2 81.3 209.1 71.4 264.7L53.5 366L26.7 366C1.6 366 -0.1 365.9 0.4 364.2C0.9 362.6 45.4 135.6 63.2 43.8C67.8 20.3 71.7 1 72 1C72.3 1 98.6 60.2 130.5 132.5C162.3 204.8 188.7 263.6 189.1 263.2C189.5 262.8 216.7 203.6 249.6 131.6C297.5 26.9 309.6 1.3 310.2 3.1C310.6 4.4 318.6 49.6 328 103.5C337.4 157.4 345.3 202.1 345.5 202.7C345.8 203.6 347.9 203.1 352.5 201C398.4 180.4 459.4 181.9 502.9 204.6C521 214 542.2 230.7 557.7 247.8L564.8 255.6L546.9 272.8C537.1 282.3 528.7 290 528.3 290C527.8 290 525.5 287.5 523.1 284.5C510.8 269.1 490.7 252.9 474.8 245.5C445.1 231.8 407.3 231.5 375.5 244.7C368.3 247.7 355 255.2 355 256.3C355 256.7 359.3 281.3 364.5 310.9C369.7 340.6 374 365.1 374 365.4C374 365.7 362.2 366 347.7 366L321.4 366L317.1 338.8C311.2 301.6 312 304 308.3 313C297.6 338.6 296 373.3 304 402C315.4 442.5 355.2 479.3 398.3 489.2C412.4 492.5 434 492.2 447.5 488.6C474.8 481.4 500.4 462.1 513.4 438.7C517.3 431.7 522.5 416.9 523.5 409.8L524.1 405L481.8 404.8L439.5 404.5L439.2 380.2L439 356L509.6 356L580.3 356L579.7 374.8C578 430.3 565.2 463.1 532.9 495C498.5 529.1 451.3 544.7 400 538.9ZM651 383.5C617.4 376.3 591.1 352.5 581.4 320.5C577.6 307.9 577.2 281.9 580.8 269.7C588 244.6 607.9 221.6 631.5 210.9C653.4 201 681.3 200.3 704 209.1C725.1 217.2 745.9 237.8 754.9 259.5C765.8 285.6 763.2 318.5 748.5 341.6C736.2 360.9 714.4 376.9 693 382.5C684.1 384.8 659.8 385.4 651 383.5ZM795 294L795 206L808.5 206L822 206L822 281.5L822 357L847.5 357L873 357L873 369.5L873 382L834 382L795 382L795 294ZM898.2 294.2L898.5 206.5L942.2 206.2L986 206L986 218.5L986 231L955.5 231L925 231L925 252L925 273L954.5 273L984 273L984 285.5L984 298L954.5 298L925 298L925 340L925 382L911.5 382L898 382L898.2 294.2ZM686.4 358C724.3 348.3 744.9 305.8 730.1 268.2C723.3 250.9 707.9 236.8 689 230.4C680.3 227.4 659 227.7 649.1 230.9C630.7 237 614 253.7 607.9 272.2C604.7 282 604.4 305.3 607.4 314C613.7 332.4 624.6 345 641.3 353.6C654.2 360.2 671.3 361.9 686.4 358ZM586 182.1C565.8 177.7 547.9 166.4 534.6 149.9C498.3 104.4 515 34.7 568.1 10.1C580.4 4.4 587.5 2.8 603.3 2.3C621.9 1.6 631.3 3.4 646.8 10.7L654 14.1L654 30L654 46L648.8 41.9C641.6 36.5 629 30.4 620.5 28.4C610.9 26.2 593.9 26.9 585.3 30C548.6 42.9 531.3 87.8 549.1 124C554.8 135.4 566.1 146.9 577 152.2C600.1 163.6 625.2 161 646.2 145.1C649.9 142.3 653.2 140 653.5 140C653.8 140 653.9 147.1 653.8 155.8L653.5 171.5L647 174.7C629.6 183.2 604.8 186.2 586 182.1ZM887 182.1C863.5 177 839.1 159.6 827.2 139.4C815.8 120.1 812.1 92.3 818 69.5C826.4 37 855 10.3 888.9 3.5C899.3 1.4 922.1 1.9 931.5 4.5C964.6 13.6 991.7 43.4 997.6 77.2C1005.7 123.4 978.2 167 932.3 180.6C920.2 184.2 899.5 184.9 887 182.1ZM350.4 181.3C354.1 171.8 433.5 3.1 434.1 3.7C434.5 4.1 452.7 44.3 474.5 93C496.4 141.7 514.4 181.8 514.7 182.2C514.9 182.7 508.7 183 500.8 183L486.5 183L477.9 162.7L469.2 142.5L432.5 142.5L395.8 142.5L386.7 162.7L377.5 182.9L363.6 183C351 183 349.8 182.9 350.4 181.3ZM687 92.9L687 4.8L712.8 5.3C741.5 5.8 747.8 6.8 759.5 12.3C770.7 17.7 778.1 26 783 38.5C786.4 47.3 786.5 64.6 783.1 74.3C778.8 86.9 767.8 98.6 756 103.1C753 104.2 749.8 105.5 748.9 105.8C747.7 106.4 753.2 114.5 774.2 143.3C788.9 163.6 801 180.3 801 180.6C801 180.8 793.7 180.9 784.8 180.8L768.6 180.5L743.9 145C723.5 115.8 718.6 109.4 716.5 109.2L714 108.9L714 144.9L714 181L700.5 181L687 181L687 92.9ZM927 156.2C946.1 150 961.9 134.3 968.7 114.8C972.1 105.2 972.9 89 970.6 78C965.7 54.4 946.9 34.7 923.9 28.9C912.4 25.9 895.7 26.5 885.3 30.2C848.6 43.2 831.4 86.7 848.7 123C855.8 137.9 873.7 152.6 890.1 157C899.9 159.7 917.4 159.3 927 156.2ZM458 117.4C458 115.3 433.5 61.1 432.9 61.7C432.2 62.4 407 116.9 407 117.7C407 117.9 418.5 118 432.5 118C446.5 118 458 117.7 458 117.4ZM741.3 83C754.2 79 760.9 68.7 759.8 54.5C758.5 38.4 748.4 31.2 725.8 30.2L714 29.7L714 58L714 86.3L724.2 85.7C730.3 85.4 737.3 84.2 741.3 83Z');
+var ICON='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v7h14v-7" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg>';
+var C={name:'',label:'MACRO GOLF',save:function(){},list:function(){return []}};
+var cur=null,img=null,size='story',hide=false,thumbs={};
+function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e}
+function escH(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function today(){var d=new Date(),m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd}
+function thumb(x){if(thumbs[x.key])return thumbs[x.key];try{var c=document.createElement('canvas');c.width=216;c.height=384;paint(c,x.w,{scale:.2});thumbs[x.key]=c.toDataURL('image/jpeg',.85)}catch(e){thumbs[x.key]=''}return thumbs[x.key]}
+function banners(){
+  var list=C.list().filter(function(x){return x.date===today()&&!x.off});
+  Array.prototype.forEach.call(document.querySelectorAll('.mgs-slot'),function(slot){
+    slot.innerHTML='';
+    list.forEach(function(x){var w=x.w,b=el('div','mgs-win'),t=thumb(x);
+      b.innerHTML=(t?'<button type="button" class="mgs-thumb" aria-label="Open your share picture"><img src="'+t+'" alt=""></button>':'')+'<div class="mgs-body"><div class="mgs-top"><span class="mgs-tag">'+escH(w.tag)+'</span><button type="button" class="mgs-x">Not now</button></div><div class="mgs-big">'+w.mBig+'</div><p>'+escH(w.mText)+'</p><button type="button" class="mgs-go">'+ICON+'<span>Share to your story</span></button></div>';
+      Array.prototype.forEach.call(b.querySelectorAll('.mgs-go,.mgs-thumb'),function(k){k.addEventListener('click',function(){open(w)})});
+      b.querySelector('.mgs-x').addEventListener('click',function(){x.off=true;C.save();banners()});
+      slot.appendChild(b)});
+  })}
+function add(key,w){var list=C.list();for(var i=0;i<list.length;i++)if(list[i].key===key)return false;list.push({key:key,date:today(),w:w});while(list.length>40)list.shift();C.save();return true}
+var sheet,cv,st;
+function build(){
+  sheet=el('div','mgs-sheet');sheet.hidden=true;sheet.setAttribute('role','dialog');sheet.setAttribute('aria-label','Share your win');
+  sheet.innerHTML='<div class="mgs-in"><div class="mgs-head"><div class="mgs-hero"><span class="mgs-tag" id="mgsTag"></span><b>Show it off</b><p>Add a photo from today, then share it to your story.</p></div><button type="button" class="mgs-close">Close</button></div>'+
+   '<div class="mgs-prev"><canvas width="1080" height="1920"></canvas><img class="mgs-out" alt="Your share picture" hidden></div>'+
+   '<div class="mgs-ctl"><label class="mgs-photo"><input type="file" accept="image/*">+ Add your photo</label>'+
+   '<div class="mgs-seg" role="group" aria-label="Size"><button type="button" data-s="story" aria-pressed="true">Story</button><button type="button" data-s="post" aria-pressed="false">Post</button></div>'+
+   '<label class="mgs-hide"><input type="checkbox"> Hide weights</label></div>'+
+   '<button type="button" class="mgs-share">'+ICON+'<span>Share to your story</span></button><p class="mgs-apps">Opens Instagram, WhatsApp, Facebook and more</p><button type="button" class="mgs-save">Save image</button><p class="mgs-st" role="status"></p></div>';
+  document.body.appendChild(sheet);cv=sheet.querySelector('canvas');st=sheet.querySelector('.mgs-st');
+  sheet.querySelector('.mgs-close').addEventListener('click',close);
+  sheet.addEventListener('click',function(e){if(e.target===sheet)close()});
+  sheet.querySelector('.mgs-photo input').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){img=im;draw()};im.src=r.result};r.readAsDataURL(f)});
+  sheet.querySelector('.mgs-seg').addEventListener('click',function(e){var b=e.target.closest('[data-s]');if(!b)return;size=b.dataset.s;Array.prototype.forEach.call(this.children,function(x){x.setAttribute('aria-pressed',String(x===b))});draw()});
+  sheet.querySelector('.mgs-hide input').addEventListener('change',function(e){hide=e.target.checked;draw()});
+  sheet.querySelector('.mgs-share').addEventListener('click',share);
+  sheet.querySelector('.mgs-save').addEventListener('click',function(){saveImg(true)});
+}
+function open(w){if(!sheet)build();cur=w;img=null;st.textContent='';sheet.querySelector('.mgs-photo input').value='';sheet.querySelector('#mgsTag').textContent=w.tag;
+  var h=sheet.querySelector('.mgs-hide');h.hidden=!w.bigHide;sheet.hidden=false;document.body.style.overflow='hidden';
+  var f=document.fonts&&document.fonts.load?Promise.all([document.fonts.load('400 100px Anton'),document.fonts.load('700 30px Inter'),document.fonts.load('800 30px Inter')]):Promise.resolve();
+  draw();f.then(draw,draw)}
+function celebrate(w){open(w);confetti()}
+function confetti(){try{if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return}catch(e){}
+  var c=el('canvas','mgs-confetti'),x=c.getContext('2d'),W=c.width=innerWidth,H=c.height=innerHeight,P=[],cols=['#FFD900','#F4F1EA','#FFFFFF','#FFD900'],t0=Date.now();
+  for(var i=0;i<140;i++)P.push({x:W/2+(Math.random()-.5)*W*.3,y:H*.35,vx:(Math.random()-.5)*14,vy:-Math.random()*16-4,s:6+Math.random()*7,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[i%4]});
+  document.body.appendChild(c);
+  (function f(){var t=Date.now()-t0;x.clearRect(0,0,W,H);P.forEach(function(p){p.vy+=.45;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.globalAlpha=Math.max(0,1-t/2600);x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore()});
+    if(t<2600)requestAnimationFrame(f);else c.remove()})()}
+function close(){sheet.hidden=true;document.body.style.overflow=''}
+function blob(cb){try{cv.toBlob(function(b){cb(b)},'image/png')}catch(e){cb(null)}}
+function share(){blob(function(b){if(!b){st.textContent='Could not make the picture. Take a screenshot instead.';return}
+  var file;try{file=new File([b],'macro-golf-win.png',{type:'image/png'})}catch(e){file=null}
+  if(file&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file]}).then(function(){st.textContent='Shared. Nice work.'},function(e){if(!e||e.name!=='AbortError')saveImg(true)})}
+  else saveImg(true)})}
+function saveImg(show){blob(function(b){if(!b)return;var u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='macro-golf-win.png';document.body.appendChild(a);a.click();a.remove();
+  if(show){var o=sheet.querySelector('.mgs-out');o.src=u;o.hidden=false;cv.hidden=true;st.textContent='Saved. If it did not download, press and hold the picture to save it, then post it from your photos.'}})}
+function draw(){if(!cur)return;var o=sheet.querySelector('.mgs-out');o.hidden=true;cv.hidden=false;paint(cv,cur,{size:size,hide:hide,img:img})}
+function paint(cv,w,op){
+  var ctx=cv.getContext('2d'),sc=op.scale||1,W=1080,H=op.size==='post'?1350:1920,M=72,A='400 Spx Anton, Impact, sans-serif',I='700 Spx Inter, sans-serif';
+  cv.width=W*sc;cv.height=H*sc;ctx.setTransform(sc,0,0,sc,0,0);
+  function fit(t,f,s,mw){ctx.font=f.replace('S',s);while(ctx.measureText(t).width>mw&&s>20){s-=4;ctx.font=f.replace('S',s)}return s}
+  if(op.img){var im=op.img,r=Math.max(W/im.width,H/im.height),iw=im.width*r,ih=im.height*r;ctx.drawImage(im,(W-iw)/2,(H-ih)/2,iw,ih)}
+  else{var g0=ctx.createLinearGradient(0,0,W,H);g0.addColorStop(0,'#3a3832');g0.addColorStop(1,'#0e0e0d');ctx.fillStyle=g0;ctx.fillRect(0,0,W,H);
+    var rg=ctx.createRadialGradient(W*.7,H*.25,10,W*.7,H*.25,W*.9);rg.addColorStop(0,'rgba(255,217,0,.2)');rg.addColorStop(1,'rgba(255,217,0,0)');ctx.fillStyle=rg;ctx.fillRect(0,0,W,H)}
+  var big=(op.hide&&w.bigHide)?w.bigHide:w.big,line=(op.hide&&w.lineHide)?w.lineHide:w.line;
+  var g=ctx.createLinearGradient(0,H*.45,0,H);g.addColorStop(0,'rgba(11,11,11,0)');g.addColorStop(.45,'rgba(11,11,11,.85)');g.addColorStop(1,'rgba(11,11,11,.96)');ctx.fillStyle=g;ctx.fillRect(0,H*.45,W,H*.55);
+  var tg=ctx.createLinearGradient(0,0,0,300);tg.addColorStop(0,'rgba(11,11,11,.7)');tg.addColorStop(1,'rgba(11,11,11,0)');ctx.fillStyle=tg;ctx.fillRect(0,0,W,300);
+  ctx.save();ctx.translate(M,56);ctx.scale(152/542,152/542);ctx.fillStyle='#FFD900';ctx.fill(LOGO,'evenodd');ctx.restore();
+  ctx.fillStyle='#F4F1EA';ctx.font=I.replace('S',30);ctx.textAlign='right';ctx.fillText(w.who||'',W-M,100);ctx.textAlign='left';
+  var y=H-(op.size==='post'?150:250);
+  ctx.fillStyle='#F4F1EA';ctx.font=I.replace('S',32);ctx.fillText(line,M,y);
+  var s=fit(big,A,/^\d+$/.test(big)?300:190,W-2*M);ctx.fillStyle='#FFD900';ctx.font=A.replace('S',s);ctx.fillText(big,M,y-56);
+  var ts=fit(w.title,A,84,W-2*M);ctx.fillStyle='#F4F1EA';ctx.font=A.replace('S',ts);ctx.fillText(w.title,M,y-76-s*.92);
+  ctx.fillStyle='#FFD900';ctx.fillRect(M,y-106-s*.92-ts,150,12);
+  ctx.font='800 30px Inter, sans-serif';var kw=ctx.measureText(w.kick).width+36,ky=y-156-s*.92-ts-48;ctx.fillStyle='#FFD900';ctx.fillRect(M,ky,kw,56);ctx.fillStyle='#0B0B0B';ctx.fillText(w.kick,M+18,ky+38);
+  ctx.fillStyle='rgba(244,241,234,.6)';ctx.font=I.replace('S',26);ctx.fillText(C.label,M,H-80);ctx.textAlign='right';ctx.fillText('MACRO.GOLF',W-M,H-80);ctx.textAlign='left';
+}
+function monday(iso){var p=String(iso).split('-'),d=new Date(+p[0],+p[1]-1,+p[2],12),k=(d.getDay()+6)%7;d.setDate(d.getDate()-k);var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd}
+function weeksBetween(a,b){var pa=a.split('-'),pb=b.split('-');return Math.round((new Date(+pb[0],+pb[1]-1,+pb[2],12)-new Date(+pa[0],+pa[1]-1,+pa[2],12))/604800000)}
+function shift(iso,n){var p=String(iso).split('-'),d=new Date(+p[0],+p[1]-1,+p[2]+n,12),m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd}
+function nice(iso){var p=String(iso).split('-');return new Date(+p[0],+p[1]-1,+p[2],12).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
+function f1(n){return (Math.round(n*10)/10).toString()}
+function unit(e){return (typeof wtInfo==='function'?wtInfo(e).u:'kg').toUpperCase()}
+function pb(e,now,prev,minR){
+  var ok=function(s){return s.w!=null&&s.r!=null&&s.r>=minR};now=now.filter(ok);prev=prev.filter(ok);if(!now.length||!prev.length)return null;
+  var b=now.reduce(function(a,s){return (s.w>a.w||(s.w===a.w&&s.r>a.r))?s:a});
+  var pm=prev.reduce(function(a,s){return Math.max(a,s.w)},0),first=prev[0];
+  var nm=e.name,u=unit(e),bw=f1(b.w)+u+' × '+b.r;
+  if(b.w>pm){var gain=b.w-first.w;return {score:(b.w-pm)/Math.max(pm,1),tag:'New PB',kick:'NEW PB',big:bw,bigHide:'PERSONAL BEST',title:nm.toUpperCase(),
+    line:gain>0?('+'+f1(gain)+'kg since '+nice(first.date)):'Heaviest set yet',lineHide:'Heaviest set yet',
+    mBig:escH(nm)+' <span>'+escH(f1(b.w)+' '+u.toLowerCase()+' × '+b.r)+'</span>',mText:gain>0?('Your heaviest set yet, '+f1(gain)+'kg up since '+nice(first.date)+'.'):'Your heaviest set yet.'}}
+  var pr=prev.filter(function(s){return s.w===b.w}).reduce(function(a,s){return Math.max(a,s.r)},0);
+  if(b.w===pm&&pr&&b.r>pr)return {score:(b.r-pr)/pr/3,tag:'Rep PB',kick:'REP PB',big:bw,bigHide:b.r+' REPS',title:nm.toUpperCase(),
+    line:'Most reps yet at '+f1(b.w)+'kg',lineHide:'Most reps yet',mBig:escH(nm)+' <span>'+b.r+' reps</span>',mText:'Most reps you have done at '+f1(b.w)+'kg.'};
+  return null}
+function weekWin(n,who){return {tag:'Week complete',kick:'WEEK COMPLETE',big:'WEEK '+n,title:'EVERY SESSION DONE',line:who.line,mBig:'<span>Week '+n+'</span> complete',mText:who.text,who:who.who}}
+function streakWin(k,who){return {tag:'Streak',kick:'STREAK',big:k+' WEEKS',title:'NOT ONE SESSION MISSED',line:who.line,mBig:'<span>'+k+' weeks</span> unbroken',mText:'Every planned session done for '+k+' weeks running.',who:who.who}}
+function msWin(n,noun,who,line){return {tag:'Milestone',kick:'MILESTONE',big:String(n),title:noun.toUpperCase()+' DONE',line:line,mBig:'<span>'+n+'</span> '+noun+' done',mText:n+' '+noun+' into your plan. '+line+'.',who:who}}
+return {init:function(o){for(var k in o)C[k]=o[k]},add:add,banners:banners,open:open,celebrate:celebrate,monday:monday,shift:shift,weeksBetween:weeksBetween,pb:pb,weekWin:weekWin,streakWin:streakWin,msWin:msWin,today:today,esc:escH,f1:f1};
+})();
+
+/* adapt-golf.js: wins for Macro Golf practice games and tests.
+   Wins (agreed with Jack):
+   - PB: a new best score in that game (needs at least one earlier game to beat).
+   - Week complete: the planned practice sessions for the week are done. A session is a day with at least one game
+     or test finished. The weekly target is macroAudit.sessions (the pre-test audit), else 3.
+   - Streak: weeks complete in a row (2, 4, 8, 12, 16, 26).
+   - Milestone: 5, 10, 25, 50 or 100 games of this game.
+   - Plan complete: the retest after the 6-week plan (tests only, cfg.extra).
+   The practice log and week wins live in localStorage "macroPractice", shared by every golf page on the same site,
+   so a week or streak is celebrated once, on whichever game completes it.
+   cfg: {id, game, noun, label, slots:[el], who(), pb(rec, prevRecs) -> win|null, extra(rec, who) -> [key, win]|null} */
+var MGP=(function(){
+  var K='macroPractice';
+  function get(){var v=null;try{v=JSON.parse(localStorage.getItem(K))}catch(e){}v=v&&typeof v==='object'?v:{};v.days=v.days||{};v.claimed=v.claimed||{};return v}
+  function put(v){try{localStorage.setItem(K,JSON.stringify(v))}catch(e){}}
+  function perWeek(){var v=get();if(v.perWeek)return v.perWeek;try{var a=JSON.parse(localStorage.getItem('macroAudit'));if(a&&+a.sessions)return Math.max(1,Math.min(7,+a.sessions))}catch(e){}return 3}
+  function setPerWeek(n){var v=get();v.perWeek=Math.max(1,Math.min(7,n));put(v)}
+  function log(id,date){var v=get(),d=v.days[date]=v.days[date]||[];d.push(id);put(v)}
+  function unlog(id,date){var v=get(),d=v.days[date];if(!d)return;var i=d.lastIndexOf(id);if(i>=0)d.splice(i,1);if(!d.length)delete v.days[date];put(v)}
+  function sessions(mon){var v=get(),n=0;for(var i=0;i<7;i++)if(v.days[MGS.shift(mon,i)])n++;return n}
+  function streak(mon){var k=0,m=mon,p=perWeek();while(sessions(m)>=p&&k<520){k++;m=MGS.shift(m,-7)}return k}
+  function claim(key){var v=get();if(v.claimed[key])return false;v.claimed[key]=MGS.today();put(v);return true}
+  return {get:get,perWeek:perWeek,setPerWeek:setPerWeek,log:log,unlog:unlog,sessions:sessions,streak:streak,claim:claim};
+})();
+
+function mgsGolf(cfg){
+  var st=cfg.store;if(!st){S.mgsWins=S.mgsWins||[];st={save:save,list:function(){return S.mgsWins}}}
+  MGS.init({name:'',label:cfg.label,save:st.save,list:st.list});
+  cfg.slots.forEach(function(p){if(!p)return;var s=document.createElement('div');s.className='mgs-slot';p.el.insertAdjacentElement(p.where||'afterend',s)});
+  function nice(iso){var p=String(iso).split('-');return new Date(+p[0],+p[1]-1,+p[2],12).toLocaleDateString('en-GB',{day:'numeric',month:'short'}).toUpperCase()}
+  function whoLine(d){var p=String(cfg.who()||'').trim();return (p?p.toUpperCase()+' · ':'')+nice(d)}
+  /* call when a game is finished and saved: rec = the new record, prev = earlier records (any order) */
+  function finished(rec,prev,count){
+    var d=rec.date,who=whoLine(d),found=[],mon=MGS.monday(d),per=MGP.perWeek();
+    var before=MGP.sessions(mon);MGP.log(cfg.id,d);var after=MGP.sessions(mon);
+    var p=prev.length?cfg.pb(rec,prev):null;if(p){p.who=who;found.push(['pb-'+cfg.id+'-'+rec.n,p])}
+    if(before<per&&after>=per){var k=MGP.streak(mon),st=[2,4,8,12,16,26].indexOf(k)>=0,key=(st?'st-'+k+'-':'wk-')+mon;
+      var info={who:who,line:per+' of '+per+' practice sessions this week',text:'Every practice session this week done.'};
+      if(MGP.claim(key))found.push([key,st?MGS.streakWin(k,info):MGS.weekWin(weekNo(mon),info)])}
+    if([5,10,25,50,100].indexOf(count)>=0)found.push(['ms-'+cfg.id+'-'+count,{tag:'Milestone',kick:'MILESTONE',big:String(count),title:(cfg.game+' games played').toUpperCase(),line:'Practice that counts',mBig:'<span>'+count+'</span> '+MGS.esc(cfg.noun)+' played',mText:count+' games of '+cfg.game+' logged. Keep stacking them.',who:who}]);
+    var ex=cfg.extra&&cfg.extra(rec,who);if(ex)found.push(ex);
+    var fresh=found.filter(function(f){return MGS.add(f[0],f[1])});MGS.banners();
+    return fresh.map(function(f){return f[1]})}
+  function weekNo(mon){var v=MGP.get(),ds=Object.keys(v.days).sort();return ds.length?MGS.weeksBetween(MGS.monday(ds[0]),mon)+1:1}
+  function undone(rec){MGP.unlog(cfg.id,rec.date)}
+  MGS.banners();
+  return {finished:finished,undone:undone,celebrate:function(w){MGS.celebrate(w)}};
+}
+
+/* golf-ux.js: the parts of Joe's ux.js that fit golf pages, using ux.css classes.
+   Kept: session-done screen, "My bests & progress" overlay with trend lines, −/+ stepper (weekly practice target).
+   Left out: RPE taps, −/+ weight, Same as last (no sets/reps/weights in golf games), add-to-home prompt (product pages). */
+var GUX=(function(){
+  function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e}
+  var esc=function(s){return MGS.esc(s)};
+  function spark(vals,lower){if(vals.length<2)return '';var W=140,H=40,v=vals.map(function(x){return lower?-x:x}),mn=Math.min.apply(null,v),mx=Math.max.apply(null,v);if(mx===mn){mn-=1;mx+=1}
+    var pts=v.map(function(p,i){return [(i/(v.length-1))*(W-8)+4,H-4-(p-mn)/(mx-mn)*(H-8)]});
+    return '<svg class="ux-spark" viewBox="0 0 '+W+' '+H+'" aria-hidden="true"><polyline fill="none" stroke="#FFD900" stroke-width="3" points="'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ')+'"/><circle cx="'+pts[pts.length-1][0].toFixed(1)+'" cy="'+pts[pts.length-1][1].toFixed(1)+'" r="4.5" fill="#FFD900"/></svg>'}
+  function overlay(label,html,on){var o=el('div','ux-done');o.setAttribute('role','dialog');o.setAttribute('aria-label',label);o.innerHTML='<div class="ux-done-in">'+html+'</div>';
+    document.body.appendChild(o);document.body.style.overflow='hidden';
+    o.addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(on&&b&&on(b.dataset.x,o,b)===false)return;if(b||e.target===o){o.remove();if(!document.querySelector('.ux-done,.mgs-sheet:not([hidden])'))document.body.style.overflow=''}});return o}
+  /* sp: {title, cells:[[label,value]], next:{k,v}, onBests, onResults} */
+  function done(sp){
+    return overlay('Game done','<div class="ux-kick">'+esc(sp.kick||'Game done')+'</div><div class="ux-h">'+esc(sp.title)+'</div><div class="ux-bar"></div>'+
+      '<div class="ux-cells">'+sp.cells.slice(0,4).map(function(c){return '<div><span>'+esc(c[0])+'</span><b>'+esc(c[1])+'</b></div>'}).join('')+'</div>'+
+      (sp.next?'<div class="ux-next"><span>'+esc(sp.next.k)+'</span><b>'+esc(sp.next.v)+'</b></div>':'')+
+      '<button type="button" class="ux-btn y" data-x="bests">See my bests</button><button type="button" class="ux-btn" data-x="results">See full results</button>',
+      function(x){if(x==='bests'&&sp.onBests)setTimeout(sp.onBests,0);if(x==='results'&&sp.onResults)setTimeout(sp.onResults,0)})}
+  /* items: [{name, best, sub, vals:[numbers oldest→newest], lower}] */
+  function bests(items,empty){
+    function week(){var per=MGP.perWeek(),mon=MGS.monday(MGS.today()),n=MGP.sessions(mon),k=MGP.streak(mon)||MGP.streak(MGS.shift(mon,-7));
+      return '<div class="ux-best"><div class="ux-bn"><b>Practice this week</b><span><em>'+n+' of '+per+'</em> sessions · '+(k?k+(k===1?' week':' weeks')+' complete in a row':'no complete weeks in a row yet')+'</span></div></div>'+
+        '<div class="gx-per"><span>Practice sessions a week</span><div class="ux-hbox"><button type="button" class="ux-step" data-x="minus" aria-label="One fewer session a week">−</button><b class="gx-pn">'+per+'</b><button type="button" class="ux-step" data-x="plus" aria-label="One more session a week">+</button></div></div>'}
+    var o=overlay('My bests','<div class="ux-top"><div><div class="ux-kick">Progress</div><div class="ux-h">My bests</div></div><button type="button" class="ux-close" data-x="close">Close</button></div><div class="ux-bar"></div>'+
+      (items.length?items.map(function(it){return '<div class="ux-best"><div class="ux-bn"><b>'+esc(it.name)+'</b><span>Best <em>'+esc(it.best)+'</em>'+(it.sub?' · '+esc(it.sub):'')+'</span></div>'+spark(it.vals||[],it.lower)+'</div>'}).join(''):'<p class="ux-empty">'+esc(empty)+'</p>')+
+      '<div class="gx-week">'+week()+'</div><button type="button" class="ux-btn" data-x="close">Close</button>',
+      function(x,o){if(x==='minus'||x==='plus'){MGP.setPerWeek(MGP.perWeek()+(x==='plus'?1:-1));o.querySelector('.gx-week').innerHTML=week();return false}});
+    return o}
+  function bestsButton(anchor,fn,where){var b=el('button','ux-bests-btn','<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 20h18M5 16l5-5 4 4 6-7" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg>My bests &amp; progress');
+    b.type='button';b.addEventListener('click',fn);anchor.insertAdjacentElement(where||'beforebegin',b);return b}
+  return {done:done,bests:bests,bestsButton:bestsButton};
+})();
+
+/* golf-auto.js: wires a Macro Golf game or test into share-on-win, the game-done screen and My bests,
+   without changing the game's own code. A game counts as finished when its results card (#finished) appears.
+   cfg: {id, game, noun, progress(), score(), fmt(v), lower, variant(), vname(), seed(), test, scoreLabel} */
+function golfWins(cfg){
+  /* kept in its own key, because some games replace their whole state object when a new game starts */
+  var KEY='mgsGolf_'+cfg.id,Z=null;try{Z=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  Z=Z&&typeof Z==='object'?Z:{};Z.hist=Z.hist||[];Z.wins=Z.wins||[];
+  function zsave(){try{localStorage.setItem(KEY,JSON.stringify(Z))}catch(e){}}
+  if(!Z.seeded){try{(cfg.seed?cfg.seed():[]).forEach(function(r){Z.hist.push(r)})}catch(e){}Z.seeded=1;zsave()}
+  window.MGZ=Z;if(cfg.init)try{cfg.init()}catch(e){}
+  var fin=$("finished"),how=$("howto");
+  function vOf(r){return r.v||''}
+  function bestOf(L){if(!L.length)return null;return L.reduce(function(a,r){return (cfg.lower?r.s<a:r.s>a)?r.s:a},L[0].s)}
+  var G=mgsGolf({store:{save:zsave,list:function(){return Z.wins}},id:cfg.id,game:cfg.game,noun:cfg.noun||(cfg.test?'tests':'games'),label:'MACRO GOLF · '+cfg.game.toUpperCase(),
+    slots:[{el:fin.querySelector('.done')||fin.firstElementChild,where:'afterend'},how?{el:how,where:'afterend'}:null],
+    who:function(){return S.player},
+    pb:function(rec,prev){var L=prev.filter(function(r){return vOf(r)===vOf(rec)}),b=bestOf(L);if(b===null||!(cfg.lower?rec.s<b:rec.s>b))return null;
+      var vn=rec.vn?' ('+rec.vn+')':'';
+      return {tag:'New PB',kick:'NEW PB',big:cfg.fmt(rec.s).toUpperCase(),title:cfg.game.toUpperCase(),line:(rec.vn?rec.vn+' · ':'')+'beat '+cfg.fmt(b),
+        mBig:MGS.esc(cfg.game)+' <span>'+MGS.esc(cfg.fmt(rec.s))+'</span>',mText:'Your best '+(cfg.test?'result':'score')+' yet'+vn+', beating '+cfg.fmt(b)+'.'}},
+    extra:cfg.test?function(rec,who){var L=Z.hist.slice(0,-1),p=L[L.length-1];if(!p)return null;
+      var days=(new Date(rec.date)-new Date(p.date))/864e5;if(days<35)return null;
+      return ['plan-'+cfg.id+'-'+rec.date,{tag:'Plan complete',kick:'PLAN COMPLETE',big:cfg.fmt(rec.s).toUpperCase(),title:(cfg.game+' retest').toUpperCase(),
+        line:'Was '+cfg.fmt(p.s)+' before the plan',mBig:'<span>Retest</span> done',mText:'Six weeks of work, retested: '+cfg.fmt(p.s)+' then, '+cfg.fmt(rec.s)+' now.',who:who}]}:null});
+  function cells(rec){var per=MGP.perWeek(),n=MGP.sessions(MGS.monday(MGS.today()));
+    var L=Z.hist.filter(function(r){return vOf(r)===vOf(rec)}),b=bestOf(L);
+    return {w:[n,per],c:[[cfg.scoreLabel||'Score',rec.t||cfg.fmt(rec.s)],['Your best'+(rec.vn?' · '+rec.vn:''),cfg.fmt(b)],[cfg.test?'Tests taken':'Games played',String(Z.hist.length)],['Practice this week',Math.min(n,per)+' of '+per]]}}
+  function showDone(rec){var x=cells(rec),w=x.w;
+    GUX.done({kick:cfg.game+(cfg.test?' · test done':' · game done'),title:rec.t||cfg.fmt(rec.s),cells:x.c,
+      next:w[0]>=w[1]?{k:'This week',v:'Week complete: every planned session done'}:{k:'Next up',v:(w[1]-w[0])+' more practice session'+(w[1]-w[0]===1?'':'s')+' to complete your week'},
+      onBests:bests,onResults:function(){fin.scrollIntoView({block:'start'})}})}
+  function bests(){var groups={},order=[];
+    Z.hist.forEach(function(r){var k=vOf(r);if(!groups[k]){groups[k]=[];order.push(k)}groups[k].push(r)});
+    var items=order.map(function(k){var L=groups[k],b=L.reduce(function(a,r){return (cfg.lower?r.s<a.s:r.s>a.s)?r:a}),f=L[0],up=cfg.lower?b.s<f.s:b.s>f.s;
+      var d=String(b.date).split('-'),nice=new Date(+d[0],+d[1]-1,+d[2],12).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+      return {name:L[L.length-1].vn||cfg.game,best:cfg.fmt(b.s),sub:nice+(up?' · up from '+cfg.fmt(f.s)+' in your first':'')+' · '+L.length+(L.length===1?(cfg.test?' test':' game'):(cfg.test?' tests':' games')),vals:L.map(function(r){return r.s}),lower:cfg.lower}});
+    GUX.bests(items,'Finish '+(cfg.test?'the test':'a game')+' and your bests appear here. The line grows every time you play.')}
+  var hist=$("hist"),anchor=hist?hist.closest("section").querySelector(".sec-h"):fin;
+  GUX.bestsButton(anchor,bests,'afterend');window.MG_GOLF_BESTS=bests;
+  function num(t){var m=String(t).replace(/−/g,'-').match(/[-+]?\d+(?:\.\d+)?/);return m?parseFloat(m[0]):null}
+  var was=!fin.hidden;
+  function finish(){var t=$("finalTxt")?$("finalTxt").textContent.trim():'',s=cfg.score?cfg.score():num(t);if(s===null||isNaN(s))return;
+    var rec={date:MGS.today(),v:cfg.variant?String(cfg.variant()):'',vn:cfg.vname?cfg.vname():'',s:s,t:t};
+    /* the same finished game shown again (e.g. after switching version and back) is not a new game */
+    var sig=rec.v+'|'+t+'|'+rec.date;if(Z.sig===sig)return;Z.sig=sig;Z.openN=cfg.progress();
+    var prev=Z.hist.slice();Z.hist.push(rec);rec.n=Z.hist.length;Z.open=1;Z.hist=Z.hist.slice(-200);zsave();
+    var wins=G.finished(rec,prev,Z.hist.length);zsave();
+    showDone(rec);if(wins.length)setTimeout(function(){G.celebrate(wins[0])},400)}
+  /* hidden again: an undo of the last shot takes the game back off; a new game clears the marker; anything else (another version) leaves it */
+  function unfinish(){var p=cfg.progress(),v=cfg.variant?String(cfg.variant()):'';
+    if(Z.open&&p===Z.openN-1&&Z.sig&&Z.sig.indexOf(v+'|')===0){var r=Z.hist.pop();if(r)G.undone(r);Z.sig=null;Z.open=0}
+    else if(p===0&&Z.sig&&Z.sig.indexOf(v+'|')===0){Z.sig=null;Z.open=0}
+    zsave()}
+  new MutationObserver(function(){var now=!fin.hidden;if(now===was)return;was=now;if(now)finish();else unfinish()}).observe(fin,{attributes:true,attributeFilter:['hidden']});
+  zsave();
+}
+</script>
+<script id="mgs-game">
+/* Insanity */
+golfWins({id:'ins',game:'Insanity',progress:function(){return S.res.length},
+  fmt:function(v){return v+' / 20'},scoreLabel:'Holed'});
+</script>
+<style id="mgshareCss"></style><style id="mailfixCss">.mfsheet{margin-top:10px;border:2px solid #0B0B0B;background:#F4F1EA;padding:14px;display:grid;gap:8px}
+.mfsheet p{margin:0 0 4px;font:600 13px/1.4 Inter,sans-serif;color:#0B0B0B}
+.mfsheet a,.mfsheet button{display:block;width:100%;box-sizing:border-box;text-align:center;padding:14px 10px;font:700 14px Inter,sans-serif;letter-spacing:.4px;text-decoration:none;border:0;cursor:pointer}
+.mfsheet .mf1{background:#0B0B0B;color:#FFD900}.mfsheet .mf2{background:#FFFFFF;color:#0B0B0B;border:1px solid rgba(11,11,11,.3)}
+.mfsheet small{display:block;font:500 12px/1.4 Inter,sans-serif;color:#5b574c}</style>
+<script id="mailfix">(function(){
+function parts(h){if(!h||h.indexOf("mailto:")!==0)return null;const q=h.indexOf("?"),p=new URLSearchParams(q<0?"":h.slice(q+1));
+ return{to:decodeURIComponent(h.slice(7,q<0?undefined:q)),su:p.get("subject")||"",body:p.get("body")||""}}
+var E=encodeURIComponent;
+var gmail=m=>"https://mail.google.com/mail/?view=cm&fs=1&to="+E(m.to)+"&su="+E(m.su)+"&body="+E(m.body);
+var outlook=m=>"https://outlook.live.com/mail/0/deeplink/compose?to="+E(m.to)+"&subject="+E(m.su)+"&body="+E(m.body);
+var framed=true;try{framed=window.top!==window}catch(x){}
+function copy(t){try{return navigator.clipboard.writeText(t).then(()=>true,()=>legacy(t))}catch(e){return Promise.resolve(legacy(t))}}
+function legacy(t){try{const ta=document.createElement("textarea");ta.value=t;ta.style.cssText="position:fixed;opacity:0";document.body.appendChild(ta);ta.select();const ok=document.execCommand("copy");ta.remove();return ok}catch(e){return false}}
+function wire(id){const a=document.getElementById(id);if(!a)return;a.removeAttribute("target");
+ const sh=document.createElement("div");sh.className="mfsheet";sh.hidden=true;a.insertAdjacentElement("afterend",sh);
+ function show(m){sh.innerHTML=`<p>Send your results to <b>${m.to}</b></p>
+  <a class="mf1" target="_blank" rel="noopener" href="${gmail(m)}">Send with Gmail</a>
+  <a class="mf2" target="_blank" rel="noopener" href="${outlook(m)}">Send with Outlook / Hotmail</a>
+  ${navigator.share?'<button class="mf2" data-k="share">Share to another app</button>':""}
+  <button class="mf2" data-k="copy">Copy results and email address</button>
+  <small>Gmail and Outlook open a new email with your coach's address and your results already filled in. Just press send.</small>`;
+  sh.hidden=false;
+  const s=sh.querySelector('[data-k="share"]');if(s)s.onclick=()=>{navigator.share({title:m.su,text:"To: "+m.to+"\n\n"+m.body}).catch(()=>{s.textContent="Sharing isn't available here";s.disabled=true})};
+  sh.querySelector('[data-k="copy"]').onclick=e=>{const b=e.currentTarget;copy("To: "+m.to+"\nSubject: "+m.su+"\n\n"+m.body).then(ok=>{b.textContent=ok?"Copied: paste into a new email to "+m.to:"Copy failed: use Preview and copy by hand"})};
+  sh.scrollIntoView({behavior:"smooth",block:"nearest"})}
+ a.addEventListener("click",e=>{if(e.defaultPrevented)return;const m=parts(a.getAttribute("href"));if(!m)return;
+  e.preventDefault();if(framed){show(m);return}location.href=a.getAttribute("href")});
+ new MutationObserver(()=>{if(!sh.hidden){const m=parts(a.getAttribute("href"));if(m)show(m);else sh.hidden=true}}).observe(a,{attributes:true,attributeFilter:["href"]});}
+function go(){wire("sendCoach");wire("ncMail")}
+document.readyState==="loading"?document.addEventListener("DOMContentLoaded",go):go();})();</script>
+
+<script>
+var UX=(function(){
+var CFG={family:'',home:false,rpeTaps:false,steps:false};
+function $q(s,r){return (r||document).querySelector(s)}
+function $a(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e}
+function n(v){var x=parseFloat(v);return isNaN(x)?null:x}
+function f1(x){return (Math.round(x*10)/10).toString()}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function fire(e,t){e.dispatchEvent(new Event(t,{bubbles:true}))}
+function noBlur(b){['mousedown','pointerdown'].forEach(function(t){b.addEventListener(t,function(ev){ev.preventDefault()})})}
+/* ---------- exercise lookup (for weight steps) ---------- */
+function allEx(){var out=[];try{if(typeof SESSIONS!=='undefined')SESSIONS.forEach(function(d){d.blocks.forEach(function(b){out=out.concat(b.ex)})})}catch(e){}
+  try{if(typeof PLAN!=='undefined')PLAN.phases.forEach(function(p){(p.days||[]).forEach(function(d){d.blocks.forEach(function(b){out=out.concat(b.ex)})})})}catch(e){}
+  try{if(typeof WORKOUTS!=='undefined')WORKOUTS.forEach(function(w){out=out.concat(w.ex)})}catch(e){}return out}
+function exById(id){var a=allEx();for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null}
+function stepOf(id){var e=exById(id);return e&&typeof e.inc==='number'?e.inc:2.5}
+/* ---------- 1. faster logging: RPE taps, same as last, -/+ ---------- */
+var box=null,obs=null;
+function rowParts(tr){var r={};$a('[data-k]',tr).forEach(function(x){var p=x.dataset.k.split('|');r.id=p[0];r.i=+p[1];r[p[2]]=x});return r}
+function decorate(){
+  if(!box)return;
+  $a(CFG.rpeTaps?'select[data-k$="|rpe"]':'.ux-none',box).forEach(function(sel){if(sel.dataset.ux)return;sel.dataset.ux=1;sel.classList.add('ux-hid');
+    var o=sel.options[sel.selectedIndex],b=el('button','ux-rpe'+(sel.value?' on':''),esc(sel.value?o.text:(sel.options[0]?sel.options[0].text:'RPE')));b.type='button';noBlur(b);
+    b.setAttribute('aria-label',sel.getAttribute('aria-label')||'Effort');sel.parentNode.appendChild(b);b.addEventListener('click',function(){chips(sel)})});
+  $a('table.sets',box).forEach(function(tb){
+    var rows=$a('tbody tr',tb).filter(function(tr){return tr.querySelector('[data-k]')});if(!rows.length)return;
+    var cur=null,prev=null;for(var i=0;i<rows.length;i++){var p=rowParts(rows[i]);var done=p.r&&p.r.value&&p.rpe&&p.rpe.value;if(!done){cur=rows[i];prev=i?rows[i-1]:null;break}}
+    if(!cur||cur.nextElementSibling&&cur.nextElementSibling.classList.contains('ux-help'))return;
+    var c=rowParts(cur),pv=prev?rowParts(prev):null,hasW=c.w&&!c.w.disabled,same=pv&&pv.r&&pv.r.value;
+    if(!(hasW&&CFG.steps)&&!same)return;
+    var tr=el('tr','ux-help'),td=el('td');td.colSpan=4;tr.appendChild(el('td'));tr.firstChild.className='ux-gap';td.colSpan=3;tr.appendChild(td);var box=el('div','ux-hbox');td.appendChild(box);
+    if(hasW&&CFG.steps){var st=stepOf(c.id);[-st,st].forEach(function(d){var b=el('button','ux-step',(d<0?'−':'+')+f1(Math.abs(d)));b.type='button';noBlur(b);b.setAttribute('aria-label',(d<0?'Less':'More')+' weight');
+      b.addEventListener('click',function(){var base=n(c.w.value);if(base==null)base=n(c.w.placeholder);if(base==null&&pv&&pv.w)base=n(pv.w.value);if(base==null)base=0;c.w.value=f1(Math.max(0,base+d));fire(c.w,'input');fire(c.w,'change')});box.appendChild(b)})}
+    if(same){var lab=(pv.w&&pv.w.value?f1(n(pv.w.value))+'kg × ':'')+pv.r.value;var b=el('button','ux-same','Same as last · '+esc(lab));b.type='button';noBlur(b);
+      b.addEventListener('click',function(){if(c.w&&!c.w.disabled&&pv.w&&pv.w.value){c.w.value=pv.w.value;fire(c.w,'input');fire(c.w,'change')}if(c.r){c.r.value=pv.r.value;fire(c.r,'input');fire(c.r,'change')}if(c.rpe){if(CFG.rpeTaps)chips(c.rpe);else c.rpe.focus()}});box.appendChild(b)}
+    cur.parentNode.insertBefore(tr,cur.nextSibling)});
+  if(obs)obs.takeRecords();
+}
+function chips(sel){var tr=sel.closest('tr');$a('.ux-chiprow',box).forEach(function(x){x.remove()});
+  var row=el('tr','ux-chiprow'),td=el('td');td.colSpan=4;row.appendChild(td);var wrap=el('div','ux-chips');td.appendChild(wrap);
+  Array.prototype.forEach.call(sel.options,function(o){if(!o.value)return;var b=el('button','ux-chip'+(o.value===sel.value?' on':''),esc(o.text));b.type='button';noBlur(b);
+    b.addEventListener('click',function(){sel.value=o.value;row.remove();fire(sel,'change');setTimeout(decorate,30)});wrap.appendChild(b)});
+  var after=tr.nextElementSibling&&tr.nextElementSibling.classList.contains('ux-help')?tr.nextElementSibling:tr;after.parentNode.insertBefore(row,after.nextSibling);if(obs)obs.takeRecords()}
+function watch(){box=$q('#blocks')||$q('#exlist');if(!box)return;obs=new MutationObserver(function(){requestAnimationFrame(decorate)});obs.observe(box,{childList:true,subtree:true});decorate()}
+/* ---------- 2. session done screen ---------- */
+var snap=null;
+function title(){var t=$q('#dayTitle')||$q('#wTitle');return t?t.textContent:''}
+function startKey(){return 'ux-start-'+location.pathname+'|'+title()}
+document.addEventListener('input',function(e){if(e.target&&e.target.dataset&&e.target.dataset.k){try{if(!sessionStorage.getItem(startKey()))sessionStorage.setItem(startKey(),String(Date.now()))}catch(x){}}},true);
+function nextUp(){var tabs=$a('#dayTabs [data-day]');if(tabs.length){var i=tabs.findIndex(function(b){return b.getAttribute('aria-selected')==='true'});
+    for(var k=1;k<=tabs.length;k++){var b=tabs[(i+k)%tabs.length];if(!/done/i.test(b.textContent))return Array.prototype.map.call(b.children,function(c){return c.textContent.trim()}).filter(Boolean).join(' \u00b7 ')||b.textContent.trim()}return 'Every session this week is done'}
+  var w=$a('#tabs [data-tab^="w"]');if(w.length>1){var s=w.find(function(b){return b.getAttribute('aria-selected')!=='true'});return s?s.textContent:''}return ''}
+document.addEventListener('click',function(e){if(!e.target.closest||!e.target.closest('#finish'))return;
+  var t=function(id){var x=$q('#'+id);return x?x.textContent:''};var st=null;try{st=Number(sessionStorage.getItem(startKey()))}catch(x){}
+  snap={title:title(),sets:t('liveSets'),on:t('liveOn'),rpe:t('liveRpe'),circ:$a('#rounds .round.done').length,start:st,next:nextUp()};
+  setTimeout(function(){var s=$q('#status');if(s&&/saved/i.test(s.textContent)){try{sessionStorage.removeItem(startKey())}catch(x){}done(snap)}},60)},true);
+function done(sp){var mins=sp.start?Math.max(1,Math.round((Date.now()-sp.start)/60000)):null,cells=[];
+  if(sp.sets)cells.push(['Sets',sp.sets]);if(sp.circ)cells.push(['Circuits',sp.circ]);if(sp.on&&sp.on!=='–')cells.push(['On target',sp.on]);if(sp.rpe&&sp.rpe!=='–')cells.push(['Avg RPE',sp.rpe]);if(mins)cells.push(['Time',mins+' min']);
+  var o=el('div','ux-done');o.setAttribute('role','dialog');o.setAttribute('aria-label','Session done');
+  o.innerHTML='<div class="ux-done-in"><div class="ux-kick">Session done</div><div class="ux-h">'+esc(sp.title||'Nice work')+'</div><div class="ux-bar"></div>'+
+   '<div class="ux-cells">'+cells.slice(0,4).map(function(c){return '<div><span>'+c[0]+'</span><b>'+esc(c[1])+'</b></div>'}).join('')+'</div>'+
+   (sp.next?'<div class="ux-next"><span>Next up</span><b>'+esc(sp.next)+'</b></div>':'')+
+   '<button type="button" class="ux-btn y" data-x="bests">See my bests</button><button type="button" class="ux-btn" data-x="close">Done</button></div>';
+  document.body.appendChild(o);o.addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(!b&&e.target!==o)return;o.remove();if(b&&b.dataset.x==='bests')bests()});window.scrollTo(0,0)}
+/* ---------- 3. my bests ---------- */
+function points(){var P=[];function push(e,date,w,r){if(w==null||r==null||!date)return;P.push({id:e.id,name:e.name,u:(typeof wtInfo==='function'?wtInfo(e).u:'kg'),date:date,w:w,r:r})}
+  try{if(CFG.family==='dan'){Object.keys(S.finished).forEach(function(k){var m=k.match(/^w(\d+)-s(\d+)$/);if(!m)return;var d=SESSIONS[+m[2]];if(!d)return;d.blocks.forEach(function(b){b.ex.forEach(function(e){if(!e.inc||e.max)return;((S.logs[k]||{})[e.id]||[]).forEach(function(s){if(isDone(e,s))push(e,S.finished[k],n(s.w),n(s.r))})})})})}
+  else if(CFG.family==='pure'){Object.keys(S.finished).forEach(function(k){var m=k.match(/^p(\d+)-w(\d+)-d(\d+)$/);if(!m)return;var ph=PLAN.phases.find(function(p){return p.id===+m[1]});var d=ph&&ph.days&&ph.days[+m[3]];if(!d)return;
+      d.blocks.forEach(function(b){b.ex.forEach(function(e){if(!e.inc||e.max||e.band||e.secs)return;((S.logs[k]||{})[e.id]||[]).forEach(function(s){var ok=typeof isDone==='function'?isDone(e,s):setDone(s);if(ok)push(e,S.finished[k],n(s.w),n(s.r))})})})})}
+  else if(CFG.family==='harry'){S.history.forEach(function(h){WORKOUTS[h.workout].ex.forEach(function(x0){var e=ex(x0,h);if(!e.inc)return;((h.logs||{})[e.id]||[]).forEach(function(s){if(s&&n(s.r)!=null&&n(s.rpe)!=null)push(e,h.date,n(s.w),n(s.r))})})})}
+  else if(CFG.family==='kevin'){S.history.forEach(function(h){WORKOUTS[h.workout].ex.forEach(function(e){if(e.load!=='kg')return;(h.rounds||[]).forEach(function(r){var x=r.ex[e.id]||{};push(e,h.date,n(x.w),x.r?n(x.r):e.reps)})})})}}catch(err){}
+  return P}
+function spark(list){if(list.length<2)return '';var W=140,H=40,ws=list.map(function(p){return p.w}),mn=Math.min.apply(null,ws),mx=Math.max.apply(null,ws);if(mx===mn){mn-=1;mx+=1}
+  var pts=list.map(function(p,i){return [(i/(list.length-1))*(W-8)+4,H-4-(p.w-mn)/(mx-mn)*(H-8)]});
+  return '<svg class="ux-spark" viewBox="0 0 '+W+' '+H+'" aria-hidden="true"><polyline fill="none" stroke="#FFD900" stroke-width="3" points="'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ')+'"/><circle cx="'+pts[pts.length-1][0].toFixed(1)+'" cy="'+pts[pts.length-1][1].toFixed(1)+'" r="4.5" fill="#FFD900"/></svg>'}
+function nice(iso){var p=String(iso).split('-');return new Date(+p[0],+p[1]-1,+p[2],12).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
+function bests(){var P=points(),by={};P.forEach(function(p){(by[p.id]=by[p.id]||{name:p.name,u:p.u,rows:[]}).rows.push(p)});
+  var items=Object.keys(by).map(function(id){var g=by[id],best=g.rows.reduce(function(a,p){return (p.w>a.w||(p.w===a.w&&p.r>a.r))?p:a});
+    var perDay={};g.rows.forEach(function(p){if(!perDay[p.date]||p.w>perDay[p.date].w)perDay[p.date]=p});var line=Object.keys(perDay).sort().map(function(d){return perDay[d]});
+    var gain=line.length>1?best.w-line[0].w:0;return {name:g.name,u:g.u,best:best,line:line,gain:gain,first:line[0]}}).sort(function(a,b){return b.gain-a.gain||a.name.localeCompare(b.name)});
+  var o=el('div','ux-done');o.setAttribute('role','dialog');o.setAttribute('aria-label','My bests');
+  o.innerHTML='<div class="ux-done-in"><div class="ux-top"><div><div class="ux-kick">Progress</div><div class="ux-h">My bests</div></div><button type="button" class="ux-close" data-x="close">Close</button></div><div class="ux-bar"></div>'+
+   (items.length?items.map(function(it){return '<div class="ux-best"><div class="ux-bn"><b>'+esc(it.name)+'</b><span>Best '+f1(it.best.w)+esc(it.u)+' × '+it.best.r+' · '+nice(it.best.date)+(it.gain>0?' · <em>+'+f1(it.gain)+'kg since '+nice(it.first.date)+'</em>':'')+'</span></div>'+spark(it.line)+'</div>'}).join(''):
+    '<p class="ux-empty">Finish a session with weights logged and your bests appear here. The line for each lift grows every time you train.</p>')+
+   '<button type="button" class="ux-btn" data-x="close">Close</button></div>';
+  document.body.appendChild(o);o.addEventListener('click',function(e){if(e.target.closest('[data-x]')||e.target===o)o.remove()})}
+function bestsButton(){var anchor=$q('#blocks')||$q('#exlist')||$q('#rounds');if(!anchor||$q('.ux-bests-btn'))return;var b=el('button','ux-bests-btn','<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 20h18M5 16l5-5 4 4 6-7" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg>My bests &amp; progress');b.type='button';b.addEventListener('click',bests);anchor.parentNode.insertBefore(b,anchor)}
+/* ---------- 4. add to home screen (personal pages only) ---------- */
+var ICON='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAKE/YAAAAASFBMVEX/6gD/5gD/4gD/3gD/2wD/2QD82gD91wD91gD61gD40wDsyQHVtgKvlgRyYwYzLAkUEgsPDgsODgsNDQsNDAsMDAsMCwsLCwtKScv+AAAMcklEQVR42u1bi7ajqBJVxAC+0aD//6d3VwG+YtKTdHr6zLqwZvqcE8u4Keq5wWz5D44sgU6gE+gEOoFOoBPoBDqBTqAT6AQ6gU6gE+gEOoFOoBPoBDqBTqAT6AQ6gU6gE+gEOoFOoBPoBDqBTqAT6P8H0G7peze9vH3oloPAfemHk8hIUm3bNE3b8bV56TsaPYlOV5ItS44fgZ6WrllegR6Xrl3sYZ6u6dx4/JK+rYUQRYF/6q537r40Gf1RVE3bQzPXkrg0fQLaLl3Wz9OrWTXN7ql0R5+1+4dhoboqk6YkMNpIXLUALYymUWQC0m6VrEkSkIsSkjUWcf4EdIuHjC8U3ef1sEeNWYjbbp5QepvJSuRQatPITIvOg1YS+sxEpeMcg2RBkm1T5aKSWbeM8wc23QDUfH+u6DZX+1XELITZz5OmbUzWdD390UOVAbSs+77vAN6InsUPkjD6hv7qjrb3T0C7ZajV0xuB2fU3k++v0yyMrHp3X20ez85b8r+JPhvaNoJmgU5UOc+RJVWQnFgyZ9Tjm6DhGEIX9eDcM+tos2o/KZqF0puC8HfF03LWsdXiY3ieBz1MFp82oqgtruBOllxYEjdgQrm5Yf5vgiY/NDp/puo7IEmocTMPmoUp1DpPnhUErNuCC4dFBo2VtA72Rb/REp0kLX0EU3sbNDAo0bj7izmJZtopulKyMTqoGuZV3Uil08HmTqBL/AZfMDTXafek+zTUEqp+26bhKKUOnvJw1Q11oZSs1vDBk7z1WPFmdGFW1YVPBNCwFkvm0dhrSf4Q0eYt0OSHhSoPBnD6Tl2WSsTwQbO4QRiPynmetMCmeMypUdPeESlyj+zAJ0ksXGFE+x5o+CEwA9btKsHMzjYFQG9u5zXTE3TB83SrGVyCHvq+RcgrekovF5KkNFk074Fmmy0JVnvhiria6/1VVrRovJEUmOe8uKYoYPJXoJWua+QcQyEVmCeSdMt8BA21hND4BuiWQSvoYHaPQZoMvix1tB5WNIWamaJ3S8nsCkoEXcpC6jK7USSel/u3QPvvLvcWcMjgghRdao6zwVxEM1g7TIhjFVT9yjyUhLJlrIq+Zh7BDxlXM7j5MYMzaCUNP5jMhRTNSbjgUEDupW/PHLGDswCnDQH9O44IP5SMmUzgrOoJNhAv+pB4J3MxnR+1pJD2OuSxNTXWPg2On4Q8Up3xuJBgTlFvDPa+Gg+bi1K5H6Xyn2LaWKVxt+pUfYXoYRsRgUJBN04u7pRc1JvJxW64SJvzeFy5qlQRNIUPXyqJQvJA6Swa65Mz4Zp3+XCL01RuhMw1hZz9u2kc3+NdjYCdEkyMhnEZ3Dgjpsu6iaOWZFIDVaoGKzyNaxm0FUyOlj/kbq5pt9KKf1DBdHuvYFr90P9v9gmGQrJcrxXsTpz8RuvHiCKETIorphvb5X2ktd+Vpv6mKoR5llQ5tYaOJW0nVPVuaQoz85qUj1FvVbT0EtCej81udTXMASZlx5GxNL6jPTQBKJNcX9+CWTuSRKkVJAc0Ado8bZuyF35I1iFrFRLMWlZD0ZzBy7KSIbaQnpDBrfPDOqw2mRRE20xX6FO5icpKsQONDotMwIdMlqTGjCVrbrfW/vEN0KRNIOIUs1d1mA8MgH/Spb4yxb6EJVxVxVXFvStyXUk0tljvMja2N1+a0mSpJnTso53JyopaYIEfWdU9w/zCPDh76Lz34CkarMEozqPPlPfSNhNZZ33IopLTug6fkLkCT9+aLCcoWY4U6CmEjCtaCmskZyffjvdtlbNknnOynN+jEIIfUrncG3K4LcGEDM6XbpLnA/9qT8GJP+LEPJIxbxRMJGts4HYoGYUEfpJ8m6zBrJUHxIFhVxjFNSA3WSfm3YxpJH5kv89t+87FR5dDI7PErnehcLOTnKZpegt0sFuCCsX60Oaj3jRvZbYvqdAH2A7cUOaNQORZLok7Wmx8JgwGPjnZYQdpu7Sf4N3az7m84Ife/xoRNDvG4sZbclgEVbRNnhfKGK1AG6EfB6GUwU2XYzGBuydYAxaCyI2dk6Ed6MfDX+uw75mHtwHOaz5YSCo3KYN7G0cCHmK8FgJYy/3QaHlzaHtXd4wUfQssA/6raCGmtY4Raq1LqQwxyg/zpPR4AnpGAc7eVtBz941VKEk44cVYXqqY7/lZ8XedI2rFOOipusIYJaVGvhFt7Jdp6bb2mMiWUn4EGrcaJGpO0S6YCvMZU8jgHExiFxlAEqCiKKQyQe0a+cEGqo6WrkDCKOq6NnmOdFcH1A+aLhRWiUcm3gGNXCXYBogUjaUG8RnBItAXWDe7KfYJ+EQXsOsKkEAi5tLDRoWKsDdtVB2o3gEdbdcWohKVb1tI0+VB0yj9Q2HeDW+Ajn7I3rYziSnA1MFUOuOtgXRTt0STU5ONUJL5PA+bagZEY6LqqkDV+eamyStRc6/yCJrqkQ+ixxRChE/eiHIMjpzPkx3MfCHL3IKii1gTrRsEdeYNnVDDwEKNulDoc/fRLkPDlMcz0HY4R/Rfgp6X0fuh6NYaPSSYrRLB19dF6BNrUs1opzuVS5OlfYhW8EUJaIjSoUtx21JiyainHJ9o2r6tadxZkR/KwD6jxhceQSdLH/3cNNrGxw42/fu+qfLlfk33aJTTXOLDtqw7Zq+K27hL0OMw0ngnI8byoohOPc2BTmBz4Dwzbt3LJneADVZPE2Zf7Z+bY9o0UFSWfsumY10qYr2xReTSZ3AqmW+3Nd6pi10dS+ajCjIKd0FrrOTOI2h0w60f3eLeAB38MBJiniLdd4wr8XHNMQTURAFYZl1Ec3r+GI33AjRtFnEtC7P75454D+XGimXfylIQsYe88mR3BDd13Kn3Rufn1ol4FQ6pV6ApSWG8Bdr74Y7GXdwcetk1g28Eg9f9eMms0f1U5qor0Epfg9ZrX9++BTqW+etNGz3jbSGYi2Qr1w+Lvy+lUemjOT+z3JSvTXYJ+sPkElus6ZEI48Zrc8zWSN/3Lu4lK0iE/9F2XJc/sWl8HHrkt0C3Wcgl4zlJ+gweK2nRBEMqXmwKM+/zsCUwepqBYud3kst89sNj7CYdrI0Bm4nJXz3G84tHat7vKnki4TugQ1V0ROKbcOOz8VCFAnV+YBiu/BH7iQjuOxG30UvfAh26QHlYc94Z4gx+j4U0pfnVkqKou5+H8/wGCmgbt3KnuLd5j6DdxEb8OejumMR3e3AVd4qh3GaJlRZZ5he7e1TUoRT1jSw5SrfuIkdNL7+p6VZUxlTnOMYJhpn9wF0z1I5kuTG6XzSmYQyUHCtx89v12NpvcrXvlMuKKnGM6XPQNbrPXJx3te5zX3szWGsT7Ij0oTMKzRMu3aqHAcYW91Yqq6gXbxsh8Hvr217e5VC1H/3yuXn40Z/yESUYZtf3oIdV2K2WL0/D532cp0GSyUGPFEjrt0jVjbywLKdyAn2r8k9APz8r4S1mM4/pctdDHYeWXIFOXY02ErlIiuy2UXWkCiIWeL2QCvtMXO5c/rLK8+MxXVivz3HvqkHYPVZW6+AwNPGxqgY2gBNY/UbVIZC06yBNc0k6ff2I28odPNbR3JHoONR+185v28Db7Ing+9Pn8u6xmliTi33MfoG1wCiOjQ34/kDgHXcM7TqIqL5c4y8cJtylcft46m0bPrOKZlx251Se1kF/+ATkSj0+PyzkA36kXqdl+evHNmNpetVnuSmMMTA75lfB4F8CHTfsKOiNz1SN3Suhn3aQf+GAbGxk9IvkFdk0Ch73nwB6O3ZT9U82R6ifLdXVzvpfO4q8NjLYJro+mGUDyaCzb1vH56AjWaPzZrgA5cLBrF9HmH/z0PdKiwF1v9gTrGmMJy/M9xX9OWi3EpCaq3u7PwjIpy5VYBfsNP+Y4/Ub1asLQXQ5KF5wvRPn6L7NlHfUW/9tN/ytdwKIVJcetaKNiV2P2VWBFnl6MPevvchgaSsgUNQFmpKOGivavcDZ9A2zXX7W2xfMi5qwtyWxGaUq9CZZ3CfS6s9g/s1XRriJ0jrsGxpdomfScUfOFOLpAfm/+p6LpSPleC1ht/kZCWFNryKMy/IDX85BZMDRHaHNfpsZSi95T9YuP/ONItAg2PPGBr7UvJ9P/4TO9Q/p+SuvQRGn0LeNEf7kBH5UzemcwQ98d4s24EAs0akI2uHhkxG/17mmt+QS6AQ6gU6gE+gEOoFOoBPoBDqBTqAT6AQ6gU6gE+gEOoFOoBPoBDqBTqAT6AQ6gU6gE+gEOoFOoBPoBDqB/sHjf87gXsBS0SnkAAAAAElFTkSuQmCC';
+function homeSetup(){try{$a('link[rel="apple-touch-icon"],link[rel="apple-touch-icon-precomposed"]').forEach(function(l){l.remove()});var h=document.head;
+  var l=document.createElement('link');l.rel='apple-touch-icon';l.href=ICON;h.appendChild(l);
+  [['apple-mobile-web-app-capable','yes'],['mobile-web-app-capable','yes'],['apple-mobile-web-app-title','Macro Golf'],['apple-mobile-web-app-status-bar-style','black']].forEach(function(m){var x=document.createElement('meta');x.name=m[0];x.content=m[1];h.appendChild(x)})}catch(e){}
+  var standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone;if(standalone)return;
+  var ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua),android=/Android/.test(ua);if(!ios&&!android)return;
+  try{if(localStorage.getItem('ux-a2hs-off'))return}catch(e){}
+  var deferred=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferred=e});
+  setTimeout(function(){var c=el('div','ux-a2hs');c.setAttribute('role','dialog');c.setAttribute('aria-label','Add to home screen');
+    c.innerHTML='<img src="'+ICON+'" alt=""><div class="ux-a2hs-t"><b>Add your plan to your home screen</b><span>'+(ios?'Tap the Share button <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v7h14v-7" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg> at the bottom of Safari, then <b>Add to Home Screen</b>.':'Tap the <b>⋮</b> menu at the top of Chrome, then <b>Add to Home screen</b>.')+' It opens full screen like an app.</span></div>'+
+     '<div class="ux-a2hs-b">'+(android?'<button type="button" data-x="install" class="ux-btn y">Add</button>':'')+'<button type="button" data-x="off" class="ux-close">Not now</button></div>';
+    document.body.appendChild(c);c.addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(!b)return;
+      if(b.dataset.x==='install'&&deferred){deferred.prompt();deferred=null}try{localStorage.setItem('ux-a2hs-off','1')}catch(x){}c.remove()})},2500)}
+function pbTab(){if(document.querySelector('.ux-pbtab'))return;var b=el('button','ux-pbtab','<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0V4zM5 5H3v2a4 4 0 0 0 4 4M19 5h2v2a4 4 0 0 1-4 4M9 15h6l1 5H8l1-5z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>My PBs');b.type='button';b.setAttribute('aria-label','See my personal bests');b.addEventListener('click',bests);document.body.appendChild(b)}
+return {init:function(o){for(var k in o)CFG[k]=o[k];watch();bestsButton();pbTab();if(CFG.home)homeSetup()},bests:bests,decorate:decorate,points:points};
+})();
+UX.init({family:'golf',home:false});
+</script>
+<script>
+/* golf glue: My PBs opens the golf bests; the name from sign-in also fills the first screen */
+(function(){var t=document.querySelector(".ux-pbtab");if(t&&window.MG_GOLF_BESTS){var b=t.cloneNode(true);t.parentNode.replaceChild(b,t);b.addEventListener("click",function(){window.MG_GOLF_BESTS()})}
+  var p=document.getElementById("player"),g=document.getElementById("gName");
+  if(p&&g){var fill=function(){if(!g.value.trim()&&p.value.trim()){g.value=p.value;g.dispatchEvent(new Event("input",{bubbles:true}))}};p.addEventListener("input",fill);fill()}})();
+</script>
+<script>var KEY="insanity";</script>
+<script src="{{BASE}}src/sync.js"></script>
+<script>MGSync.init({plan:'golf-insanity',planName:'Insanity',group:'golf'})</script>

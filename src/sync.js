@@ -1,7 +1,10 @@
 /* Macro Golf tracker cloud sync.
    Usage (after the tracker script):  MGSync.init({code:'836790'})            // personal page
                                       MGSync.init({plan:'pure-power-gym', planName:'Pure Power (gym)'})  // Pure plan: client signs in with email + PIN
-   Needs the tracker's globals: S (state), KEY (localStorage key), save(). */
+                                      MGSync.init({plan:'golf-hole-out', planName:'Hole Out', group:'golf'})  // group: one sign-in covers every page in the group
+   Needs the tracker's globals: S (state), KEY (localStorage key), save().
+   group (optional): pages sharing a group remember the email + PIN once per device, so the next page in the
+   group signs in by itself. Each page still keeps its own data (its own code). Pages without group are unchanged. */
 var MGSync=(function(){
 var URL='https://zhcgwtlyqriwlhbzkxcl.supabase.co/rest/v1/rpc/',APIKEY='sb_publishable__IBhmrVHOXsLHruU7XJB-g_OSN9Ljne';
 var CFG={},CK,cred=null,timer=null,busy=false,pill=null,state='off',origSave=null,started=false;
@@ -12,6 +15,13 @@ function getCred(){try{return JSON.parse(ls(CK)||'null')}catch(e){return null}}
 function setCred(c){cred=c;ls(CK,c?JSON.stringify(c):null)}
 function rpc(name,body){return fetch(URL+name,{method:'POST',headers:{apikey:APIKEY,'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){
   return r.text().then(function(t){var j=null;try{j=JSON.parse(t)}catch(e){}if(!r.ok||(j&&j.error)){var err=new Error((j&&(j.error||j.message))||('HTTP '+r.status));err.server=true;throw err}return j})})}
+/* ---------- group sign-in (opt-in via CFG.group) ---------- */
+function setGroup(g){if(!CFG.group||!CFG.plan||CFG.code)return;ls('mgsync-group:'+CFG.group,g?JSON.stringify(g):null)}
+function getGroup(){if(!CFG.group||!CFG.plan||CFG.code)return null;try{return JSON.parse(ls('mgsync-group:'+CFG.group)||'null')}catch(e){return null}}
+function autoSignIn(g){var code='pure:'+CFG.plan+':'+g.em;setPill('saving');
+  rpc('mg_load',{p_code:code,p_pin:g.pin,p_name:g.name||null,p_plan:CFG.planName||CFG.plan||null}).then(function(r){setCred({code:code,pin:g.pin,name:g.name||null,base:0});
+    if(g.name)ls('mgsync-pname:'+KEY,g.name);if(!reconcile(r&&r.data)){setPill('ok');applyName()}})
+  .catch(function(err){if(err&&err.server){setPill('pin');gate(/Wrong PIN/i.test(err.message)?'This game has a different PIN. Enter it to sign in.':err.message)}else setPill('offline')})}
 function stamp(){return (window.S&&window.S._mgT)||0}
 
 /* ---------- merge: keep everything from both sides, newer side wins on plain values ---------- */
@@ -68,9 +78,9 @@ function gate(msg){if($q('.mgs-gate'))return;var pure=!!CFG.plan&&!CFG.code,g=do
   document.body.appendChild(g);var f=$q('form',g),pin=f.pin;var nm=f.elements['pname'];if(nm){var cur=document.getElementById('player');if(cur&&cur.value)nm.value=cur.value}setTimeout(function(){(nm&&!nm.value?nm:(pure?f.elements['email']:pin)).focus()},50);
   $q('.mgs-gn',g).addEventListener('click',function(){ls('mgsync-skip:'+KEY,String(Date.now()));g.remove();setPill('off')});
   f.addEventListener('submit',function(e){e.preventDefault();var p=String(pin.value).replace(/\D/g,'');if(p.length<4){$q('.mgs-gerr',g).textContent='PIN must be at least 4 digits.';return}
-    var code=CFG.code,name=CFG.name||null;if(pure){var em=String(f.email.value).trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){$q('.mgs-gerr',g).textContent='Check your email address.';return}code='pure:'+CFG.plan+':'+em;name=String(f.elements['pname'].value).trim()||null}
+    var code=CFG.code,name=CFG.name||null,em=null;if(pure){em=String(f.email.value).trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){$q('.mgs-gerr',g).textContent='Check your email address.';return}code='pure:'+CFG.plan+':'+em;name=String(f.elements['pname'].value).trim()||null}
     var btn=$q('.mgs-gy',g);btn.disabled=true;btn.textContent='Checking\u2026';
-    rpc('mg_load',{p_code:code,p_pin:p,p_name:name,p_plan:CFG.planName||CFG.plan||null}).then(function(r){setCred({code:code,pin:p,name:name,base:0});ls('mgsync-skip:'+KEY,null);g.remove();if(name)ls('mgsync-pname:'+KEY,name);if(!reconcile(r&&r.data)){setPill('ok');applyName()}})
+    rpc('mg_load',{p_code:code,p_pin:p,p_name:name,p_plan:CFG.planName||CFG.plan||null}).then(function(r){setCred({code:code,pin:p,name:name,base:0});if(pure)setGroup({em:em,pin:p,name:name});ls('mgsync-skip:'+KEY,null);g.remove();if(name)ls('mgsync-pname:'+KEY,name);if(!reconcile(r&&r.data)){setPill('ok');applyName()}})
     .catch(function(err){btn.disabled=false;btn.textContent='Save to cloud';$q('.mgs-gerr',g).textContent=err.server?(/Wrong PIN/.test(err.message)?'That PIN does not match. Try again.':err.message):'No connection. Try again when you are online.'})})}
 
 /* fill the tracker's own name box from the sign-in, so clients only type it once */
@@ -87,7 +97,7 @@ function menu(){if(!cred){ls('mgsync-skip:'+KEY,null);gate();return}if(state==='
   var who=cred.code.indexOf('pure:')===0?cred.code.split(':').slice(2).join(':'):'page '+cred.code;
   if(confirmBox('Saved to cloud as '+who+'. Sign out on this device? Your logs stay saved in the cloud.'))return}
 function confirmBox(text){if($q('.mgs-gate'))return;var g=document.createElement('div');g.className='mgs-gate';g.innerHTML='<div class="mgs-gin"><div class="mgs-gk">Cloud save</div><p class="mgs-gp">'+esc(text)+'</p><button class="mgs-gy" type="button" data-x="sync">Sync now</button><button class="mgs-gn" type="button" data-x="out">Sign out on this device</button><button class="mgs-gn" type="button" data-x="close">Close</button></div>';
-  document.body.appendChild(g);g.addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(!b)return;g.remove();if(b.dataset.x==='sync')pull();if(b.dataset.x==='out'){setCred(null);setPill('off')}});return true}
+  document.body.appendChild(g);g.addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(!b)return;g.remove();if(b.dataset.x==='sync')pull();if(b.dataset.x==='out'){setCred(null);setGroup(null);setPill('off')}});return true}
 
 function css(){if($q('#mgs-sync-css'))return;var s=document.createElement('style');s.id='mgs-sync-css';s.textContent=
  '.mgs-pill{position:fixed;left:max(10px,env(safe-area-inset-left,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:38;display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:0 11px;border:0;background:#0B0B0B;color:#F4F1EA;font:600 11.5px/1 Inter,system-ui,sans-serif;letter-spacing:.4px;cursor:pointer;opacity:.92}'+
@@ -107,6 +117,6 @@ function init(o){if(started)return;started=true;for(var k in o)CFG[k]=o[k];
   window.addEventListener('online',function(){if(cred&&stamp()>(cred.base||0))push()});
   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&cred){if(stamp()>(cred.base||0))push();else pull()}else if(document.visibilityState==='hidden'&&cred&&stamp()>(cred.base||0))push()});
   setInterval(function(){if(cred&&state==='offline')push()},30000);
-  if(cred){applyName();pull()}else{var sk=+ls('mgsync-skip:'+KEY)||0;if(Date.now()-sk>3*864e5)setTimeout(function(){gate()},600);else setPill('off')}}
+  if(cred){applyName();pull()}else if(getGroup()){autoSignIn(getGroup())}else{var sk=+ls('mgsync-skip:'+KEY)||0;if(Date.now()-sk>3*864e5)setTimeout(function(){gate()},600);else setPill('off')}}
 return {init:init,_merge:merge,_summary:summary,push:push,pull:pull};
 })();

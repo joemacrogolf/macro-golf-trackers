@@ -19,12 +19,14 @@ Load after the tracker script (needs its `S`, `KEY` and `save()` globals):
 <script src="https://cdn.jsdelivr.net/gh/joemacrogolf/macro-golf-trackers@<commit>/src/sync.js"></script>
 <script>MGSync.init({code:'836790', name:'Dan Jones'})</script>                      <!-- 1-to-1 page: code = Kajabi page number -->
 <script>MGSync.init({plan:'pure-power-gym', planName:'Pure Power (gym)'})</script>  <!-- Pure plan: client signs in with email + PIN -->
+<script>MGSync.init({plan:'golf-hole-out', planName:'Hole Out', group:'golf'})</script> <!-- golf game: one sign-in covers every golf page -->
 ```
 
 - First open shows a PIN screen (Pure plans also ask for first name and email). "Not now" keeps it local-only and asks again after 3 days.
 - Saves are debounced and pushed to Supabase; offline saves catch up when the connection returns.
 - Coming back to the tab pulls changes from other devices. If both sides changed, they are merged (nothing is dropped; newer plain values win).
 - A small pill bottom-left shows the state. Tap it to sync now or sign out on that device.
+- `group` (optional, email + PIN pages only): pages in the same group remember the sign-in once per device, so the next page signs itself in. Each page still saves under its own code. Pages without `group` are unchanged.
 - Each save carries a `_mgSummary` (sessions, dates, top bests) for the coach dashboard. `ux.js` must be loaded for bests.
 
 ## Coach dashboard (`coach.html`)
@@ -64,3 +66,5 @@ Full tracker pages live in `pages/`. A Kajabi Custom Code block only needs:
 | Pure Sequencing (gym / home) | `pure-sequencing-gym`, `pure-sequencing-home` |
 | Dan Jones / Harry / Kevin (1-to-1) | `dan-jones`, `harry`, `kevin` |
 | Coach dashboard | `coach` |
+| Golf games (Jack): Hole Out, Wedge Darts, Money Stealers, Left Is Lava, Par 18, Insanity, 3 Strikes, 50ft Bank, Driver Corridor | `golf-hole-out`, `golf-wedge-darts`, `golf-money-stealers`, `golf-left-is-lava`, `golf-par-18`, `golf-insanity`, `golf-three-strikes`, `golf-fifty-ft-bank`, `golf-driver-corridor` |
+| Golf tests (Jack): Putting, Short Game, Long Game | `golf-putting-test`, `golf-short-game-test`, `golf-long-game-test` |
