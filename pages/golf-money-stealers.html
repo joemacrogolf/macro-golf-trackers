@@ -412,7 +412,7 @@ body.gated{overflow:hidden}
     <div class="read" aria-live="polite">
       <h3 id="readTitle"></h3>
       <div class="facts" id="readFacts"></div>
-      <p id="readTip"></p>
+      <p id="readTip" hidden></p>
       <button class="linky" id="rerollBtn" type="button">Can't set this up? Give me a different putt</button>
     </div>
     <div class="label">Points from 2 putts</div>
@@ -572,12 +572,6 @@ function makeRead(){
 }
 function makeReads(){const r=[];for(let i=0;i<5;i++){let x;do{x=makeRead()}while(r.length&&x.slope===r[r.length-1].slope&&x.brk===r[r.length-1].brk);r.push(x)}return r}
 function readTxt(r){return `${r.slope}, ${r.brk==="Straight"?"straight":r.amt.toLowerCase()+" "+r.brk.toLowerCase()}`}
-function readTip(r){
-  const pace=r.slope==="Downhill"?"Downhill: the zone is easy to overshoot, so let gravity do the work and aim to die it at the hole.":r.slope==="Uphill"?"Uphill: be firm enough to reach the hole. Short is the common miss.":"Flat: a normal pace, finishing about a foot past.";
-  const side=r.brk==="Left to right"?"left":"right";
-  const line=r.brk==="Straight"?" Straight putt: start it at the hole.":` ${r.amt}: start it ${r.amt==="Small break"?"just":r.amt==="Medium break"?"well":"a long way"} ${side} of the hole and let it feed in.`;
-  return pace+line;
-}
 function reads(){if(!S.reads)S.reads={};const MAP={"Half a cup":"Small break","1 cup":"Small break","2 cups":"Medium break","3 cups":"High break"};Object.values(S.reads).forEach(l=>(l||[]).forEach(r=>{if(r.amt&&MAP[r.amt])r.amt=MAP[r.amt]}));if(!S.reads[S.mode]||S.reads[S.mode].length!==5)S.reads[S.mode]=makeReads();return S.reads[S.mode]}
 function save(){try{localStorage.setItem("moneyStealers",JSON.stringify(S))}catch(e){}}
 function load(){try{const v=JSON.parse(localStorage.getItem("moneyStealers"));if(v&&v.scores&&v.scores.short&&v.scores.ext)return v}catch(e){}return null}
@@ -647,7 +641,7 @@ function renderEntry(){
   const r=reads()[n];
   $("readTitle").textContent=`${d} ft · ${r.slope.toLowerCase()} putt`;
   $("readFacts").innerHTML=[r.slope,r.brk==="Straight"?"Straight":"Breaks "+r.brk.toLowerCase(),r.amt].filter(Boolean).map(x=>`<span>${x}</span>`).join("");
-  $("readTip").textContent=readTip(r);
+  $("readTip").textContent="";$("readTip").hidden=true;
 }
 function renderCard(){
   const a=sc();let h=`<thead><tr><th class="l">Station</th><th class="l">Putt</th><th>Points</th><th>${hcName(S.target)} par</th><th>+/−</th></tr></thead><tbody>`;

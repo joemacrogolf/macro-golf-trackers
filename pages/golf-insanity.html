@@ -414,7 +414,7 @@ body.gated{overflow:hidden}
     <div class="read" aria-live="polite">
       <h3 id="readTitle"></h3>
       <div class="facts" id="readFacts"></div>
-      <p id="readTip"></p>
+      <p id="readTip" hidden></p>
       <button class="linky" id="rerollBtn" type="button">Can't set this up? Give me a different putt</button>
     </div>
     <div class="mm">
@@ -500,11 +500,6 @@ var rKey=r=>r.slope+r.brk+(r.amt||"");
 function makePlan(){const p=[];DISTS.forEach(d=>{for(let i=0;i<PER;i++){let r;do{r=makeRead()}while(p.length&&rKey(r)===rKey(p[p.length-1]));p.push({d,...r})}});return p}
 function prob(h,pt){const p=RATE[h][DISTS.indexOf(pt.d)]/100*SLOPE_M[pt.slope]*BRK_M[pt.amt||"Straight"];return Math.min(0.97,p)}
 function readTxt(r){return `${r.slope.toLowerCase()}, ${r.brk==="Straight"?"straight":r.amt.toLowerCase()+" "+r.brk.toLowerCase()}`}
-function readTip(r){
-  const pace=r.slope==="Downhill"?"Downhill: die it at the hole, as anything firm will run well past.":r.slope==="Uphill"?"Uphill: be positive and firm, as this is one to attack.":"Flat: a normal pace, finishing a foot past.";
-  if(r.brk==="Straight")return pace+" Straight putt: start it at the hole.";
-  return pace+` Start it ${r.amt==="Small break"?"just":r.amt==="Medium break"?"well":"a long way"} ${r.brk==="Left to right"?"left":"right"} of the hole and let it feed in.`;
-}
 
 var $=id=>document.getElementById(id);
 var S;
@@ -556,7 +551,7 @@ function renderEntry(){
   $("parPill").textContent=`${hcName(S.target)}: ${Math.round(prob(S.target,pt)*100)}%`;
   $("readTitle").textContent=`${pt.d} ft · ${pt.slope.toLowerCase()} putt`;
   $("readFacts").innerHTML=[pt.slope,pt.brk==="Straight"?"Straight":"Breaks "+pt.brk.toLowerCase(),pt.amt].filter(Boolean).map(x=>`<span>${x}</span>`).join("");
-  $("readTip").textContent=readTip(pt)+` Tour holes this ${Math.round(prob("Tour",pt)*100)}% of the time.`;
+  $("readTip").textContent="";$("readTip").hidden=true;
 }
 function renderCard(){
   let h=`<thead><tr><th class="l">Distance</th><th>Putts</th><th>Holed</th><th>${hcName(S.target)}</th><th>Tour</th></tr></thead><tbody>`;
