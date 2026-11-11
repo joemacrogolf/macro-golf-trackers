@@ -4,6 +4,10 @@
 window.MGV_NOAUTO=true;
 var MGWarm=(function(){
 var VID='rxkqwwoq0t',TITLE='Express 5 Minute Golf Warm Up';
+/* "How to play" videos from the Practice Games library, by page */
+var GAME={'golf-hole-out':['Hole Out','v79x5jmgq4'],'golf-money-stealers':['Money Stealers','03wsak6uxo'],'golf-insanity':['Insanity','583iekejmx'],'golf-fifty-ft-bank':['50ft Bank','fb5shey97s'],'golf-par-18':['Par 18','jiak1zvshi']};
+function game(){var s=document.querySelector('script[data-page]');return s&&GAME[s.getAttribute('data-page')]}
+function howBtn(){var g=game();return g?'<button type="button" class="mgw-ghost" data-w="game">'+PLAY+'How to play</button>':''}
 function today(){var d=new Date(),m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd}
 function isDone(){try{return localStorage.getItem('mg-golfwarm')===today()}catch(e){return false}}
 function setDone(v){try{if(v)localStorage.setItem('mg-golfwarm',today());else localStorage.removeItem('mg-golfwarm')}catch(e){}}
@@ -11,9 +15,9 @@ function watch(){if(window.MGVideo)MGVideo.open(TITLE,VID);else window.open('htt
 var PLAY='<svg width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z" fill="currentColor"/></svg>';
 function paint(card){var d=isDone();card.classList.toggle('done',d);
   card.querySelector('.mgw-body').innerHTML=d?
-   '<div class="mgw-row"><span class="mgw-tick" aria-hidden="true">✓</span><div class="mgw-t"><b>Warmed up today</b><small>Express 5-minute golf warm-up</small></div><button type="button" class="mgw-ghost" data-w="watch">Watch again</button><button type="button" class="mgw-link" data-w="undo">Undo</button></div>':
+   '<div class="mgw-row"><span class="mgw-tick" aria-hidden="true">✓</span><div class="mgw-t"><b>Warmed up today</b><small>Express 5-minute golf warm-up</small></div><button type="button" class="mgw-ghost" data-w="watch">Watch again</button>'+howBtn()+'<button type="button" class="mgw-link" data-w="undo">Undo</button></div>':
    '<div class="mgw-k">Before you start</div><div class="mgw-h">Express 5-minute golf warm-up</div><p>Do this before your first ball. It gets your body ready to swing at full speed and helps protect your back.</p>'+
-   '<div class="mgw-btns"><button type="button" class="mgw-y" data-w="watch">'+PLAY+'Watch the warm-up</button><button type="button" class="mgw-ghost" data-w="done">Done, I’m warm</button></div>'}
+   '<div class="mgw-btns"><button type="button" class="mgw-y" data-w="watch">'+PLAY+'Watch the warm-up</button><button type="button" class="mgw-ghost" data-w="done">Done, I’m warm</button>'+howBtn()+'</div>'}
 function css(){if(document.getElementById('mgw-css'))return;var s=document.createElement('style');s.id='mgw-css';s.textContent=[
  '.mgw{background:#0B0B0B;color:#F4F1EA;text-align:left;border-left:6px solid #FFD900;font-family:Inter,system-ui,sans-serif}',
  '.mgw .mgw-body{padding:18px}.mgw.done .mgw-body{padding:12px 14px}',
@@ -33,7 +37,7 @@ function init(){var how=document.getElementById('howto');if(!how||document.query
   var card=document.createElement('section');card.setAttribute('aria-label','Golf warm-up');var pad=how.classList.contains('pad');
   card.className='mgw'+(pad?' pad':'');card.innerHTML=pad?'<div class="inner"><div class="mgw-body"></div></div>':'<div class="mgw-body"></div>';
   how.parentNode.insertBefore(card,how.nextSibling);paint(card);
-  card.addEventListener('click',function(e){var b=e.target.closest('[data-w]');if(!b)return;var w=b.dataset.w;if(w==='watch')watch();else if(w==='done'){setDone(true);paint(card)}else if(w==='undo'){setDone(false);paint(card)}})}
+  card.addEventListener('click',function(e){var b=e.target.closest('[data-w]');if(!b)return;var w=b.dataset.w;if(w==='watch')watch();else if(w==='game'){var g=game();if(g&&window.MGVideo)MGVideo.open(g[0]+': how to play',g[1])}else if(w==='done'){setDone(true);paint(card)}else if(w==='undo'){setDone(false);paint(card)}})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else setTimeout(init,0);
 return {watch:watch};
 })();
