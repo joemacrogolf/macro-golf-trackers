@@ -1,136 +1,457 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap">
 <style>
-/* Paul Goddard golf plan: Macro Golf house style (black cover band, yellow bar, square corners) */
-#pg{--bg:#FFFFFF;--line:rgba(11,11,11,0.16);--fg:#0B0B0B;--muted:#77715F;--body:#3B3830;--ink:#0B0B0B;--on-ink:#F4F1EA;--gold:#FFD900;--gold-ink:#8a7f00;--soft:#F4F1EA;--good:#1FA855;--warn:#F5A800;--bad:#E0352B;
-  --display:"Anton","Arial Narrow",Impact,sans-serif;--text:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
-  background:var(--bg);color:var(--body);font-family:var(--text);font-size:15px;line-height:1.55;padding:16px 16px 90px}
-#pg *{box-sizing:border-box;border-radius:0}
-#pg .wrap{max-width:580px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
-#pg h1,#pg h2,#pg h3{font-family:var(--display);font-weight:400;text-transform:uppercase;letter-spacing:-.3px;margin:0;color:var(--fg)}
-#pg .tnum{font-variant-numeric:tabular-nums}
-#pg .muted{color:var(--muted);font-size:13px}
-#pg .label{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)}
-#pg .eyebrow{font-size:11px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;color:var(--gold-ink)}
-#pg button{font-family:var(--text);font-weight:700;border:0;padding:12px 16px;cursor:pointer;letter-spacing:.04em;color:var(--fg);background:transparent}
-#pg button:disabled{opacity:.4;cursor:not-allowed}
-#pg input,#pg select{font-family:var(--text);color:var(--fg)}
-#pg input:focus-visible,#pg button:focus-visible,#pg select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-#pg .cover{background:var(--ink);color:var(--on-ink);padding:22px 22px 18px;display:flex;flex-direction:column;gap:16px}
-#pg .goldbar{width:74px;height:7px;background:var(--gold)}
-#pg .cover h1{font-size:clamp(46px,14vw,66px);line-height:.94;letter-spacing:-1px;color:var(--on-ink)}
-#pg .cover h1 span{display:block}#pg .cover h1 .g{color:var(--gold);font-size:.46em;line-height:1.06;margin-top:6px}
-#pg .sub{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(244,241,234,.62)}
-#pg .strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid rgba(244,241,234,.18);padding-top:12px}
-#pg .strip>div{display:flex;flex-direction:column;gap:2px;min-width:0;padding:0 10px;border-left:1px solid rgba(244,241,234,.18)}
-#pg .strip>div:first-child{padding-left:0;border-left:0}
-#pg .strip .k{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold)}
-#pg .strip .v{font-family:var(--display);font-size:16px;line-height:1.15;text-transform:uppercase;color:var(--on-ink)}
-#pg .sec-h{display:flex;flex-direction:column;gap:6px;margin-top:10px}
-#pg .sec-h h2{font-size:28px;line-height:1.08}
-#pg .sec-h h2::after{content:"";display:block;width:74px;height:6px;background:var(--gold);margin-top:12px}
-#pg .card{background:var(--bg);border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:14px}
-#pg .fld{display:flex;flex-direction:column;gap:4px;min-width:0}
-#pg .fld input{font-size:18px;font-weight:600;padding:10px 12px;border:1px solid var(--line);background:var(--bg);width:100%;min-width:0}
-#pg .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-#pg .primary{background:var(--gold);color:var(--fg);font-family:var(--display);font-weight:400;font-size:20px;text-transform:uppercase;letter-spacing:.5px;padding:14px 18px}
-#pg .dark{background:var(--ink);color:var(--gold);font-family:var(--display);font-weight:400;font-size:18px;text-transform:uppercase;letter-spacing:.5px;padding:12px 16px}
-#pg .ghost{border:1px solid var(--line);background:var(--bg);color:var(--fg)}
-#pg .btns{display:flex;gap:10px;flex-wrap:wrap}#pg .btns>*{flex:1}
-#pg .linky{background:none;border:0;padding:0;color:var(--muted);text-decoration:underline;font-weight:400;font-size:13px;letter-spacing:0;align-self:flex-start}
-#pg .seg{display:flex;border:1px solid var(--line)}
-#pg .seg button{flex:1;padding:12px 6px;font-size:14px;color:var(--muted)}
-#pg .seg button[aria-pressed="true"]{background:var(--ink);color:var(--gold)}
-#pg .pick{display:grid;gap:10px}
-#pg .pick button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;background:var(--bg);border:1px solid var(--line);border-left:6px solid var(--line);padding:14px}
-#pg .pick button b{font-family:var(--display);font-weight:400;font-size:22px;text-transform:uppercase;letter-spacing:-.3px}
-#pg .pick button small{font-weight:400;font-size:13px;color:var(--body);letter-spacing:0}
-#pg .pick button[aria-pressed="true"]{border-color:var(--ink);border-left-color:var(--gold);background:var(--soft)}
-#pg .planlist{display:flex;flex-direction:column;border:1px solid var(--line)}
-#pg .planlist .row{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:9px 12px;border-top:1px solid var(--line)}
-#pg .planlist .row:first-child{border-top:0}
-#pg .planlist .n{font-family:var(--display);font-size:18px;color:var(--gold-ink)}
-#pg .planlist .t{font-weight:600;color:var(--fg);min-width:0}#pg .planlist .t small{display:block;font-weight:400;color:var(--muted);font-size:12px}
-#pg .planlist .m{font-family:var(--display);font-size:16px;color:var(--fg)}
-#pg .planlist .row.done .n{color:var(--good)}#pg .planlist .row.cur{background:var(--soft);box-shadow:inset 6px 0 0 var(--gold)}
-#pg .planlist .grp{padding:8px 12px;background:var(--ink);color:var(--gold);font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase}
-#pg .board{background:var(--ink);color:var(--on-ink);padding:16px 18px;display:grid;grid-template-columns:1fr auto;gap:4px 14px;align-items:end;border-left:6px solid var(--gold);position:sticky;top:0;z-index:5}
-#pg .board .label{color:var(--gold)}
-#pg .board .big{font-family:var(--display);font-size:52px;line-height:.9;color:var(--on-ink)}
-#pg .board .side{text-align:right;display:flex;flex-direction:column;gap:2px}
-#pg .board .side b{font-family:var(--display);font-weight:400;font-size:22px;color:var(--on-ink)}
-#pg .board .side .label{color:rgba(244,241,234,.7)}
-#pg .prog{grid-column:1/-1;display:flex;gap:3px;margin-top:8px}
-#pg .prog i{flex:1;height:5px;background:rgba(244,241,234,.18)}#pg .prog i.on{background:var(--gold)}#pg .prog i.cur{background:var(--on-ink)}
-#pg .blockhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-#pg .blockhead h2{font-size:28px;line-height:1.02}
-#pg .mins{font-family:var(--display);font-size:24px;color:var(--fg);white-space:nowrap}
-#pg .mins small{font-family:var(--text);font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--muted);margin-left:3px}
-#pg .steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
-#pg .feel{background:var(--ink);color:var(--on-ink);padding:16px;border-left:6px solid var(--gold);display:flex;flex-direction:column;gap:6px}
-#pg .feel b{font-family:var(--display);font-weight:400;font-size:24px;line-height:1.1;text-transform:uppercase;color:var(--gold)}
-#pg .timer{display:flex;align-items:center;gap:12px;border:1px solid var(--line);padding:8px 12px}
-#pg .timer b{font-family:var(--display);font-size:30px;color:var(--fg);flex:1}
-#pg .call{background:var(--soft);padding:14px;display:flex;flex-direction:column;gap:4px}
-#pg .call .d{font-family:var(--display);font-size:52px;line-height:.9;color:var(--fg)}
-#pg .call .d small{font-size:20px;color:var(--muted);margin-left:4px}
-#pg .facts{display:flex;flex-wrap:wrap;gap:6px}
-#pg .facts span{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);padding:3px 7px;background:var(--bg);color:var(--fg)}
-#pg .lmrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-#pg .lmrow input,#pg .bigin input{font-size:24px;font-weight:700;padding:10px 12px;border:1px solid var(--line);width:100%;min-width:0}
-#pg .bigin{display:grid;grid-template-columns:1fr auto;gap:10px}
-#pg .okno{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-#pg .okno button{font-family:var(--display);font-weight:400;font-size:22px;text-transform:uppercase;padding:16px}
-#pg .okno .y{background:var(--good);color:#fff}#pg .okno .x{background:var(--bad);color:#fff}
-#pg .pts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
-#pg .pts button{border:1px solid var(--line);background:var(--bg);padding:10px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:600;letter-spacing:0;color:var(--muted)}
-#pg .pts button b{font-family:var(--display);font-weight:400;font-size:24px;color:var(--fg)}
-#pg .face{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-#pg .face button{border:1px solid var(--line);background:var(--bg);padding:14px 4px;font-size:13px}
-#pg .face button.c{background:var(--gold);border-color:var(--gold)}
-#pg .tally{display:flex;flex-wrap:wrap;gap:6px}
-#pg .tally span{font-size:13px;font-weight:700;padding:5px 9px;border:1px solid var(--line);color:var(--fg)}
-#pg .tally span.ok{background:var(--good);border-color:var(--good);color:#fff}#pg .tally span.no{background:var(--bad);border-color:var(--bad);color:#fff}#pg .tally span.mid{background:var(--warn);border-color:var(--warn)}
-#pg .flash{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#fff}
-#pg .flash b{font-family:var(--display);font-weight:400;font-size:32px;line-height:1}
-#pg .flash span{font-size:14px}
-#pg .flash.p{background:var(--good)}#pg .flash.m{background:var(--bad)}#pg .flash.z{background:var(--ink)}
-#pg .verdict{background:var(--ink);color:var(--on-ink);padding:20px;display:flex;flex-direction:column;gap:8px;border-left:6px solid var(--gold)}
-#pg .verdict .k{font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold)}
-#pg .verdict .hc{font-family:var(--display);font-size:64px;line-height:.9;color:var(--on-ink)}
-#pg .verdict p{margin:0;color:rgba(244,241,234,.88)}
-#pg .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line)}
-#pg .stats div{padding:12px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:2px;min-width:0}
-#pg .stats div:first-child{border-left:0}
-#pg .stats b{font-family:var(--display);font-weight:400;font-size:26px;color:var(--fg);line-height:1}
-#pg .up{color:var(--good)}#pg .down{color:var(--bad)}
-#pg .grid{overflow-x:auto}
-#pg table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
-#pg th,#pg td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--line);font-size:14px;color:var(--fg)}
-#pg th{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;background:var(--soft)}
-#pg td.r,#pg th.r{text-align:right}
-#pg .pb{display:inline-block;background:var(--gold);color:var(--fg);font-size:10px;font-weight:700;letter-spacing:1.4px;padding:2px 6px;margin-left:6px;text-transform:uppercase}
-#pg .note{font-size:13px;color:var(--fg);background:var(--soft);border-left:6px solid var(--gold);padding:10px 12px}
-#pg .resume{border:2px solid var(--ink);background:var(--soft);padding:14px;display:flex;flex-direction:column;gap:10px}
-#pg .wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
-#pg .wk div{border:1px solid var(--line);padding:6px 2px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;gap:2px;min-height:58px}
-#pg .wk div i{font-style:normal;font-size:8.5px;font-weight:700;letter-spacing:0;padding:2px 0;overflow:hidden}
-#pg .wk div i.r{background:var(--ink);color:var(--gold)}#pg .wk div i.p{background:var(--gold);color:var(--fg)}
-#pg .wk div.today{border:2px solid var(--ink)}
-#pg .cta{background:var(--ink);color:var(--on-ink);padding:18px 20px;display:flex;flex-direction:column;gap:6px;border-bottom:6px solid var(--gold)}
-#pg .cta b{font-family:var(--display);font-weight:400;font-size:22px;text-transform:uppercase;line-height:1.1}#pg .cta b span{color:var(--gold)}
-#pg .cta small{color:#9C988C;font-size:11px;letter-spacing:2px;font-weight:700;text-transform:uppercase}
-@media (max-width:380px){#pg .call .d{font-size:44px}#pg .board .big{font-size:44px}#pg .stats b{font-size:22px}}
-</style>
+/* Layout: Macro Golf house style. Black cover band with gold bar and stacked caps, black live scoreboard, light inner cards with gold eyebrow labels */
+:root{
+  --bg:#f3f3f1; --surface:#ffffff; --line:#dddbd4; --fg:#111111; --muted:#5f5d57;
+  --ink:#0d0d0d; --ink-2:#1b1b1b; --on-ink:#ffffff; --on-ink-muted:#a8a59c;
+  --gold:#FFD900; --gold-ink:#7a6800; --gold-soft:#fff5bf;
+  --p3:#1f7a46; --p2:#5a9a3c; --p1:#c48a12; --p0:#b23a2e;
+  --display:Calibri,"Carlito","Segoe UI",Arial,sans-serif;
+  --body:Calibri,"Carlito","Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
+.wrap{max-width:580px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1,h2{font-family:var(--display);margin:0;text-wrap:balance}
+.label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.tnum{font-variant-numeric:tabular-nums}
 
-<div id="pg"><div class="wrap">
-  <header class="cover">
-    <span class="sub">Macro Golf · Performance Plan</span>
-    <div class="goldbar"></div>
-    <h1><span id="hName">Paul Goddard</span><span class="g">Golf plan · goal scratch</span></h1>
-    <div class="strip"><div><span class="k">Goal</span><span class="v">Scratch</span></div><div><span class="k">Rounds</span><span class="v">2 / week</span></div><div><span class="k">Range</span><span class="v">Practice</span></div></div>
-  </header>
-  <div id="main"></div>
-  <div class="cta"><b>Every shot. <span>One number.</span></b><small>Copyright Macro Golf Studios Ltd · macro.golf</small></div>
+/* cover band */
+.cover{background:var(--ink);color:var(--on-ink);border-radius:4px;padding:22px 20px 18px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.cover::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--gold)}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.brand .mark{font-weight:700;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.brand .sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--on-ink-muted)}
+.cover h1{font-weight:700;text-transform:uppercase;line-height:.88;letter-spacing:-.01em;font-size:clamp(40px,11vw,62px)}
+.cover h1 span{display:block}
+.cover h1 .g{color:var(--gold)}
+.goldbar{width:56px;height:5px;background:var(--gold)}
+.strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;border-top:1px solid #2c2c2c;padding-top:12px}
+.strip div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.strip .k{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--on-ink-muted);font-weight:700}
+.strip .v{font-weight:700;font-size:15px}
+.strip select option{color:#111;background:#fff}
+.strip input,.strip select{border-radius:0;font:inherit;font-weight:700;font-size:15px;background:transparent;border:0;border-bottom:1px solid #444;color:var(--on-ink);padding:2px 0;width:100%;min-width:0}
+.strip input::placeholder{color:#777}
+
+/* eyebrow section labels */
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-ink)}
+.sec-h{display:flex;flex-direction:column;gap:6px}
+.sec-h h2{font-size:24px;font-weight:700}
+.sec-h h2::after{content:"";display:block;width:36px;height:3px;background:var(--gold);margin-top:6px}
+
+/* scoreboard */
+.board{background:var(--ink-2);color:var(--on-ink);border-radius:4px;padding:18px 20px;display:grid;grid-template-columns:1fr auto;gap:6px 14px;align-items:end;border-top:4px solid var(--gold)}
+.board .label{color:var(--on-ink-muted)}
+.total{font-family:var(--display);font-weight:700;font-size:96px;line-height:.82;color:var(--gold)}
+.board .side{text-align:right}
+.board .side b{font-family:var(--display);font-size:28px;display:block;line-height:1}
+.meter{grid-column:1/-1;position:relative;height:10px;background:#2e2e2e;margin-top:24px}
+.meter .fill{position:absolute;inset:0 auto 0 0;background:var(--gold);transition:width .4s}
+.meter .tick{position:absolute;top:-20px;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--on-ink-muted);white-space:nowrap}
+.meter .tick::after{content:"";position:absolute;left:50%;top:17px;width:2px;height:14px;background:#777}
+.status{grid-column:1/-1;font-size:14px;color:#dcdad3;margin-top:4px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.callrow{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.target{font-family:var(--display);font-weight:700;font-size:70px;line-height:.9}
+.target small{font-size:24px;color:var(--muted);margin-left:4px}
+.pill{display:inline-block;padding:5px 10px;border-radius:3px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.pill.fin{background:var(--gold);color:#111}
+.pill.norm{background:var(--ink);color:var(--on-ink)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fields label{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fields input,.fields select{font:inherit;font-size:24px;font-weight:700;padding:10px 12px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--fg);width:100%;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.preview{font-size:14px;color:var(--muted);min-height:20px}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+button{font:inherit;font-weight:700;border:0;border-radius:3px;padding:12px 16px;cursor:pointer;letter-spacing:.04em}
+.primary{background:var(--gold);color:#111;flex:1;font-size:17px;text-transform:uppercase;letter-spacing:.1em}
+.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+.flash{border-radius:3px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#fff;animation:pop .35s ease}
+.flash b{font-family:var(--display);font-size:42px;line-height:1}
+.flash span{font-size:14px}
+@keyframes pop{from{transform:scale(.96);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none}.meter .fill{transition:none}}
+
+.grid{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line);font-size:14px}
+th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg);font-weight:700;background:var(--gold-soft)}
+tr:nth-child(odd) td{background:color-mix(in srgb,var(--bg) 55%,transparent)}
+td.l,th.l{text-align:left}
+.chip{display:inline-block;min-width:30px;padding:3px 6px;border-radius:3px;color:#fff;font-weight:700;font-size:16px}
+.c3{background:var(--p3)}.c2{background:var(--p2)}.c1{background:var(--p1)}.c0{background:var(--p0)}
+.cx{background:transparent;color:var(--muted);border:1px dashed var(--line)}
+.bar{height:8px;background:var(--line);position:relative;min-width:60px}
+.bar i{position:absolute;inset:0 auto 0 0}
+.muted{color:var(--muted);font-size:13px}
+.rules{font-size:14px;color:var(--muted)}
+.rules summary{cursor:pointer;font-weight:700;color:var(--fg)}
+.rules ul{padding-left:18px;margin:8px 0 0}
+.done{text-align:center;padding:10px 0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.done h2{font-size:48px;color:var(--gold-ink)}
+.done .hc{font-size:18px;font-weight:700}
+tr.me td{box-shadow:inset 0 -2px 0 var(--gold);font-weight:700}
+.up{color:var(--p3);font-weight:700}.down{color:var(--p0);font-weight:700}
+.rules p{margin:8px 0 0}
+.seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.seg button{flex:1;border-radius:0;background:transparent;color:var(--muted);padding:10px 8px;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--gold)}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+.cta{background:var(--ink);color:var(--on-ink);border-radius:4px;padding:18px 20px;display:flex;flex-direction:column;gap:6px;border-bottom:4px solid var(--gold)}
+.cta b{font-size:20px;letter-spacing:.04em;text-transform:uppercase;line-height:1.1}
+.cta b span{color:var(--gold)}
+.cta small{color:var(--on-ink-muted);font-size:12px;letter-spacing:.08em}
+.send{display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:16px;text-align:left}
+.send textarea{font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;width:100%;min-width:0;resize:vertical;padding:10px 12px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--fg)}
+.linkbtn{display:inline-flex;align-items:center;justify-content:center;font-weight:700;border-radius:3px;padding:12px 16px;text-decoration:none;letter-spacing:.04em}
+.sendbtn{font-size:17px;text-transform:uppercase;letter-spacing:.1em;padding:15px 16px;text-align:center}
+.sel{user-select:all;color:var(--fg)}
+.notes{display:flex;flex-direction:column;gap:6px}
+.notes textarea{font:inherit;font-size:15px;width:100%;min-width:0;resize:vertical;padding:10px 12px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--fg)}
+.howto{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--gold);border-radius:4px}
+.howto summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px}
+.howto summary::-webkit-details-marker{display:none}
+.howto summary b{font-size:18px;letter-spacing:.06em;text-transform:uppercase}
+.howto summary small{display:block;font-size:13px;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none}
+.howto summary .chev{flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--gold);display:grid;place-items:center;font-weight:700;transition:transform .2s}
+.howto[open] summary .chev{transform:rotate(180deg)}
+.howto .hb{padding:0 16px 16px;display:flex;flex-direction:column;gap:14px;font-size:15px}
+.howto h3{margin:0 0 6px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-ink)}
+.howto ol,.howto ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.howto table{font-size:14px}
+.howto td,.howto th{text-align:left}
+.howto .aim{font-size:16px;font-weight:700;margin:0}
+@media (prefers-reduced-motion:reduce){.howto summary .chev{transition:none}}
+/* ===== Macro Golf brand layer (per Document Brand Guide): Anton + Inter, ink / Macro Yellow / paper / cream, square corners ===== */
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --line:rgba(11,11,11,0.16); --fg:#0B0B0B; --muted:#77715F;
+  --ink:#0B0B0B; --ink-2:#0B0B0B; --on-ink:#F4F1EA; --on-ink-muted:#9C988C;
+  --gold:#FFD900; --gold-ink:#8a7f00; --gold-soft:#F4F1EA; --cream:#F4F1EA; --body:#3B3830;
+  --p4:#1FA855; --p3:#1FA855; --p2:#1FA855; --p1:#F5A800; --p0:#E0352B;
+  --display:"Anton","Arial Narrow",Impact,sans-serif; --text:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+body{background:#FFFFFF;color:#3B3830;font-family:var(--text);font-size:15px;line-height:1.55}
+*{border-radius:0!important}
+h1,h2,h3,.target,.total,.done h2,.hcbig .n{font-family:var(--display)!important;font-weight:400!important;text-transform:uppercase;letter-spacing:-0.3px}
+.label,.eyebrow,.k,th{font-family:var(--text)}
+.label{font-size:11px;font-weight:700;letter-spacing:1.6px;color:#77715F}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:2.4px;color:#8a7f00}
+/* cover */
+.cover{background:#0B0B0B;color:#F4F1EA;padding:22px 22px 18px;gap:16px}
+.cover::before{display:none}
+.brand{align-items:center}
+.brand .logo{height:34px;width:auto;display:block}
+.brand .sub{font-family:var(--text);font-size:10px;font-weight:600;letter-spacing:3px;color:rgba(244,241,234,0.62)}
+.goldbar{width:74px;height:7px;background:#FFD900;order:0}
+.cover h1{font-size:clamp(46px,14vw,68px);line-height:0.94;letter-spacing:-1px;color:#F4F1EA}
+.cover h1 .g{color:#FFD900;font-size:.46em;line-height:1.06;letter-spacing:-0.3px;margin-top:6px}
+.strip{border-top:1px solid rgba(244,241,234,0.18);padding-top:12px;gap:0}
+.strip > div{padding:0 12px;border-left:1px solid rgba(244,241,234,0.18)}
+.strip > div:first-child{padding-left:0;border-left:0}
+.strip .k{font-family:var(--text);font-size:10px;font-weight:700;letter-spacing:1.8px;color:#FFD900}
+.strip .v,.strip input,.strip select{font-family:var(--display);font-weight:400;font-size:20px;text-transform:uppercase;color:#F4F1EA;letter-spacing:-0.3px}
+.strip .v,.strip input,.strip select{font-size:16px;line-height:1.15}
+.strip > div{padding:0 10px}
+.strip input,.strip select{border-bottom:1px solid rgba(244,241,234,0.3)}
+.strip input::placeholder{color:#77715F}
+/* how to play: outlined note with yellow left border */
+.howto{background:#FFFFFF;border:1px solid rgba(11,11,11,0.18);border-left:6px solid #FFD900}
+.howto summary b{font-family:var(--display);font-weight:400;font-size:20px;letter-spacing:-0.3px}
+.howto summary small{font-family:var(--text)}
+.howto summary .chev{background:#0B0B0B;color:#FFD900}
+.howto h3{font-family:var(--text)!important;font-weight:700!important;font-size:11px;letter-spacing:2.4px;color:#8a7f00}
+.howto .aim{font-family:var(--text);font-weight:600;color:#0B0B0B}
+.howto .hb{color:#3B3830}
+/* board: black callout */
+.board{background:#0B0B0B;color:#F4F1EA;border-top:0;border-left:6px solid #FFD900}
+.board .label{color:#FFD900;letter-spacing:1.8px}
+.total{color:#F4F1EA;font-size:92px;line-height:.9}
+.total small{font-family:var(--text);font-weight:700;font-size:13px;color:#9C988C;letter-spacing:1.6px;margin-left:6px}
+.board .side b{font-family:var(--display);font-weight:400;font-size:26px;color:#F4F1EA}
+.meter{background:rgba(244,241,234,0.14)}
+.meter .fill{background:#FFD900}
+.status{font-family:var(--text);color:#F4F1EA;opacity:.85}
+/* cards and section headings */
+.card{background:#FFFFFF;border:1px solid rgba(11,11,11,0.16);padding:20px}
+.sec-h h2{font-size:28px;line-height:1.08;color:#0B0B0B}
+.sec-h h2::after{width:74px;height:6px;background:#FFD900;margin-top:14px}
+.q .qh{font-family:var(--text);font-weight:600;color:#0B0B0B}
+.q .qs,.muted{color:#77715F}
+.rangeRow output{font-family:var(--display);font-weight:400;font-size:24px;color:#0B0B0B}
+.rangeRow input[type=range]{accent-color:#0B0B0B}
+.yn{border:1px solid rgba(11,11,11,0.18)}
+.yn button{font-family:var(--display);font-weight:400;font-size:18px;text-transform:uppercase;color:#77715F;background:#FFFFFF}
+.yn button[aria-pressed="true"]{background:#FFD900;color:#0B0B0B}
+.lvl button{background:#FFFFFF;border:1px solid rgba(11,11,11,0.18);border-left:6px solid rgba(11,11,11,0.18)}
+.lvl button b{font-family:var(--display);font-weight:400;font-size:20px;letter-spacing:-0.3px}
+.lvl button small{font-family:var(--text);color:#3B3830}
+.lvl button .rec{font-family:var(--text);background:#0B0B0B;color:#FFD900;font-size:9px;letter-spacing:1.6px;padding:4px 7px}
+.lvl button[aria-pressed="true"]{border-color:#0B0B0B;border-left-color:#FFD900;background:#F4F1EA}
+/* difficulty tags: cream / yellow / ink tiles */
+.seq i{font-family:var(--display);font-weight:400;font-size:12px}
+.dE{background:#F4F1EA!important;color:#0B0B0B!important;border:1px solid rgba(11,11,11,0.18)}
+.dM{background:#FFD900!important;color:#0B0B0B!important}
+.dH{background:#0B0B0B!important;color:#FFD900!important}
+.diffpill{font-family:var(--text);font-size:10px;letter-spacing:1.6px}
+/* buttons */
+button{font-family:var(--text)}
+.primary{background:#FFD900;color:#0B0B0B;font-family:var(--display)!important;font-weight:400!important;font-size:20px!important;letter-spacing:.5px!important;text-transform:uppercase}
+.ghost{background:#FFFFFF;color:#0B0B0B;border:1px solid rgba(11,11,11,0.18);font-weight:600}
+.linky{color:#77715F}
+/* shot card */
+.target{font-size:76px;line-height:.9;color:#0B0B0B}
+.target small{font-family:var(--text);font-weight:700;font-size:13px;letter-spacing:1.6px;color:#77715F;text-transform:uppercase}
+.shot{background:#F4F1EA;border:0;border-left:6px solid #0B0B0B}
+.shot h3{font-size:24px;line-height:1.15;color:#0B0B0B}
+.shot p{font-family:var(--text);color:#3B3830}
+.shot .facts span{font-family:var(--text);background:#FFFFFF;border:1px solid rgba(11,11,11,0.16);color:#0B0B0B;font-size:10px;letter-spacing:1.3px}
+.leave input{font-family:var(--display);font-weight:400;background:#FFFFFF;border:1px solid rgba(11,11,11,0.3)}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #FFD900;outline-offset:2px}
+/* flash: result colours only */
+.flash{font-family:var(--text)}
+.flash b{font-family:var(--display);font-weight:400}
+/* tables: 2px ink top rule, hairlines */
+table{border-top:2px solid #0B0B0B}
+th{background:#FFFFFF;color:#77715F;font-size:10px;letter-spacing:1.6px;border-bottom:1px solid rgba(11,11,11,0.16)}
+td{border-bottom:1px solid rgba(11,11,11,0.13);color:#3B3830;font-family:var(--text)}
+tbody tr:nth-child(odd) td{background:transparent}
+td b{color:#0B0B0B}
+tr.me td{background:#F4F1EA!important;box-shadow:inset 6px 0 0 -0px transparent;font-weight:700;color:#0B0B0B}
+tr.me td:first-child{box-shadow:inset 6px 0 0 #FFD900}
+.up{color:#1FA855}.down{color:#E0352B}
+.rules{color:#3B3830}
+.rules summary{font-family:var(--text);font-weight:700;color:#0B0B0B}
+/* finish + send */
+.done h2{font-size:64px;color:#0B0B0B}
+.done .hc{font-family:var(--display);font-weight:400;font-size:22px;text-transform:uppercase;color:#8a7f00}
+.send textarea,.notes textarea{background:#FFFFFF;border:1px solid rgba(11,11,11,0.18);font-family:var(--text)}
+.sel{color:#0B0B0B}
+/* footer: black closing band */
+.cta{background:#0B0B0B;border-bottom:0;border-top:7px solid #FFD900}
+.cta b{font-family:var(--display);font-weight:400;font-size:24px;letter-spacing:-0.3px;color:#F4F1EA}
+.cta b span{color:#FFD900}
+.cta small{font-family:var(--text);color:#9C988C;letter-spacing:1.6px}
+/* extra components used across the games */
+.modes{border:1px solid rgba(244,241,234,0.18)}
+.modes button{background:transparent;color:#9C988C}
+.modes button b{font-family:var(--display);font-weight:400;font-size:20px;letter-spacing:-0.3px}
+.modes button small{font-family:var(--text)}
+.modes button[aria-pressed="true"]{background:#FFD900;color:#0B0B0B}
+.pill{font-family:var(--text);font-size:10px;letter-spacing:1.6px;background:#0B0B0B;color:#F4F1EA}
+.pill.fin,.pill.shift{background:#FFD900;color:#0B0B0B}
+.pts button,.strokes button{background:#FFFFFF;border:1px solid rgba(11,11,11,0.18);color:#0B0B0B}
+.pts button b,.strokes button b{font-family:var(--display);font-weight:400}
+.pts button small,.strokes button small{font-family:var(--text);color:#77715F}
+.pts button:hover,.strokes button:hover{background:#F4F1EA;border-color:#0B0B0B}
+.key{font-family:var(--text);color:#77715F}.key b{color:#0B0B0B}
+.dots i{background:#E6E1D3}.dots i.on{background:#FFD900}.dots i.cur{background:#0B0B0B}
+.read{background:#F4F1EA;border:0;border-left:6px solid #0B0B0B}
+.read h3{font-size:22px;line-height:1.15;color:#0B0B0B}
+.read p{font-family:var(--text);color:#3B3830}
+.read .facts span{font-family:var(--text);background:#FFFFFF;border:1px solid rgba(11,11,11,0.16);color:#0B0B0B;font-size:10px;letter-spacing:1.3px}
+.mm .made{background:#0B0B0B;color:#FFD900;font-family:var(--display);font-weight:400;font-size:26px}
+.mm .miss{background:#FFFFFF;color:#0B0B0B;border:1px solid rgba(11,11,11,0.3);font-family:var(--display);font-weight:400;font-size:26px}
+.dots20 i{background:#E6E1D3}.dots20 i.cur{background:#0B0B0B}
+.seg{border:1px solid rgba(11,11,11,0.18)}
+.seg button{font-family:var(--text);background:#FFFFFF;color:#77715F}
+.seg button[aria-pressed="true"]{background:#0B0B0B;color:#FFD900}
+.seg button.lavaBtn[aria-pressed="true"]{background:#E0352B;color:#FFFFFF}
+.seg2{border:1px solid rgba(11,11,11,0.18)}
+.seg2 button{font-family:var(--display);font-weight:400;font-size:18px;background:#FFFFFF;color:#77715F}
+.seg2 button[aria-pressed="true"]{background:#FFD900;color:#0B0B0B}
+.fields input,.fields select,.dists input,.warm input,.bigin,.clubin,.prox input{background:#FFFFFF;border:1px solid rgba(11,11,11,0.3);color:#0B0B0B;font-family:var(--display);font-weight:400}
+.clubin{font-family:var(--text);font-weight:600}
+.preview{font-family:var(--text);color:#77715F}
+.beat .n{font-family:var(--display);font-weight:400;color:#0B0B0B}
+.strikes i{border-color:rgba(244,241,234,0.3)}
+.strikes i.on{background:#E0352B;border-color:#E0352B}
+.unlock{background:#F4F1EA;border:0;border-left:6px solid #FFD900}
+.unlock .dots i{border-color:#0B0B0B}
+.bar{background:#E6E1D3}
+.hcbig .n{color:#0B0B0B}
+.conf i{background:#E6E1D3}.conf i.on{background:#FFD900}
+.flash{color:#FFFFFF}
+.coachsel{font-family:var(--text);font-weight:600;font-size:16px;padding:12px;border:1px solid rgba(11,11,11,0.3);background:#FFFFFF;color:#0B0B0B;width:100%;min-width:0}
+/* ===== Edge to edge: no outer gutters or gaps; each band keeps its own inner padding ===== */
+html{background:#0B0B0B}
+body{padding:0!important;background:#FFFFFF}
+.wrap{max-width:none!important;margin:0!important;gap:0!important}
+.wrap > header,.wrap > section,.wrap > footer{margin:0;border-left:0!important;border-right:0!important;border-top:0;
+  padding-left:max(20px,env(safe-area-inset-left,0px))!important;padding-right:max(20px,env(safe-area-inset-right,0px))!important}
+.wrap > header{padding-top:24px;padding-bottom:20px}
+.wrap > section.card{border-bottom:1px solid rgba(11,11,11,0.16)!important;padding-top:22px;padding-bottom:22px}
+.wrap > details.howto{margin:0;border:0!important;border-bottom:1px solid rgba(11,11,11,0.16)!important;box-shadow:inset 6px 0 0 #FFD900}
+.wrap > details.howto summary,.wrap > details.howto .hb{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.wrap > section.board{border:0!important;box-shadow:inset 6px 0 0 #FFD900;padding-top:20px;padding-bottom:20px}
+.wrap > footer.cta{padding-top:20px;padding-bottom:22px}
+.gate{position:fixed;inset:0;z-index:50;background:#0B0B0B;color:#F4F1EA;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.gate-in{min-height:100%;display:flex;flex-direction:column;gap:18px;padding:max(28px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(28px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));max-width:560px;margin:0 auto}
+.gate .logo{height:34px;width:auto;align-self:flex-start}
+.gate h2{font-family:var(--display);font-weight:400;text-transform:uppercase;letter-spacing:-0.5px;font-size:clamp(40px,12vw,60px);line-height:.95;margin:0;color:#F4F1EA}
+.gate h2 span{display:block;color:#FFD900;font-size:.42em;line-height:1.1;margin-top:6px;letter-spacing:-0.3px}
+.gate .bar{width:74px;height:7px;background:#FFD900}
+.gate .fld{display:flex;flex-direction:column;gap:8px}
+.gate .fld > span{font-family:var(--text);font-weight:700;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#FFD900}
+.gate input,.gate select{font-family:var(--text);font-weight:600;font-size:18px;padding:14px;border:1px solid rgba(244,241,234,0.3);background:#141414;color:#F4F1EA;width:100%;min-width:0;border-radius:0}
+.gate select option{color:#0B0B0B;background:#FFFFFF}
+.gate input::placeholder{color:#77715F}
+.gate .opts{display:grid;gap:8px}
+.gate .opts button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;background:#141414;color:#F4F1EA;border:1px solid rgba(244,241,234,0.25);padding:14px;font-family:var(--text)}
+.gate .opts button b{font-family:var(--display);font-weight:400;font-size:20px;text-transform:uppercase;letter-spacing:-0.3px}
+.gate .opts button small{font-size:13px;color:#9C988C;font-weight:400}
+.gate .opts button[aria-pressed="true"]{background:#FFD900;color:#0B0B0B;border-color:#FFD900}
+.gate .opts button[aria-pressed="true"] small{color:#3B3830}
+.gate .note{font-family:var(--text);font-size:13px;color:#9C988C}
+.gate .go{background:#FFD900;color:#0B0B0B;font-family:var(--display)!important;font-weight:400!important;font-size:22px!important;text-transform:uppercase;letter-spacing:.5px;padding:16px;border:0;margin-top:4px}
+.gate .go:disabled{opacity:.35}
+body.gated{overflow:hidden}
+.board[hidden]{display:none!important}
+</style>
+<style>
+.ux-hid{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+.ux-rpe{width:100%;min-width:0;height:44px;border:1px solid rgba(11,11,11,.18);background:#fff;font-family:'Anton',Impact,'Arial Narrow Bold',sans-serif;font-size:17px;color:#0B0B0B;cursor:pointer;padding:0 4px;text-transform:uppercase}
+.ux-rpe:not(.on){color:#a7a294}
+tr.done .ux-rpe{background:#F4F1EA}
+.ux-chiprow td{padding:0 0 10px!important;border-bottom:0!important}
+.ux-chips{display:flex;flex-wrap:wrap;gap:6px;background:#0B0B0B;padding:8px}
+.ux-chip{flex:1 0 auto;min-width:46px;min-height:44px;border:0;background:#1f1e1b;color:#F4F1EA;font-family:'Anton',Impact,sans-serif;font-size:18px;cursor:pointer;padding:0 8px}
+.ux-chip.on,.ux-chip:active{background:#FFD900;color:#0B0B0B}
+.ux-help td{padding:2px 6px 10px 0!important;border-bottom:1px solid rgba(11,11,11,.13)}
+.ux-help td.ux-gap{padding:0!important}
+.ux-hbox{display:flex;flex-wrap:wrap;gap:6px;align-items:stretch}
+.ux-step{min-width:56px;min-height:38px;border:1px solid #0B0B0B;background:#fff;color:#0B0B0B;font-family:'Anton',Impact,sans-serif;font-size:16px;cursor:pointer;padding:0 8px}
+.ux-same{min-height:38px;border:0;background:#0B0B0B;color:#FFD900;font-weight:700;font-size:11.5px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;padding:0 10px;white-space:nowrap;font-family:'Inter',system-ui,sans-serif}
+.ux-bests-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;border:2px solid #0B0B0B;background:#fff;color:#0B0B0B;font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:17px;cursor:pointer}
+.ux-done{position:fixed;inset:0;z-index:45;background:rgba(11,11,11,.97);overflow-y:auto;display:flex;justify-content:center;align-items:flex-start;
+  padding:calc(24px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.ux-done-in{width:100%;max-width:460px;display:flex;flex-direction:column;gap:14px;color:#F4F1EA;font-family:'Inter',system-ui,sans-serif}
+.ux-kick{font-weight:700;font-size:12px;letter-spacing:2.4px;text-transform:uppercase;color:#FFD900}
+.ux-h{font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:40px;line-height:.98;color:#F4F1EA;margin-top:6px}
+.ux-bar{width:74px;height:6px;background:#FFD900}
+.ux-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.ux-cells{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:rgba(244,241,234,.18);border:1px solid rgba(244,241,234,.18)}
+.ux-cells>div{background:#0B0B0B;padding:14px}
+.ux-cells span,.ux-next span{display:block;font-weight:700;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:#FFD900}
+.ux-cells b{display:block;font-family:'Anton',Impact,sans-serif;font-weight:400;font-size:34px;line-height:1;margin-top:8px;color:#F4F1EA}
+.ux-next{border-left:6px solid #FFD900;background:#1a1916;padding:12px 14px}
+.ux-next b{display:block;font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:20px;line-height:1.1;margin-top:6px}
+.ux-btn{min-height:52px;border:1px solid rgba(244,241,234,.35);background:transparent;color:#F4F1EA;font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:19px;cursor:pointer;padding:0 16px}
+.ux-btn.y{background:#FFD900;border-color:#FFD900;color:#0B0B0B}
+.ux-close{background:transparent;border:1px solid rgba(244,241,234,.3);color:#F4F1EA;font:inherit;font-weight:600;font-size:14px;min-height:40px;padding:0 14px;cursor:pointer;font-family:'Inter',system-ui,sans-serif}
+.ux-best{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(244,241,234,.14)}
+.ux-bn{flex:1;min-width:0}
+.ux-bn b{display:block;font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:19px;line-height:1.1}
+.ux-bn span{display:block;font-size:13px;color:#9C988C;margin-top:4px}
+.ux-bn em{font-style:normal;color:#FFD900;font-weight:600}
+.ux-spark{width:120px;height:36px;flex-shrink:0}
+.ux-empty{color:#9C988C;margin:0}
+.ux-a2hs{position:fixed;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:40;background:#0B0B0B;color:#F4F1EA;border-top:4px solid #FFD900;padding:14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 10px 30px rgba(0,0,0,.4);font-family:'Inter',system-ui,sans-serif;max-width:520px;margin:0 auto}
+.ux-a2hs img{width:52px;height:52px;flex-shrink:0}
+.ux-a2hs-t{flex:1;min-width:0;font-size:13.5px;color:#d9d5cb}
+.ux-a2hs-t>b{display:block;font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:18px;color:#FFD900;margin-bottom:4px}
+.ux-a2hs-t svg{vertical-align:-2px}
+.ux-a2hs-b{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.ux-a2hs .ux-btn{min-height:40px;font-size:16px}
+.ux-pbtab{position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:37;display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 16px;border:0;border-top:3px solid #FFD900;background:#0B0B0B;color:#FFD900;font-family:'Anton',Impact,sans-serif;font-size:17px;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.35)}
+.ux-pbtab:focus-visible{outline:3px solid #FFD900;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.ux-chip{transition:none}}
+</style>
+<style id="pg-css">
+/* Paul's plan: extra pieces, drawn with the games' brand layer */
+#main{display:flex;flex-direction:column}
+#main > section.card{border:0!important;border-bottom:1px solid rgba(11,11,11,0.16)!important;padding:22px max(20px,env(safe-area-inset-right,0px)) 22px max(20px,env(safe-area-inset-left,0px))!important}
+#main > section.board{border:0!important;box-shadow:inset 6px 0 0 #FFD900;padding:20px max(20px,env(safe-area-inset-right,0px)) 20px max(20px,env(safe-area-inset-left,0px))!important}
+.board .side .label{color:#9C988C}
+.read{background:#F4F1EA;border-left:6px solid #0B0B0B;padding:12px 14px}
+.steps{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;color:#3B3830}
+.feel{background:#0B0B0B;color:#F4F1EA;padding:16px;border-left:6px solid #FFD900;display:flex;flex-direction:column;gap:6px}
+.feel .label{color:#FFD900}
+.feel b{font-family:var(--display);font-weight:400;font-size:26px;line-height:1.08;text-transform:uppercase;color:#F4F1EA}
+.shot{padding:10px 12px}.shot .facts{display:flex;flex-wrap:wrap;gap:6px}.shot .facts span{padding:3px 7px;text-transform:uppercase;font-weight:700}
+.mm{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mm button{padding:16px;text-transform:uppercase}
+.pts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.pts button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 2px}.pts button b{font-size:26px}.pts button small{font-size:10px;line-height:1.2;text-align:center}
+.face{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.face button{background:#FFFFFF;border:1px solid rgba(11,11,11,0.18);color:#0B0B0B;padding:14px 4px;font-size:13px}
+.face button.c{background:#FFD900;border-color:#FFD900}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips .chip{font-size:13px;min-width:0}
+.cx{color:#77715F}
+.linky{background:none;border:0;padding:0;text-decoration:underline;font-weight:400;font-size:13px;letter-spacing:0;align-self:flex-start;cursor:pointer}
+.tick,.tickd{padding:16px;font-family:var(--display)!important;font-weight:400!important;font-size:22px;text-transform:uppercase;border:1px solid rgba(11,11,11,0.3)}
+.tick{background:#FFFFFF;color:#0B0B0B}.tickd{background:#0B0B0B;color:#FFD900;border-color:#0B0B0B}
+.timer{display:flex;align-items:center;gap:12px;border:1px solid rgba(11,11,11,0.18);padding:8px 12px}
+.timer b{font-family:var(--display);font-weight:400;font-size:34px;color:#0B0B0B;flex:1}
+.timer button{background:#0B0B0B;color:#FFD900;font-family:var(--display)!important;font-weight:400!important;font-size:18px;text-transform:uppercase}
+.meter2{height:10px;background:#E6E1D3;position:relative}.meter2 i{position:absolute;inset:0 auto 0 0;background:#FFD900}
+.planlist{display:flex;flex-direction:column;border-top:2px solid #0B0B0B}
+.planlist .row{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:9px 4px;border-bottom:1px solid rgba(11,11,11,0.13)}
+.planlist .n{font-family:var(--display);font-size:18px;color:#8a7f00}.planlist .t{font-weight:600;color:#0B0B0B;min-width:0}
+.planlist .m{font-family:var(--display);font-size:18px;color:#0B0B0B}.planlist .m small{font-family:var(--text);font-size:10px;font-weight:700;letter-spacing:1.4px;color:#77715F;margin-left:3px;text-transform:uppercase}
+.planlist .row.done .n{color:#1FA855}.planlist .row.cur{background:#F4F1EA;box-shadow:inset 6px 0 0 #FFD900}
+.planlist .grp{padding:8px 10px;background:#0B0B0B;color:#FFD900;font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase}
+.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.wk div{border:1px solid rgba(11,11,11,0.16);padding:6px 2px;text-align:center;display:flex;flex-direction:column;gap:3px;min-height:60px}
+.wk div b{font-family:var(--display);font-weight:400;font-size:16px;color:#0B0B0B}
+.wk div i{font-style:normal;font-size:8.5px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;padding:2px 0;overflow:hidden}
+.wk div i.r{background:#0B0B0B;color:#FFD900}.wk div i.p{background:#FFD900;color:#0B0B0B}
+.wk div.today{border:2px solid #0B0B0B}
+.unlock b{color:#0B0B0B}
+.done{text-align:center}
+.fields select{font-family:var(--display);font-weight:400;font-size:28px;padding:8px 12px;border:1px solid rgba(11,11,11,0.3);background:#FFFFFF}
+.btns > *{flex:1}
+</style>
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Set up your golf plan" hidden><div class="gate-in">
+  <svg class="logo" role="img" aria-label="Macro Golf" viewBox="0 0 1000 540" width="63" height="34"><path id="mgLogoP" fill="#FFD900" fill-rule="evenodd" d="M400 538.9C326 530.5 262.6 470.4 250 396.4C240.3 339.9 255.7 284.9 292.3 245.4L300.7 236.3L295 200.9C291.8 181.4 289.1 164.6 288.8 163.5C288.3 161.1 293.2 150.6 235 278.7C209.4 334.9 188.2 381 187.9 381C187.6 381 165.6 331.7 139 271.5C112.4 211.3 90.3 162.3 90 162.8C89.6 163.2 81.3 209.1 71.4 264.7L53.5 366L26.7 366C1.6 366 -0.1 365.9 0.4 364.2C0.9 362.6 45.4 135.6 63.2 43.8C67.8 20.3 71.7 1 72 1C72.3 1 98.6 60.2 130.5 132.5C162.3 204.8 188.7 263.6 189.1 263.2C189.5 262.8 216.7 203.6 249.6 131.6C297.5 26.9 309.6 1.3 310.2 3.1C310.6 4.4 318.6 49.6 328 103.5C337.4 157.4 345.3 202.1 345.5 202.7C345.8 203.6 347.9 203.1 352.5 201C398.4 180.4 459.4 181.9 502.9 204.6C521 214 542.2 230.7 557.7 247.8L564.8 255.6L546.9 272.8C537.1 282.3 528.7 290 528.3 290C527.8 290 525.5 287.5 523.1 284.5C510.8 269.1 490.7 252.9 474.8 245.5C445.1 231.8 407.3 231.5 375.5 244.7C368.3 247.7 355 255.2 355 256.3C355 256.7 359.3 281.3 364.5 310.9C369.7 340.6 374 365.1 374 365.4C374 365.7 362.2 366 347.7 366L321.4 366L317.1 338.8C311.2 301.6 312 304 308.3 313C297.6 338.6 296 373.3 304 402C315.4 442.5 355.2 479.3 398.3 489.2C412.4 492.5 434 492.2 447.5 488.6C474.8 481.4 500.4 462.1 513.4 438.7C517.3 431.7 522.5 416.9 523.5 409.8L524.1 405L481.8 404.8L439.5 404.5L439.2 380.2L439 356L509.6 356L580.3 356L579.7 374.8C578 430.3 565.2 463.1 532.9 495C498.5 529.1 451.3 544.7 400 538.9ZM651 383.5C617.4 376.3 591.1 352.5 581.4 320.5C577.6 307.9 577.2 281.9 580.8 269.7C588 244.6 607.9 221.6 631.5 210.9C653.4 201 681.3 200.3 704 209.1C725.1 217.2 745.9 237.8 754.9 259.5C765.8 285.6 763.2 318.5 748.5 341.6C736.2 360.9 714.4 376.9 693 382.5C684.1 384.8 659.8 385.4 651 383.5ZM795 294L795 206L808.5 206L822 206L822 281.5L822 357L847.5 357L873 357L873 369.5L873 382L834 382L795 382L795 294ZM898.2 294.2L898.5 206.5L942.2 206.2L986 206L986 218.5L986 231L955.5 231L925 231L925 252L925 273L954.5 273L984 273L984 285.5L984 298L954.5 298L925 298L925 340L925 382L911.5 382L898 382L898.2 294.2ZM686.4 358C724.3 348.3 744.9 305.8 730.1 268.2C723.3 250.9 707.9 236.8 689 230.4C680.3 227.4 659 227.7 649.1 230.9C630.7 237 614 253.7 607.9 272.2C604.7 282 604.4 305.3 607.4 314C613.7 332.4 624.6 345 641.3 353.6C654.2 360.2 671.3 361.9 686.4 358ZM586 182.1C565.8 177.7 547.9 166.4 534.6 149.9C498.3 104.4 515 34.7 568.1 10.1C580.4 4.4 587.5 2.8 603.3 2.3C621.9 1.6 631.3 3.4 646.8 10.7L654 14.1L654 30L654 46L648.8 41.9C641.6 36.5 629 30.4 620.5 28.4C610.9 26.2 593.9 26.9 585.3 30C548.6 42.9 531.3 87.8 549.1 124C554.8 135.4 566.1 146.9 577 152.2C600.1 163.6 625.2 161 646.2 145.1C649.9 142.3 653.2 140 653.5 140C653.8 140 653.9 147.1 653.8 155.8L653.5 171.5L647 174.7C629.6 183.2 604.8 186.2 586 182.1ZM887 182.1C863.5 177 839.1 159.6 827.2 139.4C815.8 120.1 812.1 92.3 818 69.5C826.4 37 855 10.3 888.9 3.5C899.3 1.4 922.1 1.9 931.5 4.5C964.6 13.6 991.7 43.4 997.6 77.2C1005.7 123.4 978.2 167 932.3 180.6C920.2 184.2 899.5 184.9 887 182.1ZM350.4 181.3C354.1 171.8 433.5 3.1 434.1 3.7C434.5 4.1 452.7 44.3 474.5 93C496.4 141.7 514.4 181.8 514.7 182.2C514.9 182.7 508.7 183 500.8 183L486.5 183L477.9 162.7L469.2 142.5L432.5 142.5L395.8 142.5L386.7 162.7L377.5 182.9L363.6 183C351 183 349.8 182.9 350.4 181.3ZM687 92.9L687 4.8L712.8 5.3C741.5 5.8 747.8 6.8 759.5 12.3C770.7 17.7 778.1 26 783 38.5C786.4 47.3 786.5 64.6 783.1 74.3C778.8 86.9 767.8 98.6 756 103.1C753 104.2 749.8 105.5 748.9 105.8C747.7 106.4 753.2 114.5 774.2 143.3C788.9 163.6 801 180.3 801 180.6C801 180.8 793.7 180.9 784.8 180.8L768.6 180.5L743.9 145C723.5 115.8 718.6 109.4 716.5 109.2L714 108.9L714 144.9L714 181L700.5 181L687 181L687 92.9ZM927 156.2C946.1 150 961.9 134.3 968.7 114.8C972.1 105.2 972.9 89 970.6 78C965.7 54.4 946.9 34.7 923.9 28.9C912.4 25.9 895.7 26.5 885.3 30.2C848.6 43.2 831.4 86.7 848.7 123C855.8 137.9 873.7 152.6 890.1 157C899.9 159.7 917.4 159.3 927 156.2ZM458 117.4C458 115.3 433.5 61.1 432.9 61.7C432.2 62.4 407 116.9 407 117.7C407 117.9 418.5 118 432.5 118C446.5 118 458 117.7 458 117.4ZM741.3 83C754.2 79 760.9 68.7 759.8 54.5C758.5 38.4 748.4 31.2 725.8 30.2L714 29.7L714 58L714 86.3L724.2 85.7C730.3 85.4 737.3 84.2 741.3 83Z"/></svg>
+  <div class="bar"></div>
+  <h2>Paul Goddard<span>Before you start</span></h2>
+  <label class="fld"><span>Your name</span><input id="gName" autocomplete="name" placeholder="First and last name"></label>
+  <label class="fld"><span>Driver carry (yds)</span><input id="gDrv" inputmode="numeric" placeholder="e.g. 250"></label>
+  <div class="fld"><span>On round days, which warm-up first?</span><div class="opts" id="gOrder"><button type="button" data-v="putt" aria-pressed="false"><b>Putting first</b><small>Start-line gate, Hole Out and Money Stealers, then the range</small></button><button type="button" data-v="range" aria-pressed="false"><b>Range first</b><small>The Practice Plan warm-up and drivers and approaches, then putting</small></button></div></div>
+  <p class="note">Your goal is a scratch handicap. Every shot is scored as strokes gained against scratch, and you can change the order every round.</p>
+  <button class="go" id="gGo" disabled>Continue</button>
 </div></div>
+<div class="wrap">
+  <header class="cover">
+    <div class="brand"><svg class="logo" role="img" aria-label="Macro Golf" viewBox="0 0 1000 540" width="63" height="34"><use href="#mgLogoP"/></svg><span class="sub">Golf plan</span></div>
+    <div class="goldbar" style="margin-top:28px"></div>
+    <h1><span id="hName">Paul Goddard</span><span class="g">Goal: scratch handicap</span></h1>
+    <div class="strip">
+      <div><span class="k">Player</span><input id="player" placeholder="Name" aria-label="Player name" autocomplete="name"></div>
+      <div><span class="k">Goal</span><span class="v">Scratch</span></div>
+      <div><span class="k">Driver carry</span><input id="drvIn" inputmode="numeric" aria-label="Driver carry in yards"></div>
+    </div>
+  </header>
+  <details class="howto">
+    <summary><span><b>How your plan works</b><small>Round days, range practice and how every shot is scored</small></span><span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+    <div class="hb">
+      <p class="aim">Two rounds a week with both warm-ups, plus range practice. Every scored shot counts against a scratch golfer.</p>
+      <div><h3>Round day warm-up</h3><ol>
+        <li>Pick putting first or range first.</li>
+        <li>Putting warm-up (15 mins): 5 min start-line gate, a short Hole Out (12 putts from 3, 4 and 5 ft) and a short Money Stealers (3 stations).</li>
+        <li>Range warm-up (35 mins): the Practice Plan 30 min approach and driver session (body warm up, ladder to 70 yds, strike station, 8 drives, 8 approaches, warm down) plus your 5 min technical station.</li>
+      </ol></div>
+      <div><h3>Range practice</h3><ol>
+        <li>The Practice Plan warm-up, your technical station, then Wedge Darts: 18 balls with strokes gained on every shot.</li>
+      </ol></div>
+      <div><h3>Scoring</h3><ul>
+        <li>Enter carry and offline from the launch monitor after every full shot.</li>
+        <li>Every scored shot shows its strokes gained against scratch. Plus is better than scratch, minus is worse.</li>
+        <li>Every session gets a handicap: the level whose average golfer would have matched you exactly.</li>
+        <li>Your bests are kept under My PBs. At the end of the week, tap Send my week to Jack.</li>
+      </ul></div>
+    </div>
+  </details>
+  <div id="main"></div>
+  <footer class="cta"><b>Every shot. <span>One number.</span></b><small>COPYRIGHT MACRO GOLF STUDIOS LTD · MACRO.GOLF</small></footer>
+</div>
 
 <script src="{{BASE}}src/golf-sg.js"></script>
 <script>
@@ -193,7 +514,7 @@ function practiceBlocks(){
   return B}
 function newSession(kind){
   var B=kind==="range"?practiceBlocks():(S.order==="putt"?putBlocks().concat(rangeBlocks()):rangeBlocks().concat(putBlocks()));
-  S.cur={id:"s"+Date.now(),date:today(),kind:kind,order:kind==="round"?S.order:null,bi:0,blocks:B};S.flash=null;S.view=null;S.last=null;save();render();window.scrollTo(0,0)}
+  S.cur={id:"s"+Date.now(),date:today(),kind:kind,order:kind==="round"?S.order:null,bi:0,blocks:B};S.flash=null;S.view=null;S.last=null;save();render();toEntry()}
 
 /* ---------- strokes gained ---------- */
 var MS_SPLIT={4:[[0,0]],3:[[0,1.5]],2:[[1.5,1.5],[0,4.5]],1:[[1.5,4.5]],0:[[4.5,4.5]]};
@@ -252,9 +573,9 @@ function act(a,v){var b=cur();
   if(a==="name"){S.player=v;save();return}
   if(a==="order"){S.order=v;save();render();return}
   if(a==="start"){newSession(v);return}
-  if(a==="resume"){S.view=null;save();render();window.scrollTo(0,0);return}
+  if(a==="resume"){S.view=null;save();render();toEntry();return}
   if(a==="discard"){S.cur=null;save();render();return}
-  if(a==="next"){if(b&&b.timer)stopTimer();S.flash=null;if(S.cur.bi<S.cur.blocks.length-1){S.cur.bi++;save();render();window.scrollTo(0,0)}else finish();return}
+  if(a==="next"){if(b&&b.timer)stopTimer();S.flash=null;if(S.cur.bi<S.cur.blocks.length-1){S.cur.bi++;save();render();toEntry()}else finish();return}
   if(a==="back"){if(S.cur.bi>0){stopTimer();S.cur.bi--;S.flash=null;save();render()}return}
   if(a==="tick"){b.done=!b.done;save();render();return}
   if(a==="cnt"){if(b.res.length<b.total){b.res.push(v==="1");setFlash(v==="1"?"p":"m",v==="1"?"Through the gate":"Missed the gate",b.res.filter(Boolean).length+"/"+b.res.length)}save();render();return}
@@ -277,10 +598,11 @@ function act(a,v){var b=cur();
   if(a==="copy"){var txt=weekReport(v).join("\n");try{navigator.clipboard.writeText(txt);var el=document.querySelector('[data-act="copy"]');if(el)el.textContent="Copied"}catch(e){}return}
   if(a==="home"){S.view=null;S.last=null;save();render();window.scrollTo(0,0);return}
   if(a==="tohome"){stopTimer();S.view="home";save();render();window.scrollTo(0,0);return}
-  if(a==="hist"){S.last=v;save();render();window.scrollTo(0,0);return}
+  if(a==="hist"){S.last=v;save();render();toEntry();return}
 }
+function toEntry(){var e=document.getElementById("entry")||document.querySelector("#main .board");if(e)e.scrollIntoView({block:"start"})}
 function finish(){var c=S.cur,h={id:c.id,date:c.date,kind:c.kind,order:c.order,blocks:c.blocks};h.st=stats(h);h.pbs=newPbs(h);
-  S.history=S.history.filter(function(x){return x.id!==h.id});S.history.unshift(h);S.history=S.history.slice(0,200);S.cur=null;S.flash=null;S.last=h.id;save();render();window.scrollTo(0,0)}
+  S.history=S.history.filter(function(x){return x.id!==h.id});S.history.unshift(h);S.history=S.history.slice(0,200);S.cur=null;S.flash=null;S.last=h.id;save();render();toEntry()}
 
 /* ---------- timer ---------- */
 var TM=null;
@@ -289,65 +611,70 @@ function timerHtml(b){var left=b.left==null?b.mins*60:b.left;return '<div class=
 function bindTimer(b){var btn=$("tmrBtn");if(!btn)return;btn.onclick=function(){if(TM){stopTimer();save();render();return}
   if(b.left==null)b.left=b.mins*60;TM=setInterval(function(){b.left=Math.max(0,b.left-1);var el=$("tmr");if(el)el.textContent=Math.floor(b.left/60)+":"+String(b.left%60).padStart(2,"0");if(!b.left){stopTimer();save();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}render()}},1000);render()}}
 
-/* ---------- rendering ---------- */
-function linesHtml(b){return '<ul class="steps">'+b.lines.map(function(l){return "<li>"+esc(l)+"</li>"}).join("")+"</ul>"}
-function nextBtn(label,dis){return '<div class="btns">'+(S.cur.bi?'<button class="ghost" data-act="back" style="flex:0 0 auto">Back</button>':"")+'<button class="primary" data-act="next"'+(dis?" disabled":"")+'>'+label+'</button></div>'}
+/* ---------- rendering (same layout and components as the Macro Golf games) ---------- */
+function L$(b){return '<ul class="steps">'+b.lines.map(function(l){return "<li>"+esc(l)+"</li>"}).join("")+"</ul>"}
+function nextBtn(label,dis){return '<div class="btns">'+(S.cur.bi?'<button class="ghost" data-act="back">Back</button>':"")+'<button class="primary" data-act="next"'+(dis?" disabled":"")+'>'+label+'</button></div>'}
 function blockDone(b){return b.t==="tick"?!!b.done:b.t==="count"?b.res.length>=b.total:b.t==="holeout"?b.res.length>=b.putts.length:b.t==="money"?b.res.length>=b.st.length:
   b.t==="ladder"?(b.res.length&&b.res[b.res.length-1].c>=70):b.t==="strike"?b.res.length>=b.balls:b.t==="drive"?b.res.length>=b.holes.length:b.t==="app"?b.res.length>=b.ds.length:b.t==="wd"?b.res.length>=b.plan.length:false}
-function lmInputs(note){return '<div class="seg"><button data-act="side" data-v="L" aria-pressed="'+(S.side==="L")+'">Offline left</button><button data-act="side" data-v="R" aria-pressed="'+(S.side!=="L")+'">Offline right</button></div>'+
-  '<div class="lmrow"><label class="fld"><span class="label">Carry (yds)</span><input id="carryIn" inputmode="decimal" placeholder="e.g. '+note+'"></label><label class="fld"><span class="label">Offline (yds)</span><input id="offIn" inputmode="decimal" placeholder="e.g. 4"></label></div>'+
-  '<button class="dark" data-act="lm">Enter shot</button>'}
-function tallyRes(arr){return arr.length?'<div class="tally">'+arr.join("")+"</div>":""}
-function runBlock(b){var h="",done=blockDone(b),undo='<button class="linky" data-act="undo">Undo last</button>';
-  if(b.feel)h+='<div class="feel"><span class="label" style="color:var(--gold)">The feel</span><b>'+esc(b.feel)+"</b></div>";
-  h+=linesHtml(b);if(b.timer)h+=timerHtml(b);
-  if(b.t==="tick")h+='<button class="'+(b.done?"dark":"ghost")+'" data-act="tick">'+(b.done?"✓ Done":"Tick it off")+"</button>"+nextBtn(b.done?"Next":"Tick it off to move on",!b.done);
+function lmInputs(eg){return '<div class="seg"><button data-act="side" data-v="L" aria-pressed="'+(S.side==="L")+'">Offline left</button><button data-act="side" data-v="R" aria-pressed="'+(S.side!=="L")+'">Offline right</button></div>'+
+  '<div class="fields"><label><span class="label">Carry (yds)</span><input id="carryIn" inputmode="decimal" placeholder="e.g. '+eg+'"></label><label><span class="label">Offline (yds)</span><input id="offIn" inputmode="decimal" placeholder="e.g. 3.2"></label></div>'+
+  '<p class="preview">Enter the launch monitor numbers to score the shot.</p><div class="btns"><button class="primary" data-act="lm">Score shot</button>'+(cur().res.length?'<button class="ghost" data-act="undo">Undo</button>':"")+"</div>"}
+function chips(arr){return arr.length?'<div class="chips">'+arr.join("")+"</div>":""}
+function chip(cls,t){return '<span class="chip '+cls+'">'+t+"</span>"}
+function callrow(lbl,big,unit,pill){return '<div class="callrow"><div><div class="label">'+lbl+'</div><div class="target tnum">'+big+(unit?"<small>"+unit+"</small>":"")+"</div></div>"+(pill?'<span class="pill '+(pill[1]||"norm")+'">'+pill[0]+"</span>":"")+"</div>"}
+function undoBtn(b){return b.res.length?'<button class="linky" data-act="undo">Undo last</button>':""}
+function runBlock(b){var h="",done=blockDone(b);
+  if(b.feel)h+='<div class="feel"><span class="label">The feel</span><b>'+esc(b.feel)+"</b></div>";
+  h+='<div class="read">'+L$(b)+"</div>";if(b.timer)h+=timerHtml(b);
+  if(b.t==="tick")h+='<button class="'+(b.done?"tickd":"tick")+'" data-act="tick">'+(b.done?"✓ Done":"Tick it off")+"</button>"+nextBtn(b.done?"Next":"Tick it off to move on",!b.done);
   if(b.t==="count"){var mk=b.res.filter(Boolean).length;
-    h+='<div class="call"><span class="label">'+(done?"Station done":"Putt "+(b.res.length+1)+" of "+b.total)+'</span><div class="d tnum">'+mk+"<small>of "+b.res.length+" through</small></div></div>"+
-      (done?"":'<div class="okno"><button class="y" data-act="cnt" data-v="1">Through</button><button class="x" data-act="cnt" data-v="0">Missed</button></div>')+
-      tallyRes(b.res.map(function(x){return '<span class="'+(x?"ok":"no")+'">'+(x?"✓":"✕")+"</span>"}))+(b.res.length?undo:"")+nextBtn(done?"Next":"Finish the 10 putts",!done)}
+    h+=callrow(done?"Station done":"Putt "+(b.res.length+1)+" of "+b.total,mk,"of "+b.res.length+" through",["4 ft"])+
+      (done?"":'<div class="mm"><button class="made" data-act="cnt" data-v="1">Through</button><button class="miss" data-act="cnt" data-v="0">Missed</button></div>')+
+      chips(b.res.map(function(x){return chip(x?"c3":"c0",x?"✓":"✕")}))+undoBtn(b)+nextBtn(done?"Next":"Finish the 10 putts",!done)}
   if(b.t==="holeout"){var p=b.putts[b.res.length];
-    h+=(done?'<div class="call"><span class="label">Hole Out done</span><div class="d tnum">'+b.res.filter(Boolean).length+"<small>of 12 holed</small></div></div>":
-      '<div class="call"><span class="label">Putt '+(b.res.length+1)+' of 12</span><div class="d tnum">'+p.ft+'<small>ft '+p.spot+'</small></div><div class="facts"><span>'+esc(p.desc)+"</span></div></div>"+
-      '<div class="okno"><button class="y" data-act="ho" data-v="1">Holed</button><button class="x" data-act="ho" data-v="0">Missed</button></div>')+
-      tallyRes(b.res.map(function(x,i){return '<span class="'+(x?"ok":"no")+'">'+b.putts[i].ft+b.putts[i].spot[0]+"</span>"}))+(b.res.length?undo:"")+nextBtn(done?"Next":"Finish the 12 putts",!done)}
+    h+=(done?callrow("Hole Out done",b.res.filter(Boolean).length,"of 12 holed"):callrow("Putt "+(b.res.length+1)+" of 12",p.ft,"ft",[p.spot])+
+      '<div class="shot"><div class="facts"><span>'+esc(p.desc)+"</span></div></div>"+
+      '<div class="mm"><button class="made" data-act="ho" data-v="1">Holed</button><button class="miss" data-act="ho" data-v="0">Missed</button></div>')+
+      chips(b.res.map(function(x,i){return chip(x?"c3":"c0",b.putts[i].ft+b.putts[i].spot[0])}))+undoBtn(b)+nextBtn(done?"Next":"Finish the 12 putts",!done)}
   if(b.t==="money"){var q=b.st[b.res.length];
-    h+=(done?'<div class="call"><span class="label">Money Stealers done</span><div class="d tnum">'+b.res.reduce(function(a,x){return a+x},0)+"<small>of 12 pts</small></div></div>":
-      '<div class="call"><span class="label">Station '+(b.res.length+1)+' of 3 · two balls</span><div class="d tnum">'+q.ft+'<small>ft</small></div><div class="facts"><span>'+q.slope+"</span></div></div>"+
-      '<div class="pts">'+[[4,"Both holed"],[3,"Holed + zone"],[2,"2 zone / 1 holed"],[1,"One in zone"],[0,"None"]].map(function(x){return '<button data-act="ms" data-v="'+x[0]+'"><b>'+x[0]+"</b>"+x[1]+"</button>"}).join("")+"</div>")+
-      tallyRes(b.res.map(function(x,i){return '<span class="'+(x>=3?"ok":x>=1?"mid":"no")+'">'+b.st[i].ft+" ft: "+x+"</span>"}))+(b.res.length?undo:"")+nextBtn(done?"Next":"Score all 3 stations",!done)}
+    h+=(done?callrow("Money Stealers done",b.res.reduce(function(a,x){return a+x},0),"of 12 pts"):callrow("Station "+(b.res.length+1)+" of 3 · two balls",q.ft,"ft",[q.slope])+
+      '<div class="pts">'+[[4,"Both holed"],[3,"Holed + zone"],[2,"2 zone / 1 holed"],[1,"One in zone"],[0,"None"]].map(function(x){return '<button data-act="ms" data-v="'+x[0]+'"><b>'+x[0]+"</b><small>"+x[1]+"</small></button>"}).join("")+"</div>")+
+      chips(b.res.map(function(x,i){return chip(x>=3?"c3":x>=1?"c1":"c0",b.st[i].ft+" ft: "+x)}))+undoBtn(b)+nextBtn(done?"Next":"Score all 3 stations",!done)}
   if(b.t==="ladder"){var last=b.res[b.res.length-1],top=last?last.c:0,hits=b.res.filter(function(x){return x.ok}).length;
-    h+='<div class="call"><span class="label">'+(last?"Carry it to where your last ball finished":"First shot")+'</span><div class="d tnum">'+(last?last.c+"<small>yds</small>":"Short chip")+"</div></div>"+
-      '<span class="muted">'+top+" of 70 yds · "+hits+" of "+Math.max(0,b.res.length-1)+" carried to the last ball</span>"+
-      tallyRes(b.res.map(function(s){return '<span class="'+(s.ok===null?"":s.ok?"ok":"no")+'">'+s.c+"</span>"}))+
-      (done?"":'<label class="fld"><span class="label">Where this ball finished (yds)</span><input id="ladIn" inputmode="numeric" placeholder="e.g. '+(top?top+8:15)+'"></label>'+
-        (b.res.length?'<div class="okno"><button class="y" data-act="lad" data-v="1">Carried to it</button><button class="x" data-act="lad" data-v="0">Didn’t</button></div>':'<button class="dark" data-act="lad" data-v="1">Enter</button>'))+
+    h+=callrow(last?"Carry it to where your last ball finished":"First shot",last?last.c:"Chip",last?"yds":"",[top+" / 70 yds"])+
+      '<div class="meter2"><i style="width:'+Math.min(100,top/70*100)+'%"></i></div><span class="muted">'+hits+" of "+Math.max(0,b.res.length-1)+" carried to the last ball</span>"+
+      chips(b.res.map(function(s){return chip(s.ok===null?"cx":s.ok?"c3":"c0",s.c)}))+
+      (done?"":'<div class="fields"><label style="grid-column:1/-1"><span class="label">Where this ball finished (yds)</span><input id="ladIn" inputmode="numeric" placeholder="e.g. '+(top?top+8:15)+'"></label></div>'+
+        (b.res.length?'<div class="mm"><button class="made" data-act="lad" data-v="1">Carried to it</button><button class="miss" data-act="lad" data-v="0">Didn’t</button></div>':'<button class="primary" data-act="lad" data-v="1">Enter</button>'))+
       (b.res.length?'<button class="linky" data-act="ladUndo">Undo last</button>':"")+nextBtn(done?"✓ 70 yds reached, next":"Ladder up to 70 yds",!done)}
   if(b.t==="strike"){var cc=b.res.filter(function(x){return x==="Centre"}).length;
-    h+='<div class="call"><span class="label">'+(done?"Strike map":"Ball "+(b.res.length+1)+" of "+b.balls)+'</span><div class="d tnum">'+cc+"<small>of "+b.res.length+" centred</small></div></div>"+
+    h+=callrow(done?"Strike map":"Ball "+(b.res.length+1)+" of "+b.balls,cc,"of "+b.res.length+" centred")+
       (done?"":'<div class="face">'+["High toe","High","High heel","Toe","Centre","Heel","Low toe","Low","Low heel"].map(function(x){return '<button data-act="face" data-v="'+x+'" class="'+(x==="Centre"?"c":"")+'">'+x+"</button>"}).join("")+"</div>")+
-      tallyRes(b.res.map(function(x){return '<span class="'+(x==="Centre"?"ok":"mid")+'">'+x+"</span>"}))+(b.res.length?'<button class="linky" data-act="faceUndo">Undo last</button>':"")+nextBtn(done?"Next":"Tap all 5 strikes",!done)}
+      chips(b.res.map(function(x){return chip(x==="Centre"?"c3":"c1",x)}))+(b.res.length?'<button class="linky" data-act="faceUndo">Undo last</button>':"")+nextBtn(done?"Next":"Tap all 5 strikes",!done)}
   if(b.t==="drive"){var k=b.res.length,hl=b.holes[k];
-    h+=(done?'<div class="call"><span class="label">Driving done</span><div class="d tnum">'+b.res.filter(function(r,i){return Math.abs(r.off)<=b.holes[i].fw}).length+"<small>of 8 fairways</small></div></div>":
-      '<div class="call"><span class="label">Drive '+(k+1)+' of 8</span><div class="d tnum">'+hl.L+'<small>yd par '+hl.par+'</small></div><div class="facts"><span>Driver</span><span>Fairway '+hl.fw*2+" yds wide</span></div></div>"+lmInputs(S.drv))+
-      tallyRes(b.res.map(function(r,i){var a=driveAfter(+GOAL,b.holes[i],r);return '<span class="'+(a.lie==="Fairway"?"ok":a.lie==="Rough"?"mid":"no")+'">'+Math.round(r.carry)+"</span>"}))+(k?undo:"")+nextBtn(done?"Next":"Hit all 8 drives",!done)}
+    h+=(done?callrow("Driving done",b.res.filter(function(r,i){return Math.abs(r.off)<=b.holes[i].fw}).length,"of 8 fairways"):
+      callrow("Drive "+(k+1)+" of 8",hl.L,"yd par "+hl.par,["Driver"])+'<div class="shot"><div class="facts"><span>Fairway '+hl.fw*2+" yds wide</span><span>Pick a fairway on the range</span></div></div>"+lmInputs(S.drv))+
+      chips(b.res.map(function(r,i){var a=driveAfter(+GOAL,b.holes[i],r);return chip(a.lie==="Fairway"?"c3":a.lie==="Rough"?"c1":"c0",Math.round(r.carry))}))+(done?undoBtn(b):"")+nextBtn(done?"Next":"Hit all 8 drives",!done)}
   if(b.t==="app"){var m=b.res.length;
-    h+=(done?'<div class="call"><span class="label">Approach done</span><div class="d tnum">'+sgf(total(shotsOf({blocks:[b]}),+GOAL))+"<small>vs scratch</small></div></div>":
-      '<div class="call"><span class="label">Shot '+(m+1)+' of 8 · new flag</span><div class="d tnum">'+b.ds[m]+'<small>yds</small></div></div>'+lmInputs(b.ds[m]))+
-      tallyRes(b.res.map(function(r,i){var v=sgOf({k:"app",d:b.ds[i],carry:r.carry,off:r.off},+GOAL);return '<span class="'+(v>=0?"ok":"no")+'">'+b.ds[i]+"</span>"}))+(m?undo:"")+nextBtn(done?"Next":"Hit all 8 approaches",!done)}
-  if(b.t==="wd"){var w=b.res.length,pts=b.res.reduce(function(a,r,i){return a+wdPts(r.target,r.carry,r.off,wdFin(i))},0);
-    h+='<div class="stats"><div><span class="label">Points</span><b class="tnum">'+pts+'</b></div><div><span class="label">Round</span><b class="tnum">'+Math.min(3,Math.floor(w/6)+1)+'/3</b></div><div><span class="label">Ball</span><b class="tnum">'+Math.min(18,w+1)+"/18</b></div></div>";
-    if(!done)h+=(wdFin(w)?'<div class="call"><span class="label">Finisher · pick your target</span><select id="finPick" style="font-size:28px;font-family:var(--display);padding:6px;border:1px solid var(--line)">'+[50,60,70,80,90,100].map(function(x){return "<option"+(x===b.plan[w]?" selected":"")+">"+x+"</option>"}).join("")+'</select><span class="muted">A 3 doubles to 6. A 0 costs 3.</span></div>':
-      '<div class="call"><span class="label">Ball '+(w%6+1)+' of 6</span><div class="d tnum">'+b.plan[w]+"<small>yds</small></div></div>")+lmInputs(b.plan[w]);
-    h+=tallyRes(b.res.map(function(r,i){var p=wdPts(r.target,r.carry,r.off,wdFin(i));return '<span class="'+(p>=2?"ok":p===1?"mid":"no")+'">'+r.target+": "+(p>0?"+":"")+p+"</span>"}))+(w?undo:"")+nextBtn(done?"Next":"Hit all 18 balls",!done)}
+    h+=(done?callrow("Approach done",sgf(total(shotsOf({blocks:[b]}),+GOAL)),"vs scratch"):callrow("Shot "+(m+1)+" of 8 · new flag",b.ds[m],"yds",["New club"])+lmInputs(b.ds[m]))+
+      chips(b.res.map(function(r,i){var v=sgOf({k:"app",d:b.ds[i],carry:r.carry,off:r.off},+GOAL);return chip(v>=0?"c3":"c0",b.ds[i])}))+(done?undoBtn(b):"")+nextBtn(done?"Next":"Hit all 8 approaches",!done)}
+  if(b.t==="wd"){var w=b.res.length;
+    if(!done)h+=(wdFin(w)?'<div class="callrow"><div><div class="label">Round '+(Math.floor(w/6)+1)+' · finisher: pick your target</div><div class="fields" style="grid-template-columns:1fr"><select id="finPick">'+[50,60,70,80,90,100].map(function(x){return "<option"+(x===b.plan[w]?" selected":"")+">"+x+"</option>"}).join("")+'</select></div></div><span class="pill fin">Finisher</span></div><p class="preview">A 3 doubles to 6. A 0 costs 3.</p>':
+      callrow("Round "+(Math.floor(w/6)+1)+" · Ball "+(w%6+1),b.plan[w],"yds",["Coach calls"]))+lmInputs(b.plan[w]);
+    else h+=callrow("Wedge Darts done",b.res.reduce(function(a,r,i){return a+wdPts(r.target,r.carry,r.off,wdFin(i))},0),"pts");
+    h+=chips(b.res.map(function(r,i){var p=wdPts(r.target,r.carry,r.off,wdFin(i));return chip(p>=3?"c3":p>=2?"c2":p===1?"c1":"c0",r.target+": "+(p>0?"+":"")+p)}))+(done?undoBtn(b):"")+nextBtn(done?"Next":"Hit all 18 balls",!done)}
+  if(S.flash)h+='<div class="flash" style="background:'+(S.flash.c==="p"?"#1FA855":S.flash.c==="m"?"#E0352B":"#0B0B0B")+'"><span>'+S.flash.t+"</span><b>"+esc(S.flash.b)+"</b></div>";
   return h}
 function planList(c){var h='<div class="planlist">',g="";c.blocks.forEach(function(b,i){if(b.grp!==g){g=b.grp;h+='<div class="grp">'+esc(g)+"</div>"}
-  h+='<div class="row '+(i<c.bi?"done":"")+" "+(i===c.bi?"cur":"")+'"><span class="n">'+(i<c.bi?"✓":String(i+1).padStart(2,"0"))+'</span><span class="t">'+esc(b.title)+'</span><span class="m">'+b.mins+"</span></div>"});return h+"</div>"}
+  h+='<div class="row '+(i<c.bi?"done":"")+" "+(i===c.bi?"cur":"")+'"><span class="n">'+(i<c.bi?"✓":String(i+1).padStart(2,"0"))+'</span><span class="t">'+esc(b.title)+'</span><span class="m">'+b.mins+"<small>min</small></span></div>"});return h+"</div>"}
+function board(lbl,big,side,meter,status){return '<section class="board" aria-live="polite"><div><div class="label">'+lbl+'</div><div class="total tnum">'+big+'</div></div><div class="side">'+
+  side.map(function(s,i){return '<div class="label"'+(i?' style="margin-top:8px"':"")+">"+s[0]+'</div><b class="tnum">'+s[1]+"</b>"}).join("")+'</div><div class="meter"><div class="fill" style="width:'+Math.max(0,Math.min(100,meter))+'%"></div></div><div class="status">'+status+"</div></section>"}
+function secH(eb,t){return '<div class="sec-h"><span class="eyebrow">'+eb+"</span><h2>"+t+"</h2></div>"}
 function renderRun(){var c=S.cur,b=cur(),L=shotsOf(c),hc=sessHc(L),sg=total(L,+GOAL);
-  var h='<div class="board"><div><span class="label">Strokes gained vs scratch</span><div class="big tnum">'+(L.length?sgf(sg):"–")+'</div></div><div class="side"><span class="label">Playing like</span><b class="tnum">'+hcTxt(hc)+"</b><span class=\"label\">"+L.length+" shot"+(L.length===1?"":"s")+'</span></div><div class="prog">'+c.blocks.map(function(x,i){return '<i class="'+(i<c.bi?"on":i===c.bi?"cur":"")+'"></i>'}).join("")+"</div></div>";
-  h+='<div class="card"><div class="blockhead"><div style="min-width:0"><span class="eyebrow">'+String(c.bi+1).padStart(2,"0")+" / "+esc(b.grp)+"</span><h2>"+esc(b.title)+'</h2></div><span class="mins">'+b.mins+"<small>MIN</small></span></div>"+runBlock(b)+"</div>";
-  if(S.flash)h+='<div class="flash '+S.flash.c+'"><span>'+S.flash.t+"</span><b>"+esc(S.flash.b)+"</b></div>";
-  h+='<section class="sec-h"><span class="eyebrow">This session</span><h2>'+(c.kind==="range"?"Range practice":"Round day warm-up")+"</h2></section>"+planList(c)+'<div class="btns"><button class="ghost" data-act="tohome">Home</button><button class="ghost" data-act="discard">Abandon session</button></div>';
+  var h=board("Strokes gained vs scratch",L.length?sgf(sg):"0",[["Block",(c.bi+1)+" / "+c.blocks.length],["Playing like",hcTxt(hc)],["Shots",L.length]],c.bi/c.blocks.length*100,
+    (c.kind==="range"?"Range practice":"Round day warm-up · "+(c.order==="putt"?"putting first":"range first"))+". Every scored shot is strokes gained against scratch.");
+  h+='<section class="card" id="entry">'+secH(String(c.bi+1).padStart(2,"0")+" / "+esc(b.grp)+" · "+b.mins+" min",esc(b.title))+runBlock(b)+"</section>";
+  h+='<section class="card">'+secH("This session",c.kind==="range"?"Range practice":"Round day warm-up")+planList(c)+'<div class="btns"><button class="ghost" data-act="tohome">Home</button><button class="ghost" data-act="discard">Abandon session</button></div></section>';
   return h}
 function weekOf(ds){var m=monday(ds);return S.history.filter(function(h){return monday(h.date)===m}).slice().reverse()}
 function weekReport(m){var W=S.history.filter(function(h){return monday(h.date)===m}).slice().reverse(),R=[];
@@ -366,51 +693,70 @@ function weekReport(m){var W=S.history.filter(function(h){return monday(h.date)=
   return R}
 function sendWeek(m){var R=weekReport(m);S.sent[m]=today();save();
   location.href="mailto:"+COACH+"?subject="+encodeURIComponent((S.player||"Paul Goddard")+" golf plan: week of "+nice(m))+"&body="+encodeURIComponent(R.join("\n"));setTimeout(render,300)}
-function sessRow(h){return '<tr data-act="hist" data-v="'+h.id+'" style="cursor:pointer"><td>'+nice(h.date)+'</td><td>'+(h.kind==="range"?"Range":"Round warm-up")+(h.pbs&&h.pbs.length?'<span class="pb">PB</span>':"")+'</td><td class="r">'+hcTxt(h.st.hc)+'</td><td class="r '+(h.st.sg>=0?"up":"down")+'">'+sgf(h.st.sg)+"</td></tr>"}
+function sessRow(h){return '<tr data-act="hist" data-v="'+h.id+'" style="cursor:pointer"><td class="l">'+nice(h.date)+'</td><td class="l">'+(h.kind==="range"?"Range":"Round warm-up")+(h.pbs&&h.pbs.length?' <span class="pill fin">PB</span>':"")+'</td><td><b>'+hcTxt(h.st.hc)+'</b></td><td class="'+(h.st.sg>=0?"up":"down")+'">'+sgf(h.st.sg)+"</td></tr>"}
 function renderSummary(h){var s=h.st,rows=[],pb=h.pbs||[];
-  function row(k,label,val,sg){rows.push("<tr><td>"+label+(pb.indexOf(k)>-1?'<span class="pb">New PB</span>':"")+'</td><td class="r">'+val+'</td><td class="r '+(sg==null?"":sg>=0?"up":"down")+'">'+(sg==null?"–":sgf(sg))+"</td></tr>")}
-  if(s.gate!=null)row("gate","Start-line gate",s.gate+"/10");if(s.holeout!=null)row("holeout","Hole Out",s.holeout+"/12",s.sg_holeout);if(s.money!=null)row("money","Money Stealers",s.money+"/12 pts",s.sg_money);
-  if(s.ladder!=null)row("ladder","Ladder to 70",s.ladder+"/"+Math.max(0,s.ladderN-1));if(s.strike!=null)row("strike","Strike station",s.strike+"/5 centred");
-  if(s.sg_drive!=null)row("sg_drive","Driving",s.fairways+"/"+s.drives+" fairways",s.sg_drive);if(s.sg_app!=null)row("sg_app","Approach","8 flags",s.sg_app);if(s.wd!=null)row("wd","Wedge Darts",s.wd+" pts",s.sg_wd);
-  var hcPb=pb.indexOf("hc")>-1;
-  return '<div class="verdict"><span class="k">'+nice(h.date)+" · "+(h.kind==="range"?"Range practice":"Round day warm-up")+'</span><div class="hc">'+hcTxt(s.hc)+'</div><p>This session played like a '+(s.hc==null?"–":hcTxt(s.hc).toLowerCase()==="scratch"?"scratch golfer":hcTxt(s.hc)+" handicap")+(hcPb?" · best yet":"")+'. Strokes gained against your scratch goal: <b style="color:var(--gold)">'+sgf(s.sg)+"</b> over "+s.n+" shots.</p></div>"+
-    '<div class="card"><span class="eyebrow">Game by game</span><div class="grid"><table><thead><tr><th>Game</th><th class="r">Score</th><th class="r">SG vs scratch</th></tr></thead><tbody>'+rows.join("")+"</tbody></table></div>"+
-    (pb.length?'<div class="note">New personal best'+(pb.length>1?"s":"")+": "+pb.map(function(k){return PBS.filter(function(x){return x[0]===k})[0][1]}).join(", ")+"</div>":"")+
-    '<button class="primary" data-act="home">Done</button></div>'}
+  function row(k,label,val,sg){rows.push('<tr><td class="l">'+label+(pb.indexOf(k)>-1?' <span class="pill fin">New PB</span>':"")+'</td><td><b>'+val+'</b></td><td class="'+(sg==null?"":sg>=0?"up":"down")+'">'+(sg==null?"–":sgf(sg))+"</td></tr>")}
+  if(s.gate!=null)row("gate","Start-line gate",s.gate+"/10");if(s.holeout!=null)row("holeout","Hole Out",s.holeout+"/12",s.sg_holeout);if(s.money!=null)row("money","Money Stealers",s.money+"/12",s.sg_money);
+  if(s.ladder!=null)row("ladder","Ladder to 70",s.ladder+"/"+Math.max(0,s.ladderN-1));if(s.strike!=null)row("strike","Strike station",s.strike+"/5");
+  if(s.sg_drive!=null)row("sg_drive","Driving",s.fairways+"/"+s.drives+" fw",s.sg_drive);if(s.sg_app!=null)row("sg_app","Approach","8 flags",s.sg_app);if(s.wd!=null)row("wd","Wedge Darts",s.wd+" pts",s.sg_wd);
+  var h2=board("Strokes gained vs scratch",sgf(s.sg),[["Played like",hcTxt(s.hc)],["Shots",s.n]],100,nice(h.date)+" · "+(h.kind==="range"?"Range practice":"Round day warm-up")+" finished.");
+  h2+='<section class="card" id="finished"><div class="done"><span class="label">Session handicap</span><h2>'+hcTxt(s.hc)+'</h2><div class="hc">Strokes gained vs scratch: '+sgf(s.sg)+'</div><p class="muted" style="margin:0">This session played like a '+(Math.round(s.hc)===0?"scratch golfer":hcTxt(s.hc)+" handicap")+" over "+s.n+" scored shots.</p></div>"+
+    '<div class="grid"><table><thead><tr><th class="l">Game</th><th>Score</th><th>SG vs scratch</th></tr></thead><tbody>'+rows.join("")+"</tbody></table></div>"+
+    (pb.length?'<div class="unlock" style="padding:12px 14px"><b>New personal best'+(pb.length>1?"s":"")+":</b> "+pb.map(function(k){return PBS.filter(function(x){return x[0]===k})[0][1]}).join(", ")+"</div>":"")+
+    '<button class="primary" data-act="home">Done</button></section>';
+  return h2}
 function renderHome(){var h="",t=today(),m=monday(t),W=weekOf(t),rounds=W.filter(function(x){return x.kind==="round"}).length,range=W.filter(function(x){return x.kind==="range"}).length;
-  h+='<div class="card"><div class="two"><label class="fld"><span class="label">Name</span><input id="player" autocomplete="name" placeholder="Paul Goddard" value="'+esc(S.player)+'"></label><label class="fld"><span class="label">Driver carry (yds)</span><input id="drvIn" inputmode="numeric" value="'+S.drv+'"></label></div></div>';
-  if(S.cur)h+='<div class="resume"><b>You have a session in progress</b><span class="muted">'+(S.cur.kind==="range"?"Range practice":"Round day warm-up")+" · block "+(S.cur.bi+1)+" of "+S.cur.blocks.length+'</span><div class="btns"><button class="primary" data-act="resume">Carry on</button><button class="ghost" data-act="discard">Start again</button></div></div>';
-  /* week */
   var tot=W.reduce(function(a,x){return a+(x.st.sg||0)},0),hs=W.map(function(x){return x.st.hc}).filter(function(x){return x!=null});
-  h+='<section class="sec-h"><span class="eyebrow">01 / This week</span><h2>Week of '+nice(m)+"</h2></section>";
-  h+='<div class="card"><div class="wk">'+[0,1,2,3,4,5,6].map(function(i){var d=addDays(m,i),ss=S.history.filter(function(x){return x.date===d});return '<div class="'+(d===t?"today":"")+'">'+["M","T","W","T","F","S","S"][i]+ss.map(function(x){return '<i class="'+(x.kind==="round"?"r":"p")+'">'+(x.kind==="round"?"ROUND":"RANGE")+"</i>"}).join("")+"</div>"}).join("")+"</div>"+
-    '<div class="stats"><div><span class="label">Round warm-ups</span><b class="tnum">'+rounds+"/"+WEEK_ROUNDS+'</b></div><div><span class="label">SG vs scratch</span><b class="tnum '+(W.length?(tot>=0?"up":"down"):"")+'">'+(W.length?sgf(tot):"–")+'</b></div><div><span class="label">Avg handicap</span><b class="tnum">'+(hs.length?hcTxt(hs.reduce(function(a,x){return a+x},0)/hs.length):"–")+"</b></div></div>"+
-    '<span class="muted">'+range+" range session"+(range===1?"":"s")+" this week.</span>";
-  var dow=(new Date().getDay()+6)%7;if(W.length&&dow>=6&&!S.sent[m])h+='<div class="note">It’s the end of the week. Send your week to Jack.</div>';
-  h+='<div class="btns"><button class="dark" data-act="send" data-v="'+m+'">'+(S.sent[m]?"Send again":"Send my week to Jack")+'</button><button class="ghost" data-act="copy" data-v="'+m+'" style="flex:0 0 auto">Copy</button></div>'+(S.sent[m]?'<span class="muted">Sent '+nice(S.sent[m])+".</span>":"");
+  h+=board("This week · SG vs scratch",W.length?sgf(tot):"0",[["Round warm-ups",rounds+" / "+WEEK_ROUNDS],["Avg handicap",hs.length?hcTxt(hs.reduce(function(a,x){return a+x},0)/hs.length):"–"],["Range sessions",range]],rounds/WEEK_ROUNDS*100,
+    "Week of "+nice(m)+". Two rounds a week, each with both warm-ups.");
+  if(S.cur)h+='<section class="card"><div class="unlock" style="padding:14px;display:flex;flex-direction:column;gap:10px"><b>You have a session in progress</b><span class="muted">'+(S.cur.kind==="range"?"Range practice":"Round day warm-up")+" · block "+(S.cur.bi+1)+" of "+S.cur.blocks.length+'</span><div class="btns"><button class="primary" data-act="resume">Carry on</button><button class="ghost" data-act="discard">Start again</button></div></div></section>';
+  var k=S.pick||"round";
+  h+='<section class="card">'+secH("01 / Today","Pick your session")+'<div class="lvl">'+
+    '<button data-act="pick" data-v="round" aria-pressed="'+(k==="round")+'"><b>Round day warm-up</b><small>Putting warm-up: start-line gate, Hole Out and Money Stealers (15 mins). Range warm-up: the Practice Plan 30 min approach and driver, plus your 5 min technical station (35 mins).</small></button>'+
+    '<button data-act="pick" data-v="range" aria-pressed="'+(k==="range")+'"><b>Range practice</b><small>The Practice Plan warm-up and your technical station, then Wedge Darts with strokes gained on every shot. About 45 mins.</small></button></div>'+
+    (k==="round"?'<span class="label">Which warm-up first?</span><div class="seg"><button data-act="order" data-v="putt" aria-pressed="'+(S.order==="putt")+'">Putting first</button><button data-act="order" data-v="range" aria-pressed="'+(S.order==="range")+'">Range first</button></div>':"")+
+    '<button class="primary" data-act="start" data-v="'+k+'">Start '+(k==="round"?"round day warm-up":"range practice")+"</button></section>";
+  /* week */
+  h+='<section class="card">'+secH("02 / This week","Week of "+nice(m))+'<div class="wk">'+[0,1,2,3,4,5,6].map(function(i){var d=addDays(m,i),ss=S.history.filter(function(x){return x.date===d});return '<div class="'+(d===t?"today":"")+'"><b>'+["M","T","W","T","F","S","S"][i]+"</b>"+ss.map(function(x){return '<i class="'+(x.kind==="round"?"r":"p")+'">'+(x.kind==="round"?"Round":"Range")+"</i>"}).join("")+"</div>"}).join("")+"</div>";
+  var dow=(new Date().getDay()+6)%7;if(W.length&&dow>=6&&!S.sent[m])h+='<div class="unlock" style="padding:12px 14px">It’s the end of the week. Send your week to Jack.</div>';
+  h+='<div class="btns"><button class="primary" data-act="send" data-v="'+m+'">'+(S.sent[m]?"Send again":"Send my week to Jack")+'</button><button class="ghost" data-act="copy" data-v="'+m+'">Copy</button></div>'+(S.sent[m]?'<span class="muted">Sent '+nice(S.sent[m])+".</span>":"");
   var pm=addDays(m,-7);if(S.history.some(function(x){return monday(x.date)===pm})&&!S.sent[pm])h+='<button class="linky" data-act="send" data-v="'+pm+'">Last week wasn’t sent. Send week of '+nice(pm)+"</button>";
-  h+="</div>";
-  /* start */
-  h+='<section class="sec-h"><span class="eyebrow">02 / Start a session</span><h2>Pick your game plan</h2></section>';
-  h+='<div class="card"><div class="pick"><button data-act="start" data-v="round"><b>Round day warm-up</b><small>Putting warm-up: start-line gate, Hole Out and Money Stealers (15 mins). Range warm-up: the Practice Plan 30 min approach and driver plus a 5 min technical station (35 mins).</small></button></div>'+
-    '<span class="label">Which warm-up first?</span><div class="seg"><button data-act="order" data-v="putt" aria-pressed="'+(S.order==="putt")+'">Putting first</button><button data-act="order" data-v="range" aria-pressed="'+(S.order==="range")+'">Range first</button></div></div>';
-  h+='<div class="card"><div class="pick"><button data-act="start" data-v="range"><b>Range practice</b><small>Practice Plan warm-up, your technical station, then Wedge Darts (18 balls, strokes gained on every shot) and a warm down. About 45 mins.</small></button></div></div>';
-  /* bests */
-  var B=bests();h+='<section class="sec-h"><span class="eyebrow">03 / Personal bests</span><h2>My PBs</h2></section><div class="card">';
-  var pr=PBS.filter(function(p){return B[p[0]]});h+=pr.length?'<div class="grid"><table><tbody>'+pr.map(function(p){return "<tr><td>"+p[1]+'</td><td class="r"><b>'+p[3](B[p[0]].v)+'</b></td><td class="r muted">'+nice(B[p[0]].date)+"</td></tr>"}).join("")+"</tbody></table></div>":'<span class="muted">Your bests appear here after your first session.</span>';
-  h+="</div>";
+  h+="</section>";
   /* history */
-  h+='<section class="sec-h"><span class="eyebrow">04 / History</span><h2>Every session</h2></section><div class="card">';
-  h+=S.history.length?'<div class="grid"><table><thead><tr><th>Date</th><th>Session</th><th class="r">Played like</th><th class="r">SG</th></tr></thead><tbody>'+S.history.slice(0,40).map(sessRow).join("")+"</tbody></table></div>":'<span class="muted">Finished sessions appear here, each with the handicap it was played to and its strokes gained against scratch.</span>';
-  h+='<span class="muted">Strokes gained compares every shot with a scratch golfer from the same spot (Mark Broadie’s data, adjusted by handicap). The session handicap is the level whose average golfer would have matched you exactly.</span></div>';
+  h+='<section class="card">'+secH("03 / History","Every session")+(S.history.length?'<div class="grid"><table><thead><tr><th class="l">Date</th><th class="l">Session</th><th>Played like</th><th>SG</th></tr></thead><tbody>'+S.history.slice(0,40).map(sessRow).join("")+"</tbody></table></div>":'<span class="muted">Finished sessions appear here, each with the handicap it was played to and its strokes gained against scratch.</span>')+
+    '<p class="muted" style="margin:0">Strokes gained compares every shot with a scratch golfer from the same spot (Mark Broadie’s data, adjusted by handicap). The session handicap is the level whose average golfer would have matched you exactly.</p></section>';
   return h}
-function render(){var m=$("main");if(!m)return;stopTimerIfLeft();var last=S.last&&S.history.filter(function(x){return x.id===S.last})[0];m.innerHTML=last?renderSummary(last):S.cur&&S.view!=="home"?renderRun():renderHome();$("hName").textContent=S.player||"Paul Goddard";bind()}
+function pbScreen(){var B=bests(),pr=PBS.filter(function(p){return B[p[0]]});
+  var el=document.createElement("div");el.className="ux-done";el.id="pbSheet";
+  el.innerHTML='<div class="ux-done-in"><div class="ux-top"><div><div class="ux-kick">Progress</div><div class="ux-h">My bests</div></div><button type="button" class="ux-close" data-x="close">Close</button></div><div class="ux-bar"></div>'+
+    (pr.length?pr.map(function(p){var c=S.history.filter(function(h){return h.st&&h.st[p[0]]!=null}).length;return '<div class="ux-best"><div class="ux-bn"><b>'+p[1]+"</b><span>Best <em>"+p[3](B[p[0]].v)+"</em> · "+nice(B[p[0]].date)+" · "+c+" session"+(c===1?"":"s")+"</span></div></div>"}).join(""):'<p class="ux-empty">Your bests appear here after your first session.</p>')+
+    '<div class="ux-best"><div class="ux-bn"><b>Round warm-ups this week</b><span><em>'+weekOf(today()).filter(function(x){return x.kind==="round"}).length+" of "+WEEK_ROUNDS+"</em> rounds</span></div></div>"+
+    '<button type="button" class="ux-btn" data-x="close">Close</button></div>';
+  document.body.appendChild(el);el.querySelectorAll('[data-x="close"]').forEach(function(b){b.onclick=function(){el.remove()}})}
+function pbTab(){if(document.querySelector(".ux-pbtab"))return;var b=document.createElement("button");b.className="ux-pbtab";b.type="button";
+  b.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0V4zM5 5H3v2a4 4 0 0 0 4 4M19 5h2v2a4 4 0 0 1-4 4M9 15h6l1 5H8l1-5z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>My PBs';
+  b.onclick=pbScreen;document.body.appendChild(b)}
+function render(){var m=$("main");if(!m)return;stopTimerIfLeft();var last=S.last&&S.history.filter(function(x){return x.id===S.last})[0];
+  m.innerHTML=last?renderSummary(last):S.cur&&S.view!=="home"?renderRun():renderHome();
+  var p=$("player");if(p&&document.activeElement!==p)p.value=S.player||"";var d=$("drvIn");if(d&&document.activeElement!==d)d.value=S.drv;
+  $("hName").textContent=S.player||"Paul Goddard";gateShow();pbTab();bind()}
 function stopTimerIfLeft(){var b=cur();if(TM&&!(b&&b.timer))stopTimer()}
 function bind(){var m=$("main");m.querySelectorAll("[data-act]").forEach(function(el){el.onclick=function(){act(el.dataset.act,el.dataset.v)}});
-  var p=$("player");if(p)p.oninput=function(e){act("name",e.target.value)};var d=$("drvIn");if(d)d.onchange=function(e){act("drv",e.target.value)};
   ["carryIn","offIn","ladIn"].forEach(function(id){var e=$(id);if(e)e.onkeydown=function(ev){if(ev.key==="Enter"){if(id==="offIn")act("lm");else if(id==="carryIn"){var o=$("offIn");o&&o.focus()}}}});
   var b=cur();if(b&&b.timer)bindTimer(b)}
+/* first open: the same dark "before you start" screen as the games */
+function gateShow(){var g=$("gate");if(!g)return;var on=!S.ready;g.hidden=!on;document.body.classList.toggle("gated",on);if(!on)return;
+  var n=$("gName");if(n&&!n.value)n.value=S.player||($("player")&&$("player").value)||"";var dc=$("gDrv");if(dc&&!dc.value)dc.value=S.drv;
+  g.querySelectorAll("#gOrder button").forEach(function(x){x.setAttribute("aria-pressed",String(x.dataset.v===S.order))});$("gGo").disabled=!(($("gName").value||"").trim())}
+(function(){var g=$("gate");if(!g)return;
+  $("gName").oninput=function(){$("gGo").disabled=!this.value.trim()};
+  g.querySelectorAll("#gOrder button").forEach(function(x){x.onclick=function(){S.order=x.dataset.v;gateShow()}});
+  $("gGo").onclick=function(){S.player=$("gName").value.trim();var dv=parseFloat($("gDrv").value);if(dv>=150&&dv<=360)S.drv=Math.round(dv);S.ready=true;save();render();window.scrollTo(0,0)};
+  $("player").oninput=function(e){S.player=e.target.value;save();$("hName").textContent=S.player||"Paul Goddard"};
+  $("drvIn").onchange=function(e){act("drv",e.target.value);e.target.value=S.drv}})();
+var _act=act;act=function(a,v){if(a==="pick"){S.pick=v;save();render();return}return _act(a,v)};
 render();
+
 </script>
 <script src="{{BASE}}src/sync.js"></script>
 <script>MGSync.init({plan:'golf-paul-goddard',planName:'Paul Goddard Golf Plan',group:'golf'})</script>
