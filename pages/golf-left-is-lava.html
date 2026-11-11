@@ -651,7 +651,7 @@ function score(target,carry,off,side){
   if(short)opts.push(-1);
   const pts=Math.min(...opts);
   let why;
-  if(pts===-2)why="In the lava"; else if(pts===-1)why="Short. Club up"; else if(pts===3)why="Inside 15 ft";
+  if(pts===-2)why="In the lava"; else if(pts===-1)why="Short"; else if(pts===3)why="Inside 15 ft";
   else if(pts===1)why="On the green"; else why=lo<0?"Safe miss":"Missed the green";
   return {prox,ft,lava:lo>0,short,pts,why};
 }
@@ -1419,5 +1419,12 @@ UX.init({family:'golf',home:false});
   if(p&&g){var fill=function(){if(!g.value.trim()&&p.value.trim()){g.value=p.value;g.dispatchEvent(new Event("input",{bubbles:true}))}};p.addEventListener("input",fill);fill()}})();
 </script>
 <script>var KEY="leftIsLava";</script>
+<script src="{{BASE}}src/golf-sg.js"></script>
+<script>/* strokes gained alongside the game score */
+S.shots.forEach(s=>{if(s.why==="Short. Club up")s.why="Short"});
+GSG.init({target:()=>S.target,colLabel:"Shot",
+  shots:()=>S.shots.map(s=>({n:s.target+" yds, "+s.why.toLowerCase(),sg:GSG.approachSG(GSG.num(S.target),+s.target,+s.carry,Math.abs(+s.off),s.pts===-2)})),
+  note:"Each shot is valued from the fairway at the target distance to where it finished. In the lava costs a penalty stroke and a chip from the drop."});
+</script>
 <script src="{{BASE}}src/sync.js"></script>
 <script>MGSync.init({plan:'golf-left-is-lava',planName:'Left Is Lava',group:'golf'})</script>

@@ -1307,5 +1307,11 @@ UX.init({family:'golf',home:false});
   if(p&&g){var fill=function(){if(!g.value.trim()&&p.value.trim()){g.value=p.value;g.dispatchEvent(new Event("input",{bubbles:true}))}};p.addEventListener("input",fill);fill()}})();
 </script>
 <script>var KEY="wedgeDarts";</script>
+<script src="{{BASE}}src/golf-sg.js"></script>
+<script>/* strokes gained alongside the game score */
+GSG.init({target:()=>S.target,colLabel:"Shot",
+  shots:()=>S.shots.map(s=>({n:s.target+" yds, carried "+(+s.carry).toFixed(1)+", "+Math.abs(+s.off).toFixed(1)+" off",sg:GSG.approachSG(GSG.num(S.target),+s.target,+s.carry,Math.abs(+s.off))})),
+  note:"Each shot is valued from the fairway at the target distance to where it finished. Inside the green (about 8 yds plus 3% of the distance) it’s a putt from that distance; outside it’s a chip."});
+</script>
 <script src="{{BASE}}src/sync.js"></script>
 <script>MGSync.init({plan:'golf-wedge-darts',planName:'Wedge Darts',group:'golf'})</script>

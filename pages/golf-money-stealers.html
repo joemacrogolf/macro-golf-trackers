@@ -1274,5 +1274,13 @@ UX.init({family:'golf',home:false});
   if(p&&g){var fill=function(){if(!g.value.trim()&&p.value.trim()){g.value=p.value;g.dispatchEvent(new Event("input",{bubbles:true}))}};p.addEventListener("input",fill);fill()}})();
 </script>
 <script>var KEY="moneyStealers";</script>
+<script src="{{BASE}}src/golf-sg.js"></script>
+<script>/* strokes gained alongside the game score */
+(function(){var L={4:[[0,0]],3:[[0,1.5]],2:[[1.5,1.5],[0,4.5]],1:[[1.5,4.5]],0:[[4.5,4.5]]};
+GSG.init({target:()=>S.target,unit:"station",colLabel:"Station (2 putts)",
+  shots:()=>sc().map((p,i)=>{const d=G().stations[i],r=(reads()||[])[i]||{},n=GSG.num(S.target),opts=L[p]||L[0];
+    const sg=opts.reduce((a,o)=>a+o.reduce((b,lv)=>b+GSG.puttSG(n,d,lv,r.slope),0),0)/opts.length;return {n:d+" ft, "+p+" pt"+(p===1?"":"s"),sg}}),
+  note:"Each station is two putts, valued from their length and slope. Holed counts as 0 ft, in the zone as 1.5 ft and outside it as 4.5 ft; 2 points (two in the zone, or one holed) is the average of the two."})})();
+</script>
 <script src="{{BASE}}src/sync.js"></script>
 <script>MGSync.init({plan:'golf-money-stealers',planName:'Money Stealers',group:'golf'})</script>

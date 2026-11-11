@@ -1985,5 +1985,11 @@ UX.init({family:'golf',home:false});
   if(p&&g){var fill=function(){if(!g.value.trim()&&p.value.trim()){g.value=p.value;g.dispatchEvent(new Event("input",{bubbles:true}))}};p.addEventListener("input",fill);fill()}})();
 </script>
 <script>var KEY="macroSGT";</script>
+<script src="{{BASE}}src/golf-sg.js"></script>
+<script>/* strokes gained alongside the game score */
+GSG.init({target:()=>S.target||"10",colLabel:"Shot",
+  shots:()=>{const T=MacroPlan.num(S.target||"10"),m=mgMult(T),L=[];S.res.forEach((r,i)=>{if(r===null)return;const s=shotAt(i);L.push({n:s.name+", "+(r===0?"holed":(+r).toFixed(1)+" ft"),sg:MacroPlan.puttE(T,expLeave(s,m))-MacroPlan.puttE(T,r)})});return L},
+  note:"Each shot is valued as the putts a golfer of your target handicap would need from their typical leave on that shot, minus the putts from your leave. Skipped shots aren’t counted."});
+</script>
 <script src="{{BASE}}src/sync.js"></script>
 <script>MGSync.init({plan:'golf-short-game-test',planName:'Short Game Test',group:'golf'})</script>

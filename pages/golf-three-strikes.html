@@ -1256,5 +1256,12 @@ UX.init({family:'golf',home:false});
   if(p&&g){var fill=function(){if(!g.value.trim()&&p.value.trim()){g.value=p.value;g.dispatchEvent(new Event("input",{bubbles:true}))}};p.addEventListener("input",fill);fill()}})();
 </script>
 <script>var KEY="threeStrikes";</script>
+<script src="{{BASE}}src/golf-sg.js"></script>
+<script>/* strokes gained alongside the game score */
+GSG.init({target:()=>S.target||"10",setTarget:v=>{S.target=v;save()},unit:"swing",colLabel:"Swing",
+  shots:()=>S.club!=="Driver"?[]:S.swings.map(v=>{v=+v;const c=S.metric==="ball"?v*1.55:v*2.3;return {n:v.toFixed(1)+" mph, about "+Math.round(c)+" yds carry",sg:GSG.driveSG(GSG.num(S.target||"10"),c)}}),
+  summary:(L,t)=>S.club!=="Driver"?{big:"–",line:"Strokes gained is worked out for Driver swings."}:L.length?{big:GSG.fmt(L.reduce((a,s)=>a+s.sg,0)/L.length),line:"per drive over "+L.length+" swing"+(L.length===1?"":"s")+"; a "+GSG.name(t)+" golfer drives about "+Math.round(GSG.driveTotal(GSG.num(t)))+" yds"}:{big:"–",line:"Each swing is scored as you go."},
+  note:"Strokes gained per drive. Speed is turned into an estimated carry (about 2.3 yds per mph of club speed, or 1.55 per mph of ball speed) plus 6% roll, then valued on a 400 yd par 4 against your target handicap’s average drive. It measures distance only, not direction."});
+</script>
 <script src="{{BASE}}src/sync.js"></script>
 <script>MGSync.init({plan:'golf-three-strikes',planName:'3 Strikes',group:'golf'})</script>
