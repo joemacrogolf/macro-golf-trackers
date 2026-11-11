@@ -365,6 +365,7 @@ tr.done .ux-rpe{background:#F4F1EA}
 @media (prefers-reduced-motion:reduce){.ux-chip{transition:none}}
 </style>
 <style id="pg-css">
+.vizcap{font-family:var(--display);font-size:20px;text-transform:uppercase;color:#0B0B0B;text-align:center;margin:0}
 .viz{border:2px solid #0B0B0B;line-height:0}.viz svg{display:block;width:100%;height:auto}.tap{cursor:crosshair;touch-action:manipulation}
 #main .planlist .t{text-align:left!important}
 /* option buttons: stacked title + one plain line (set explicitly so the Kajabi theme can't centre or inline them) */
@@ -589,7 +590,8 @@ function act(a,v){var b=cur();
   if(a==="start"){newSession(v);return}
   if(a==="resume"){S.view=null;save();render();toEntry();return}
   if(a==="discard"){S.cur=null;save();render();return}
-  if(a==="next"){if(b&&b.timer)stopTimer();S.flash=null;if(S.cur.bi<S.cur.blocks.length-1){S.cur.bi++;save();render();toEntry()}else finish();return}
+  if(a==="skip"){stopTimer();b.done=true;b.skipped=true;save();a="next"}
+  if(a==="next"){if(b&&(b.timer||b.t==="tick"))stopTimer();S.flash=null;if(S.cur.bi<S.cur.blocks.length-1){S.cur.bi++;save();render();toEntry()}else finish();return}
   if(a==="back"){if(S.cur.bi>0){stopTimer();S.cur.bi--;S.flash=null;save();render()}return}
   if(a==="tick"){b.done=!b.done;save();render();return}
   if(a==="cnt"){if(b.res.length<b.total){b.res.push(v==="1");setFlash(v==="1"?"p":"m",v==="1"?"Through the gate":"Missed the gate",b.res.filter(Boolean).length+"/"+b.res.length)}save();render();return}
@@ -605,7 +607,7 @@ function act(a,v){var b=cur();
     else if(b.t==="wd"){var w=b.res.length,tg=wdFin(w)?(+$("finPick").value||b.plan[w]):b.plan[w];b.res.push({target:tg,carry:c,off:o});var pt=wdPts(tg,c,o,wdFin(w));
       var sg=sgOf({k:"app",d:tg,carry:c,off:o},+GOAL);setFlash(pt>0?"p":pt<0?"m":"z",tg+" yds · "+(pt>0?"+":"")+pt+" pt"+(Math.abs(pt)===1?"":"s")+"<br><b style='font-family:var(--text);font-size:14px'>Strokes gained "+sgf(sg)+" vs scratch</b>",(pt>0?"+":"")+pt)}
     save();render();var ci=$("carryIn");if(ci)ci.focus();return}
-  if(a==="side"){S.side=v;save();document.querySelectorAll('[data-act="side"]').forEach(function(x){x.setAttribute("aria-pressed",String(x.dataset.v===v))});return}
+  if(a==="side"){S.side=v;save();document.querySelectorAll('[data-act="side"]').forEach(function(x){x.setAttribute("aria-pressed",String(x.dataset.v===v))});var pc=$("pic");if(pc)pc.innerHTML=shotPic(cur());return}
   if(a==="undo"){if(b.res.length){b.res.pop();S.flash=null;save();render()}return}
   if(a==="drv"){var dv=parseFloat(v);if(dv>=150&&dv<=360){S.drv=Math.round(dv);save()}return}
   if(a==="send"){sendWeek(v);return}
@@ -623,7 +625,7 @@ var TM=null;
 function stopTimer(){if(TM){clearInterval(TM);TM=null}}
 function timerHtml(b){var left=b.left==null?b.mins*60:b.left;return '<div class="timer"><b id="tmr">'+Math.floor(left/60)+":"+String(left%60).padStart(2,"0")+'</b><button class="dark" id="tmrBtn">'+(TM?"Pause":left<b.mins*60?"Resume":"Start "+b.mins+" min")+'</button></div>'}
 function bindTimer(b){var btn=$("tmrBtn");if(!btn)return;btn.onclick=function(){if(TM){stopTimer();save();render();return}
-  if(b.left==null)b.left=b.mins*60;TM=setInterval(function(){b.left=Math.max(0,b.left-1);var el=$("tmr");if(el)el.textContent=Math.floor(b.left/60)+":"+String(b.left%60).padStart(2,"0");if(!b.left){stopTimer();save();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}render()}},1000);render()}}
+  if(b.left==null)b.left=b.mins*60;TM=setInterval(function(){b.left=Math.max(0,b.left-1);var el=$("tmr");if(el)el.textContent=Math.floor(b.left/60)+":"+String(b.left%60).padStart(2,"0");if(!b.left){stopTimer();if(b.t==="tick")b.done=true;save();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}render()}},1000);render()}}
 
 
 /* iron club face for the strike station (same drawing as the Practice Plan): tap where it came off, heat map from 3 strikes */
@@ -651,12 +653,81 @@ function faceSummary(hits){if(!hits.length)return "";const z=hits.map(faceZone),
   const mis=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]);return `${c} of ${hits.length} in the middle`+(mis.length?` · most misses ${mis[0].toLowerCase()} (${cnt[mis[0]]})`:"")}
 function isCentre(h){return typeof h==="string"?h==="Centre":faceZone(h).centre}
 function svgPt(e){var svg=e.currentTarget,r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;return {x:(e.clientX-r.left)/r.width*vb.width,y:(e.clientY-r.top)/r.height*vb.height}}
+/* ---------- pictures (from the Practice Plan) ---------- */
+var PC={deep:"#1d4d2b",rough:"#3d7a45",fw:"#6aa85a",green:"#8fd07a",water:"#2b7fc4",sand:"#eadcae",ink:"#0B0B0B",white:"#FFFFFF",gold:"#FFD900",turf:"#5d8f4e"};
+var PT=(x,y,str,o={})=>`<text x="${x}" y="${y}" font-family="Inter,Arial,sans-serif" font-size="${o.s||10}" font-weight="${o.w||700}" text-anchor="${o.a||"middle"}" fill="${o.c||PC.white}" letter-spacing=".5">${str}</text>`;
+var flag=(x,y)=>`<line x1="${x}" y1="${y}" x2="${x}" y2="${y-20}" stroke="${PC.white}" stroke-width="1.5"/><path d="M${x} ${y-20} l9 3 -9 3z" fill="${PC.gold}"/>`;
+var ballDot=(x,y)=>`<circle cx="${x}" cy="${y}" r="5.5" fill="${PC.white}" stroke="${PC.ink}" stroke-width="2"/>`;
+/* approach geometry: tap position <-> carry and offline */
+var AG={W:300,H:180,k:2.4};AG.cx=150;AG.cy=AG.H/2+6;
+function appSVG(s,ball){const {W,H,k,cx,cy}=AG,r=(8+0.03*s.d),h=s.haz,X=y=>cx+y*k,Y=d=>cy-d*k;
+  let g=`<rect width="${W}" height="${H}" fill="${PC.rough}"/><ellipse cx="${cx}" cy="${cy}" rx="${(r+7)*k}" ry="${(r+5)*k}" fill="${PC.fw}"/><ellipse cx="${cx}" cy="${cy}" rx="${r*k}" ry="${r*k*.85}" fill="${PC.green}"/>`+flag(cx,cy);
+  if(h){const sg=h.side==="L"?-1:1;
+    if(h.type==="ob"){const x1=X(sg*h.line);g+=`<line x1="${x1}" y1="0" x2="${x1}" y2="${H}" stroke="${PC.white}" stroke-width="2" stroke-dasharray="2 7"/>`+PT(sg<0?x1-14:x1+14,cy+3,"OB")}
+    else{const x1=X(sg*h.line),x2=sg<0?0:W;g+=`<rect x="${Math.min(x1,x2)}" y="0" width="${Math.abs(x2-x1)}" height="${H}" fill="${PC.water}"/>`+PT((x1+x2)/2,cy+3,"WATER")}}
+  g+=PT(cx,H-8,s.d+" yds to the flag",{w:600});
+  if(ball)g+=ballDot(X(Math.max(-60,Math.min(60,ball.o))),Y(Math.max(-34,Math.min(34,ball.c-s.d))));
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Green, ${s.d} yards">${g}</svg>`}
+function teeGeo(s){const W=300,H=300,top=26,bot=H-22,sy=(bot-top)/(s.L+10);return {W,H,top,bot,sy,X:y=>150+y*2.3,Y:d=>bot-d*sy}}
+function teeSVG(s,ball){const G=teeGeo(s),{W,H,top,bot,X,Y}=G,L=s.L,fh=s.fwHalf,h=s.haz;
+  let g=`<rect width="${W}" height="${H}" fill="${PC.deep}"/><rect x="${X(-(fh+20))}" y="${top-10}" width="${(fh+20)*4.6}" height="${bot-top+18}" fill="${PC.rough}"/>`;
+  const f0=Math.min(110,L*0.3);g+=`<rect x="${X(-fh)}" y="${Y(L-22)}" width="${fh*4.6}" height="${Y(f0)-Y(L-22)}" rx="16" fill="${PC.fw}"/>`;
+  g+=`<circle cx="150" cy="${Y(L)}" r="${24}" fill="${PC.green}"/>`+flag(150,Y(L))+`<rect x="141" y="${bot+2}" width="18" height="8" fill="${PC.fw}"/>`;
+  if(h){const sg=h.side==="L"?-1:1;
+    if(h.type==="water"){const x1=X(sg*h.line),x2=sg<0?0:W;g+=`<rect x="${Math.min(x1,x2)}" y="${Y(L-5)}" width="${Math.abs(x2-x1)}" height="${Y(Math.max(80,L*0.3))-Y(L-5)}" fill="${PC.water}"/>`+PT((x1+x2)/2,Y(L*0.55),"WATER")}
+    if(h.type==="ob"){const x1=X(sg*h.line);g+=`<line x1="${x1}" y1="${Y(L)}" x2="${x1}" y2="${Y(60)}" stroke="${PC.white}" stroke-width="2" stroke-dasharray="2 7"/>`+PT(sg<0?x1-14:x1+14,Y(L*0.55),"OB")}
+    if(h.type==="bunker"){const xi=X(sg*h.inner),xo=X(sg*h.outer),cy=(Y(h.from)+Y(h.to))/2;g+=`<ellipse cx="${(xi+xo)/2}" cy="${cy}" rx="${Math.abs(xo-xi)/2}" ry="${(Y(h.from)-Y(h.to))/2}" fill="${PC.sand}"/>`+PT(sg<0?Math.min(xi,xo)-4:Math.max(xi,xo)+4,cy+3,h.from+"–"+h.to,{s:9,a:sg<0?"end":"start"})}}
+  const lft=h&&h.side==="R";for(let d=100;d<L-30;d+=50){const y=Y(d);g+=lft?`<line x1="14" y1="${y}" x2="26" y2="${y}" stroke="${PC.white}" opacity=".7"/>`+PT(30,y+3,d,{s:9,a:"start",w:600}):`<line x1="${W-26}" y1="${y}" x2="${W-14}" y2="${y}" stroke="${PC.white}" opacity=".7"/>`+PT(W-30,y+3,d,{s:9,a:"end",w:600})}
+  if(ball){const tot=ball.c*1.06,bx=X(Math.max(-62,Math.min(62,ball.o))),by=Y(Math.min(L+10,Math.max(0,tot)));g+=`<path d="M150 ${bot} Q ${(150+bx)/2} ${(bot+by)/2-30} ${bx} ${by}" fill="none" stroke="${PC.gold}" stroke-width="2" stroke-dasharray="4 4"/>`+ballDot(bx,by)}
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${L} yard hole">${g}</svg>`}
+function vizSVG(v,b){const W=300,H=170;let g="";
+  if(v==="breaker"){g=`<rect width="${W}" height="${H}" fill="${PC.green}"/><circle cx="210" cy="70" r="14" fill="${PC.ink}"/><rect x="208" y="58" width="4" height="22" fill="${PC.white}"/><circle cx="210" cy="57" r="4" fill="${PC.white}"/>
+    <path d="M60 150 C 70 60, 170 30, 199 66" fill="none" stroke="${PC.gold}" stroke-width="3" stroke-dasharray="6 6"/>`+ballDot(60,150)+`<circle cx="199" cy="66" r="5" fill="${PC.white}" opacity=".6"/>`}
+  else if(v==="gate"){g=`<rect width="${W}" height="${H}" fill="${PC.green}"/><circle cx="250" cy="85" r="10" fill="${PC.ink}"/><line x1="70" y1="85" x2="240" y2="85" stroke="${PC.white}" stroke-width="2" stroke-dasharray="5 5"/>`+
+    `<rect x="98" y="66" width="6" height="10" fill="${PC.white}"/><rect x="98" y="94" width="6" height="10" fill="${PC.white}"/>`+ballDot(70,85)+`<rect x="40" y="70" width="10" height="30" fill="${PC.ink}"/>`}
+  else if(v==="lag"){g=`<rect width="${W}" height="${H}" fill="${PC.green}"/><circle cx="250" cy="85" r="34" fill="none" stroke="${PC.white}" stroke-width="2" stroke-dasharray="4 4"/><circle cx="250" cy="85" r="7" fill="${PC.ink}"/>`+
+    [40,90,140].map((x,i)=>ballDot(x,85)+PT(x,112,["20 FT","30 FT","40 FT"][2-i],{c:C.ink,s:9})).join("")}
+  else if(v==="sandline"||v==="tightlie"){const sand=v==="sandline";g=`<rect width="${W}" height="${H}" fill="${sand?C.sand:"#9bb86a"}"/>`+(sand?`<line x1="140" y1="20" x2="140" y2="150" stroke="#a8946a" stroke-width="4"/>`:"")+
+    `<circle cx="158" cy="98" r="11" fill="${PC.white}" stroke="${PC.ink}" stroke-width="2"/><path d="M60 110 L130 106" stroke="${PC.ink}" stroke-width="5"/><path d="M168 108 Q 200 104 250 112" fill="none" stroke="${sand?"#a8946a":"#4a6e3c"}" stroke-width="10" stroke-linecap="round"/>`+
+    `<path d="M150 70 L250 40" stroke="${PC.gold}" stroke-width="2" stroke-dasharray="4 4"/>`}
+  else if(v==="flights"){g=`<rect width="${W}" height="${H}" fill="${PC.rough}"/><rect x="200" y="120" width="100" height="50" fill="${PC.green}"/>`+flag(255,138)+ballDot(30,150)+
+    [[40,"LOW"],[90,"MID"],[10,"HIGH"]].map(([k,l],i)=>`<path d="M34 146 Q 140 ${k+(i===1?0:0)} 250 136" fill="none" stroke="${i===0?C.white:i===1?C.gold:"#9ec3e6"}" stroke-width="2" stroke-dasharray="5 5"/>`).join("")}
+  else if(v==="corridor"){g=`<rect width="${W}" height="${H}" fill="${PC.rough}"/><path d="M150 160 L110 10 L190 10 Z" fill="${PC.fw}" opacity=".9"/><circle cx="110" cy="14" r="5" fill="${PC.gold}"/><circle cx="190" cy="14" r="5" fill="${PC.gold}"/>`+ballDot(150,155)+`<line x1="150" y1="150" x2="150" y2="20" stroke="${PC.white}" stroke-width="2" stroke-dasharray="5 5"/>`}
+  else if(v==="safe"){const L=b&&b.side==="L";g=`<rect width="${W}" height="${H}" fill="${PC.rough}"/><rect x="${L?0:200}" y="0" width="100" height="${H}" fill="${PC.water}"/><ellipse cx="150" cy="80" rx="46" ry="38" fill="${PC.green}"/>`+flag(150,82)+
+    `<path d="M150 82 m ${L?30:-30} 0 a 60 50 0 0 ${L?1:0} ${L?40:-40} 40" fill="none" stroke="${PC.gold}" stroke-width="3" stroke-dasharray="5 5"/>`+PT(L?50:250,90,"TROUBLE")+PT(L?230:70,40,"SAFE",{c:C.ink})}
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Drill picture">${g}</svg>`}
+
+/* putting and ladder pictures for the warm-up games */
+function holeOutSVG(b,i){var W=300,H=190,cx=150,cy=95,g='<rect width="'+W+'" height="'+H+'" fill="'+PC.green+'"/>';
+  var dirs={North:[0,-1],East:[1,0],South:[0,1],West:[-1,0]},pos=function(p){var d=dirs[p.spot];return [cx+d[0]*p.ft*24,cy+d[1]*p.ft*14]};
+  [3,4,5].forEach(function(ft){g+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+ft*24+'" ry="'+ft*14+'" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-dasharray="3 5"/>'});
+  if(i!=null&&b.putts[i]){var q=pos(b.putts[i]);g+='<line x1="'+q[0]+'" y1="'+q[1]+'" x2="'+cx+'" y2="'+cy+'" stroke="'+PC.gold+'" stroke-width="2" stroke-dasharray="5 5"/>'}
+  b.putts.forEach(function(p,j){var q=pos(p),r=b.res[j];
+    g+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="'+(j===i?7:4.5)+'" fill="'+(j===i?"#FFFFFF":r===1?"#1FA855":r===0?"#E0352B":"#FFFFFF")+'" fill-opacity="'+(j===i||r!=null?1:.45)+'" stroke="#0B0B0B" stroke-width="'+(j===i?2:1)+'"/>'});
+  g+='<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="#0B0B0B"/>'+flag(cx,cy);
+  g+=PT(cx,14,"NORTH · DOWNHILL",{s:9})+PT(cx,H-6,"SOUTH · UPHILL",{s:9})+PT(10,cy-14,"WEST",{s:9,a:"start"})+PT(W-10,cy-14,"EAST",{s:9,a:"end"});
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Hole Out spots">'+g+'</svg>'}
+function moneySVG(q){var W=300,H=130,hx=225,y=62,g='<rect width="'+W+'" height="'+H+'" fill="'+PC.green+'"/>';
+  g+='<rect x="'+(hx-14)+'" y="'+(y-24)+'" width="42" height="48" fill="'+PC.gold+'" fill-opacity=".45" stroke="'+PC.gold+'" stroke-width="2"/>';
+  g+='<line x1="46" y1="'+y+'" x2="'+(hx-10)+'" y2="'+y+'" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="5 5"/>';
+  g+='<circle cx="'+hx+'" cy="'+y+'" r="7" fill="#0B0B0B"/>'+flag(hx,y)+ballDot(40,y-8)+ballDot(40,y+8);
+  g+=PT(24,H-10,q.ft+" FT · "+String(q.slope).toUpperCase()+" · TWO BALLS",{c:"#0B0B0B",s:10,a:"start"})+PT(hx+7,y-30,"ZONE",{c:"#0B0B0B",s:9});
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Money Stealers station">'+g+'</svg>'}
+function ladderSVG(b){var W=300,H=120,g='<rect width="'+W+'" height="'+H+'" fill="'+PC.fw+'"/>',X=function(yd){return 34+Math.min(78,yd)/78*250};
+  [10,20,30,40,50,60].forEach(function(d){g+='<line x1="'+X(d)+'" y1="22" x2="'+X(d)+'" y2="'+(H-28)+'" stroke="#FFFFFF" stroke-opacity=".35"/>'+PT(X(d),H-12,d,{s:9,c:"#0B0B0B"})});
+  g+='<line x1="'+X(70)+'" y1="16" x2="'+X(70)+'" y2="'+(H-24)+'" stroke="'+PC.gold+'" stroke-width="3"/>'+PT(X(70),12,"70 YDS",{s:9,c:"#0B0B0B"});
+  g+='<rect x="18" y="'+(H/2-16)+'" width="10" height="28" fill="#0B0B0B"/>';
+  b.res.forEach(function(s,i){var x=X(s.c),y=H/2-2+(i%2?-10:10);g+='<circle cx="'+x+'" cy="'+y+'" r="7" fill="'+(s.ok===false?"#E0352B":"#FFFFFF")+'" stroke="#0B0B0B" stroke-width="2"/>'+PT(x,y+3,i+1,{s:8,c:"#0B0B0B"})});
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Ladder to 70 yards">'+g+'</svg>'}
+function shotPic(b){if(!b)return "";var c=parseFloat(($("carryIn")||{}).value),o=parseFloat(($("offIn")||{}).value),ball=c>0?{c:c,o:(isNaN(o)?0:(S.side==="L"?-Math.abs(o):Math.abs(o)))}:null,i=b.res.length;
+  if(b.t==="drive"){var hl=b.holes[i];return hl?teeSVG({L:hl.L,fwHalf:hl.fw,haz:null},ball):""}
+  var d=b.t==="app"?b.ds[i]:b.t==="wd"?(wdFin(i)&&$("finPick")?+$("finPick").value:b.plan[i]):null;return d?appSVG({d:d,haz:null},ball):""}
 /* ---------- rendering (same layout and components as the Macro Golf games) ---------- */
 function L$(b){return '<ul class="steps">'+b.lines.map(function(l){return "<li>"+esc(l)+"</li>"}).join("")+"</ul>"}
 function nextBtn(label,dis){return '<div class="btns">'+(S.cur.bi?'<button class="ghost" data-act="back">Back</button>':"")+'<button class="primary" data-act="next"'+(dis?" disabled":"")+'>'+label+'</button></div>'}
 function blockDone(b){return b.t==="tick"?!!b.done:b.t==="count"?b.res.length>=b.total:b.t==="holeout"?b.res.length>=b.putts.length:b.t==="money"?b.res.length>=b.st.length:
   b.t==="ladder"?(b.res.length&&b.res[b.res.length-1].c>=70):b.t==="strike"?b.res.length>=b.balls:b.t==="drive"?b.res.length>=b.holes.length:b.t==="app"?b.res.length>=b.ds.length:b.t==="wd"?b.res.length>=b.plan.length:false}
-function lmInputs(eg){return '<div class="seg"><button data-act="side" data-v="L" aria-pressed="'+(S.side==="L")+'">Offline left</button><button data-act="side" data-v="R" aria-pressed="'+(S.side!=="L")+'">Offline right</button></div>'+
+function lmInputs(eg){return '<div class="viz" id="pic">'+shotPic(cur())+'</div><p class="preview" style="margin:0">The ball moves as you type the numbers.</p><div class="seg"><button data-act="side" data-v="L" aria-pressed="'+(S.side==="L")+'">Offline left</button><button data-act="side" data-v="R" aria-pressed="'+(S.side!=="L")+'">Offline right</button></div>'+
   '<div class="fields"><label><span class="label">Carry (yds)</span><input id="carryIn" inputmode="decimal" placeholder="e.g. '+eg+'"></label><label><span class="label">Offline (yds)</span><input id="offIn" inputmode="decimal" placeholder="e.g. 3.2"></label></div>'+
   '<p class="preview">Enter the launch monitor numbers to score the shot.</p><div class="btns"><button class="primary" data-act="lm">Score shot</button>'+(cur().res.length?'<button class="ghost" data-act="undo">Undo</button>':"")+"</div>"}
 function chips(arr){return arr.length?'<div class="chips">'+arr.join("")+"</div>":""}
@@ -665,24 +736,27 @@ function callrow(lbl,big,unit,pill){return '<div class="callrow"><div><div class
 function undoBtn(b){return b.res.length?'<button class="linky" data-act="undo">Undo last</button>':""}
 function runBlock(b){var h="",done=blockDone(b);
   if(b.feel)h+='<div class="feel"><span class="label">The feel</span><b>'+esc(b.feel)+"</b></div>";
-  h+='<div class="read">'+L$(b)+"</div>";if(b.timer)h+=timerHtml(b);
-  if(b.t==="tick")h+='<button class="'+(b.done?"tickd":"tick")+'" data-act="tick">'+(b.done?"✓ Done":"Tick it off")+"</button>"+nextBtn(b.done?"Next":"Tick it off to move on",!b.done);
+  h+='<div class="read">'+L$(b)+"</div>";if(b.timer&&b.t!=="tick")h+=timerHtml(b);
+  if(b.t==="tick"){var full=b.mins*60,left=b.left==null?full:b.left,fin=!!b.done;
+    h+='<div class="timer"><b id="tmr">'+Math.floor(left/60)+":"+String(left%60).padStart(2,"0")+'</b><span class="label">'+(fin?(b.skipped?"Skipped":"Time\u2019s up"):TM?"Running":left<full?"Paused":b.mins+" min")+"</span></div>"+
+      '<div class="btns">'+(S.cur.bi?'<button class="ghost" data-act="back">Back</button>':"")+(fin?"":'<button class="ghost" data-act="skip">Skip</button>')+
+      (fin?'<button class="primary" data-act="next">Next</button>':'<button class="primary" id="tmrBtn">'+(TM?"Pause":left<full?"Resume":"Start")+"</button>")+"</div>"}
   if(b.t==="count"){var mk=b.res.filter(Boolean).length;
-    h+=callrow(done?"Station done":"Putt "+(b.res.length+1)+" of "+b.total,mk,"of "+b.res.length+" through",["4 ft"])+
+    h+=callrow(done?"Station done":"Putt "+(b.res.length+1)+" of "+b.total,mk,"of "+b.res.length+" through",["4 ft"])+'<div class="viz">'+vizSVG("gate")+'</div><p class="vizcap">Through the gate</p>'+
       (done?"":'<div class="mm"><button class="made" data-act="cnt" data-v="1">Through</button><button class="miss" data-act="cnt" data-v="0">Missed</button></div>')+
       chips(b.res.map(function(x){return chip(x?"c3":"c0",x?"✓":"✕")}))+undoBtn(b)+nextBtn(done?"Next":"Finish the 10 putts",!done)}
   if(b.t==="holeout"){var p=b.putts[b.res.length];
-    h+=(done?callrow("Hole Out done",b.res.filter(Boolean).length,"of 12 holed"):callrow("Putt "+(b.res.length+1)+" of 12",p.ft,"ft",[p.spot])+
+    h+=(done?callrow("Hole Out done",b.res.filter(Boolean).length,"of 12 holed"):callrow("Putt "+(b.res.length+1)+" of 12",p.ft,"ft",[p.spot])+'<div class="viz">'+holeOutSVG(b,b.res.length)+'</div>'+
       '<div class="shot"><div class="facts"><span>'+esc(p.desc)+"</span></div></div>"+
       '<div class="mm"><button class="made" data-act="ho" data-v="1">Holed</button><button class="miss" data-act="ho" data-v="0">Missed</button></div>')+
       chips(b.res.map(function(x,i){return chip(x?"c3":"c0",b.putts[i].ft+b.putts[i].spot[0])}))+undoBtn(b)+nextBtn(done?"Next":"Finish the 12 putts",!done)}
   if(b.t==="money"){var q=b.st[b.res.length];
-    h+=(done?callrow("Money Stealers done",b.res.reduce(function(a,x){return a+x},0),"of 12 pts"):callrow("Station "+(b.res.length+1)+" of 3 · two balls",q.ft,"ft",[q.slope])+
+    h+=(done?callrow("Money Stealers done",b.res.reduce(function(a,x){return a+x},0),"of 12 pts"):callrow("Station "+(b.res.length+1)+" of 3 · two balls",q.ft,"ft",[q.slope])+'<div class="viz">'+moneySVG(q)+'</div>'+
       '<div class="pts">'+[[4,"Both holed"],[3,"Holed + zone"],[2,"2 zone / 1 holed"],[1,"One in zone"],[0,"None"]].map(function(x){return '<button data-act="ms" data-v="'+x[0]+'"><b>'+x[0]+"</b><small>"+x[1]+"</small></button>"}).join("")+"</div>")+
       chips(b.res.map(function(x,i){return chip(x>=3?"c3":x>=1?"c1":"c0",b.st[i].ft+" ft: "+x)}))+undoBtn(b)+nextBtn(done?"Next":"Score all 3 stations",!done)}
   if(b.t==="ladder"){var last=b.res[b.res.length-1],top=last?last.c:0,hits=b.res.filter(function(x){return x.ok}).length;
     h+=callrow(last?"Carry it to where your last ball finished":"First shot",last?last.c:"Chip",last?"yds":"",[top+" / 70 yds"])+
-      '<div class="meter2"><i style="width:'+Math.min(100,top/70*100)+'%"></i></div><span class="muted">'+hits+" of "+Math.max(0,b.res.length-1)+" carried to the last ball</span>"+
+      '<div class="viz">'+ladderSVG(b)+'</div><div class="meter2"><i style="width:'+Math.min(100,top/70*100)+'%"></i></div><span class="muted">'+hits+" of "+Math.max(0,b.res.length-1)+" carried to the last ball</span>"+
       chips(b.res.map(function(s){return chip(s.ok===null?"cx":s.ok?"c3":"c0",s.c)}))+
       (done?"":'<div class="fields"><label style="grid-column:1/-1"><span class="label">Where this ball finished (yds)</span><input id="ladIn" inputmode="numeric" placeholder="e.g. '+(top?top+8:15)+'"></label></div>'+
         (b.res.length?'<div class="mm"><button class="made" data-act="lad" data-v="1">Carried to it</button><button class="miss" data-act="lad" data-v="0">Didn’t</button></div>':'<button class="primary" data-act="lad" data-v="1">Enter</button>'))+
@@ -780,10 +854,11 @@ function render(){var m=$("main");if(!m)return;stopTimerIfLeft();var last=S.last
   m.innerHTML=last?renderSummary(last):S.cur&&S.view!=="home"?renderRun():renderHome();
   var p=$("player");if(p&&document.activeElement!==p)p.value=S.player||"";var d=$("drvIn");if(d&&document.activeElement!==d)d.value=S.drv;
   $("hName").textContent=S.player||"Paul Goddard";gateShow();pbTab();bind()}
-function stopTimerIfLeft(){var b=cur();if(TM&&!(b&&b.timer))stopTimer()}
+function stopTimerIfLeft(){var b=cur();if(TM&&!(b&&(b.timer||b.t==="tick")))stopTimer()}
 function bind(){var m=$("main");m.querySelectorAll("[data-act]").forEach(function(el){el.onclick=function(){act(el.dataset.act,el.dataset.v)}});
+  ["carryIn","offIn","finPick"].forEach(function(id){var e=$(id);if(e)e.addEventListener("input",function(){var pc=$("pic");if(pc)pc.innerHTML=shotPic(cur())})});
   ["carryIn","offIn","ladIn"].forEach(function(id){var e=$(id);if(e)e.onkeydown=function(ev){if(ev.key==="Enter"){if(id==="offIn")act("lm");else if(id==="carryIn"){var o=$("offIn");o&&o.focus()}}}});
-  var b=cur();if(b&&b.timer)bindTimer(b);
+  var b=cur();if(b&&(b.timer||b.t==="tick"))bindTimer(b);
   var fc=$("face");if(b&&b.t==="strike"&&fc){fc.querySelector("svg").addEventListener("click",function(e){if(b.res.length>=b.balls)return;var q=svgPt(e);b.res.push({x:Math.round(q.x),y:Math.round(q.y)});save();render()})}}
 /* first screen every time he opens the page: warming up for a round, or range practice? */
 var ASK=true,ASKK=null;if(S.last){S.last=null}
