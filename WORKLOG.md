@@ -3,8 +3,13 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
-2026-11-12 22:45 · Jack's Claude · IN VIDAPP: Home tab: new artwork for Testing / Practice / Train tiles and a new My Numbers tile · in progress
-2026-11-12 22:40 · Jack's Claude · NEW My Numbers: pages/golf-my-numbers.html + src/golf-numbers.js (read-only dashboard: strokes gained by area from the tests, 6-week plan week/odds/goals, tests over time, game bests; signs in with the golf email + PIN, uses mg_whoami then mg_load only for records that exist). Practice Plan opening page also shows the strokes gained card. Kajabi page my-numbers next, then a VidApp Home tile · in progress
+2026-11-12 23:10 · Jack's Claude · VidApp PUBLISHED TO PREVIEW (Home tiles, My Numbers tile, MG Athletes tab). Publish To Live Apps not pressed yet: waiting on Jack's OK for this batch · preview
+2026-11-12 23:08 · Jack's Claude · VidApp TAB RENAMED: bottom tab 4183648 (Website → www.macro.golf/my-plan) title 'Golf 1 on 1' → 'MG Athletes' (12-char limit), header 'Golf 1 on 1 Only' → 'Macro Golf Athletes'. Icon unchanged · saved
+2026-11-12 23:05 · Jack's Claude · VidApp REMOVED Website item 'My Numbers' 4183745 from its parent Practice 4182266 (made there first by mistake; not deleted) · saved
+2026-11-12 23:04 · Jack's Claude · VidApp NEW Website item 'My Numbers' 4183747 on Home tab 312348 (Home sub-tab, 5th tile after Warm Up) → https://www.macro.golf/my-numbers, thumbnail assets/thumbs/tile-numbers.png · saved
+2026-11-12 23:00 · Jack's Claude · VidApp THUMBNAILS REPLACED on Home groups: Testing 4182255 (tile-testing.png '01 · TEST / Find where you lose shots'), Practice 4182266 (tile-practice.png '02 · PRACTICE / Your 6 week plan'), Train 4182260 (tile-train.png 'Move better, swing faster'). Old images kept on VidApp S3 for rollback · saved
+2026-11-12 22:45 · Jack's Claude · IN VIDAPP: Home tab: new artwork for Testing / Practice / Train tiles and a new My Numbers tile · done (see below)
+2026-11-12 22:40 · Jack's Claude · NEW My Numbers: pages/golf-my-numbers.html + src/golf-numbers.js (read-only dashboard: strokes gained by area from the tests, 6-week plan week/odds/goals, tests over time, game bests; signs in with the golf email + PIN, uses mg_whoami then mg_load only for records that exist). Practice Plan opening page also shows the strokes gained card. Kajabi page my-numbers live (id 2152402404, theme 2168260310, section game / block loader, pinned c9f5763; a stalled duplicate 2152402388 was renamed my-numbers-stalled, not deleted) · live
 2026-11-12 22:15 · Jack's Claude · Lava 'Stopping the miss' and Driver Corridor 'Driving accuracy': tag on the first screen (re-pinning p-740258, p-937452) and new VidApp thumbnails · live
 2026-11-12 22:20 · Jack's Claude · VidApp PUBLISHED TO PREVIEW then LIVE (Jack's go-ahead) for the Lava and Driver Corridor thumbnails. OUT OF VIDAPP · live
 2026-11-12 22:19 · Jack's Claude · VidApp THUMBNAIL REPLACED on Website item 'Driver Corridor' 4183637 (parent Long Game 4182265): now shows 'DRIVING ACCURACY' (assets/thumbs/game-driver-corridor.png) · saved
