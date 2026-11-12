@@ -97,3 +97,4 @@ Exercises use `x(id, name, {sets, reps, rpe, side, kind, inc, note, slot})`. `re
 | Sam McDowell | `sam-mcdowell` | 527903 |
 | Luis Vega | `luis-vega` | 694218 |
 | Rob Seeley | `rob-seeley` | 741365 |
+| Colin Howard | `colin-howard` | 576900 |

@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 11:10 · Sam's Claude · Colin Howard plan live: Kajabi page p-576900 (theme 2168250329) pinned to 32bb190, Supabase mg_clients row added. Demo videos still missing for Deep Banded Backswing, Dumbbell Rotations, Glute Bridge, Wide Stance Dumbbell Deadlift, Freestanding Dumbbell Row (Sam emailing Joe); re-pin Colin once they are in videos.js · live
 2026-11-12 11:20 · Jack's Claude · Distance from pin now typed in feet (Wedge Darts, Lava, Long Game Test, Paul Goddard); Wedge Darts yardages in a mixed order with no 10-yd steps · live
 2026-11-12 11:01 · Joe's Claude · VidApp: Publish To Live Apps pressed (Joe's call). Members get the direct-link Practice games next time they open the app · live
 2026-11-12 11:05 · Joe's Claude · VidApp: pressed Publish To Preview (Joe's call) so the direct-link Practice games reach the preview app. Did NOT press Publish To Live Apps. Sam invited to Supabase (Developer, pending his accept); SamMacroGolf already a GitHub collaborator · done
