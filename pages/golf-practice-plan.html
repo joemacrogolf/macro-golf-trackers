@@ -102,6 +102,18 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 .prog6 .pc{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}.pch{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.pch b{font-family:var(--display);font-weight:400;font-size:20px;text-transform:uppercase}.pch small{color:var(--muted);font-size:12px}
 .pcbig{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.pcbig span{font-family:var(--display);font-size:30px;line-height:1}.pcbig i{font-style:normal;color:var(--muted)}.pcbig em{font-style:normal;font-weight:700;font-size:13px;margin-left:auto;padding:3px 8px;background:var(--line)}.pcbig.up em{background:#1FA855;color:#fff}.pcbig.down em{background:#E0352B;color:#fff}
 .pcl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}.pcl li{display:grid;grid-template-columns:1fr auto 52px;gap:8px;align-items:baseline;font-size:14px}.pcl small{color:var(--muted);font-size:12px}.pcl b{text-align:right;font-size:13px}.pcl li.up b{color:#1FA855}.pcl li.down b{color:#E0352B}
+.welcome{background:var(--ink);color:var(--on-ink);border-left:6px solid var(--gold);padding:18px;display:flex;flex-direction:column;gap:14px}
+.welcome .wtop{display:grid;grid-template-columns:1fr 112px;gap:12px;align-items:start}.welcome .wk{font-weight:700;font-size:11px;letter-spacing:2.2px;text-transform:uppercase;color:var(--gold)}
+.welcome h2{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:30px;line-height:1;margin:6px 0 8px;color:var(--on-ink)}.welcome p{margin:0;font-size:15px;line-height:1.5;color:#d9d5cb}
+.wodds{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}.wodds .ring{width:104px;height:104px}.wodds small{font-size:11px;line-height:1.3;color:#c9c4b6}
+.wmeta{font-size:14px;color:#d9d5cb;border-top:1px solid rgba(244,241,234,.14);padding-top:10px}.wmeta b{color:var(--gold)}
+.goals{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}.goals li{background:rgba(244,241,234,.06);padding:12px;display:flex;flex-direction:column;gap:8px}
+.goals .gh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.goals .gh b{font-size:15px}.goals .gh small{color:var(--gold);font-size:12px;font-weight:700;white-space:nowrap}
+.goals .gv{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.goals .gv span{font-family:var(--display);font-size:28px;line-height:1}.goals .gv small{display:block;font-family:Inter,system-ui,sans-serif;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#9d988a;margin-bottom:2px}
+.goals .gv i{font-style:normal;color:#9d988a}.goals .ggoal{color:var(--gold)}.goals .gv em{font-style:normal;margin-left:auto;font-size:12px;font-weight:700;color:#0B0B0B;background:var(--gold);padding:3px 8px}
+.gbar{height:7px;background:rgba(244,241,234,.14)}.gbar i{display:block;height:100%;background:var(--gold)}.goals .gp{font-size:12px;color:#c9c4b6}
+.ghow summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--gold)}.ghow p{margin:8px 0 0!important;font-size:14px!important}
+.pcg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}.pcg li{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:baseline;font-size:13px;padding:6px 8px;background:var(--line)}.pcg li.hit{background:rgba(31,168,85,.14)}.pcg small{color:var(--muted)}.pcg b{font-size:12px}.pcg li.hit b{color:#1FA855}
 .wk6{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.wk6 div{border:1px solid var(--line);padding:6px 4px;text-align:center;display:flex;flex-direction:column;gap:2px}.wk6 small{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.wk6 b{font-family:var(--display);font-weight:400;font-size:17px}.wk6 .full{background:var(--ink);border-color:var(--ink)}.wk6 .full b,.wk6 .full small{color:var(--gold)}.wk6 .part{background:rgba(255,218,0,.18)}.wk6 .now{border:2px solid var(--gold)}.wk6 .next b{color:var(--muted)}
 .prog i{flex:1;height:5px;background:rgba(244,241,234,.18)}
 .prog i.on{background:var(--gold)}.prog i.cur{background:var(--on-ink)}
@@ -1338,12 +1350,13 @@ function makePlan(){const P=PG(),pr=P.profile,ents=testEntries(),used=TEST_ORDER
   T.sort((a,b)=>b.loss-a.loss);
   /* keep the results each 6-week plan was built from, so retests can be compared like for like */
   const basis={};used.forEach(k=>{const e=ents[k];basis[k]={t:e.t,hc:e.hc,target:e.target,raw:e.raw}});
-  if(P.plan&&P.plan.basis){P.cycles=(P.cycles||[]).concat([{start:P.plan.start,end:weekKey(),basis:P.plan.basis}]).slice(-12)}
+  if(P.plan&&P.plan.basis){P.cycles=(P.cycles||[]).concat([{start:P.plan.start,end:weekKey(),basis:P.plan.basis,goals:P.plan.goals||null}]).slice(-12)}
   P.first=P.first||{};used.forEach(k=>{if(!P.first[k])P.first[k]=basis[k]});
   P.plan={v:2,basis,t:Date.now(),from:used,missing:TEST_ORDER.filter(k=>!used.includes(k)),target:pr.target,sessions,mins:pr.mins,maintain:!!maintain,
     week,targets:T.map(t=>({key:t.key,name:t.name,group:t.group,area:t.area,loss:t.loss,mins:t.mins,full:t.full,game:t.game,games:t.games,maintain:!!t.maintain})),
     strengths:leaks.filter(l=>l.perRound>=0.05).sort((a,b)=>b.perRound-a.perRound).slice(0,3).map(l=>({name:l.name,perRound:l.perRound})),
     totalLoss:sum(T.filter(t=>!t.maintain).map(t=>t.loss)),start:weekKey(),retestWeeks:6};
+  P.plan.goals=goalsFor(P.plan);
   P.weeks=P.weeks||{};window.save()}
 /* fill the sessions: full games first into the emptiest session they fit, then pour each area's focused minutes into the sessions
    with the most room, in pieces of at least 8 minutes, so every session ends up close to its time and no session runs over */
@@ -1439,6 +1452,8 @@ function progressCard(){const P=PG(),rows=TEST_ORDER.map(k=>[k,compareFor(k)]).f
       ${dh!=null?`<div class="pcbig ${dh>0.05?"up":dh<-0.05?"down":""}"><span>${hcTxt(b.hc)}</span><i>→</i><span>${hcTxt(a.hc)}</span><em>${dh>0.05?"▲ "+dh.toFixed(1)+" better":dh<-0.05?"▼ "+Math.abs(dh).toFixed(1)+" worse":"Level"}</em></div>`:""}
       ${keys.length?`<ul class="pcl">${keys.map(x=>{const d=LA[x].perRound-LB[x].perRound;return `<li class="${d>0.05?"up":d<-0.05?"down":""}"><span>${esc(LA[x].name)}</span><small>${sh(LB[x].perRound)} → ${sh(LA[x].perRound)}</small><b>${d>0.05?"▲ "+d.toFixed(1):d<-0.05?"▼ "+Math.abs(d).toFixed(1):"–"}</b></li>`}).join("")}</ul>
       <p class="muted" style="margin:0;font-size:13px">Shots a round against a ${hcName(a.target||P.plan&&P.plan.target||"10")} player. ${tot>0.05?`<b style="color:var(--fg)">${tot.toFixed(1)} shots a round better</b> across this test.`:tot<-0.05?`${Math.abs(tot).toFixed(1)} shots a round down across this test. The next plan puts more time there.`:"About level overall."}</p>`:""}
+      ${(()=>{const P2=PG(),src=[P2.plan].concat((P2.cycles||[]).slice().reverse()).find(x=>x&&x.basis&&x.basis[k]&&x.basis[k].t===b.t),G=src&&(src.goals||(src.targets?goalsFor(src):null));
+        const mine=(G||[]).filter(g=>LA[g.key]);if(!mine.length)return "";return `<ul class="pcg">${mine.map(g=>{const v=r1(LA[g.key].perRound),hit=v>=g.goal-0.05;return `<li class="${hit?"hit":""}"><span>${esc(g.name)}</span><small>goal ${sgf(g.goal)} · now ${sgf(v)}</small><b>${hit?"✓ Goal hit":"Not yet"}</b></li>`}).join("")}</ul>`})()}
       ${c.first&&c.first.hc!=null&&a.hc!=null?`<p class="muted" style="margin:0;font-size:13px">Since your first test on ${niceDay(c.first.t)}: ${hcTxt(c.first.hc)} → ${hcTxt(a.hc)}.</p>`:""}</div>`});
   return h+`</div>`}
 function testsCard(){const P=PG(),ents=testEntries(),skip=P.skip||{},done=TEST_ORDER.filter(k=>ents[k]),use=done.filter(k=>!skip[k]),miss=TEST_ORDER.filter(k=>!use.includes(k));
@@ -1455,8 +1470,37 @@ function testsCard(){const P=PG(),ents=testEntries(),skip=P.skip||{},done=TEST_O
   else h+=`<button class="primary" data-act="mkPlan">${P.plan?(retestDue()?"Build my next 6 week plan":"Rebuild my 6 week plan"):"Build my 6 week plan"}</button>`;
   if(P.plan)h+=`<button class="linky" data-act="home">← Back to this week</button>`;
   return h+`<button class="linky" data-act="editProf">Change how much you practice</button></div>`}
+/* ---------- 6-week goals: simple, achievable steps from each test, and how likely they are ----------
+   Goal rule: a gap of 0.6 shots a round or less aims for level (0.0); a bigger gap aims to halve it.
+   Likelihood starts at 30% and rises with the practice minutes actually done on that area (up to 95%),
+   so every completed session moves it. */
+const GOAL_BAND={"lg.wedge":"100–150 yds","lg.mid":"150–175 yds","lg.long":"175–200 yds","lg.fwg":"Fairway woods into the green","lg.fwt":"Fairway woods off the tee","lg.drv":"Off the tee","lg.speed":"Club speed","putt.s":"3–6 ft","putt.m":"6–10 ft","putt.mid":"10–20 ft","putt.l":"20–35 ft","putt.lag":"35–50 ft"};
+const r1=x=>Math.round(x*10)/10;
+function goalsFor(p){return (p.targets||[]).filter(t=>!t.maintain&&t.loss>=0.1).slice(0,4).map(t=>{const now=-r1(t.loss);
+  return {key:t.key,name:t.name,area:t.area,now,goal:now>=-0.6?0:r1(now/2),mins:t.mins}})}
+function goalsOf(p){return p.goals||goalsFor(p)}
+function minsDoneOn(key){const P=PG(),p=P.plan;let m=0;Object.entries(P.weeks||{}).forEach(([wk,idx])=>{if(wk<p.start)return;
+  (idx||[]).forEach(i=>{const s=p.week[i];if(s)itemsOf(s).forEach(x=>{if(x.key===key)m+=x.mins})})});return m}
+function goalOdds(g){const plan=Math.max(1,(g.mins||0)*PG().plan.retestWeeks),d=minsDoneOn(g.key);return Math.min(95,Math.round(30+65*Math.min(1,d/plan)))}
+function overallOdds(G){if(!G.length)return 0;return Math.round(G.reduce((a,g)=>a+goalOdds(g),0)/G.length)}
+const sgf=v=>(v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(1);
+function ringSVG(pct){const R=42,C=2*Math.PI*R,o=C*(1-pct/100);return `<svg viewBox="0 0 100 100" class="ring" role="img" aria-label="${pct}% likely"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgba(244,241,234,.16)" stroke-width="9"/><circle cx="50" cy="50" r="${R}" fill="none" stroke="#FFD900" stroke-width="9" stroke-linecap="butt" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${o.toFixed(1)}" transform="rotate(-90 50 50)"/><text x="50" y="50" text-anchor="middle" dominant-baseline="central" fill="#F4F1EA" font-family="Anton,Impact,sans-serif" font-size="27">${pct}%</text></svg>`}
+function welcomeCard(){const P=PG(),p=P.plan,G=goalsOf(p),wk=weekNo(),W=p.retestWeeks,T=hcName(p.target||"10"),fn=firstName();if(!G.length)return "";
+  const odds=overallOdds(G),doneAll=Object.entries(P.weeks||{}).filter(([k])=>k>=p.start).reduce((a,[,v])=>a+(v||[]).length,0),left=Math.max(0,p.week.length*W-doneAll);
+  /* what one more session is worth: the next session not yet done this week */
+  const dn=doneThisWeek(),nx=p.week.findIndex((_,i)=>!dn.includes(i));let gain=0;
+  if(nx>=0){const its=itemsOf(p.week[nx]);G.forEach(g=>{const add=its.filter(x=>x.key===g.key).reduce((a,x)=>a+x.mins,0);if(add){const plan=Math.max(1,g.mins*W),d=minsDoneOn(g.key);gain+=Math.min(95,Math.round(30+65*Math.min(1,(d+add)/plan)))-goalOdds(g)}});gain=Math.round(gain/G.length)}
+  return `<section class="welcome"><div class="wtop"><div class="wtx"><span class="wk">${wk>W?"Your "+W+" weeks are up":wk===1&&!doneAll?"Welcome to your plan":"Week "+wk+" of "+W}</span>
+     <h2>${wk===1&&!doneAll?`${fn?esc(fn)+", here":"Here"}'s what we're aiming for`:`Your ${W} week goals`}</h2>
+     <p>Small, achievable steps from your tests. We're after steady improvement every week of the ${W} weeks, not a quick fix. Hit these and you'll see it on your retest.</p></div>
+     <div class="wodds">${ringSVG(odds)}<small>Chance of hitting your goals</small></div></div>
+   <div class="wmeta">${gain>0?`<b>+${gain}%</b> when you finish your next session.`:left?`Every session you complete pushes this up.`:"You've done every session. Time to retest."} ${left?`${left} session${left===1?"":"s"} left in your ${W} weeks.`:""}</div>
+   <ul class="goals">${G.map(g=>{const o=goalOdds(g),gap=r1(g.goal-g.now);return `<li><div class="gh"><b>${esc(g.name)}</b>${GOAL_BAND[g.key]&&!g.name.includes(GOAL_BAND[g.key])?`<small>${GOAL_BAND[g.key]}</small>`:""}</div>
+      <div class="gv"><span class="gnow"><small>Now</small>${sgf(g.now)}</span><i>→</i><span class="ggoal"><small>Goal</small>${sgf(g.goal)}</span><em>${sgf(gap)} shots a round</em></div>
+      <div class="gbar" aria-label="${o}% likely"><i style="width:${o}%"></i></div><small class="gp">${o}% likely · ${minsDoneOn(g.key)} of ${g.mins*W} practice minutes done</small></li>`}).join("")}</ul>
+   <details class="ghow"><summary>How these goals work</summary><p>Each number is strokes gained a round against a ${T} player, from your tests. Minus means it's costing you shots. A gap of half a shot or less, we aim to close completely. A bigger gap, we aim to halve it in ${W} weeks. That's a realistic step, and the next ${W} weeks take it further.</p><p>Your goals change with your tests. One player might need wedges from 100–150 yds, another 150–175 yds and their short putts. When you retest, you'll see which goals you hit and get new ones.</p><p>The chance goes up as you complete sessions that work on each goal. It's a guide to how much of the work you've put in, not a promise.</p></details></section>`}
 function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,next=p.week.findIndex((_,i)=>!done.includes(i)),wk=weekNo(),retest=wk>p.retestWeeks;
-  let h=`<div class="board"><div><span class="label">${wk>p.retestWeeks?"Your "+p.retestWeeks+" week plan is done":"Week "+wk+" of "+p.retestWeeks+" · this week"}</span><div class="big tnum">${done.length}<small style="font-size:.4em;color:var(--on-ink-muted)"> / ${n}</small></div></div>
+  let h=welcomeCard()+`<div class="board"><div><span class="label">${wk>p.retestWeeks?"Your "+p.retestWeeks+" week plan is done":"This week"}</span><div class="big tnum">${done.length}<small style="font-size:.4em;color:var(--on-ink-muted)"> / ${n}</small></div></div>
    <div class="side"><span class="label">Sessions</span><b>${n} × ${p.mins} min</b></div>
    <div class="prog">${p.week.map((_,i)=>`<i class="${done.includes(i)?"on":i===next?"cur":""}"></i>`).join("")}</div>
    <div class="bstat">${next<0?"Every session done this week. That's how you get better.":done.length?`${n-done.length} to go this week. Keep it going.`:`You've got ${n} practice session${n===1?"":"s"} this week. Pick whichever suits today.`}</div></div>`;
