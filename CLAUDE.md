@@ -130,7 +130,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)
 
 - Practice (4182266) contains three groups: Putting 4182263, Short Game 4182264 and Long Game 4182265.
-  - Each game in those groups is a **direct Website link** to its scoring page, with no group or "Start Scoring" step. The old per-game groups still exist but are detached.
+  - Each game in those groups is a **direct Website link** to its scoring page, with no group or "Start Scoring" step. The old per-game groups were deleted on 2026-11-12.
 - Website items can't be edited. To change one:
   1. Create a new item with the right URL and thumbnail.
   2. Remove the old item from its parent.
