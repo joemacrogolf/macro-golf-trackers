@@ -99,6 +99,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 .board .side{text-align:right;display:flex;flex-direction:column;gap:2px}
 .board .side b{font-family:var(--display);font-weight:400;font-size:22px;color:var(--on-ink)}
 .prog{grid-column:1/-1;display:flex;gap:4px;margin-top:10px}
+.wk6{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.wk6 div{border:1px solid var(--line);padding:6px 4px;text-align:center;display:flex;flex-direction:column;gap:2px}.wk6 small{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.wk6 b{font-family:var(--display);font-weight:400;font-size:17px}.wk6 .full{background:var(--ink);border-color:var(--ink)}.wk6 .full b,.wk6 .full small{color:var(--gold)}.wk6 .part{background:rgba(255,218,0,.18)}.wk6 .now{border:2px solid var(--gold)}.wk6 .next b{color:var(--muted)}
 .prog i{flex:1;height:5px;background:rgba(244,241,234,.18)}
 .prog i.on{background:var(--gold)}.prog i.cur{background:var(--on-ink)}
 .bstat{grid-column:1/-1;font-size:13px;color:rgba(244,241,234,.85)}
@@ -1394,7 +1395,7 @@ function planBlocks(s,mins,cfg,idx){const B=[],it=itemsOf(s),areas=sessAreas(s),
   return B}
 function startPlanSession(i){const P=PG(),s=P.plan.week[i],pr=P.profile,areas=sessAreas(s);
   const c=Object.assign(defaultCfg(),{name:pr.name||window.S.player||"",target:P.plan.target||pr.target||"10",mins:pr.mins,areas,focus:{},lm:pr.sim===true?true:pr.sim===false?false:null});
-  S={step:"run",cfg:c,blocks:planBlocks(s,pr.mins,c,i),bi:0,t0:Date.now(),plan:{week:weekKey(),idx:i,n:P.plan.week.length}};ui={};save();render();window.scrollTo(0,0)}
+  S={step:"run",cfg:c,blocks:planBlocks(s,pr.mins,c,i+(weekNo()-1)*P.plan.week.length),bi:0,t0:Date.now(),plan:{week:weekKey(),idx:i,n:P.plan.week.length}};ui={};save();render();window.scrollTo(0,0)}
 
 function stripHome(){const P=PG(),p=P.plan;$("sArea").textContent=p?(ORDER.filter(a=>p.week.some(s=>sessAreas(s).includes(a))).map(a=>AREAS[a]).join(" · ")||"–"):"Your tests";
   $("sTime").textContent=p?p.week.length+" × "+p.mins+" min":"–";$("sTarget").textContent=p?hcName(p.target||"10"):"–"}
@@ -1418,16 +1419,19 @@ function testsCard(){const P=PG(),ents=testEntries(),skip=P.skip||{},done=TEST_O
     h+=`<div class="trow ${st}"><span class="tn">${st==="ok"?"✓":st==="skip"?"–":i+1}</span><div class="tt"><b>${TEST_PLAN[k][1]}</b><small>${sub}</small></div><div class="ta">${act}</div></div>`});
   h+=`</div>`;
   if(!use.length)h+=`<div class="recnote">Take at least one test and your plan is built from it. Come back here when you've finished. Your results load automatically.</div>`;
-  else if(miss.length&&!ui.confirm)h+=`<div class="warnbox"><b>Your plan won't be perfect yet</b>${miss.map(k=>TEST_PLAN[k][1]).join(" and ")} ${miss.length>1?"aren't":"isn't"} in it, so ${miss.length>1?"those parts":"that part"} of your game won't be covered. You can build it now and add ${miss.length>1?"them":"it"} later.</div><button class="primary" data-act="mkPlanAnyway">Build my plan anyway</button>`;
-  else h+=`<button class="primary" data-act="mkPlan">${P.plan?"Rebuild my plan":"Build my plan"}</button>`;
+  else if(miss.length&&!ui.confirm)h+=`<div class="warnbox"><b>Your plan won't be perfect yet</b>${miss.map(k=>TEST_PLAN[k][1]).join(" and ")} ${miss.length>1?"aren't":"isn't"} in it, so ${miss.length>1?"those parts":"that part"} of your game won't be covered. You can build it now and add ${miss.length>1?"them":"it"} later.</div><button class="primary" data-act="mkPlanAnyway">Build my 6 week plan anyway</button>`;
+  else h+=`<button class="primary" data-act="mkPlan">${P.plan?"Rebuild my 6 week plan":"Build my 6 week plan"}</button>`;
   if(P.plan)h+=`<button class="linky" data-act="home">← Back to this week</button>`;
   return h+`<button class="linky" data-act="editProf">Change how much you practise</button></div>`}
 function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,next=p.week.findIndex((_,i)=>!done.includes(i)),wk=weekNo(),retest=wk>p.retestWeeks;
-  let h=`<div class="board"><div><span class="label">This week · week ${Math.min(wk,99)} of your plan</span><div class="big tnum">${done.length}<small style="font-size:.4em;color:var(--on-ink-muted)"> / ${n}</small></div></div>
+  let h=`<div class="board"><div><span class="label">${wk>p.retestWeeks?"Your "+p.retestWeeks+" week plan is done":"Week "+wk+" of "+p.retestWeeks+" · this week"}</span><div class="big tnum">${done.length}<small style="font-size:.4em;color:var(--on-ink-muted)"> / ${n}</small></div></div>
    <div class="side"><span class="label">Sessions</span><b>${n} × ${p.mins} min</b></div>
    <div class="prog">${p.week.map((_,i)=>`<i class="${done.includes(i)?"on":i===next?"cur":""}"></i>`).join("")}</div>
    <div class="bstat">${next<0?"Every session done this week. That's how you get better.":done.length?`${n-done.length} to go this week. Keep it going.`:`You've got ${n} practice session${n===1?"":"s"} this week. Pick whichever suits today.`}</div></div>`;
-  if(retest)h+=`<div class="warnbox"><b>Time to retest</b>It's been ${p.retestWeeks} weeks. Take your tests again and rebuild your plan to see what's improved.</div>`;
+  /* the six weeks of the plan at a glance */
+  {const W=p.retestWeeks||6,st=new Date(p.start);h+=`<div class="wk6" aria-label="Your ${W} week plan">${Array.from({length:W},(_,k)=>{const d=new Date(st);d.setDate(d.getDate()+7*k);const key=weekKey(d),c=((P.weeks||{})[key]||[]).length,state=k+1<wk?(c>=n?"full":c?"part":"miss"):k+1===wk?"now":"next";
+    return `<div class="${state}"><small>Wk ${k+1}</small><b>${k+1<=wk?c+"/"+n:"–"}</b></div>`}).join("")}</div>`}
+  if(retest)h+=`<div class="warnbox"><b>Your ${p.retestWeeks} weeks are up: time to retest</b>Take your tests again and build your next ${p.retestWeeks} week plan from the new numbers. You can keep using this plan until you do.</div><button class="primary" data-act="tests">Retest and build my next plan</button>`;
   if(p.missing&&p.missing.length)h+=`<div class="recnote">This plan doesn't cover ${p.missing.map(k=>TEST_PLAN[k][1]).join(" or ")}. <button class="linky" data-act="tests">Add ${p.missing.length>1?"them":"it"}</button></div>`;
   /* the player picks which session to do today: each one is a kind (range, short game, putting) */
   const KN={range:["Range session","On the range or simulator"],short:["Short game session","Chipping and pitching area"],putt:["Putting session","Putting green"],green:["Short game + putting","Chipping area and putting green"],mixed:["Mixed session","Range, then the short game area"]};
@@ -1444,7 +1448,7 @@ function whyCard(){const P=PG(),p=P.plan,T=hcName(p.target||"10");
   if(!p.targets){if(!p.chosen||!p.chosen.length)return "";return `<div class="recnote">Rebuild your plan to see the new layout. <button class="linky" data-act="tests">Rebuild</button></div>`}
   const mx=Math.max(...p.targets.map(t=>t.mins));
   return `<details class="card" ${ui.why?"open":""}><summary class="label" style="cursor:pointer">Why your plan looks like this</summary>
-   <p style="margin:0">Built from your ${p.from.map(k=>TEST_PLAN[k][1]).join(", ")} on ${niceDay(p.t)}, compared with a ${T} player. Every area that's costing you shots gets practice time, and the biggest leaks get the most.</p>
+   <p style="margin:0">Built from your ${p.from.map(k=>TEST_PLAN[k][1]).join(", ")} on ${niceDay(p.t)}, compared with a ${T} player. The same sessions run for ${p.retestWeeks} weeks, with the drills changing week to week, then you retest. Every area that's costing you shots gets practice time, and the biggest leaks get the most.</p>
    ${p.targets.map(t=>`<div class="why"><div class="wh"><b>${esc(t.name)}</b><span>${t.mins} min a week</span></div><div class="wbar"><i style="width:${Math.round(t.mins/mx*100)}%"></i></div>
       <small>${t.maintain?"Nothing big to fix, this keeps it sharp.":`Losing ${t.loss.toFixed(1)} shot${t.loss>=1.05?"s":""} a round against a ${T} player.`} ${t.full?`${t.full>1?"Full games":"A full game"}: ${(t.games||[t.game]).map(g=>esc(MacroPlan.GAMES[g].name)).join(", ")}${t.mins>sum((t.games||[t.game]).map(g=>MacroPlan.GAMES[g].mins))+2?", plus focused work":""}.`:"Focused drills and short strokes gained games. Better use of the time than a full game."}</small></div>`).join("")}
    ${p.strengths.length?`<p class="muted" style="margin:0">Already strong: ${p.strengths.map(s=>esc(s.name).toLowerCase()).join(", ")}.</p>`:""}
