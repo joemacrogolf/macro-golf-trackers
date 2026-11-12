@@ -170,9 +170,11 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 .trow{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:12px;border-top:1px solid var(--line)}
 .trow:first-child{border-top:0}
 .trow .tn{width:30px;height:30px;display:grid;place-items:center;font-family:var(--display);font-size:16px;background:var(--soft);color:var(--fg)}
-.trow.ok .tn{background:var(--good);color:#fff}.trow.skip{opacity:.6}
+.trow.ok .tn{background:var(--good);color:#fff}.trow.skip{background:var(--soft)}.trow.skip .tn{background:transparent;border:1px dashed var(--muted);color:var(--muted)}.trow.skip .tt b{color:var(--muted)}
+.tsm{font-size:13px;padding:8px 12px;border:1px solid var(--line);background:var(--bg);color:var(--fg);white-space:nowrap}.trow .ta{min-width:0}
+.trow .ta .tbtn,.trow .ta .tsm{width:100%;text-align:center}
 .trow .tt{min-width:0;display:flex;flex-direction:column}.trow .tt b{color:var(--fg)}.trow .tt small{color:var(--muted);font-size:12.5px}
-.trow .ta{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.trow .ta{display:flex;flex-direction:column;align-items:stretch;gap:6px}
 .tbtn{text-decoration:none;font-size:15px;padding:9px 14px}
 .warnbox{background:#fff5bf;border-left:6px solid var(--gold);padding:12px 14px;font-size:14px;color:var(--fg)}
 .warnbox b{display:block;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:3px}
@@ -1347,9 +1349,11 @@ function profileCard(){const pr=ui.prof||(ui.prof=Object.assign(defProfile(),PG(
 const pr_=on=>`aria-pressed="${on?"true":"false"}"`;
 function testsCard(){const P=PG(),ents=testEntries(),skip=P.skip||{},done=TEST_ORDER.filter(k=>ents[k]),use=done.filter(k=>!skip[k]),miss=TEST_ORDER.filter(k=>!use.includes(k));
   let h=`<section class="sec-h"><span class="eyebrow">02 / Your tests</span><h2>Your plan comes from your tests</h2></section><div class="card"><p style="margin:0">Each test finds where you're losing shots. Do all three and your plan covers your whole game. You can skip one or two, but the plan will only cover what you've tested.</p><div class="tests">`;
-  TEST_ORDER.forEach((k,i)=>{const e=ents[k],sk=!!skip[k];
-    h+=`<div class="trow ${e&&!sk?"ok":sk?"skip":""}"><span class="tn">${e&&!sk?"✓":i+1}</span><div class="tt"><b>${TEST_PLAN[k][1]}</b><small>${TEST_COVERS[k]}${e?" · done "+niceDay(e.t)+(e.hc!=null?" · played like "+hcTxt(e.hc):""):""}${sk?" · skipped":""}</small></div>
-     <div class="ta">${e?(sk?`<button class="linky" data-act="skipT" data-v="${k}">Use it</button>`:`<button class="linky" data-act="skipT" data-v="${k}">Leave out</button>`):`<a class="dark tbtn" href="${site(TEST_URL[k])}">Take it</a>${sk?"":`<button class="linky" data-act="skipT" data-v="${k}">Skip</button>`}`}</div></div>`});
+  /* one clear state per test: done (tick), to do (Take it / Skip for now), skipped (Undo) */
+  TEST_ORDER.forEach((k,i)=>{const e=ents[k],sk=!!skip[k],st=e&&!sk?"ok":sk?"skip":"todo";
+    const sub=st==="ok"?`${TEST_COVERS[k]} · done ${niceDay(e.t)}${e.hc!=null?" · played like "+hcTxt(e.hc):""}`:st==="skip"?`Skipped for now · your plan won't cover ${TEST_COVERS[k].toLowerCase()}`:TEST_COVERS[k];
+    const act=st==="ok"?"":st==="skip"?`<button class="ghost tsm" data-act="skipT" data-v="${k}">Undo</button>`:`<a class="dark tbtn" href="${site(TEST_URL[k])}">Take it</a><button class="ghost tsm" data-act="skipT" data-v="${k}">Skip for now</button>`;
+    h+=`<div class="trow ${st}"><span class="tn">${st==="ok"?"✓":st==="skip"?"–":i+1}</span><div class="tt"><b>${TEST_PLAN[k][1]}</b><small>${sub}</small></div><div class="ta">${act}</div></div>`});
   h+=`</div>`;
   if(!use.length)h+=`<div class="recnote">Take at least one test and your plan is built from it. Come back here when you've finished. Your results load automatically.</div>`;
   else if(miss.length&&!ui.confirm)h+=`<div class="warnbox"><b>Your plan won't be perfect yet</b>${miss.map(k=>TEST_PLAN[k][1]).join(" and ")} ${miss.length>1?"aren't":"isn't"} in it, so ${miss.length>1?"those parts":"that part"} of your game won't be covered. You can build it now and add ${miss.length>1?"them":"it"} later.</div><button class="primary" data-act="mkPlanAnyway">Build my plan anyway</button>`;
