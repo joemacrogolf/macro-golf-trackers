@@ -21,25 +21,25 @@ var EX={
   /* strength · pulling */
   pullup:{n:'Pull Up',k:'S',eq:'g',inc:BW,easy:'latpd'},
   latpd:{n:'Cable Lat Pull Down',k:'S',eq:'g',inc:CABLE},
-  hklatpd:{n:'Half Kneeling Single Arm Cable Lat Pull Down',k:'S',eq:'g',inc:CABLE,side:1},
+  hklatpd:{n:'Cable Single Arm Lat Pull Down',k:'S',eq:'g',inc:CABLE,side:1},
   bandlatpd:{n:'Banded Lat Pull Down',k:'S',eq:'b',inc:BW},
   cablerow:{n:'Cable Row',k:'S',eq:'g',inc:CABLE},
   dbrow:{n:'Dumbbell Single Arm Row',k:'S',eq:'h',inc:DB,side:1},
   bandrow:{n:'Banded Row',k:'S',eq:'b',inc:BW},
   sapd:{n:'Cable Straight Arm Pull Downs',k:'S',eq:'g',inc:CABLE},
-  dbpullover:{n:'Dumbbell Pullover',k:'S',eq:'h',inc:DB},
+  dbpullover:{n:'Dumbbell Pull Over',k:'S',eq:'h',inc:DB},
   bandsapd:{n:'Banded Straight Arm Pull Down',k:'S',eq:'b',inc:BW},
   facepull:{n:'Face Pull',k:'S',eq:'g',inc:CABLE},
-  bandfacepull:{n:'Banded Face Pull',k:'S',eq:'b',inc:BW},
+  bandfacepull:{n:'Face Pull with Band',k:'S',eq:'b',inc:BW},
   /* strength · pushing */
   dbincline:{n:'Dumbbell Incline Bench Press',k:'S',eq:'g',inc:DB},
   dbflat:{n:'Dumbbell Flat Bench Press',k:'S',eq:'g',inc:DB},
   dbfloor:{n:'Dumbbell Floor Press',k:'S',eq:'h',inc:DB},
   pressup:{n:'Press Up',k:'S',eq:'b',inc:BW,easy:'incpressup'},
-  incpressup:{n:'Incline Press Up',k:'S',eq:'b',inc:BW},
+  incpressup:{n:'Elevated Press Up',k:'S',eq:'b',inc:BW},
   lmpress:{n:'Kneeling Landmine Single Shoulder Press',k:'S',eq:'g',inc:PLATE,side:1},
   hkdbpress:{n:'Single Arm Kneeling Shoulder Press',k:'S',eq:'h',inc:DB,side:1},
-  bandohpress:{n:'Banded Overhead Press',k:'S',eq:'b',inc:BW},
+  bandohpress:{n:'Banded Shoulder Press',k:'S',eq:'b',inc:BW},
   /* strength · lower body */
   goblet:{n:'Dumbbell Goblet Squat',k:'S',eq:'h',inc:DB},
   bandsquat:{n:'Banded Squat',k:'S',eq:'b',inc:BW},
@@ -50,11 +50,11 @@ var EX={
   dbrevlunge:{n:'Dumbbell Reverse Lunge',k:'S',eq:'h',inc:DB,side:1},
   revlungebw:{n:'Reverse Lunge',k:'S',eq:'b',inc:BW,side:1},
   dbsidelunge:{n:'Dumbbell Side Lunge',k:'S',eq:'h',inc:DB,side:1},
-  sidelungebw:{n:'Side Lunge',k:'S',eq:'b',inc:BW,side:1},
+  sidelungebw:{n:'Lateral Lunge',k:'S',eq:'b',inc:BW,side:1},
   legcurl:{n:'Laying Leg Curl',k:'S',eq:'g',inc:CABLE},
   slbridge:{n:'Single Leg Glute Bridge',k:'S',eq:'b',inc:BW,side:1},
   legext:{n:'Leg Extension Machine',k:'S',eq:'g',inc:CABLE},
-  dbstepup:{n:'Dumbbell Step Up',k:'S',eq:'h',inc:DB,side:1},
+  dbstepup:{n:'Dumbbell Step Ups',k:'S',eq:'h',inc:DB,side:1},
   calf:{n:'Standing Calf Raise',k:'S',eq:'b',inc:DB},
   /* strength · rotation and arms */
   cablechop:{n:'Cable Woodchop',k:'S',eq:'g',inc:CABLE,side:1},
@@ -67,7 +67,7 @@ var EX={
   bandcurl:{n:'Banded Bicep Curl',k:'S',eq:'b',inc:BW},
   pushdown:{n:'Tricep Push Down',k:'S',eq:'g',inc:CABLE},
   dbtriext:{n:'Overhead Dumbbell Tricep Extension',k:'S',eq:'h',inc:DB},
-  bandpushdown:{n:'Banded Tricep Push Down',k:'S',eq:'b',inc:BW},
+  bandpushdown:{n:'Resistance Band Tricep Extensions',k:'S',eq:'b',inc:BW},
   /* power · arm chop */
   hhslam:{n:'High Hands Slam',k:'P',eq:'g',inc:MB},
   mbslam:{n:'Med Ball Slam',k:'P',eq:'g',inc:MB},
@@ -96,7 +96,7 @@ var EX={
   powpressup:{n:'Power Press Up',k:'P',eq:'b',inc:BW,easy:'incpowpressup'},
   incpowpressup:{n:'Elevated Power Press Up',k:'P',eq:'b',inc:BW},
   cablepush:{n:'GRF Cable Push',k:'P',eq:'g',inc:CABLE,side:1},
-  dbpushpress:{n:'Single Arm Standing Shoulder Push Press',k:'P',eq:'h',inc:DB,side:1},
+  dbpushpress:{n:'Dumbbell Push Press',k:'P',eq:'h',inc:DB},
   bandpowpress:{n:'Banded Single Arm Push Press',k:'P',eq:'b',inc:BW,side:1},
   grflmpress:{n:'GRF Landmine Press',k:'P',eq:'g',inc:PLATE,side:1},
   /* power · rotation and lateral */
@@ -117,9 +117,9 @@ var EX={
   steprot:{n:'Step Rotation Sequence',k:'Q',eq:'b',side:1},
   steptrig:{n:'Step Trigger Wall Touch',k:'Q',eq:'b',side:1},
   resstep:{n:'Resistance Step with Rotation',k:'Q',eq:'g',inc:CABLE,side:1},
-  bandresstep:{n:'Banded Step with Rotation',k:'Q',eq:'b',side:1},
+  bandresstep:{n:'Resistance Step with Rotation',k:'Q',eq:'b',side:1},
   splitrot:{n:'Split Press with Rotation',k:'Q',eq:'g',inc:CABLE,side:1},
-  bandsplitrot:{n:'Banded Split Press with Rotation',k:'Q',eq:'b',side:1},
+  bandsplitrot:{n:'Split Press with Rotation',k:'Q',eq:'b',side:1},
   hipaero:{n:'Hip Aeroplanes',k:'Q',eq:'b',side:1},
   hipdrops:{n:'Hip Drops',k:'Q',eq:'b',side:1},
   kneesup:{n:'Knees Up Disassociation',k:'Q',eq:'b',side:1},
@@ -129,7 +129,7 @@ var EX={
   /* core and stability */
   deadbug:{n:'Deadbug',k:'C',eq:'b',side:1},
   sideplank:{n:'Side Plank',k:'C',eq:'b',side:1,secs:1},
-  birddog:{n:'Bird Dog',k:'C',eq:'b',side:1},
+  birddog:{n:'Diagonal Bird Dogs',k:'C',eq:'b',side:1},
   corechop:{n:'Core Stability Chop',k:'C',eq:'g',inc:CABLE,side:1},
   bandcorechop:{n:'Core Stability Chop',k:'C',eq:'b',side:1},
   dorsal:{n:'Dorsal Raise',k:'C',eq:'b'},
@@ -305,7 +305,7 @@ function generate(ans,T){
     return out}
   function pick(slot,kind,used){
     var list=(SLOT[slot]||[]).concat(FALLBACK[kind]||[]);
-    for(var i=0;i<list.length;i++){var id=list[i];if(!ok(id))continue;var c=cands(id);for(var j=0;j<c.length;j++){var r=c[j];if(!ok(r)||used[r]||(low&&EX[r].jump))continue;used[r]=1;return r}}
+    for(var i=0;i<list.length;i++){var id=list[i];if(!ok(id))continue;var c=cands(id);for(var j=0;j<c.length;j++){var r=c[j];if(!ok(r)||used[r]||used['n:'+EX[r].n]||(low&&EX[r].jump))continue;used[r]=1;used['n:'+EX[r].n]=1;return r}}
     return null}
   function rest(base){if(!lvl.rest)return base;return base.replace(/\d+/g,function(n){return String(+n+lvl.rest)})}
   function build(id,role){
