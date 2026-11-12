@@ -61,6 +61,10 @@ Template (fill in the brackets, keep the steps):
 
 Golf personal plans use exactly the same message and the same My Plan button.
 
+## Planned: app navigation (not built yet)
+
+`docs/app-navigation-plan.md`: 1-to-1 Coaching top tab, My Training and My Practice front doors, one sign-in for all. Read it before building any of those pages. No VidApp changes until Joe says so.
+
 ## How pages work (short version; README.md has the detail)
 
 - Every tracker lives in `pages/<name>.html`. Kajabi pages hold only a loader:
