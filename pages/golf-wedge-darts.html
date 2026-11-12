@@ -325,6 +325,7 @@ body.gated{overflow:hidden}
   <label class="fld"><span>Your name</span><input id="gName" autocomplete="name" placeholder="First and last name"></label>
   <label class="fld"><span>Target handicap</span><select id="gHc"><option value="">Choose a target</option><option value="Tour">Tour</option><option value="0">Scratch</option><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option></select></label>
   <div class="fld" id="gLvlWrap"><span>Scoring zones</span><div class="opts" id="gLvl"><button type="button" data-v="std" aria-pressed="false"><b>Standard</b><small>3 / 6 / 9 yds, 8 yds left/right. Recommended for most players</small></button><button type="button" data-v="tight" aria-pressed="false"><b>Tight</b><small>2 / 4 / 6 yds, 4 yds left/right. For single-figure players</small></button></div><span class="note" id="gLvlNote" hidden>Game in progress, so the difficulty stays as it is until you start a new one.</span></div>
+  <div class="fld" id="gBandWrap"><span>Distances</span><div class="opts" id="gBand"><button type="button" data-v="all" aria-pressed="true"><b>50 to 100 yds</b><small>The full wedge range</small></button><button type="button" data-v="lo" aria-pressed="false"><b>50 to 75 yds</b><small>Shorter, partial wedges</small></button><button type="button" data-v="hi" aria-pressed="false"><b>75 to 100 yds</b><small>Fuller wedges</small></button></div></div>
   <div class="fld" id="gModeWrap"><span>What does your launch monitor give you?</span><div class="opts" id="gMode"><button type="button" data-v="lm" aria-pressed="true"><b>Carry + offline</b><small>Two numbers per shot</small></button><button type="button" data-v="pin" aria-pressed="false"><b>Distance from pin</b><small>One number per shot. The zones become circles round the flag</small></button></div></div>
   <button class="go" id="gGo" disabled>Continue</button>
 </div></div>
@@ -513,9 +514,11 @@ var hcName=h=>h==="Tour"?"Tour":h==="0"?"Scratch":h+" hc";
 var TICKS=["25","15","5","0"];
 var fmt=x=>(Math.round(x*10)/10).toFixed(1);
 function P(){return PAR[S.tight?"tight":"std"]}
-function shotPar(h,t,fin){const k=TARGETS.indexOf(t);return P()[fin?"f":"n"][h][k]}
-/* expected points for a whole game: each target appears 2.5x as a called shot and 0.5x as a finisher across 3 rounds */
-function fullPar(h){return TARGETS.reduce((a,_,k)=>a+2.5*P().n[h][k]+0.5*P().f[h][k],0)}
+/* targets are random whole yardages, so par is read between the 10-yd columns of the table */
+function parAt(a,t){const x=Math.max(50,Math.min(100,+t)),i=Math.min(4,Math.floor((x-50)/10)),f=(x-50-10*i)/10;return a[i]+(a[i+1]-a[i])*f}
+function shotPar(h,t,fin){return parAt(P()[fin?"f":"n"][h],t)}
+/* expected points for this game's card (finishers at the suggested yardage) */
+function fullPar(h){if(!S||!S.plan)return 0;return S.plan.reduce((a,r)=>a+r.reduce((b,t,k)=>b+shotPar(h,t,k===PER-1),0),0)}
 function parSoFar(h){return S.shots.reduce((a,s)=>a+shotPar(h,s.target,s.fin),0)}
 function playingLike(){
   const n=S.shots.length;if(!n)return null;const pts=total();
@@ -544,13 +547,14 @@ function refreshReport(){
 }
 var GAME_NAME="Wedge Darts";
 function reportScore(){return total()+" pts"}
+function bins(){const [a,b]=band(),st=(b-a)/5;return Array.from({length:5},(_,k)=>{const lo=Math.round(a+st*k),hi=k===4?b:Math.round(a+st*(k+1))-1;return {lo,hi,label:lo+"–"+hi}})}
 function buildReport(){
   const sh=S.shots, t=total(), par=parSoFar(S.target), pl=playingLike();
-  const D=TARGETS.map(d=>{const ss=sh.filter(s=>s.target===d);if(!ss.length)return null;
-    return {d,err:mean(ss.map(s=>s.err)),bias:mean(ss.map(s=>s.carry-s.target))}}).filter(Boolean);
+  const D=bins().map(x=>{const ss=sh.filter(s=>s.target>=x.lo&&s.target<=x.hi);if(!ss.length)return null;
+    return {d:x.label,lo:x.lo,err:mean(ss.map(s=>s.err)),bias:mean(ss.map(s=>s.carry-s.target))}}).filter(Boolean);
   const byErr=D.slice().sort((a,b)=>a.err-b.err), best=byErr[0], worst=byErr[byErr.length-1];
   const bias=mean(sh.map(s=>s.carry-s.target)), gated=sh.filter(s=>s.gated).length;
-  const part=D.filter(x=>x.d<=80), full=D.filter(x=>x.d>80);
+  const part=(S.band||"all")==="all"?D.filter(x=>x.lo<80):[], full=D.filter(x=>x.lo>=80);
   const trends=[];
   if(Math.abs(bias)>=1.5)trends.push(`Tends to leave it ${bias<0?"short":"long"} (${Math.abs(bias).toFixed(1)} yds on average).`);
   if(part.length&&full.length){const p=mean(part.map(x=>x.err)),f=mean(full.map(x=>x.err));if(Math.abs(p-f)>=1)trends.push(p>f?"Partial swings (50 to 80 yds) are the weak spot.":"Fuller swings (90 to 100 yds) are the weak spot.")}
@@ -575,11 +579,18 @@ function buildReport(){
   return L.join("\n");
 }
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-/* random order with no 10-yd steps between neighbours (so it never runs 90, 80, 70...) */
-function mixed(a,prev){for(let n=0;n<500;n++){const s=shuffle(a);let ok=prev==null||Math.abs(s[0]-prev)!==10;for(let i=1;ok&&i<s.length;i++)if(Math.abs(s[i]-s[i-1])===10)ok=false;if(ok)return s}return shuffle(a)}
+/* distance band chosen on the start screen */
+var BANDS={all:[50,100],lo:[50,75],hi:[75,100]};
+function band(b){return BANDS[b||(S&&S.band)]||BANDS.all}
+/* one round: six random whole yardages, one from each sixth of the band so they spread out, in a random order
+   with neighbours at least 3 yds apart */
+function roundPlan(prev,b){const [lo,hi]=band(b),w=(hi-lo)/PER;let s;
+  for(let n=0;n<400;n++){s=shuffle(Array.from({length:PER},(_,k)=>Math.round(lo+w*k+Math.random()*w)));
+    if(new Set(s).size<PER)continue;let ok=prev==null||Math.abs(s[0]-prev)>=3;for(let i=1;ok&&i<PER;i++)if(Math.abs(s[i]-s[i-1])<3)ok=false;if(ok)return s}return s}
+function makePlan(b,keep,from){const plan=[];for(let r=0;r<ROUNDS;r++)plan.push(keep&&r<from?keep[r]:roundPlan(r?plan[r-1][PER-1]:null,b));return plan}
 function fresh(){
-  const plan=[];for(let r=0;r<ROUNDS;r++)plan.push(mixed(TARGETS,r?plan[r-1][PER-1]:null));
-  return {player:S?S.player:"",tight:S?S.tight:false,target:S&&S.target?S.target:"15",inMode:S&&S.inMode?S.inMode:"lm",plan,shots:[]};
+  const bd=S&&S.band?S.band:"all";
+  return {player:S?S.player:"",tight:S?S.tight:false,target:S&&S.target?S.target:"15",inMode:S&&S.inMode?S.inMode:"lm",band:bd,plan:makePlan(bd),shots:[]};
 }
 function save(){try{localStorage.setItem("wedgeDarts",JSON.stringify(S))}catch(e){}}
 function load(){try{const v=JSON.parse(localStorage.getItem("wedgeDarts"));if(v&&v.plan&&v.shots)return v}catch(e){}return null}
@@ -628,7 +639,7 @@ function renderEntry(){
   $("typePill").className="pill "+(fin?"fin":"norm");
   $("pickWrap").hidden=!fin;
   if(fin&&$("pick").dataset.round!==String(r)){
-    $("pick").innerHTML=TARGETS.map(t=>`<option value="${t}" ${t===S.plan[r][PER-1]?"selected":""}>${t} yds</option>`).join("");
+    {const [lo,hi]=band();$("pick").innerHTML=Array.from({length:hi-lo+1},(_,k)=>lo+k).map(t=>`<option value="${t}" ${t===S.plan[r][PER-1]?"selected":""}>${t} yds</option>`).join("")}
     $("pick").dataset.round=String(r);
   }
   $("targetTxt").innerHTML=`${curTarget()}<small>yds</small>`;
@@ -708,11 +719,11 @@ function renderBench(){
 function renderDist(){
   let h=`<tr><th class="l">Target</th><th>Balls</th><th>Avg error</th><th>Bias</th><th>Pts</th><th class="l" style="width:30%"></th></tr>`;
   let worst=null;
-  TARGETS.forEach(t=>{
-    const ss=S.shots.filter(s=>s.target===t);
+  bins().forEach(x=>{const t=x.label;
+    const ss=S.shots.filter(s=>s.target>=x.lo&&s.target<=x.hi);
     if(!ss.length){h+=`<tr><td class="l"><b>${t}</b></td><td>0</td><td>–</td><td>–</td><td>–</td><td></td></tr>`;return}
     const ae=ss.reduce((a,s)=>a+s.err,0)/ss.length;
-    const bias=ss.reduce((a,s)=>a+(s.carry-t),0)/ss.length;
+    const bias=ss.reduce((a,s)=>a+(s.carry-s.target),0)/ss.length;
     const pts=ss.reduce((a,s)=>a+s.pts,0);
     if(!worst||ae>worst.ae)worst={t,ae};
     const w=Math.min(100,ae/12*100), col=ae<=3?"var(--p3)":ae<=6?"var(--p2)":ae<=9?"var(--p1)":"var(--p0)";
@@ -754,7 +765,7 @@ function bindNew(){$("newBtn").onclick=()=>{
   $("no").onclick=resetNew;
 }}
 
-S=load()||fresh(); if(!S.target)S.target="15"; /* rounds not started yet get the new mixed order */ for(let r=0;r<ROUNDS;r++)if(S.shots.length<=r*PER&&S.plan[r])S.plan[r]=mixed(TARGETS,r?S.plan[r-1][PER-1]:null); $("player").value=S.player||""; $("targetHc").value=S.target;
+S=load()||fresh(); if(!S.target)S.target="15"; if(!S.band)S.band="all"; /* rounds not started yet get random yardages */ S.plan=makePlan(S.band,S.plan,Math.ceil(S.shots.length/PER)); $("player").value=S.player||""; $("targetHc").value=S.target;
 bindNew(); renderAll();
 
 /* ---------- Coach picker: email only ---------- */
@@ -810,6 +821,10 @@ function boardVis(){const b=document.querySelector(".board");if(b)b.hidden=!(S.s
 {const _ra=renderAll;renderAll=function(){_ra();boardVis()}}
 boardVis();
 
+/* distance band chosen on the start screen: a new band gives a new card of yardages */
+(function(){function paintBand(){var lk=S.shots.length>0,v=S.band||"all";document.querySelectorAll("#gBand button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.v===v));b.disabled=lk&&b.dataset.v!==v})}
+  document.querySelectorAll("#gBand button").forEach(function(b){b.addEventListener("click",function(){if(S.shots.length||S.band===b.dataset.v)return;S.band=b.dataset.v;S.plan=makePlan(S.band);$("pick").dataset.round="";save();paintBand();renderAll()})});
+  new MutationObserver(paintBand).observe(document.getElementById("gate"),{attributes:true,attributeFilter:["hidden"]});paintBand()})();
 /* entry mode chosen on the start screen: carry + offline, or distance from pin */
 (function(){function paintMode(){var lk=S.shots.length>0;document.querySelectorAll("#gMode button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.v===(S.inMode||"lm")));b.disabled=lk&&b.dataset.v!==(S.inMode||"lm")})}
   document.querySelectorAll("#gMode button").forEach(function(b){b.addEventListener("click",function(){if(S.shots.length)return;S.inMode=b.dataset.v;save();paintMode();renderAll()})});
@@ -1177,7 +1192,7 @@ function golfWins(cfg){
 <script id="mgs-game">
 /* Wedge Darts */
 golfWins({id:'wd',game:'Wedge Darts',progress:function(){return S.shots.length},
-  variant:function(){return S.tight?'tight':'std'},vname:function(){return S.tight?'Tight zones':'Standard zones'},
+  variant:function(){return (S.tight?'tight':'std')+(S.band&&S.band!=='all'?'-'+S.band:'')},vname:function(){return (S.tight?'Tight zones':'Standard zones')+(S.band==='lo'?' · 50 to 75 yds':S.band==='hi'?' · 75 to 100 yds':'')},
   fmt:function(v){return v+' pts'},scoreLabel:'Points'});
 </script>
 <style id="mgshareCss"></style><style id="mailfixCss">.mfsheet{margin-top:10px;border:2px solid #0B0B0B;background:#F4F1EA;padding:14px;display:grid;gap:8px}
