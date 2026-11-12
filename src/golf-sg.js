@@ -29,8 +29,8 @@ function E(n,lie,yds){var p=P(n);
   var base=interp(FW,yds)+(lie==="fw"?0:lie==="rough"?0.15+0.1*Math.min(1,(yds-100)/100):0.45);
   return base+p.g*(0.6+0.4*Math.min(yds,300)/150)*(lie==="fw"?1:lie==="rough"?1.15:1.3)}
 function putt(n,ft){return ft<=0?0:E(n,"green",ft/3)}
-/* one putt from ft (slope: "Uphill"/"Downhill"), finishing leaveFt away (0 = holed) */
-function puttSG(n,ft,leaveFt,slope){var adj=slope==="Downhill"?0.045:slope==="Uphill"?-0.025:0;return putt(n,ft)+adj*Math.min(1,ft/8)-1-putt(n,leaveFt)}
+/* one putt from ft, finishing leaveFt away (0 = holed). Distance only: slope and break are not used (same number for every putt of that length) */
+function puttSG(n,ft,leaveFt){return putt(n,ft)-1-putt(n,leaveFt)}
 /* a chip, pitch or bunker shot from yds and a lie, finishing leaveFt from the hole */
 function shortSG(n,lie,yds,leaveFt){return E(n,lieOf(lie),yds)-1-putt(n,leaveFt)}
 /* an approach from the fairway to a flag d yds away; carry/off in yds; penalty = in the hazard */

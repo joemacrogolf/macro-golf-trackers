@@ -134,7 +134,9 @@ tr.me td{box-shadow:inset 0 -2px 0 var(--gold);font-weight:700}
 .howto td,.howto th{text-align:left}
 .howto .aim{font-size:16px;font-weight:700;margin:0}
 @media (prefers-reduced-motion:reduce){.howto summary .chev{transition:none}}
-.holeviz{margin:12px 0 4px;line-height:0;border:2px solid #0B0B0B}.holeviz svg{display:block;width:100%;height:auto}.holeviz.small{margin-top:8px;max-width:340px}</style>
+.holeviz{margin:12px 0 4px;line-height:0;border:2px solid #0B0B0B}.holeviz svg{display:block;width:100%;height:auto}.holeviz.small{margin-top:8px;max-width:340px}
+#entry [hidden],#gate [hidden]{display:none!important}
+</style>
 
 <style>
 [hidden]{display:none!important}
@@ -444,7 +446,7 @@ body.gated{overflow:hidden}
   <details class="howto" id="howto">
     <summary><span><b>How it works</b><small>The test, the scoring and what you get at the end</small></span><span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
     <div class="hb">
-      <p class="aim">Every full-swing club, from 100 yds to driver, on a launch monitor. Only two numbers matter: carry and offline. Every shot is scored by strokes gained against your target handicap.</p>
+      <p class="aim">Every full-swing club, from 100 yds to driver, on a launch monitor. Tee shots use total distance and offline; approaches use carry and offline or distance from the pin. Every shot is scored by strokes gained against your target handicap.</p>
       <div><h3>Before you start</h3><ol>
         <li>Warm up fully. The full test takes about 75 minutes and the half test about 40. Your progress saves if you need to stop.</li>
         <li>Enter your driver carry and your longest fairway club carry, so the targets suit your game.</li>
@@ -452,7 +454,7 @@ body.gated{overflow:hidden}
       <div><h3>The test</h3><ol>
         <li>The app gives you the shot: an approach to a target, or a tee shot on a hole. Distances are random each time.</li>
         <li>Choose your club and hit one ball. Shape doesn't matter: only where it lands.</li>
-        <li>Enter the carry and offline numbers from the launch monitor, and which side it finished.</li>
+        <li>Tee shots: enter total distance and offline. Approaches: carry and offline, or distance from the pin if you chose that at the start.</li>
         <li>Some shots have water, out of bounds or a fairway bunker on one side, shown on the picture of the hole. Missing big on the water or out-of-bounds side costs a penalty shot. Finishing in a fairway bunker leaves a harder next shot.</li>
       </ol></div>
       <div><h3>Scoring</h3><ul>
@@ -497,6 +499,14 @@ body.gated{overflow:hidden}
       <span class="qs">3 wood, 5 wood or hybrid: whatever you'd hit into a long par 5.</span>
       <div class="rangeRow"><input type="range" id="fw" min="130" max="290" step="5" aria-label="Fairway club carry"><output id="fwOut" class="tnum"></output></div>
     </div>
+    <div class="q">
+      <span class="qh">Approach shots: what does your launch monitor give you?</span>
+      <span class="qs">Tee shots always use total distance and offline.</span>
+      <div class="verseg" role="group" aria-label="Approach numbers">
+        <button id="vLM"><b>Carry + offline</b><small>Two numbers per shot</small></button>
+        <button id="vPin"><b>Distance from pin</b><small>One number per shot</small></button>
+      </div>
+    </div>
     <button class="primary" id="startBtn">Start the test</button>
   </section>
 
@@ -518,9 +528,10 @@ body.gated{overflow:hidden}
       <div class="holeviz" id="holeViz" aria-label="Picture of the hole"></div>
     </div>
     <div class="fields">
-      <label><span class="label">Carry (yds)</span><input id="carry" type="number" inputmode="decimal" step="0.1" placeholder="e.g. 148.2"></label>
-      <label><span class="label">Offline (yds left or right)</span><input id="off" type="number" inputmode="decimal" step="0.1" min="0" placeholder="e.g. 6.4"></label>
-      <div class="fld dir"><span class="label">Finished</span>
+      <label><span class="label" id="carryLbl">Carry (yds)</span><input id="carry" type="number" inputmode="decimal" step="0.1" placeholder="e.g. 148.2"></label>
+      <label id="offWrap"><span class="label">Offline (yds left or right)</span><input id="off" type="number" inputmode="decimal" step="0.1" min="0" placeholder="e.g. 6.4"></label>
+      <div class="fld dir" id="penWrap" hidden><span class="label">Hazard</span><div class="seg" role="group" aria-label="Did it finish in the hazard"><button id="penN" aria-pressed="true">Safe</button><button id="penY" aria-pressed="false">In the hazard</button></div></div>
+      <div class="fld dir" id="dirWrap"><span class="label">Finished</span>
         <div class="seg" role="group" aria-label="Which side of the target line">
           <button id="dirL" aria-pressed="false">Left</button>
           <button id="dirC" aria-pressed="false">On line</button>
@@ -584,7 +595,7 @@ body.gated{overflow:hidden}
       <summary>Where the numbers come from</summary>
       <p>The Tour baseline is Mark Broadie's strokes gained data: from the fairway a PGA Tour player averages 2.80 strokes to hole out from 100 yds, 2.98 from 160 yds and 3.19 from 200 yds, and 1.87 putts from 20 ft.</p>
       <p>Each handicap adds a set amount per shot, more from further away and from the rough, so that a 20 handicap averages about 3.8 from 150 yds and a scratch player about 3.1. Those gaps were checked against Shot Scope's average proximity by handicap (about 38 ft for scratch, 57 ft for a 10 handicap and 81 ft for a 20 handicap from 100–150 yds), allowing for the perfect lie on a launch monitor. Tee shots use each level's typical driving distance and fairway rate (for example 270 yds and 55% for scratch, 215 yds and 42% for a 20 handicap).</p>
-      <p>Your shot's finish is worked out from carry and offline. Within about 10–14 yds of the target counts as on the green (bigger allowance for longer shots), then the putt or chip that follows is valued from the same tables. Every shot's value is that expected score before the shot, minus one, minus the expected score after it.</p>
+      <p>Your shot's finish is worked out from the numbers you enter (total distance for tee shots). Approaches start from the fairway value for that distance. Within about 10–14 yds of the target counts as on the green (bigger allowance for longer shots), then the putt or chip that follows is valued from the same tables. Every shot's value is that expected score before the shot, minus one, minus the expected score after it.</p>
       <p>These are estimates built on published averages, not an official handicap.</p>
     </details>
   </section>
@@ -631,7 +642,7 @@ function endState(s,carry,offSigned){
     if(p<=greenR(s.d))return {pen:0,lie:"green",rem:p,desc:`${Math.round(p*3)} ft`};
     return {pen:0,lie:off>30?"trouble":p<=greenR(s.d)+10?"fw":"rough",rem:p,desc:`Missed green, ${Math.round(p)} yds`};
   }
-  const total=carry*1.06,ahead=s.L-total,rem=Math.max(5,Math.sqrt(ahead*ahead+off*off));
+  const total=carry,ahead=s.L-total,rem=Math.max(5,Math.sqrt(ahead*ahead+off*off));
   if(onHaz&&off>s.haz.line)return {pen:1,lie:"rough",rem:Math.max(5,Math.abs(ahead)),desc:"Penalty"};
   if(s.haz&&s.haz.type==="bunker"){const h=s.haz,sideOk=(offSigned<0&&h.side==="L")||(offSigned>0&&h.side==="R");if(sideOk&&total>=h.from&&total<=h.to&&off>=h.inner&&off<=h.outer)return {pen:0,lie:"trouble",rem,desc:"Fairway bunker"}}
   if(off<=s.fwHalf)return {pen:0,lie:"fw",rem,desc:"Fairway"};
@@ -667,7 +678,9 @@ function makeShot(cat,set){
 }
 
 /* ---------- State ---------- */
-var S,dir=null;
+var S,dir=null,pen=false;
+/* approach entry mode: "lm" = carry + offline, "pin" = distance from the pin (yds). Tee shots: total distance + offline. */
+var pinMode=s=>S.appMode==="pin"&&s&&s.kind==="app";
 function blank(){return {player:"",target:"10",len:"full",set:{drv:240,fw:210},started:false,shots:[],res:[],history:[],saved:false,notes:""}}
 function save(){try{localStorage.setItem("macroLGT",JSON.stringify(S))}catch(e){}}
 function load(){try{const v=JSON.parse(localStorage.getItem("macroLGT"));if(v&&v.set&&v.res)return v}catch(e){}return null}
@@ -689,6 +702,7 @@ function renderSetup(){
   $("drv").value=S.set.drv;$("drvOut").textContent=S.set.drv+" yds";
   $("fw").value=S.set.fw;$("fwOut").textContent=S.set.fw+" yds";
   $("vFull").setAttribute("aria-pressed",String(S.len==="full"));$("vHalf").setAttribute("aria-pressed",String(S.len==="half"));
+  $("vLM").setAttribute("aria-pressed",String(S.appMode!=="pin"));$("vPin").setAttribute("aria-pressed",String(S.appMode==="pin"));
   $("warnT").textContent=S.len==="full"?"Set aside about 75 minutes":"Set aside about 40 minutes";
   $("lenTxt").textContent=S.started?total():(S.len==="full"?60:30);
 }
@@ -749,17 +763,26 @@ function renderEntry(){
   if(s.kind==="app"){$("distTxt").innerHTML=`${s.d}<small>yds</small>`;$("shotName").textContent=shotTitle(s);$("shotFacts").innerHTML=["Fairway lie","Target "+s.d+" yds"].map(x=>`<span>${x}</span>`).join("")}
   else{$("distTxt").innerHTML=`${s.L}<small>yd hole</small>`;$("shotName").textContent=shotTitle(s);$("shotFacts").innerHTML=[s.club,"Fairway "+(s.fwHalf*2)+" yds wide"].concat(s.haz&&s.haz.type==="bunker"?["Bunker "+s.haz.from+"–"+s.haz.to+" yds out"]:[]).map(x=>`<span>${x}</span>`).join("")}
   $("holeViz").innerHTML=holeSVG(s);
+  const pm=pinMode(s);$("carryLbl").textContent=pm?"Distance from pin (yds)":s.kind==="app"?"Carry (yds)":"Total distance (yds)";
+  $("carry").placeholder=pm?"e.g. 7.5":s.kind==="app"?"e.g. 148.2":"e.g. 255";
+  $("offWrap").hidden=pm;$("dirWrap").hidden=pm;$("penWrap").hidden=!(pm&&s.haz&&s.haz.type!=="bunker");
+  $("penN").setAttribute("aria-pressed",String(!pen));$("penY").setAttribute("aria-pressed",String(pen));
   updateEnter();
 }
-function readIn(){const c=parseFloat($("carry").value),o=parseFloat($("off").value),off=isNaN(o)?0:Math.abs(o);const side=off===0?"C":dir;return {c,off,side,ok:c>0&&(off===0||side==="L"||side==="R")}}
+function readIn(){const s=S.shots[n()];if(pinMode(s)){const p=parseFloat($("carry").value);return {pin:p,ok:p>=0}}
+  const c=parseFloat($("carry").value),o=parseFloat($("off").value),off=isNaN(o)?0:Math.abs(o);const side=off===0?"C":dir;return {c,off,side,ok:c>0&&(off===0||side==="L"||side==="R")}}
+/* a distance-from-pin result is stored as the same carry/offline pair it implies (short by that much, on line),
+   or, in the hazard, wide on the hazard side, so every score and picture uses one model */
+function pinToCO(s,p,inHaz){if(inHaz&&s.haz)return {c:s.d,o:(s.haz.side==="L"?-1:1)*(s.haz.line+1),pin:p,pen:1};return {c:Math.max(0,s.d-p),o:0,pin:p}}
 function updateEnter(){$("enterBtn").disabled=!readIn().ok}
 function setDir(d){dir=d;["L","C","R"].forEach(k=>$("dir"+k).setAttribute("aria-pressed",String(dir===k)));if(d==="C")$("off").value="0";updateEnter()}
 function catStats(){return Object.keys(CATS).map(c=>{const f=s=>s.cat===c;const l=sgList(tn(),f);if(!l.length)return null;return {c,name:CATS[c],n:l.length,per:sum(l)/l.length,hc:playsLike(f)}}).filter(Boolean)}
 function patterns(){
   const app=S.res.map((r,i)=>({r,s:S.shots[i]})).filter(o=>o.s.kind==="app"),tee=S.res.map((r,i)=>({r,s:S.shots[i]})).filter(o=>o.s.kind==="tee");
   const out={};
-  if(app.length){out.bias=sum(app.map(o=>o.r.c-o.s.d))/app.length;out.greens=app.filter(o=>endState(o.s,o.r.c,o.r.o).lie==="green").length;out.appN=app.length;
-    out.left=app.filter(o=>o.r.o<-10).length;out.right=app.filter(o=>o.r.o>10).length;out.offAvg=sum(app.map(o=>Math.abs(o.r.o)))/app.length}
+  const lmApp=app.filter(o=>o.r.pin==null);
+  if(app.length){out.bias=lmApp.length?sum(lmApp.map(o=>o.r.c-o.s.d))/lmApp.length:0;out.greens=app.filter(o=>endState(o.s,o.r.c,o.r.o).lie==="green").length;out.appN=app.length;
+    out.left=lmApp.filter(o=>o.r.o<-10).length;out.right=lmApp.filter(o=>o.r.o>10).length;out.offAvg=sum(app.map(o=>Math.abs(o.r.o)))/app.length}
   if(tee.length){out.teeN=tee.length;out.fwy=tee.filter(o=>endState(o.s,o.r.c,o.r.o).desc==="Fairway").length;out.pens=S.res.map((r,i)=>endState(S.shots[i],r.c,r.o)).filter(x=>x.pen).length;
     const dr=tee.filter(o=>o.s.cat==="drv");if(dr.length)out.drvCarry=sum(dr.map(o=>o.r.c))/dr.length}
   return out;
@@ -790,9 +813,9 @@ function renderFinish(){
 }
 function renderCard(){
   if(!S.started||!n()){$("card").innerHTML=`<tr><td class="l muted">Each shot appears here with its strokes gained against your target.</td></tr>`;return}
-  let h=`<thead><tr><th>#</th><th class="l">Shot</th><th>Carry</th><th>Off</th><th class="l">Result</th><th>SG</th></tr></thead><tbody>`;
+  let h=`<thead><tr><th>#</th><th class="l">Shot</th><th>Dist</th><th>Off</th><th class="l">Result</th><th>SG</th></tr></thead><tbody>`;
   S.res.forEach((r,i)=>{const s=S.shots[i],x=shotSG(s,r.c,r.o,tn());
-    h+=`<tr><td>${i+1}</td><td class="l">${s.kind==="app"?s.d+" yds":s.L+" yd hole"}</td><td>${r.c.toFixed(1)}</td><td>${Math.abs(r.o).toFixed(1)}${r.o<0?"L":r.o>0?"R":""}</td><td class="l">${x.st.desc}</td><td class="${x.sg>=0?"up":"down"}"><b>${fmt2(x.sg)}</b></td></tr>`});
+    h+=`<tr><td>${i+1}</td><td class="l">${s.kind==="app"?s.d+" yds":s.L+" yd hole"}</td><td>${r.pin!=null?r.pin.toFixed(1)+" to pin":r.c.toFixed(1)}</td><td>${r.pin!=null?"\u2013":Math.abs(r.o).toFixed(1)+(r.o<0?"L":r.o>0?"R":"")}</td><td class="l">${x.st.desc}</td><td class="${x.sg>=0?"up":"down"}"><b>${fmt2(x.sg)}</b></td></tr>`});
   $("card").innerHTML=h+"</tbody>";
 }
 function renderHist(){
@@ -817,8 +840,8 @@ function startTest(){const mix=MIX[S.len],list=[];Object.entries(mix).forEach(([
   S.shots=list.map(c=>makeShot(c,S.set));S.res=[];S.started=true;S.saved=false;S.notes="";save();renderAll();$("entry").scrollIntoView({behavior:"smooth",block:"start"})}
 function newTest(){S.started=false;S.shots=[];S.res=[];S.saved=false;S.notes="";$("flash").innerHTML="";save();renderAll();window.scrollTo({top:0,behavior:"smooth"})}
 function enter(){
-  const {c,off,side,ok}=readIn();if(!ok||done())return;
-  const o=side==="L"?-off:side==="R"?off:0,s=S.shots[n()];S.res.push({c,o});
+  const rd=readIn();if(!rd.ok||done())return;const s=S.shots[n()];let c,o;
+  if(rd.pin!=null){const r=pinToCO(s,rd.pin,pen);c=r.c;o=r.o;S.res.push(r)}else{c=rd.c;o=rd.side==="L"?-rd.off:rd.side==="R"?rd.off:0;S.res.push({c,o})}pen=false;
   if(done()&&!S.saved){S.history.unshift({date:new Date().toISOString().slice(0,10),len:S.len,target:S.target,hc:playsLike(),per:sum(sgList(tn()))/n()});S.history=S.history.slice(0,20);S.saved=true}
   save();const x=shotSG(s,c,o,tn());$("carry").value="";$("off").value="";setDir(null);
   $("flash").innerHTML=`<div class="flash ${x.sg>=0?"s2":x.st.pen?"s5":"s4"}"><span>${s.kind==="app"?s.d+" yds":s.L+" yd hole"} · ${x.st.desc}</span><b>${fmt2(x.sg)}</b></div><div class="holeviz small">${holeSVG(s,{c,o})}</div>`;
@@ -846,6 +869,8 @@ function syncCoach(){const a=coachAddr(),r=$("report").value;
 /* ---------- Events ---------- */
 $("vFull").addEventListener("click",()=>{if(S.started)return;S.len="full";save();renderAll()});
 $("vHalf").addEventListener("click",()=>{if(S.started)return;S.len="half";save();renderAll()});
+$("vLM").addEventListener("click",()=>{if(S.started)return;S.appMode="lm";save();renderAll()});
+$("vPin").addEventListener("click",()=>{if(S.started)return;S.appMode="pin";save();renderAll()});
 $("drv").addEventListener("input",e=>{if(S.started)return;S.set.drv=+e.target.value;save();renderSetup()});
 $("fw").addEventListener("input",e=>{if(S.started)return;S.set.fw=+e.target.value;save();renderSetup()});
 $("startBtn").addEventListener("click",startTest);
@@ -853,6 +878,7 @@ $("carry").addEventListener("input",updateEnter);
 $("off").addEventListener("input",()=>{const v=parseFloat($("off").value);if(v>0&&dir==="C")setDir(null);else updateEnter()});
 ["L","C","R"].forEach(k=>$("dir"+k).addEventListener("click",()=>setDir(k)));
 $("enterBtn").addEventListener("click",enter);
+$("penN").addEventListener("click",()=>{pen=false;renderEntry()});$("penY").addEventListener("click",()=>{pen=true;renderEntry()});
 [$("carry"),$("off")].forEach(el=>el.addEventListener("keydown",e=>{if(e.key==="Enter")enter()}));
 $("undo").addEventListener("click",undo);
 $("player").addEventListener("input",e=>{S.player=e.target.value;save();if(done())refreshReport()});
@@ -1741,8 +1767,8 @@ window.MG_DONE=()=>done();
 window.MG_ID=()=>{const h=S.history[0];return h?h.date+"|"+h.hc+"|"+S.res.length:"x"};
 window.MG_CTX=function(){const T=tn(),L=P(T),TL=hcName(S.target),p=patterns(),all=S.res.map((r,i)=>({r,s:S.shots[i]}));
   let speed=null;const dr=all.filter(o=>o.s.cat==="drv");
-  if(dr.length&&p.drvCarry){const mine=p.drvCarry*1.06,per=E(T,"fw",Math.max(30,400-L.D))-E(T,"fw",Math.max(30,400-mine));
-    speed={key:"lg.speed",test:"long",n:dr.length,per,you:"Your driver carried "+Math.round(p.drvCarry)+" yds on average (about "+Math.round(mine)+" yds total)",level:"A "+TL+" golfer averages about "+Math.round(L.D)+" yds total"}}
+  if(dr.length&&p.drvCarry){const mine=p.drvCarry,per=E(T,"fw",Math.max(30,400-L.D))-E(T,"fw",Math.max(30,400-mine));
+    speed={key:"lg.speed",test:"long",n:dr.length,per,you:"Your drives went "+Math.round(mine)+" yds total on average",level:"A "+TL+" golfer averages about "+Math.round(L.D)+" yds total"}}
   const raw=catStats().map(c=>{const these=all.filter(o=>o.s.cat===c.c);let per=c.per,you,level;
     if(c.c==="drv"||c.c==="fwt"){const fw=these.filter(o=>endState(o.s,o.r.c,o.r.o).desc==="Fairway").length;you="You found "+fw+" of "+these.length+" fairways ("+Math.round(fw/these.length*100)+"%)";level="A "+TL+" golfer finds about "+Math.round(L.fw*100)+"%";if(c.c==="drv"&&speed)per=c.per-speed.per}
     else{const g=these.filter(o=>endState(o.s,o.r.c,o.r.o).lie==="green").length;you="You hit "+g+" of "+these.length+" greens ("+Math.round(g/these.length*100)+"%)"}

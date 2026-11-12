@@ -469,7 +469,7 @@ body.gated{overflow:hidden}
       <summary>How these numbers were worked out</summary>
       <p>PGA Tour make rates come from ShotLink: about 70% from 6 ft, 53% from 8 ft, 41% from 10 ft and 30% from 12 ft.</p>
       <p>Amateur rates come from Shot Scope data by handicap. For example, from 6–9 ft scratch golfers hole 49%, 10 handicaps 39% and 20 handicaps 33%. From 9–12 ft it is 34%, 26% and 18%. Each exact distance was read off between those bands.</p>
-      <p>Each putt is then adjusted: uphill putts are about 10% easier and downhill putts about 15% harder; a straight putt is about 15% easier and a high break about 15% harder. Your expected score is built from the exact 20 putts you were given, so a tough set counts for more.</p>
+      <p>Every putt is judged on its length only: the make rate for that distance, whatever the slope or break. Your expected score is built from the exact 20 putts you were given.</p>
       <p>20 putts still varies a lot from one session to the next, so judge the average over several sessions.</p>
     </details>
     <div class="confirm" id="newWrap"></div>
@@ -489,8 +489,9 @@ var RATE={Tour:[70.2,52.9,41.3,30.1],"0":[62.5,46.5,36.5,29],"5":[55.5,42.3,35.7
 var HCS=["Tour","0","5","10","15","20","25","30"];
 var HCNUM={Tour:-5,"0":0,"5":5,"10":10,"15":15,"20":20,"25":25,"30":30};
 var hcName=h=>h==="Tour"?"Tour":h==="0"?"Scratch":h+" hc";
-var SLOPE_M={Uphill:1.1,Flat:1.05,Downhill:0.85};
-var BRK_M={Straight:1.15,"Small break":1.05,"Medium break":0.95,"High break":0.85};
+/* distance only: the make rate for the length, whatever the slope or break */
+var SLOPE_M={Uphill:1,Flat:1,Downhill:1};
+var BRK_M={Straight:1,"Small break":1,"Medium break":1,"High break":1};
 var SLOPES=["Uphill","Uphill","Downhill","Downhill","Flat"];
 var BREAKS=["Left to right","Right to left","Left to right","Right to left","Straight"];
 var AMTS=["Small break","Medium break","High break"];
@@ -1211,7 +1212,7 @@ UX.init({family:'golf',home:false});
 <script>/* strokes gained alongside the game score */
 GSG.init({target:()=>S.target,unit:"putt",colLabel:"Putt",
   shots:()=>S.res.map((r,i)=>{const p=S.plan[i],n=GSG.num(S.target);return {n:p.d+" ft "+String(p.slope||"").toLowerCase()+(r?", holed":", missed"),sg:GSG.puttSG(n,p.d,r?0:Math.max(1.5,0.15*p.d),p.slope)}}),
-  note:"Each putt is valued from its length and slope. The game records holed or missed, so a miss is counted as finishing 15% of the putt’s length from the hole (at least 1.5 ft)."});
+  note:"Each putt is valued from its length only (slope and break are not used). The game records holed or missed, so a miss is counted as finishing 15% of the putt’s length from the hole (at least 1.5 ft)."});
 </script>
 <script>/* standard leaderboard score: read by sync.js as _mgSummary.golf. This game keeps only the current card in S, so each
    finished card is copied into S.mgRounds (synced with S); a card left unfinished or undone is never counted */

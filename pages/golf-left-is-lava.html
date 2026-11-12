@@ -335,6 +335,8 @@ body{padding:0!important;background:#FFFFFF}
 .gate .go:disabled{opacity:.35}
 body.gated{overflow:hidden}
 .board[hidden]{display:none!important}
+
+#entry [hidden],#gate [hidden]{display:none!important}
 </style>
 
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Set up Left Is Lava"><div class="gate-in">
@@ -343,6 +345,7 @@ body.gated{overflow:hidden}
   <h2>Left Is Lava<span>Before you start</span></h2>
   <label class="fld"><span>Your name</span><input id="gName" autocomplete="name" placeholder="First and last name"></label>
   <label class="fld"><span>Target handicap</span><select id="gHc"><option value="">Choose a target</option><option value="Tour">Tour</option><option value="0">Scratch</option><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option></select></label>
+  <div class="fld" id="gModeWrap"><span>What does your launch monitor give you?</span><div class="opts" id="gMode"><button type="button" data-v="lm" aria-pressed="true"><b>Carry + offline</b><small>Two numbers and the side it finished</small></button><button type="button" data-v="pin" aria-pressed="false"><b>Distance from pin</b><small>One number, then tap safe, short or in the lava</small></button></div></div>
   <button class="go" id="gGo" disabled>Continue</button>
 </div></div>
 <div class="wrap">
@@ -421,11 +424,17 @@ body.gated{overflow:hidden}
       <span class="pill norm" id="flightPill">Call: stock flight</span>
     </div>
     <div class="fields">
-      <label><span class="label">Carry (yds)</span>
+      <label><span class="label" id="carryLbl">Carry (yds)</span>
         <input id="carry" type="number" inputmode="decimal" step="0.1" placeholder="e.g. 131.4"></label>
-      <label><span class="label">Offline (yds left or right)</span>
+      <label id="offWrap"><span class="label">Offline (yds left or right)</span>
         <input id="off" type="number" inputmode="decimal" step="0.1" min="0" placeholder="e.g. 6.2"></label>
-      <div class="fld dir"><span class="label">Finished</span>
+      <div class="fld dir" id="resWrap" hidden><span class="label">Where did it finish?</span>
+        <div class="seg" role="group" aria-label="Where it finished">
+          <button id="resSafe" aria-pressed="false">Safe</button>
+          <button id="resShort" aria-pressed="false">Short</button>
+          <button id="resLava" aria-pressed="false">In the lava</button>
+        </div></div>
+      <div class="fld dir" id="dirWrap"><span class="label">Finished</span>
         <div class="seg" role="group" aria-label="Which side of the pin line">
           <button id="dirL" aria-pressed="false">Left</button>
           <button id="dirC" aria-pressed="false">On line</button>
@@ -633,7 +642,7 @@ function makeOrder(d){
 function makeShifts(){return Array.from({length:6},()=>SHIFTS[Math.floor(Math.random()*SHIFTS.length)])}
 function fresh(keep){
   const d=keep&&keep.dists?keep.dists:[115,135,165];
-  return {player:keep?keep.player:"",target:keep&&keep.target?keep.target:"5",lava:keep?keep.lava:"L",mode:keep?keep.mode:"std",dists:d,
+  return {player:keep?keep.player:"",target:keep&&keep.target?keep.target:"5",lava:keep?keep.lava:"L",mode:keep?keep.mode:"std",inMode:keep&&keep.inMode?keep.inMode:"lm",dists:d,
           order:makeOrder(d),shifts:makeShifts(),shots:[],history:keep&&keep.history?keep.history:[],saved:false};
 }
 function save(){try{localStorage.setItem("leftIsLava",JSON.stringify(S))}catch(e){}}
@@ -665,7 +674,14 @@ function sideWord(){return S.lava==="L"?"left":"right"}
 function safeWord(){return S.lava==="L"?"right":"left"}
 function chipCls(p){return p===3?"s3":p===1?"s1":p===0?"s0":p===-1?"sm1":"sm2"}
 
+/* distance-from-pin entry: the result is turned into the carry/offline it implies, so scoring and strokes gained use one model.
+   Safe = that far away on the safe side; Short = that far short on line; In the lava = at least 10.5 yds out on the lava side */
+var pres=null,pinMode=()=>S.inMode==="pin";
 function readInputs(){
+  if(pinMode()){const p=parseFloat($("carry").value),t=S.order[idx()];if(isNaN(p)||p<0||!pres)return {c:isNaN(p)?NaN:t,off:0,side:"C",ok:false,pin:p};
+    if(pres==="short")return {c:Math.max(0,t-p),off:0,side:"C",ok:true,pin:p};
+    if(pres==="lava")return {c:t,off:Math.max(p,10.5),side:S.lava,ok:true,pin:p};
+    return {c:t,off:p,side:p===0?"C":(S.lava==="L"?"R":"L"),ok:true,pin:p}}
   const c=parseFloat($("carry").value), o=parseFloat($("off").value);
   const off=isNaN(o)?0:Math.abs(o);
   const side=off===0?"C":dir;
@@ -675,6 +691,8 @@ function setDir(d){dir=d;["L","C","R"].forEach(k=>$("dir"+k).setAttribute("aria-
   if(d==="C")$("off").value="0";updatePreview()}
 function updatePreview(){
   const {c,off,side,ok}=readInputs(); $("enter").disabled=!ok;
+  if(pinMode()){["Safe","Short","Lava"].forEach(k=>$("res"+k).setAttribute("aria-pressed",String(pres===k.toLowerCase())));
+    if(!ok){$("preview").textContent="Enter the distance from the pin, then tap where it finished.";return}}
   if(isNaN(c)){$("preview").textContent="Enter carry and offline from the sim, then tap the side it finished.";return}
   if(!ok){$("preview").textContent="Tap Left or Right to show which side of the pin it finished.";return}
   const t=S.order[idx()], s=score(t,c,off,side);
@@ -688,7 +706,7 @@ function enter(){
   S.shots.push(shot);
   if(idx()===BALLS&&!S.saved){S.history.unshift({date:new Date().toISOString().slice(0,10),pts:total(),goal:Math.round(goal()*10)/10,hc:S.target,left:pctLava(S.shots),prox:median(S.shots.map(x=>x.ft)),mode:S.mode});S.history=S.history.slice(0,12);S.saved=true}
   save();
-  $("carry").value="";$("off").value="";setDir(null);
+  $("carry").value="";$("off").value="";pres=null;setDir(null);
   flash(shot); renderAll();
   if(idx()<BALLS)$("carry").focus();
 }
@@ -906,6 +924,14 @@ bindNew(); renderAll();
 function boardVis(){const b=document.querySelector(".board");if(b)b.hidden=!(S.shots.length>0)}
 {const _ra=renderAll;renderAll=function(){_ra();boardVis()}}
 boardVis();
+
+/* entry mode chosen on the start screen: carry + offline, or distance from pin */
+(function(){function paint(){var pm=pinMode();$("carryLbl").textContent=pm?"Distance from pin (yds)":"Carry (yds)";$("carry").placeholder=pm?"e.g. 6.5":"e.g. 131.4";$("offWrap").hidden=pm;$("dirWrap").hidden=pm;$("resWrap").hidden=!pm;
+    var lk=S.shots.length>0;document.querySelectorAll("#gMode button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.v===(S.inMode||"lm")));b.disabled=lk&&b.dataset.v!==(S.inMode||"lm")})}
+  document.querySelectorAll("#gMode button").forEach(function(b){b.addEventListener("click",function(){if(S.shots.length)return;S.inMode=b.dataset.v;save();paint();updatePreview()})});
+  [["resSafe","safe"],["resShort","short"],["resLava","lava"]].forEach(function(x){$(x[0]).addEventListener("click",function(){pres=x[1];updatePreview()})});
+  new MutationObserver(paint).observe(document.getElementById("gate"),{attributes:true,attributeFilter:["hidden"]});
+  if(typeof window.renderAll==="function"){var r0=window.renderAll;window.renderAll=function(){var x=r0.apply(this,arguments);paint();return x}}paint()})();
 </script>
 <style>
 .mgs-slot{display:flex;flex-direction:column;gap:10px}

@@ -314,6 +314,8 @@ body{padding:0!important;background:#FFFFFF}
 .gate .go:disabled{opacity:.35}
 body.gated{overflow:hidden}
 .board[hidden]{display:none!important}
+
+#entry [hidden],#gate [hidden]{display:none!important}
 </style>
 
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Set up Wedge Darts"><div class="gate-in">
@@ -323,6 +325,7 @@ body.gated{overflow:hidden}
   <label class="fld"><span>Your name</span><input id="gName" autocomplete="name" placeholder="First and last name"></label>
   <label class="fld"><span>Target handicap</span><select id="gHc"><option value="">Choose a target</option><option value="Tour">Tour</option><option value="0">Scratch</option><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option></select></label>
   <div class="fld" id="gLvlWrap"><span>Scoring zones</span><div class="opts" id="gLvl"><button type="button" data-v="std" aria-pressed="false"><b>Standard</b><small>3 / 6 / 9 yds, 8 yds left/right. Recommended for most players</small></button><button type="button" data-v="tight" aria-pressed="false"><b>Tight</b><small>2 / 4 / 6 yds, 4 yds left/right. For single-figure players</small></button></div><span class="note" id="gLvlNote" hidden>Game in progress, so the difficulty stays as it is until you start a new one.</span></div>
+  <div class="fld" id="gModeWrap"><span>What does your launch monitor give you?</span><div class="opts" id="gMode"><button type="button" data-v="lm" aria-pressed="true"><b>Carry + offline</b><small>Two numbers per shot</small></button><button type="button" data-v="pin" aria-pressed="false"><b>Distance from pin</b><small>One number per shot. The zones become circles round the flag</small></button></div></div>
   <button class="go" id="gGo" disabled>Continue</button>
 </div></div>
 <div class="wrap">
@@ -403,9 +406,9 @@ body.gated{overflow:hidden}
     <div class="fields">
       <label id="pickWrap" hidden><span class="label">His pick</span>
         <select id="pick"></select></label>
-      <label><span class="label">Carry (yds)</span>
+      <label><span class="label" id="carryLbl">Carry (yds)</span>
         <input id="carry" type="number" inputmode="decimal" step="0.1" placeholder="e.g. 68.4"></label>
-      <label><span class="label">Offline (yds left or right)</span>
+      <label id="offWrap"><span class="label">Offline (yds left or right)</span>
         <input id="off" type="number" inputmode="decimal" step="0.1" placeholder="e.g. 3.2"></label>
     </div>
     <div class="preview tnum" id="preview">Enter the sim numbers to score the shot.</div>
@@ -574,7 +577,7 @@ function buildReport(){
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function fresh(){
   const plan=[];for(let r=0;r<ROUNDS;r++)plan.push(shuffle(TARGETS));
-  return {player:S?S.player:"",tight:S?S.tight:false,target:S&&S.target?S.target:"15",plan,shots:[]};
+  return {player:S?S.player:"",tight:S?S.tight:false,target:S&&S.target?S.target:"15",inMode:S&&S.inMode?S.inMode:"lm",plan,shots:[]};
 }
 function save(){try{localStorage.setItem("wedgeDarts",JSON.stringify(S))}catch(e){}}
 function load(){try{const v=JSON.parse(localStorage.getItem("wedgeDarts"));if(v&&v.plan&&v.shots)return v}catch(e){}return null}
@@ -587,7 +590,10 @@ function basePts(err,off){
   const z=zones();
   if(err<=z[0]&&a<=z[0])return 3;if(err<=z[1]&&a<=z[1])return 2;if(err<=z[2]&&a<=Math.min(z[2],g))return 1;return 0;
 }
-function score(target,carry,off,fin){
+var pinMode=()=>S.inMode==="pin";
+function pinPts(p){const z=zones();return p<=z[0]?3:p<=z[1]?2:p<=z[2]?1:0}
+function score(target,carry,off,fin,pin){
+  if(pin!=null){const b=pinPts(pin);let p=b;if(fin){p=b===3?6:b===0?-3:b}return {err:pin,miss:pin,base:b,pts:p,gated:false,pin}}
   const err=Math.abs(carry-target), b=basePts(err,off);
   let p=b; if(fin){p=b===3?6:b===0?-3:b}
   return {err,miss:Math.sqrt(err*err+off*off),base:b,pts:p,gated:Math.abs(off)>gate()};
@@ -624,16 +630,20 @@ function renderEntry(){
     $("pick").dataset.round=String(r);
   }
   $("targetTxt").innerHTML=`${curTarget()}<small>yds</small>`;
+  $("carryLbl").textContent=pinMode()?"Distance from pin (yds)":"Carry (yds)";$("carry").placeholder=pinMode()?"e.g. 4.5":"e.g. 68.4";$("offWrap").hidden=pinMode();
   updatePreview();
 }
 function readInputs(){
   const c=parseFloat($("carry").value), o=parseFloat($("off").value);
+  if(pinMode())return {pin:c,c:NaN,o:0,ok:!isNaN(c)&&c>=0};
   return {c,o:isNaN(o)?0:o,ok:!isNaN(c)};
 }
 function updatePreview(){
   const {c,o,ok}=readInputs(); $("enter").disabled=!ok;
-  if(!ok){$("preview").textContent="Enter the sim numbers to score the shot. Offline is optional.";return}
-  const t=curTarget(), s=score(t,c,o,isFin(idx()));
+  if(!ok){$("preview").textContent=pinMode()?"Enter the distance from the pin to score the shot.":"Enter the sim numbers to score the shot. Offline is optional.";return}
+  const t=curTarget(), rd=readInputs();
+  if(rd.pin!=null){const s=score(t,0,0,isFin(idx()),rd.pin);$("preview").textContent=`${rd.pin.toFixed(1)} yds from the pin → ${s.pts>0?"+":""}${s.pts} pts`;return}
+  const s=score(t,c,o,isFin(idx()));
   const dir=c<t?"short":c>t?"long":"on the number";
   $("preview").textContent=`${s.err.toFixed(1)} yds ${dir}${s.gated?" · more than "+gate()+" yds offline":""} → ${s.pts>0?"+":""}${s.pts} pts`;
 }
@@ -641,11 +651,13 @@ function flash(s,t){
   const cls="c"+Math.max(0,Math.min(3,s.base));
   const words=s.gated?"Offline. Too wide":["Missed the zone","In the zone","Close","Dart!"][s.base];
   const extra=s.fin?(s.base===3?" · doubled":s.base===0?" · finisher penalty":""):"";
-  $("flash").innerHTML=`<div class="flash ${cls}"><span>${t} yds · ${s.carry.toFixed(1)} carry<br>${words}${extra}</span><b>${s.pts>0?"+":""}${s.pts}</b></div>`;
+  $("flash").innerHTML=`<div class="flash ${cls}"><span>${t} yds · ${s.pin!=null?s.pin.toFixed(1)+" from the pin":s.carry.toFixed(1)+" carry"}<br>${words}${extra}</span><b>${s.pts>0?"+":""}${s.pts}</b></div>`;
 }
 function enter(){
-  const {c,o,ok}=readInputs(); if(!ok)return;
-  const i=idx(), t=curTarget(), fin=isFin(i), s=score(t,c,o,fin);
+  const rd=readInputs(); if(!rd.ok)return;
+  const i=idx(), t=curTarget(), fin=isFin(i);
+  /* distance from pin is stored with the carry it implies (short by that much, on line) so strokes gained uses one model */
+  const c=rd.pin!=null?Math.max(0,t-rd.pin):rd.c, o=rd.pin!=null?0:rd.o, s=score(t,c,o,fin,rd.pin);
   const shot={target:t,carry:c,off:o,fin,...s};
   S.shots.push(shot); save();
   $("carry").value="";$("off").value="";
@@ -795,6 +807,11 @@ bindNew(); renderAll();
 function boardVis(){const b=document.querySelector(".board");if(b)b.hidden=!(S.shots.length>0)}
 {const _ra=renderAll;renderAll=function(){_ra();boardVis()}}
 boardVis();
+
+/* entry mode chosen on the start screen: carry + offline, or distance from pin */
+(function(){function paintMode(){var lk=S.shots.length>0;document.querySelectorAll("#gMode button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.v===(S.inMode||"lm")));b.disabled=lk&&b.dataset.v!==(S.inMode||"lm")})}
+  document.querySelectorAll("#gMode button").forEach(function(b){b.addEventListener("click",function(){if(S.shots.length)return;S.inMode=b.dataset.v;save();paintMode();renderAll()})});
+  new MutationObserver(paintMode).observe(document.getElementById("gate"),{attributes:true,attributeFilter:["hidden"]});paintMode()})();
 </script>
 <style>
 .mgs-slot{display:flex;flex-direction:column;gap:10px}

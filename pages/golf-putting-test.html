@@ -572,7 +572,7 @@ body.gated{overflow:hidden}
       <summary>Where the numbers come from</summary>
       <p>The Tour row is Mark Broadie's strokes gained putting data: 1.04 putts from 3 ft, 1.61 from 10 ft, 1.87 from 20 ft and 2.14 from 50 ft.</p>
       <p>The handicap rows are built from Shot Scope make rates by handicap (for example, from 6–9 ft scratch golfers hole 49%, 10 handicaps 39% and 20 handicaps 33%) and from how far each level typically leaves its first putt, so three-putts are included.</p>
-      <p>Downhill putts are scored as slightly harder and uphill putts slightly easier. Each putt's value is the expected putts before it, minus one, minus the expected putts from where it finished.</p>
+      <p>Each putt's value is the expected putts before it, minus one, minus the expected putts from where it finished.</p>
       <p>These are estimates built on published averages, not an official handicap.</p>
     </details>
   </section>
@@ -596,8 +596,8 @@ function rowE(row,ft){const g=PT.grid;if(ft<=1)return 1;if(ft<=g[0])return 1+(ro
 function E(n,ft){ /* any handicap number, interpolated between levels and extrapolated past the ends */
   let i=1;while(i<LV.length-1&&n>LV[i][1])i++;const a=LV[i-1],b=LV[i],t=(n-a[1])/(b[1]-a[1]);
   const ea=rowE(PT.tab[a[0]],ft),eb=rowE(PT.tab[b[0]],ft);return Math.max(1,ea+(eb-ea)*t)}
-var SLOPE_ADJ={Uphill:-0.025,Downhill:0.045};
-function startE(n,p){return E(n,p.ft)+SLOPE_ADJ[p.slope]*Math.min(1,p.ft/8)}
+/* distance only: every putt of the same length has the same expected strokes, whatever the slope or break */
+function startE(n,p){return E(n,p.ft)}
 function puttSG(p,r,n){return startE(n,p)-1-(r.holed?0:E(n,r.leave))}
 
 /* ---------- The test ---------- */

@@ -573,7 +573,7 @@ body.gated{overflow:hidden}
     <details class="rules">
       <summary>Where the numbers come from</summary>
       <p>The Tour row is Mark Broadie's strokes gained putting data: tour players hole about 99% from 3 ft, 93% from 4 ft and 88% from 5 ft.</p>
-      <p>The handicap rows use Shot Scope make rates by handicap from short range. Downhill and sidehill putts are scored as slightly harder than uphill.</p>
+      <p>The handicap rows use Shot Scope make rates by handicap from short range.</p>
       <p>A holed putt gains the chance your target level would have missed it; a miss costs the chance they'd have holed it, plus the tap-in that follows. These are estimates built on published averages, not an official handicap.</p>
     </details>
   </section>
@@ -598,7 +598,7 @@ function E(n,ft){let i=1;while(i<LV.length-1&&n>LV[i][1])i++;const a=LV[i-1],b=L
 
 /* ---------- The game: N/E/S/W at 3, 4, 5 ft, twice ---------- */
 var SPOTS=[["N","North","Downhill"],["E","East","Right to left"],["S","South","Uphill"],["W","West","Left to right"]];
-var ADJ={Uphill:-0.025,Downhill:0.045,"Right to left":0.03,"Left to right":0.03};
+var ADJ={Uphill:0,Downhill:0,"Right to left":0,"Left to right":0}; /* distance only: no slope or break adjustment */
 var MISS_LEAVE=2;
 var PUTTS=[];[1,2].forEach(r=>[3,4,5].forEach(ft=>SPOTS.forEach(s=>PUTTS.push({round:r,ft,spot:s[0],name:s[1],type:s[2]}))));
 /* make rate from 3, 4 and 5 ft by level (average slope) */

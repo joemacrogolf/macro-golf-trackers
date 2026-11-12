@@ -435,6 +435,7 @@ tr.done .ux-rpe{background:#F4F1EA}
   <h2 id="gHead">Paul Goddard<span>What are you doing today?</span></h2>
   <div class="fld" id="gResumeWrap" hidden><span>Session in progress</span><div class="opts"><button type="button" id="gResume"><b>Carry on</b><small id="gResumeTxt"></small></button></div></div>
   <div class="fld"><span>Pick one</span><div class="opts" id="gKind"><button type="button" data-v="round" aria-pressed="false"><b>Warming up for a round</b><small>Putting warm-up (gate, Hole Out, Money Stealers) and range warm-up (Practice Plan 30 min approach and driver, plus your technical station)</small></button><button type="button" data-v="range" aria-pressed="false"><b>Range practice</b><small>Practice Plan warm-up, your technical station, then Wedge Darts with strokes gained on every shot</small></button></div></div>
+  <div class="fld"><span>Your launch monitor numbers for approaches</span><div class="opts" id="gMode"><button type="button" data-v="lm" aria-pressed="false"><b>Carry + offline</b><small>Drives always use total distance + offline</small></button><button type="button" data-v="pin" aria-pressed="false"><b>Distance from pin</b><small>One number per approach</small></button></div></div>
   <div class="fld" id="gOrderWrap" hidden><span>Which warm-up first?</span><div class="opts" id="gOrder"><button type="button" data-v="putt" aria-pressed="false"><b>Putting first</b><small>Start-line gate, Hole Out and Money Stealers, then the range</small></button><button type="button" data-v="range" aria-pressed="false"><b>Range first</b><small>The Practice Plan warm-up, drives and approaches, then putting</small></button></div></div>
   <button class="go" id="gGo" disabled>Start</button>
   <button type="button" class="note" id="gSkip" style="background:none;border:0;text-decoration:underline;align-self:flex-start;padding:0">Not now, show my plan</button>
@@ -447,7 +448,7 @@ tr.done .ux-rpe{background:#F4F1EA}
     <div class="strip">
       <div><span class="k">Rounds</span><span class="v">2 / week</span></div>
       <div><span class="k">Goal</span><span class="v">Scratch</span></div>
-      <div><span class="k">Driver carry</span><input id="drvIn" inputmode="numeric" aria-label="Driver carry in yards"></div>
+      <div><span class="k">Driver total</span><input id="drvIn" inputmode="numeric" aria-label="Driver total distance in yards"></div>
     </div>
   </header>
   <details class="howto" id="howto">
@@ -521,7 +522,7 @@ function warmBlocks(grp){return [
   ]}
 function rangeBlocks(){
   var grp="Range warm-up",B=warmBlocks(grp),holes=[];
-  for(var i=0;i<8;i++){var L=Math.round((S.drv*1.06+ri(110,175))/5)*5;holes.push({L:L,par:L>470?5:4,fw:pick([13,14,15,16])})}
+  for(var i=0;i<8;i++){var L=Math.round((S.drv+ri(110,175))/5)*5;holes.push({L:L,par:L>470?5:4,fw:pick([13,14,15,16])})}
   B.push({t:"drive",id:"drive",grp:grp,title:"Driving: strokes gained game",mins:8,holes:holes,res:[],lines:["Every drive is a tee shot on the hole shown. Full routine, pick a fairway on the range.","Enter carry and offline from the launch monitor."]});
   var ds=shuffle([ri(100,125),ri(100,125),ri(125,150),ri(125,150),ri(150,175),ri(150,175),ri(175,200),ri(175,200)]);
   B.push({t:"app",id:"app",grp:grp,title:"Approach: strokes gained game",mins:7,ds:ds,res:[],lines:["Every ball is a new flag at the distance shown. New club, full routine.","Enter carry and offline from the launch monitor."]});
@@ -540,7 +541,8 @@ function newSession(kind){
 /* ---------- strokes gained ---------- */
 var MS_SPLIT={4:[[0,0]],3:[[0,1.5]],2:[[1.5,1.5],[0,4.5]],1:[[1.5,4.5]],0:[[4.5,4.5]]};
 function Etee(n,L){var p=GSG.P(n),R=Math.max(30,L-p.D);return 1+p.fw*GSG.E(n,"fw",R)+(1-p.fw-p.pen)*GSG.E(n,"rough",R)+p.pen*(1+GSG.E(n,"rough",R))}
-function driveAfter(n,h,r){var a=Math.abs(r.off),R=Math.max(10,h.L-r.carry*1.06);
+/* drives are entered as TOTAL distance (older entries were carry, so they get the old 6% roll) */
+function driveAfter(n,h,r){var a=Math.abs(r.off),R=Math.max(10,h.L-(r.tot!=null?r.tot:r.carry*1.06));
   if(a<=h.fw)return {lie:"Fairway",e:GSG.E(n,"fw",R)};if(a<=h.fw+20)return {lie:"Rough",e:GSG.E(n,"rough",R)};return {lie:"Penalty",e:1+GSG.E(n,"rough",R)}}
 function sgOf(s,n){
   if(s.k==="putt")return GSG.puttSG(n,s.ft,s.leave,s.slope);
@@ -550,7 +552,7 @@ function sgOf(s,n){
 function shotsOf(sess){var L=[];sess.blocks.forEach(function(b){
   if(b.t==="holeout")b.res.forEach(function(r,i){var p=b.putts[i];L.push({k:"putt",g:b.id,ft:p.ft,slope:p.slope,leave:r?0:1.5})});
   if(b.t==="money")b.res.forEach(function(r,i){var p=b.st[i];L.push({k:"ms",g:b.id,ft:p.ft,slope:p.slope,pts:r})});
-  if(b.t==="drive")b.res.forEach(function(r,i){L.push({k:"drive",g:b.id,h:b.holes[i],carry:r.carry,off:r.off})});
+  if(b.t==="drive")b.res.forEach(function(r,i){L.push({k:"drive",g:b.id,h:b.holes[i],carry:r.carry,tot:r.tot,off:r.off})});
   if(b.t==="app")b.res.forEach(function(r,i){L.push({k:"app",g:b.id,d:b.ds[i],carry:r.carry,off:r.off})});
   if(b.t==="wd")b.res.forEach(function(r){L.push({k:"app",g:b.id,d:r.target,carry:r.carry,off:r.off})});});return L}
 function total(L,n){return L.reduce(function(a,s){return a+sgOf(s,n)},0)}
@@ -564,6 +566,9 @@ function wdPts(target,carry,off,fin){var err=Math.abs(carry-target),a=Math.abs(o
   if(a<=8){if(err<=3&&a<=3)b=3;else if(err<=6&&a<=6)b=2;else if(err<=9&&a<=8)b=1}
   return fin?(b===3?6:b===0?-3:b):b}
 function wdFin(i){return i%6===5}
+function wdPinPts(p,fin){var b=p<=3?3:p<=6?2:p<=9?1:0;return fin?(b===3?6:b===0?-3:b):b}
+function wdScore(r,i){return r.pin!=null?wdPinPts(r.pin,wdFin(i)):wdPts(r.target,r.carry,r.off,wdFin(i))}
+function pinOn(b){return S.inMode==="pin"&&b&&(b.t==="app"||b.t==="wd")}
 function stats(sess){var o={},L=shotsOf(sess);
   sess.blocks.forEach(function(b){
     if(b.t==="count"&&b.res.length)o.gate=b.res.filter(Boolean).length;
@@ -571,8 +576,8 @@ function stats(sess){var o={},L=shotsOf(sess);
     if(b.t==="money"&&b.res.length)o.money=b.res.reduce(function(a,x){return a+x},0);
     if(b.t==="ladder"&&b.res.length){o.ladder=b.res.filter(function(x){return x.ok}).length;o.ladderN=b.res.length}
     if(b.t==="strike"&&b.res.length)o.strike=b.res.filter(isCentre).length;
-    if(b.t==="drive"&&b.res.length){o.fairways=b.res.filter(function(r,i){return Math.abs(r.off)<=b.holes[i].fw}).length;o.drives=b.res.length;o.longest=Math.max.apply(null,b.res.map(function(r){return r.carry}))}
-    if(b.t==="wd"&&b.res.length)o.wd=b.res.reduce(function(a,r,i){return a+wdPts(r.target,r.carry,r.off,wdFin(i))},0);
+    if(b.t==="drive"&&b.res.length){o.fairways=b.res.filter(function(r,i){return Math.abs(r.off)<=b.holes[i].fw}).length;o.drives=b.res.length;o.longest=Math.max.apply(null,b.res.map(function(r){return r.tot!=null?r.tot:r.carry}))}
+    if(b.t==="wd"&&b.res.length)o.wd=b.res.reduce(function(a,r,i){return a+wdScore(r,i)},0);
   });
   ["holeout","money","drive","app","wd"].forEach(function(g){var l=L.filter(function(s){return s.g===g});if(l.length)o["sg_"+g]=total(l,+GOAL)});
   o.sg=total(L,+GOAL);o.hc=sessHc(L);o.n=L.length;return o}
@@ -608,10 +613,12 @@ function act(a,v){var b=cur();
   if(a==="ladUndo"){b.res.pop();save();render();return}
   if(a==="face"){if(b.res.length<b.balls)b.res.push(v);save();render();return}
   if(a==="faceUndo"){b.res.pop();save();render();return}
-  if(a==="lm"){var c=parseFloat($("carryIn").value),o=parseFloat($("offIn").value);if(!(c>0)||isNaN(o))return;if(S.side==="L")o=-Math.abs(o);else o=Math.abs(o);
-    if(b.t==="drive"){var k=b.res.length,h=b.holes[k];b.res.push({carry:c,off:o});var aft=driveAfter(+GOAL,h,{carry:c,off:o});sgFlash({k:"drive",h:h,carry:c,off:o},"Hole "+(k+1)+" · "+Math.round(c)+" carry · "+aft.lie)}
-    else if(b.t==="app"){var m=b.res.length,d=b.ds[m];b.res.push({carry:c,off:o});var px=Math.sqrt((c-d)*(c-d)+o*o);sgFlash({k:"app",d:d,carry:c,off:o},d+" yds · finished "+Math.round(px*3)+" ft away")}
-    else if(b.t==="wd"){var w=b.res.length,tg=wdFin(w)?(+$("finPick").value||b.plan[w]):b.plan[w];b.res.push({target:tg,carry:c,off:o});var pt=wdPts(tg,c,o,wdFin(w));
+  if(a==="lm"){var c=parseFloat($("carryIn").value),o=parseFloat(($("offIn")||{}).value),pin=null;
+    if(pinOn(b)){pin=c;if(!(pin>=0))return;var dd=b.t==="app"?b.ds[b.res.length]:(wdFin(b.res.length)?(+$("finPick").value||b.plan[b.res.length]):b.plan[b.res.length]);c=Math.max(0,dd-pin);o=0}
+    else{if(!(c>0)||isNaN(o))return;if(S.side==="L")o=-Math.abs(o);else o=Math.abs(o)}
+    if(b.t==="drive"){var k=b.res.length,h=b.holes[k];b.res.push({tot:c,carry:c,off:o});var aft=driveAfter(+GOAL,h,{tot:c,off:o});sgFlash({k:"drive",h:h,tot:c,carry:c,off:o},"Hole "+(k+1)+" · "+Math.round(c)+" total · "+aft.lie)}
+    else if(b.t==="app"){var m=b.res.length,d=b.ds[m];b.res.push(pin!=null?{carry:c,off:o,pin:pin}:{carry:c,off:o});var px=Math.sqrt((c-d)*(c-d)+o*o);sgFlash({k:"app",d:d,carry:c,off:o},d+" yds · finished "+Math.round(px*3)+" ft away")}
+    else if(b.t==="wd"){var w=b.res.length,tg=wdFin(w)?(+$("finPick").value||b.plan[w]):b.plan[w];b.res.push(pin!=null?{target:tg,carry:c,off:o,pin:pin}:{target:tg,carry:c,off:o});var pt=pin!=null?wdPinPts(pin,wdFin(w)):wdPts(tg,c,o,wdFin(w));
       var sg=sgOf({k:"app",d:tg,carry:c,off:o},+GOAL);setFlash(pt>0?"p":pt<0?"m":"z",tg+" yds · "+(pt>0?"+":"")+pt+" pt"+(Math.abs(pt)===1?"":"s")+"<br><b style='font-family:var(--text);font-size:14px'>Strokes gained "+sgf(sg)+" vs scratch</b>",(pt>0?"+":"")+pt)}
     save();render();var ci=$("carryIn");if(ci)ci.focus();return}
   if(a==="side"){S.side=v;save();document.querySelectorAll('[data-act="side"]').forEach(function(x){x.setAttribute("aria-pressed",String(x.dataset.v===v))});var pc=$("pic");if(pc)pc.innerHTML=shotPic(cur(),true);return}
@@ -727,6 +734,7 @@ function ladderSVG(b){var W=300,H=120,g='<rect width="'+W+'" height="'+H+'" fill
   b.res.forEach(function(s,i){var x=X(s.c),y=H/2-2+(i%2?-10:10);g+='<circle cx="'+x+'" cy="'+y+'" r="7" fill="'+(s.ok===false?"#E0352B":"#FFFFFF")+'" stroke="#0B0B0B" stroke-width="2"/>'+PT(x,y+3,i+1,{s:8,c:"#0B0B0B"})});
   return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Ladder to 70 yards">'+g+'</svg>'}
 function shotPic(b,live){if(!b)return "";var c=!live?NaN:parseFloat(($("carryIn")||{}).value),o=parseFloat(($("offIn")||{}).value),ball=c>0?{c:c,o:(isNaN(o)?0:(S.side==="L"?-Math.abs(o):Math.abs(o)))}:null,i=b.res.length;
+  if(pinOn(b))ball=null;
   if(b.t==="drive"){var hl=b.holes[i];return hl?teeSVG({L:hl.L,fwHalf:hl.fw,haz:null},ball):""}
   var d=b.t==="app"?b.ds[i]:b.t==="wd"?(wdFin(i)&&$("finPick")?+$("finPick").value:b.plan[i]):null;return d?appSVG({d:d,haz:null},ball):""}
 /* ---------- rendering (same layout and components as the Macro Golf games) ---------- */
@@ -736,8 +744,11 @@ function nextBtn(){var b=cur(),last=S.cur.bi===S.cur.blocks.length-1,done=blockD
   (done?'<button class="primary" data-act="next">'+(last?"Finish session":"Next")+'</button>':'<button class="ghost" data-act="next">'+(last?"Skip and finish":"Skip")+'</button>')+'</div>'}
 function blockDone(b){return b.t==="tick"?true:b.t==="count"?b.res.length>=b.total:b.t==="holeout"?b.res.length>=b.putts.length:b.t==="money"?b.res.length>=b.st.length:
   b.t==="ladder"?(b.res.length&&b.res[b.res.length-1].c>=70):b.t==="strike"?b.res.length>=b.balls:b.t==="drive"?b.res.length>=b.holes.length:b.t==="app"?b.res.length>=b.ds.length:b.t==="wd"?b.res.length>=b.plan.length:false}
-function lmInputs(eg){return '<div class="viz" id="pic">'+shotPic(cur())+'</div><p class="preview" style="margin:0">The ball moves as you type the numbers.</p><div class="seg"><button data-act="side" data-v="L" aria-pressed="'+(S.side==="L")+'">Offline left</button><button data-act="side" data-v="R" aria-pressed="'+(S.side!=="L")+'">Offline right</button></div>'+
-  '<div class="fields"><label><span class="label">Carry (yds)</span><input id="carryIn" inputmode="decimal" placeholder="e.g. '+eg+'"></label><label><span class="label">Offline (yds)</span><input id="offIn" inputmode="decimal" placeholder="e.g. 3.2"></label></div>'+
+function lmInputs(eg){var b=cur(),drv=b&&b.t==="drive";
+  if(pinOn(b))return '<div class="viz" id="pic">'+shotPic(b)+'</div><div class="fields"><label style="grid-column:1/-1"><span class="label">Distance from pin (yds)</span><input id="carryIn" inputmode="decimal" placeholder="e.g. 6.5"></label></div>'+
+    '<p class="preview">Enter the distance from the pin on the launch monitor.</p><div class="btns"><button class="primary" data-act="lm">Score shot</button>'+(b.res.length?'<button class="ghost" data-act="undo">Undo</button>':"")+"</div>";
+  return '<div class="viz" id="pic">'+shotPic(b)+'</div><p class="preview" style="margin:0">The ball moves as you type the numbers.</p><div class="seg"><button data-act="side" data-v="L" aria-pressed="'+(S.side==="L")+'">Offline left</button><button data-act="side" data-v="R" aria-pressed="'+(S.side!=="L")+'">Offline right</button></div>'+
+  '<div class="fields"><label><span class="label">'+(drv?"Total distance (yds)":"Carry (yds)")+'</span><input id="carryIn" inputmode="decimal" placeholder="e.g. '+eg+'"></label><label><span class="label">Offline (yds)</span><input id="offIn" inputmode="decimal" placeholder="e.g. 3.2"></label></div>'+
   '<p class="preview">Enter the launch monitor numbers to score the shot.</p><div class="btns"><button class="primary" data-act="lm">Score shot</button>'+(cur().res.length?'<button class="ghost" data-act="undo">Undo</button>':"")+"</div>"}
 function chips(arr){return arr.length?'<div class="chips">'+arr.join("")+"</div>":""}
 function chip(cls,t){return '<span class="chip '+cls+'">'+t+"</span>"}
@@ -784,8 +795,8 @@ function runBlock(b){var h="",done=blockDone(b);
   if(b.t==="wd"){var w=b.res.length;
     if(!done)h+=(wdFin(w)?'<div class="callrow"><div><div class="label">Round '+(Math.floor(w/6)+1)+' · finisher: pick your target</div><div class="fields" style="grid-template-columns:1fr"><select id="finPick">'+[50,60,70,80,90,100].map(function(x){return "<option"+(x===b.plan[w]?" selected":"")+">"+x+"</option>"}).join("")+'</select></div></div><span class="pill fin">Finisher</span></div><p class="preview">A 3 doubles to 6. A 0 costs 3.</p>':
       callrow("Round "+(Math.floor(w/6)+1)+" · Ball "+(w%6+1),b.plan[w],"yds",["Coach calls"]))+lmInputs(b.plan[w]);
-    else h+=callrow("Wedge Darts done",b.res.reduce(function(a,r,i){return a+wdPts(r.target,r.carry,r.off,wdFin(i))},0),"pts");
-    h+=chips(b.res.map(function(r,i){var p=wdPts(r.target,r.carry,r.off,wdFin(i));return chip(p>=3?"c3":p>=2?"c2":p===1?"c1":"c0",r.target+": "+(p>0?"+":"")+p)}))+(done?undoBtn(b):"")+nextBtn(done?"Next":"Hit all 18 balls",!done)}
+    else h+=callrow("Wedge Darts done",b.res.reduce(function(a,r,i){return a+wdScore(r,i)},0),"pts");
+    h+=chips(b.res.map(function(r,i){var p=wdScore(r,i);return chip(p>=3?"c3":p>=2?"c2":p===1?"c1":"c0",r.target+": "+(p>0?"+":"")+p)}))+(done?undoBtn(b):"")+nextBtn(done?"Next":"Hit all 18 balls",!done)}
   if(S.flash)h+='<div class="flash" style="background:'+(S.flash.c==="p"?"#1FA855":S.flash.c==="m"?"#E0352B":"#0B0B0B")+'"><span>'+S.flash.t+"</span><b>"+esc(S.flash.b)+"</b></div>";
   return h}
 function planList(c){var h='<div class="planlist">',g="";c.blocks.forEach(function(b,i){if(b.grp!==g){g=b.grp;h+='<div class="grp">'+esc(g)+"</div>"}
@@ -876,10 +887,12 @@ function gateShow(){var g=$("gate");if(!g)return;var on=ASK&&!(S.last);g.hidden=
   $("gResumeWrap").hidden=!S.cur;if(S.cur)$("gResumeTxt").textContent=(S.cur.kind==="range"?"Range practice":"Round day warm-up")+" \u00b7 block "+(S.cur.bi+1)+" of "+S.cur.blocks.length;
   g.querySelectorAll("#gKind button").forEach(function(x){x.setAttribute("aria-pressed",String(x.dataset.v===ASKK))});
   $("gOrderWrap").hidden=ASKK!=="round";g.querySelectorAll("#gOrder button").forEach(function(x){x.setAttribute("aria-pressed",String(x.dataset.v===S.order))});
+  g.querySelectorAll("#gMode button").forEach(function(x){x.setAttribute("aria-pressed",String(x.dataset.v===(S.inMode||"lm")))});
   $("gGo").disabled=!ASKK;$("gGo").textContent=ASKK==="round"?"Start round warm-up":ASKK==="range"?"Start range practice":"Start"}
 (function(){var g=$("gate");if(!g)return;
   g.querySelectorAll("#gKind button").forEach(function(x){x.onclick=function(){ASKK=x.dataset.v;gateShow()}});
   g.querySelectorAll("#gOrder button").forEach(function(x){x.onclick=function(){S.order=x.dataset.v;save();gateShow()}});
+  g.querySelectorAll("#gMode button").forEach(function(x){x.onclick=function(){S.inMode=x.dataset.v;save();gateShow()}});
   $("gGo").onclick=function(){if(!ASKK)return;ASK=false;S.pick=ASKK;newSession(ASKK);toEntry()};
   $("gResume").onclick=function(){ASK=false;S.view=null;save();render();toEntry()};
   $("gSkip").onclick=function(){ASK=false;S.view=S.cur?"home":null;save();render();window.scrollTo(0,0)};

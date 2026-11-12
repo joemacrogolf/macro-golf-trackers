@@ -1280,7 +1280,7 @@ UX.init({family:'golf',home:false});
 GSG.init({target:()=>S.target,unit:"station",colLabel:"Station (2 putts)",
   shots:()=>sc().map((p,i)=>{const d=G().stations[i],r=(reads()||[])[i]||{},n=GSG.num(S.target),opts=L[p]||L[0];
     const sg=opts.reduce((a,o)=>a+o.reduce((b,lv)=>b+GSG.puttSG(n,d,lv,r.slope),0),0)/opts.length;return {n:d+" ft, "+p+" pt"+(p===1?"":"s"),sg}}),
-  note:"Each station is two putts, valued from their length and slope. Holed counts as 0 ft, in the zone as 1.5 ft and outside it as 4.5 ft; 2 points (two in the zone, or one holed) is the average of the two."})})();
+  note:"Each station is two putts, valued from their length only. Holed counts as 0 ft, in the zone as 1.5 ft and outside it as 4.5 ft; 2 points (two in the zone, or one holed) is the average of the two."})})();
 </script>
 <script>/* standard leaderboard score: read by sync.js as _mgSummary.golf. This game keeps only the current card in S, so each
    finished card is copied into S.mgRounds (synced with S); a card left unfinished or undone is never counted */

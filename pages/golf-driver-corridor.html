@@ -212,7 +212,7 @@ body.gated{overflow:hidden}
         <li>Study the picture. The yellow band shows where your chosen club normally carries.</li>
         <li>Choose your club.</li>
         <li>Pick a target on the range that matches your plan, run your full routine and hit it.</li>
-        <li>Enter the carry and offline from the sim, choose left or right, and tap Score shot.</li>
+        <li>Enter the total distance and offline from the sim, choose left or right, and tap Score shot.</li>
       </ol></div>
       <div><h3>Scoring</h3><ul>
         <li>Each shot is scored in strokes gained against a tour baseline for that hole length.</li>
@@ -252,7 +252,7 @@ body.gated{overflow:hidden}
     <div class="plan" id="plan" hidden></div>
     <div><span class="label">Club off the tee</span><div class="clubs" id="clubs" role="group" aria-label="Club"></div></div>
     <div class="fields">
-      <label><span class="label">Carry (yds)</span><input id="carry" type="number" inputmode="decimal" step="0.1" placeholder="e.g. 238"></label>
+      <label><span class="label">Total (yds)</span><input id="carry" type="number" inputmode="decimal" step="0.1" placeholder="e.g. 255"></label>
       <div class="offrow"><label><span class="label">Offline (yds left or right)</span><input id="off" type="number" inputmode="decimal" step="0.1" min="0" placeholder="e.g. 9"></label>
         <div class="lr" role="group" aria-label="Miss side"><button id="sideL" aria-pressed="false">Left</button><button id="sideR" aria-pressed="true">Right</button></div></div>
     </div>
@@ -407,8 +407,10 @@ function lieAt(h,x,d){
   return "rough";
 }
 var ROLL={fairway:.07,green:.03,rough:.015,bunker:0};
-function sim(h,club,carry,off){
-  const c=CLUBS.find(k=>k[0]===club)||CLUBS[0];
+/* the player enters TOTAL distance and offline. The landing spot (for carry hazards) is worked back from the total;
+   the ball finishes at the total unless a hazard stops it first */
+function sim(h,club,total,off){
+  const c=CLUBS.find(k=>k[0]===club)||CLUBS[0], carry=total/(1+ROLL.fairway*c[3]);
   const ox=Math.max(-carry,Math.min(carry,off));
   const land={x:ox,d:Math.sqrt(Math.max(carry*carry-ox*ox,0))};
   let pos={...land}, lie=lieAt(h,land.x,land.d);
@@ -422,6 +424,7 @@ function sim(h,club,carry,off){
     }
     lie=lieAt(h,pos.x,pos.d);
   }
+  if(total>0&&!["water","creek","bunker","ob","trees"].includes(lie)){const fx=Math.max(-total,Math.min(total,off));pos={x:fx,d:Math.sqrt(Math.max(total*total-fx*fx,0))};lie=lieAt(h,pos.x,pos.d)}
   const start=E("tee",h.len);
   let pen=0, drop=null, endLie=lie, endPos=pos, label="", reteed=false;
   if(lie==="water"){const z=hazAt(h,pos.x,pos.d);pen=1;drop={x:z.side==="R"?z.x-2:z.x+2,d:pos.d};endPos=drop;endLie=lieAt(h,drop.x,drop.d);if(endLie==="water"||endLie==="creek")endLie="rough";label="Water · penalty drop"}
