@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 13:10 · Jack's Claude · Long Game Test: yardages spread evenly across each club group's range for the player, no repeats (approaches or hole lengths), no back-to-back near-identical shots · live
 2026-11-12 12:45 · Joe's Claude · My Plan live at www.macro.golf/my-plan (theme 2168251504) pinned to aaf40be. All 8 1-to-1 client pages (Dan, Harry, Kevin, Paul Bruce, Sam McDowell, Luis, Rob, Colin) re-pinned to aaf40be (contains each old pin and 51ebf1b; tested each through My Plan, no errors) so they sign in from My Plan without a second PIN prompt. Clients link their own email with the plan code, no coach entry. Still to run in Supabase: the updated mg_myplan in supabase/005-myplan.sql (Chrome stopped responding) · nearly done
 2026-11-12 13:40 · Joe's Claude (Build My Plan session) · Build My Plan live: Kajabi p-258147 (theme 2168251525) pinned to 51ebf1b. Email + PIN (plan build-my-plan, no Supabase rows needed). Needs locking to paid users in VidApp (Joe) · live
 2026-11-12 13:00 · Jack's Claude · src/golf-art.js: softer water (curved shoreline, rounded ends, shading, ripples) + new creekSVG for Driver Corridor burns; Long Game Test, Driver Corridor, Paul Goddard re-pinned · live

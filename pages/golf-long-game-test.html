@@ -677,16 +677,26 @@ function hazard(chance,line){if(Math.random()>chance)return null;const side=pick
 function teeHazard(fwHalf,club){const r=Math.random();if(r>0.6)return null;const side=pick(["L","R"]),sd=side==="L"?"left":"right";
   if(r<0.25){const from=Math.round((club*1.06-20+ri(-10,10))/5)*5;return {type:"bunker",side,from,to:from+25,inner:fwHalf-6,outer:fwHalf+8,line:999,name:"Bunker "+sd}}
   const t=r<0.45?"Water":"Out of bounds";return {type:t==="Water"?"water":"ob",side,line:fwHalf+15,name:t+" "+sd}}
-function makeShot(cat,set){
+/* the yardage range each club group is tested over, cut to what this player can reach with their fairway club */
+function band(cat,fw){let lo,hi;
+  if(cat==="wedge"){lo=100;hi=140}else if(cat==="mid"){lo=141;hi=180}else if(cat==="long"){lo=181;hi=215}else{lo=fw-20;hi=fw}
+  hi=Math.min(hi,fw);lo=Math.min(lo,hi-10);lo=Math.max(100,lo);hi=Math.max(hi,lo);return [lo,hi]}
+/* k values spread evenly over lo..hi (one from each slice), never reusing one already in 'used' while there is room */
+function spreadVals(lo,hi,k,used,step,glo,ghi){step=step||1;const out=[],w=(hi-lo+1)/k;
+  for(let i=0;i<k;i++){let v=Math.min(hi,Math.floor(lo+w*i+Math.random()*w));v=lo+Math.round((v-lo)/step)*step;
+    if(used.has(v)){for(let s=step;s<=hi-lo;s+=step){if(v+s<=hi&&!used.has(v+s)){v+=s;break}if(v-s>=lo&&!used.has(v-s)){v-=s;break}}}
+    /* this group's range is full: take the nearest free yardage the player can still reach */
+    if(used.has(v)&&glo!=null){for(let s=step;s<=ghi-glo;s+=step){if(v+s<=ghi&&!used.has(v+s)){v+=s;break}if(v-s>=glo&&!used.has(v-s)){v-=s;break}}}
+    used.add(v);out.push(v)}
+  for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]]}return out}
+function makeShot(cat,set,v,wide){
   const fw=set.fw,dr=set.drv;
-  if(cat==="drv"||cat==="fwt"){const club=cat==="drv"?dr:fw;const L=Math.round((club*1.06+ri(110,175))/5)*5;const par=L>470?5:4;
-    const fwHalf=cat==="fwt"?pick([15,16,17]):pick([18,19,20,21,22]);
+  if(cat==="drv"||cat==="fwt"){const club=cat==="drv"?dr:fw;const L=v!=null?v:Math.round((club*1.06+ri(110,175))/5)*5;const par=L>470?5:4;
+    const fwHalf=wide!=null?wide:cat==="fwt"?pick([15,16,17]):pick([18,19,20,21,22]);
     const th=teeHazard(fwHalf,club);
     return {cat,kind:"tee",L,par,fwHalf,haz:th,G:makeGreen(150,th&&th.type!=="bunker"?th.side:null),club:cat==="drv"?"Driver":"Fairway club or long iron"}}
-  let lo,hi;
-  if(cat==="wedge"){lo=100;hi=140}else if(cat==="mid"){lo=141;hi=180}else if(cat==="long"){lo=181;hi=215}else{lo=fw-20;hi=fw}
-  hi=Math.min(hi,fw);lo=Math.min(lo,hi-10);lo=Math.max(100,lo);hi=Math.max(hi,lo);
-  const d=ri(lo,hi),haz=hazard(cat==="fwg"?0.25:0.3,12),G=makeGreen(d,haz&&haz.side);
+  const [lo,hi]=band(cat,fw);
+  const d=v!=null?v:ri(lo,hi),haz=hazard(cat==="fwg"?0.25:0.3,12),G=makeGreen(d,haz&&haz.side);
   if(haz)haz.line=Math.ceil(gReach(G,haz.side==="L"?-1:1)+ri(4,8));
   return {cat,kind:"app",d,haz,G};
 }
@@ -818,9 +828,19 @@ function renderBench(){
 function renderAll(){renderSetup();renderBoard();renderEntry();renderCard();renderHist();renderBench()}
 
 /* ---------- Actions ---------- */
-function startTest(){const mix=MIX[S.len],list=[];Object.entries(mix).forEach(([c,k])=>{for(let i=0;i<k;i++)list.push(c)});
-  for(let i=list.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[list[i],list[j]]=[list[j],list[i]]}
-  S.shots=list.map(c=>makeShot(c,S.set));S.res=[];S.started=true;S.saved=false;S.notes="";save();renderAll();$("entry").scrollIntoView({behavior:"smooth",block:"start"})}
+/* every club group's yardages are spread evenly across the distances that suit this player, with no yardage
+   (or hole length) used twice where there's room, then the shots are shuffled so no two in a row are within 5 yds */
+function testPlan(mix,set){const usedA=new Set(),usedT=new Set(),list=[];
+  Object.entries(mix).forEach(([c,k])=>{
+    if(c==="drv"||c==="fwt"){const club=c==="drv"?set.drv:set.fw,base=Math.round(club*1.06/5)*5,Ls=spreadVals(base+110,base+175,k,usedT,5),
+        widths=c==="fwt"?[15,16,17]:[18,19,20,21,22];Ls.forEach((L,i)=>list.push([c,L,widths[i%widths.length]]))}
+    else{const [lo,hi]=band(c,set.fw);spreadVals(lo,hi,k,usedA,1,100,Math.max(set.fw,140)).forEach(d=>list.push([c,d]))}});
+  let best=list,bestBad=1e9;
+  for(let n=0;n<300&&bestBad>0;n++){const a=list.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+    let bad=0;for(let i=1;i<a.length;i++)if(Math.abs(a[i][1]-a[i-1][1])<5)bad++;if(bad<bestBad){best=a;bestBad=bad}}
+  return best}
+function startTest(){const list=testPlan(MIX[S.len],S.set);
+  S.shots=list.map(x=>makeShot(x[0],S.set,x[1],x[2]));S.res=[];S.started=true;S.saved=false;S.notes="";save();renderAll();$("entry").scrollIntoView({behavior:"smooth",block:"start"})}
 function newTest(){S.started=false;S.shots=[];S.res=[];S.saved=false;S.notes="";$("flash").innerHTML="";save();renderAll();window.scrollTo({top:0,behavior:"smooth"})}
 function enter(){
   const rd=readIn();if(!rd.ok||done())return;const s=S.shots[n()];let c,o;
