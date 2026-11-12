@@ -3,7 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
-2026-11-12 19:15 · Jack's Claude · Head-to-head is games only: not on tests, Paul's plan, Practice Plan or On-Course (never was), and now also hidden when a game is opened from the Practice Plan (its game links carry ?from=plan). Re-pinning the 9 games and p-274816 · live
+2026-11-12 19:15 · Jack's Claude · Head-to-head is games only: not on tests, Paul's plan, Practice Plan or On-Course (never was), and now also hidden when a game is opened from the Practice Plan (its game links carry ?from=plan). 9 games + p-274816 re-pinned c664e64 / e2ff0e2 → e5ce17b (contains both) · live
 2026-11-12 18:53 · Jack's Claude · DONE head-to-head: the 9 golf games re-pinned ba0b84b → c664e64 (contains it). Tests and Paul's plan untouched · live
 2026-11-12 19:05 · Jack's Claude · Head-to-head on all 9 golf games (H2H button above Leaders): one round each on one phone. Signed-in player's round saves and counts as normal; the opponent's round is never saved (no localStorage writes, no mg_save/mg_load during their turn, page reloads after to drop it). New src/h2h.js, loaded by src/leaderboard.js (+2 lines: loader, and no podium toast during a guest turn). No shared files changed · live
 2026-11-12 18:12 · Joe's Claude (Build My Plan session) · IN VIDAPP (Joe asked, he's away): filling bottom tab URLs (My Coach /my-plan, My Training /my-training, My Practice /my-practice); Train → My Training Plan (website) + Training Library group; Practice → My Practice Plan (website) + Games & Drills group; Warm Up tile → website /warm-up. NOT pressing Publish To Preview · in progress
