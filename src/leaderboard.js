@@ -70,8 +70,25 @@ function css(){var s=document.createElement('style');s.textContent=[
  '.lb-rows li.me{background:rgba(255,217,0,.1)}',
  '.lb-msg{color:#cfcabd;margin:6px 0}.lb-small{color:#9C988C;font-size:12.5px;margin:8px 0 0}',
  '.lb-foot{border-top:1px solid rgba(244,241,234,.15);padding-top:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}.lb-foot p{margin:0;color:#cfcabd;font-size:14px}',
+ '.lb-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(120px + env(safe-area-inset-bottom,0px));z-index:70;width:min(440px,calc(100vw - 24px));display:flex;align-items:center;gap:12px;padding:14px;background:#0B0B0B;color:#F4F1EA;border-left:6px solid #FFD900;box-shadow:0 12px 30px rgba(0,0,0,.35);font-family:Inter,system-ui,sans-serif;animation:lbIn .45s cubic-bezier(.2,1.4,.4,1)}',
+ '.lb-toast div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.lb-toast b{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:22px;text-transform:uppercase;color:#FFD900;line-height:1.05}.lb-toast span{font-size:13.5px;color:#e4e0d4}',
+ '.lb-toast button{min-height:40px;padding:0 12px;border:0;background:#FFD900;color:#0B0B0B;font:700 14px Inter,system-ui,sans-serif;cursor:pointer}.lb-toast button[data-lb=x]{background:transparent;color:#9C988C;font-size:22px;padding:0 6px}',
+ '@keyframes lbIn{from{transform:translate(-50%,20px);opacity:0}to{transform:translate(-50%,0);opacity:1}}@media (prefers-reduced-motion:reduce){.lb-toast{animation:none}}',
  '.lb-ghost{min-height:44px;padding:0 14px;border:1px solid rgba(244,241,234,.4);background:transparent;color:#F4F1EA;font:600 14px Inter,system-ui,sans-serif;cursor:pointer}'].join('');document.head.appendChild(s)}
-function init(){var g=game();if(!/^golf-/.test(g)||g==='golf-paul-goddard'||typeof window.MG_SCORE!=='function')return;css();tab()}
+/* after a finished round: if this player now leads a board (or is in the top 3 this month), tell them */
+var seen=null;
+function sig(){var s=score();if(!s)return '';var R=Array.isArray(s.rounds)?s.rounds:[],l=R[R.length-1]||{};return R.length+'|'+(l.d||'')+'|'+l.s+'|'+s.best}
+function watch(){var now=sig();if(seen===null){seen=now;return}if(now&&now!==seen){seen=now;if(myCode()&&!hidden())setTimeout(check,4500)}}
+function pos(j){var rows=(j&&j.rows)||[];for(var i=0;i<rows.length;i++)if(rows[i].me)return i+1;return 0}
+function check(){cache={};Promise.all([load('month'),load('all')]).then(function(r){var m=pos(r[0]),a=pos(r[1]),g=gameName(),msg=null;
+  if(a===1)msg=['You\'re number 1','Top of the all-time '+g+' leaderboard. Nobody has done better.'];
+  else if(m===1)msg=['Top of the leaderboard','You\'re number 1 on '+g+' this month. Now hold on to it.'];
+  else if(m===2||m===3)msg=[(m===2?'2nd':'3rd')+' this month','You\'re on the '+g+' podium. One more good round could take top spot.'];
+  if(msg)toast(msg[0],msg[1])}).catch(function(){})}
+function toast(h,p){var old=document.querySelector('.lb-toast');if(old)old.remove();var d=document.createElement('div');d.className='lb-toast';d.setAttribute('role','status');
+  d.innerHTML='<svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0V4zM5 5H3v2a4 4 0 0 0 4 4M19 5h2v2a4 4 0 0 1-4 4M9 15h6l1 5H8l1-5z" stroke="#FFD900" stroke-width="2"/></svg><div><b>'+esc(h)+'</b><span>'+esc(p)+'</span></div><button type="button" data-lb="open">See it</button><button type="button" data-lb="x" aria-label="Close">×</button>';
+  d.addEventListener('click',function(e){var b=e.target.closest('[data-lb]');if(!b)return;d.remove();if(b.dataset.lb==='open')open()});document.body.appendChild(d);setTimeout(function(){if(d.parentNode)d.remove()},12000)}
+function init(){var g=game();if(!/^golf-/.test(g)||g==='golf-paul-goddard'||typeof window.MG_SCORE!=='function')return;css();tab();setInterval(watch,2000)}
 window.MGBoard={open:open};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else setTimeout(init,0);
 })();

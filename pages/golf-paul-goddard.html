@@ -650,23 +650,43 @@ function bindTimer(b){var btn=$("tmrBtn");if(!btn)return;btn.onclick=function(){
 
 /* iron club face for the strike station (same drawing as the Practice Plan): tap where it came off, heat map from 3 strikes */
 var FT=function(x,y,str,o){o=o||{};return '<text x="'+x+'" y="'+y+'" font-family="Inter,Arial,sans-serif" font-size="'+(o.s||10)+'" font-weight="'+(o.w||700)+'" text-anchor="'+(o.a||"middle")+'" fill="'+(o.c||"#FFFFFF")+'" letter-spacing=".5">'+str+'</text>'};
+/* the iron face, seen square on: toe on the left, heel and hosel on the right. Same 300 x 170 frame and zones as before
+   (centre = x 108–170, y 74–114), so taps and summaries are unchanged */
 function faceSVG(hits,heat){
-  let g=`<defs><linearGradient id="ironG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfbfc"/><stop offset=".55" stop-color="#e3e5e8"/><stop offset="1" stop-color="#b9bdc3"/></linearGradient>
-   <linearGradient id="hoselG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d9dce0"/><stop offset=".5" stop-color="#f7f8f9"/><stop offset="1" stop-color="#a9adb3"/></linearGradient>
-   <radialGradient id="hg"><stop offset="0" stop-color="#E0352B" stop-opacity=".55"/><stop offset="1" stop-color="#E0352B" stop-opacity="0"/></radialGradient>
-   <clipPath id="faceClip"><path d="M40 112 C34 80 38 48 70 40 C78 38 88 38 98 39 L214 52 C228 54 236 62 240 74 C244 92 244 114 240 126 C236 136 228 140 216 140 L70 142 C52 142 43 128 40 112 Z"/></clipPath></defs>
-   <rect width="300" height="170" fill="#F1F2F3"/>
-   <path d="M228 72 C240 54 252 32 262 10 C264 6 268 4 272 5 L282 8 C287 10 288 14 286 18 C276 40 266 66 258 92 L248 126 Z" fill="url(#hoselG)" stroke="#9a9ea4" stroke-width="1.5"/>
-   <path d="M40 112 C34 80 38 48 70 40 C78 38 88 38 98 39 L214 52 C228 54 236 62 240 74 C244 92 244 114 240 126 C236 136 228 140 216 140 L70 142 C52 142 43 128 40 112 Z" fill="url(#ironG)" stroke="#8d9198" stroke-width="2"/>
-   <path d="M46 116 C42 88 44 58 72 48 L96 46" fill="none" stroke="#ffffff" stroke-width="2.5" opacity=".9"/>
-   <path d="M52 132 Q60 138 74 138 L214 136" fill="none" stroke="#9fa3a9" stroke-width="2" opacity=".7"/>`;
-  g+=`<g clip-path="url(#faceClip)">`;
-  for(let k=0;k<12;k++){const y=60+k*6,x1=74-(k<3?0:k*.4),x2=200-k*.6;g+=`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y+1.2}" stroke="#a7abb1" stroke-width="1.3" stroke-linecap="round"/>`}
-  g+=`</g><circle cx="138" cy="94" r="15" fill="none" stroke="#0B0B0B" stroke-width="1.2" stroke-dasharray="3 3" opacity=".55"/>`;
-  g+=FT(56,26,"TOE",{c:"#77715F",s:9,a:"start"})+FT(226,160,"HEEL",{c:"#77715F",s:9,a:"end"});
-  if(heat)hits.forEach(h=>{g+=`<circle cx="${h.x}" cy="${h.y}" r="22" fill="url(#hg)"/>`});
-  hits.forEach((h,i)=>{g+=`<circle cx="${h.x}" cy="${h.y}" r="7" fill="#0B0B0B" stroke="#FFD900" stroke-width="1.5"/>`+FT(h.x,h.y+3,i+1,{s:8,c:"#FFFFFF"})});
-  return `<svg viewBox="0 0 300 170" class="tap" role="img" aria-label="Iron club face">${g}</svg>`}
+  const FACE="M94 40 L222 57 C231 58 237 64 238 73 L242 121 C243 134 235 142 221 142 L86 143 C58 143 41 127 39 99 C37 68 55 42 94 40 Z";
+  let g=`<defs>
+   <linearGradient id="fcBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6f6f4"/><stop offset="1" stop-color="#e7e6e1"/></linearGradient>
+   <linearGradient id="fcMetal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".18" stop-color="#eef0f2"/><stop offset=".62" stop-color="#d5d9de"/><stop offset=".9" stop-color="#b7bcc3"/><stop offset="1" stop-color="#9fa5ad"/></linearGradient>
+   <radialGradient id="fcToe" cx=".12" cy=".45" r=".5"><stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#8f959d" stop-opacity=".35"/></radialGradient>
+   <linearGradient id="fcHosel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a8adb4"/><stop offset=".35" stop-color="#f4f5f6"/><stop offset=".7" stop-color="#cfd3d8"/><stop offset="1" stop-color="#8e949b"/></linearGradient>
+   <linearGradient id="fcShaft" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8e949b"/><stop offset=".45" stop-color="#f2f3f4"/><stop offset="1" stop-color="#7d838a"/></linearGradient>
+   <radialGradient id="fcHeat"><stop offset="0" stop-color="#E0352B" stop-opacity=".75"/><stop offset=".45" stop-color="#F5A800" stop-opacity=".45"/><stop offset="1" stop-color="#FFD900" stop-opacity="0"/></radialGradient>
+   <filter id="fcSoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>
+   <filter id="fcShadow" x="-10%" y="-10%" width="130%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity=".22"/></filter>
+   <clipPath id="fcClip"><path d="${FACE}"/></clipPath></defs>
+   <rect width="300" height="170" fill="url(#fcBg)"/>`;
+  /* shaft, ferrule and hosel */
+  g+=`<g filter="url(#fcShadow)"><path d="M262 -6 L281 0 L276 18 L257 12 Z" fill="url(#fcShaft)"/>
+   <path d="M257 12 L276 18 L273 27 L254 21 Z" fill="#111"/><path d="M256 15 L275 21" stroke="#FFD900" stroke-width="1.2"/>
+   <path d="M254 21 L273 27 C266 52 258 82 251 112 C249 122 244 128 236 130 L226 72 C236 58 246 40 254 21 Z" fill="url(#fcHosel)"/>`;
+  /* the head */
+  g+=`<path d="${FACE}" fill="url(#fcMetal)"/><path d="${FACE}" fill="url(#fcToe)"/></g>`;
+  g+=`<g clip-path="url(#fcClip)">`;
+  /* brushed finish, then the grooves (engraved: dark line with a light edge under it) */
+  for(let y=44;y<142;y+=2.2)g+=`<line x1="30" y1="${y}" x2="250" y2="${y+0.4}" stroke="#ffffff" stroke-width=".5" opacity=".18"/>`;
+  for(let k=0;k<11;k++){const y=58+k*6,x1=76+(k>8?(k-8)*3:0),x2=204-(k>8?(k-8)*2:0);
+    g+=`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#8a9098" stroke-width="1.6" stroke-linecap="round"/><line x1="${x1}" y1="${y+1.3}" x2="${x2}" y2="${y+1.3}" stroke="#ffffff" stroke-width=".7" opacity=".75" stroke-linecap="round"/>`}
+  /* leading edge and top line */
+  g+=`<path d="M60 136 C70 141 78 142 88 142 L220 141" fill="none" stroke="#7f858d" stroke-width="2.5" opacity=".55"/>`;
+  if(heat&&hits.length)g+=`<g filter="url(#fcSoft)">${hits.map(h=>`<circle cx="${h.x}" cy="${h.y}" r="20" fill="url(#fcHeat)"/>`).join("")}</g>`;
+  g+=`</g><path d="${FACE}" fill="none" stroke="#6f757d" stroke-width="1.6"/><path d="M92 43 L221 60" stroke="#ffffff" stroke-width="1.6" opacity=".9" stroke-linecap="round"/>`;
+  /* the middle of the face */
+  g+=`<rect x="108" y="74" width="62" height="40" rx="12" fill="none" stroke="#0B0B0B" stroke-width="1.2" stroke-dasharray="4 4" opacity=".45"/>`;
+  g+=FT(48,30,"TOE",{c:"#77715F",s:9,a:"start"})+FT(232,160,"HEEL",{c:"#77715F",s:9,a:"end"});
+  /* strikes: numbered marks, the latest one ringed in yellow */
+  hits.forEach((h,i)=>{const last=i===hits.length-1;g+=(last?`<circle cx="${h.x}" cy="${h.y}" r="11" fill="none" stroke="#FFD900" stroke-width="2.5"/>`:"")+
+    `<circle cx="${h.x}" cy="${h.y}" r="7" fill="#0B0B0B" stroke="#ffffff" stroke-width="1.5"/>`+FT(h.x,h.y+3,i+1,{s:8,c:"#FFFFFF"})});
+  return `<svg viewBox="0 0 300 170" class="tap" role="img" aria-label="Iron club face. Tap where the ball came off the face">${g}</svg>`}
 function faceZone(h){const hz=h.x<108?"Toe":h.x>170?"Heel":"Centre",vz=h.y<74?"high":h.y>114?"low":"";return {hz,vz,centre:hz==="Centre"&&!vz}}
 function faceSummary(hits){if(!hits.length)return "";const z=hits.map(faceZone),c=z.filter(x=>x.centre).length;
   const cnt={};z.forEach(x=>{if(!x.centre){const k=x.hz+(x.vz?" "+x.vz:"");cnt[k]=(cnt[k]||0)+1}});

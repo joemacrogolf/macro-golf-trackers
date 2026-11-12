@@ -1739,7 +1739,7 @@ function fallback(blob,name){
 /* when a test is completed: save it so the other tests and the plan can use it */
 var SK="macroSaved_"+TEST;let saved=null;try{saved=localStorage.getItem(SK)}catch(e){}
 function watch(){try{if(window.MG_DONE&&window.MG_DONE()){const id=String(window.MG_ID());if(saved!==id){saved=id;try{localStorage.setItem(SK,id)}catch(e){}const c=ctx();
-  MacroPlan.saveResult(TEST,{t:Date.now(),target:c.target,hc:c.result.hc,raw:c.raw.filter(r=>r.test===TEST)});if(window.MG_PAINT)window.MG_PAINT()}}}catch(e){}}
+  var mgE={t:Date.now(),target:c.target,hc:c.result.hc,raw:c.raw.filter(r=>r.test===TEST)};MacroPlan.saveResult(TEST,mgE);/* also on the cloud record, so My Practice can build the plan on any device */try{if(window.S){S.planEntry=mgE;S.audit=MacroPlan.loadAudit();if(typeof window.save==="function")window.save()}}catch(e){}if(window.MG_PAINT)window.MG_PAINT()}}}catch(e){}}
 setInterval(watch,1000);watch();
 })();
 </script><style id="mailfixCss">.mfsheet{margin-top:10px;border:2px solid #0B0B0B;background:#F4F1EA;padding:14px;display:grid;gap:8px}
