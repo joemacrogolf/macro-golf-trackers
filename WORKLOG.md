@@ -3,6 +3,8 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 22:00 · Jack's Claude · Putting games: tag under the name on the first screen and new VidApp thumbnails (Money Stealers 'Lag putting game', Insanity '6–12 feet', Hole Out '3–5 feet'). Pinning all 9 games to this commit · live
+2026-11-12 22:00 · Jack's Claude · IN VIDAPP: replacing thumbnails on the three Putting games (group 4182263) · in progress
 2026-11-12 21:55 · Jack's Claude · Every game now opens with 'How are you playing? Single player / Head to head' (once per visit; not when opened from the Practice Plan). 50ft Bank / Wedge Darts first-screen tags now 'Chipping' / 'Pitching'. 9 games re-pinned (e5ce17b / 02fabad) → this commit · live
 2026-11-12 21:50 · Jack's Claude · VidApp PUBLISHED TO PREVIEW then LIVE (Jack's go-ahead) for the three thumbnails below. OUT OF VIDAPP · live
 2026-11-12 21:48 · Jack's Claude · VidApp THUMBNAIL REPLACED on Website item 'Wedge Darts' 4183636 (parent Short Game 4182264): now shows 'PITCHING' under the name (assets/thumbs/game-wedge-darts.png) · saved
