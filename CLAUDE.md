@@ -144,7 +144,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)
 
 - **Coaching page in the app:** www.macro.golf/coaching-app loads the live /coaching page's Custom Code blocks each time (no copy to keep in step). If /coaching is rebuilt WITHOUT `.mgw` content blocks, check coaching-app still shows the content (it falls back to everything except header/footer/nav).
-- **Bottom tabs (12 Nov):** Home · Golf 1 on 1 (/my-plan, was My Coach) · Train 1 on 1 (/my-training, was My Training) · 6 Week Plan (/my-practice, was My Practice) · Playlists. Tab titles max 12 characters; icons for the 1-on-1 tabs in assets/icons/ (black 400px PNG). Renamed by Jack's Claude 12 Nov, saved, awaiting Joe's publish. Sub tabs can't open a website directly; bottom tabs can (Website type).
+- **Bottom tabs (12 Nov):** Home · Golf 1 on 1 (/my-plan, was My Coach) · Train 1 on 1 (/my-training, was My Training) · 6 Week Plan (/my-practice, was My Practice) · Playlists. Tab titles max 12 characters; icons for the 1-on-1 tabs in assets/icons/ (black 400px PNG). Renamed by Jack's Claude 12 Nov, published to preview 12 Nov (Joe OK'd). Sub tabs can't open a website directly; bottom tabs can (Website type).
 - **Home tiles:** Testing · Practice (My Practice Plan → /my-practice + Games & Drills group 4183704) · Train (My Training Plan → /my-training + Training Library group 4183703) · Warm Up (website → /warm-up).
 - New Website items can get a thumbnail by fetching an image (jsDelivr from `assets/thumbs/`, or the VidApp S3 `large_…` copy of an existing thumbnail) into the dialog's file input with DataTransfer.
 
