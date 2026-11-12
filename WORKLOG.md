@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 21:20 · Jack's Claude · IN VIDAPP: pressing Publish To Preview for the bottom-tab changes. Jack says Joe has OK'd it · in progress
 2026-11-12 21:15 · Jack's Claude · OUT OF VIDAPP. Saved, NOT published to preview (Joe to publish). Labels are shorter than in docs/for-joe-bottom-tabs.md because VidApp allows 12 characters per tab title · saved
 2026-11-12 21:14 · Jack's Claude · VidApp RENAMED bottom tab 'My Practice' (Website tab 4183672, URL unchanged https://www.macro.golf/my-practice): tab title → '6 Week Plan', header → 'Practice Plan'; icon unchanged · saved
 2026-11-12 21:12 · Jack's Claude · VidApp RENAMED bottom tab 'My Training' (Website tab 4183671, URL unchanged https://www.macro.golf/my-training): tab title → 'Train 1 on 1', header 'My Training' → 'Fitness 1 on 1 Only', icon replaced with assets/icons/tab-fitness-1on1-black.png (MG logo + dumbbell) · saved
