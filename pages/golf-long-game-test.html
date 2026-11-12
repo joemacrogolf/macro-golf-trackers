@@ -670,7 +670,9 @@ function shotSG(s,carry,offSigned,n,pin){
 
 /* ---------- The test ---------- */
 var CATS={wedge:"Wedges and short irons",mid:"Mid irons",long:"Long irons and hybrids",fwg:"Fairway clubs into the green",fwt:"Fairway clubs off the tee",drv:"Driver"};
-var MIX={full:{wedge:18,mid:14,long:8,fwg:4,fwt:4,drv:12},half:{wedge:9,mid:7,long:4,fwg:2,fwt:2,drv:6}};
+/* shots per club group. Weighted a little toward mid and long irons (rather than how often each comes up on the course)
+   so every area has enough shots for a solid strokes gained number */
+var MIX={full:{wedge:13,mid:14,long:11,fwg:6,fwt:4,drv:12},half:{wedge:7,mid:7,long:5,fwg:3,fwt:2,drv:6}};
 var ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 var pick=a=>a[Math.floor(Math.random()*a.length)];
 function hazard(chance,line){if(Math.random()>chance)return null;const side=pick(["L","R"]),t=pick(["Water","Out of bounds"]);return {type:t==="Water"?"water":"ob",side,line,name:t+" "+(side==="L"?"left":"right")}}

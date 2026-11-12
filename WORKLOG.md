@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 16:10 · Jack's Claude · Long Game Test shot mix: full 13 wedge / 14 mid / 11 long / 6 fairway-club approaches (was 18/14/8/4), half 7/7/5/3 · live
 2026-11-12 14:50 · Joe's Claude (Build My Plan session) · SHARED videos.js: MGVideo.open(name, id, label) gains an optional label (default stays 'Exercise demo'; backward compatible). Build My Plan: mobility shows 'Watch now' (player label 'Watch now · follow along'); yellow 'Change my plan' button in the hero. Engine: buttons only show when CLIENT.onRebuild / coachUrl set. Re-pinned p-258147 only · live
 2026-11-12 14:35 · Joe's Claude · Exercise library v5 on Drive (1EQjn4IPZn2Lz-Qeb-LpIS7wRAPoUNnzk): +10 columns (Wistia video ID for all 647 lessons, names used in plans, setting, default dose, rest, each side, easier/harder, golf purpose, status), 9 missing golf step drill IDs filled, 12 Needs filming rows. v4 untouched. Noted in CLAUDE.md · done
 2026-11-12 14:45 · Joe's Claude (Build My Plan session) · Build My Plan: Play now button on today's mobility video (Wistia IDs for all 64 videos in the 10 Minute Mobility series, opened with MGVideo.open); questionnaire headings forced off-white (Kajabi theme heading colour was showing navy). Engine change is additive (only pages with CLIENT.mobilityVideos). Re-pinned p-258147 only · live
