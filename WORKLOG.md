@@ -3,7 +3,11 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
-2026-11-12 21:40 · Jack's Claude · IN VIDAPP: new thumbnails with a one-line description for 50 Foot Bank ('Chipping only'), Par 18 ('Chipping and putting') and Wedge Darts ('Wedges – pitching') in Short Game 4182264 · in progress
+2026-11-12 21:50 · Jack's Claude · VidApp PUBLISHED TO PREVIEW then LIVE (Jack's go-ahead) for the three thumbnails below. OUT OF VIDAPP · live
+2026-11-12 21:48 · Jack's Claude · VidApp THUMBNAIL REPLACED on Website item 'Wedge Darts' 4183636 (parent Short Game 4182264): now shows 'PITCHING' under the name (assets/thumbs/game-wedge-darts.png) · saved
+2026-11-12 21:46 · Jack's Claude · VidApp THUMBNAIL REPLACED on Website item 'Par 18' 4183635 (parent Short Game 4182264): now shows 'CHIPPING AND PUTTING' under the name (assets/thumbs/game-par-18.png) · saved
+2026-11-12 21:44 · Jack's Claude · VidApp THUMBNAIL REPLACED on Website item '50ft Bank' 4183634 (parent Short Game 4182264): now shows 'CHIPPING' under the name (assets/thumbs/game-fifty-ft-bank.png). Website items' thumbnails CAN be replaced in place (Manage Content › item) · saved
+2026-11-12 21:40 · Jack's Claude · IN VIDAPP: new thumbnails with a one-line description for the three Short Game games · done
 2026-11-12 21:32 · Jack's Claude · VidApp PUBLISHED TO LIVE APPS (Jack's go-ahead; preview re-published first, which VidApp needs before the live button appears). Members get the new bottom tabs next time they open the app: Home · Golf 1 on 1 · My Training · 6 Week Plan · Playlists. OUT OF VIDAPP · live
 2026-11-12 21:30 · Jack's Claude · IN VIDAPP: pressing Publish To Live Apps (Jack's go-ahead) for the bottom-tab changes · done
 2026-11-12 21:28 · Jack's Claude · OUT OF VIDAPP. Published to preview again with the My Training fix (Joe's OK via Jack). Did NOT press Publish To Live Apps · preview
