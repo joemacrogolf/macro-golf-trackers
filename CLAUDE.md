@@ -1,6 +1,6 @@
 # CLAUDE.md: shared rulebook for every Claude working on this repo
 
-Two people work on this repo with their own Claude: **Joe** (founder, fitness plans and the overall system) and **Jack** (golf games, tests and golf plans). Their Claudes cannot talk to each other directly. **This file and `WORKLOG.md` are how they coordinate.** Read both before you change anything.
+Three people work on this repo with their own Claude: **Joe** (founder, fitness plans and the overall system), **Jack** (golf games, tests and golf plans) and **Sam** (1-to-1 client training plans, built from `clients/*.js`). Their Claudes cannot talk to each other directly. **This file and `WORKLOG.md` are how they coordinate.** Read both before you change anything.
 
 ## First run for Jack's Claude (one time only)
 
