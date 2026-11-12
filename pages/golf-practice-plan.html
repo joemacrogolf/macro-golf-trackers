@@ -1469,7 +1469,8 @@ function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,ne
      ${isDone?`<button class="linky" data-act="startPlan" data-v="${i}">Do it again</button>`:`<button class="primary" data-act="startPlan" data-v="${i}">Do this one today</button>`}</div>`});
   h+=progressCard();
   h+=whyCard();
-  h+=`<div class="btns"><button class="ghost" data-act="build">Build a one-off session</button><button class="ghost" data-act="tests">Tests and plan</button></div>`;
+  h+=`<div class="btns"><button class="ghost" data-act="build">Build a one-off session</button><button class="ghost" data-act="tests">Tests and plan</button></div>
+   ${ui.reset?`<div class="warnbox"><b>Reset your plan?</b>This clears your 6 week plan and the sessions you've ticked off. Your test results, your answers and your game scores stay, so you can build a new plan straight away.</div><div class="btns"><button class="primary" data-act="resetYes">Yes, reset my plan</button><button class="ghost" data-act="resetNo">Cancel</button></div>`:`<button class="linky" data-act="resetAsk">Reset my plan</button>`}`;
   return h}
 function whyCard(){const P=PG(),p=P.plan,T=hcName(p.target||"10");
   if(!p.targets){if(!p.chosen||!p.chosen.length)return "";return `<div class="recnote">Rebuild your plan to see the new layout. <button class="linky" data-act="tests">Rebuild</button></div>`}
@@ -1502,6 +1503,10 @@ function homeAct(act,v,el){const P=PG();
     case "editProf":ui={editProf:true};render();window.scrollTo(0,0);return true;
     case "tests":ui={tests:true};render();window.scrollTo(0,0);return true;
     case "skipT":P.skip=P.skip||{};P.skip[v]=!P.skip[v];window.save();render();return true;
+    case "resetAsk":ui.reset=true;render();setTimeout(()=>{const b=document.querySelector('[data-act="resetYes"]');if(b)b.scrollIntoView({block:"center"})},0);return true;
+    case "resetNo":ui.reset=false;render();return true;
+    /* reset: the plan and its ticked sessions go; tests, profile, history and game scores stay */
+    case "resetYes":{const P=PG();delete P.plan;P.weeks={};const ip=rd(KEY);if(ip&&ip.plan)wr(KEY,null);window.save();ui={tests:true};render();window.scrollTo(0,0);return true}
     case "mkPlan":case "mkPlanAnyway":makePlan();ui={why:true};render();window.scrollTo(0,0);return true;
     case "startPlan":startPlanSession(+v);return true;
     case "play":{const b=S&&S.step==="run"?cur():null;if(b){b.opened=true;save()}return true}
