@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 14:35 · Joe's Claude · Exercise library v5 on Drive (1EQjn4IPZn2Lz-Qeb-LpIS7wRAPoUNnzk): +10 columns (Wistia video ID for all 647 lessons, names used in plans, setting, default dose, rest, each side, easier/harder, golf purpose, status), 9 missing golf step drill IDs filled, 12 Needs filming rows. v4 untouched. Noted in CLAUDE.md · done
 2026-11-12 14:45 · Joe's Claude (Build My Plan session) · Build My Plan: Play now button on today's mobility video (Wistia IDs for all 64 videos in the 10 Minute Mobility series, opened with MGVideo.open); questionnaire headings forced off-white (Kajabi theme heading colour was showing navy). Engine change is additive (only pages with CLIENT.mobilityVideos). Re-pinned p-258147 only · live
 2026-11-12 14:30 · Joe's Claude · out of VidApp. Deleted (Joe's call, all detached, checked Home/Testing/Practice first): old game groups Money Stealers 4182272, Insanity 4182274, Hole Out 4182275, Wedge Darts 4182276, Lava 4182277, Par 18 4182278, Driver Corridor 4182958, 3 Strikes 4183599, 50ft Bank 4182269, and duplicate Wedge Darts website 4183589 (Live Games 4181215 now empty, left in place). Practice games unchanged. Approach Boss/Par 5/Wedge Boss/New Group left alone · done
 2026-11-12 14:15 · Joe's Claude · in VidApp: deleting detached old game groups + duplicate Wedge Darts (Joe's call) · in progress

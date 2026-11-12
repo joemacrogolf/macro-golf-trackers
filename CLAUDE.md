@@ -87,6 +87,8 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | `src/golfwarm.js` | Golf pages: Express 5-minute warm-up card. Also "How to play" for games with a video. |
 | `src/golf-sg.js` | Golf pages: strokes gained. |
 
+**Exercise library (the planning database).** Google Drive file `Macro_Golf_VidApp_Library_Audited_v5.xlsm` (id `1EQjn4IPZn2Lz-Qeb-LpIS7wRAPoUNnzk`). One row per Kajabi exercise lesson with its Wistia video ID, the other names plans use for it, setting, default dose, rest, each side, easier and harder options, golf purpose and filming status. The suggested columns are rule-based drafts for coaches to check. Use it when choosing exercises and video IDs for any plan.
+
 **My Plan (live).** www.macro.golf/my-plan: one email + PIN log-in for every 1-to-1 plan and golf personal plan (first time adds the 6-digit plan code). It loads the loader live on the client's own page, so keep each client's page pinned as usual. New client plans need nothing extra; see README.
 
 **Golf leaderboards (live).** Each golf page exposes `window.MG_SCORE()`; `summary()` sends it as `_mgSummary.golf` plus `lbHide`. `src/leaderboard.js` (loaded by `golfwarm.js`) shows a Leaders tab with This month / All time boards, read from the public read-only `mg_leaderboard` function (`supabase/004-leaderboard.sql`). `MGSync.init({…, fixedName:'Name'})` skips the name box on one-person plans.
