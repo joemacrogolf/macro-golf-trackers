@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 23:35 · Jack's Claude · VidApp PUBLISHED TO PREVIEW then LIVE (Jack's go-ahead): Warm Up tile artwork, My Numbers first on Home. OUT OF VIDAPP · live
 2026-11-12 23:31 · Jack's Claude · OUT OF VIDAPP. Not published yet: waiting on Jack's OK to publish preview + live · saved
 2026-11-12 23:30 · Jack's Claude · VidApp MOVED Website item 'My Numbers' 4183747 to first place on Home (Home tab 312348, Home sub-tab). New order: My Numbers · Testing · Practice · Train · Warm Up · saved
 2026-11-12 23:28 · Jack's Claude · VidApp THUMBNAIL REPLACED on Website item 'Warm Up' 4183706 (parent Home sub-tab, → www.macro.golf/warm-up): now '04 · WARM UP / Ready to play in minutes' (assets/thumbs/tile-warmup.png). Old: large_landscape_4183706_image_20261112_192255_warmup.jpg · saved
