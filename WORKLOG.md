@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 21:30 · Jack's Claude · IN VIDAPP: pressing Publish To Live Apps (Jack's go-ahead) for the bottom-tab changes · in progress
 2026-11-12 21:28 · Jack's Claude · OUT OF VIDAPP. Published to preview again with the My Training fix (Joe's OK via Jack). Did NOT press Publish To Live Apps · preview
 2026-11-12 21:27 · Jack's Claude · VidApp REVERTED bottom tab 'Train 1 on 1' (Website tab 4183671, URL unchanged https://www.macro.golf/my-training) back to title 'My Training', header 'My Training', calendar icon (re-uploaded as assets/icons/tab-training-calendar-black.png, a close copy of the original). Jack: My Training isn't 1-on-1 only · saved
 2026-11-12 21:25 · Jack's Claude · IN VIDAPP: putting the middle tab back to My Training (Jack: it isn't 1-on-1 only) · done
