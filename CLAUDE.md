@@ -148,8 +148,8 @@ Golf personal plans use exactly the same message and the same My Plan button.
 - **Home tiles:** Testing · Practice (My Practice Plan → /my-practice + Games & Drills group 4183704) · Train (My Training Plan → /my-training + Training Library group 4183703) · Warm Up (website → /warm-up).
 - New Website items can get a thumbnail by fetching an image (jsDelivr from `assets/thumbs/`, or the VidApp S3 `large_…` copy of an existing thumbnail) into the dialog's file input with DataTransfer.
 
-- Practice (4182266) contains three groups: Putting 4182263, Short Game 4182264 and Long Game 4182265.
-  - Each game in those groups is a **direct Website link** to its scoring page, with no group or "Start Scoring" step. The old per-game groups were deleted on 2026-11-12.
+- Practice (4182266) holds My Practice Plan (website 4183705 → /my-practice) + Games & Drills (group 4183704). Games & Drills contains the Putting 4182263, Short Game 4182264 and Long Game 4182265 groups and the Golf Drills module 2156869483.
+  - Each game in the Putting / Short Game / Long Game groups is a **direct Website link** to its scoring page, with no group or "Start Scoring" step. The old per-game groups were deleted on 2026-11-12.
 - Website items can't be edited. To change one:
   1. Create a new item with the right URL and thumbnail.
   2. Remove the old item from its parent.
