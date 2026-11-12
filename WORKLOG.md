@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 22:45 · Jack's Claude · IN VIDAPP: Home tab: new artwork for Testing / Practice / Train tiles and a new My Numbers tile · in progress
 2026-11-12 22:40 · Jack's Claude · NEW My Numbers: pages/golf-my-numbers.html + src/golf-numbers.js (read-only dashboard: strokes gained by area from the tests, 6-week plan week/odds/goals, tests over time, game bests; signs in with the golf email + PIN, uses mg_whoami then mg_load only for records that exist). Practice Plan opening page also shows the strokes gained card. Kajabi page my-numbers next, then a VidApp Home tile · in progress
 2026-11-12 22:15 · Jack's Claude · Lava 'Stopping the miss' and Driver Corridor 'Driving accuracy': tag on the first screen (re-pinning p-740258, p-937452) and new VidApp thumbnails · live
 2026-11-12 22:20 · Jack's Claude · VidApp PUBLISHED TO PREVIEW then LIVE (Jack's go-ahead) for the Lava and Driver Corridor thumbnails. OUT OF VIDAPP · live
