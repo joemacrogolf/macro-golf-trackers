@@ -47,14 +47,18 @@ function target(tests){var t=null;Object.keys(tests||{}).forEach(function(k){if(
 function sgCard(tests,opts){opts=opts||{};var A=byArea(tests),T=target(tests),have=GROUPS.filter(function(g){return A.rows[g]!=null});
   if(!have.length)return opts.empty===false?'':'<div class="mgn-card"><div class="mgn-k">Strokes gained</div><p class="mgn-p">Take your tests and this fills in: where you gain and lose shots against your target, area by area.</p>'+testLinks()+'</div>';
   var mx=Math.max(0.5,Math.max.apply(null,have.map(function(g){return Math.abs(A.rows[g])}))),tot=have.reduce(function(a,g){return a+A.rows[g]},0);
-  var all=[];have.forEach(function(g){all=all.concat(A.keys[g])});all.sort(function(a,b){return a.pr-b.pr});var worst=all[0],best=all[all.length-1];
+  /* callouts are by AREA (the same totals as the bars), with the biggest single shot type inside that area underneath */
+  var ord=have.slice().sort(function(a,b){return A.rows[a]-A.rows[b]}),wa=ord[0],ba=ord[ord.length-1];
+  var pick=function(g,lo){var k=A.keys[g].slice().sort(function(a,b){return a.pr-b.pr});return lo?k[0]:k[k.length-1]};
+  var worst=wa&&A.rows[wa]<-0.05?{name:wa,pr:A.rows[wa],part:pick(wa,true)}:null,best=ba&&A.rows[ba]>0.05&&ba!==(worst&&worst.name)?{name:ba,pr:A.rows[ba],part:pick(ba,false)}:null;
+  var part=function(x,lo){return x.part&&A.keys[x.name].length>1&&(lo?x.part.pr<-0.05:x.part.pr>0.05)?'<span class="mgn-part">Mostly '+esc(x.part.name.toLowerCase())+' ('+sg(x.part.pr)+')</span>':''};
   var dates=Object.keys(tests).map(function(k){return tests[k].t}).filter(Boolean).sort();
   return '<div class="mgn-card"><div class="mgn-top"><div><div class="mgn-k">Strokes gained a round</div><div class="mgn-sub">vs a '+esc(hcName(T))+' player'+(dates.length?' \u00b7 tests '+day(dates[0])+(dates.length>1&&day(dates[dates.length-1])!==day(dates[0])?'\u2013'+day(dates[dates.length-1]):''):'')+'</div></div>'+
    '<div class="mgn-tot '+(tot>=0?'up':'down')+'"><b>'+sg(tot)+'</b><small>total a round</small></div></div>'+
    '<div class="mgn-bars">'+GROUPS.map(function(g){var v=A.rows[g];if(v==null)return '<div class="mgn-row off"><span>'+g+'</span><div class="mgn-track"><i class="mid"></i></div><em>not tested</em></div>';
      var w=Math.min(50,Math.abs(v)/mx*50);return '<div class="mgn-row"><span>'+g+'</span><div class="mgn-track"><i class="mid"></i><i class="bar '+(v>=0?'up':'down')+'" style="'+(v>=0?'left:50%':'right:50%')+';width:'+w.toFixed(1)+'%"></i></div><em class="'+(v>=0?'up':'down')+'">'+sg(v)+'</em></div>'}).join('')+'</div>'+
-   (worst&&worst.pr<-0.05?'<div class="mgn-call down"><small>Biggest leak</small><b>'+esc(worst.name)+'</b><em>'+sg(worst.pr)+' a round</em></div>':'')+
-   (best&&best.pr>0.05?'<div class="mgn-call up"><small>Biggest strength</small><b>'+esc(best.name)+'</b><em>'+sg(best.pr)+' a round</em></div>':'')+
+   (worst?'<div class="mgn-call down"><small>Biggest leak</small><b>'+esc(worst.name)+'</b><em>'+sg(worst.pr)+' a round</em>'+part(worst,true)+'</div>':'')+
+   (best?'<div class="mgn-call up"><small>Biggest strength</small><b>'+esc(best.name)+'</b><em>'+sg(best.pr)+' a round</em>'+part(best,false)+'</div>':'')+
    (opts.note!==false?'<p class="mgn-note">Plus means you gain shots on a '+esc(hcName(T))+' player, minus means you lose them. Retest to update.</p>':'')+'</div>'}
 function testLinks(){return '<div class="mgn-links">'+Object.keys(TESTS).map(function(k){return '<a href="https://www.macro.golf/'+TESTS[k][2]+'">'+TESTS[k][1]+' \u2192</a>'}).join('')+'</div>'}
 
@@ -139,7 +143,7 @@ function css(){if(document.getElementById('mgn-css'))return;var s=document.creat
  '.mgn-track .bar{position:absolute;top:0;bottom:0}.mgn-track .bar.up{background:#3ad37a}.mgn-track .bar.down{background:#ff6b5e}em.up{color:#3ad37a}em.down{color:#ff6b5e}',
  '.mgn-call{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;background:rgba(244,241,234,.06);border-left:3px solid #ff6b5e}.mgn-call.up{border-left-color:#3ad37a}',
  '.mgn-call small{grid-column:1/-1;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#9C988C;font-weight:700}.mgn-call b{font-size:15px}.mgn-call em{font-style:normal;font-weight:700;font-size:13px}.mgn-call.up em{color:#3ad37a}.mgn-call.down em{color:#ff6b5e}',
- '.mgn-note{margin:0;font-size:12px;color:#9C988C}.mgn-links{display:flex;flex-wrap:wrap;gap:8px}.mgn-links a{color:#FFD900;font-weight:700;font-size:14px;text-decoration:none;border:1px solid rgba(255,217,0,.4);padding:8px 10px}',
+ '.mgn-part{grid-column:1/-1;font-size:12px;color:#9C988C}.mgn-note{margin:0;font-size:12px;color:#9C988C}.mgn-links{display:flex;flex-wrap:wrap;gap:8px}.mgn-links a{color:#FFD900;font-weight:700;font-size:14px;text-decoration:none;border:1px solid rgba(255,217,0,.4);padding:8px 10px}',
  '.mgn-prog{height:8px;background:rgba(244,241,234,.12)}.mgn-prog i{display:block;height:100%;background:#FFD900}',
  '.mgn-goals{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}.mgn-goals li{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:13px}.mgn-goals em{font-style:normal;font-weight:700;color:#FFD900}',
  '.mgn-gbar{grid-column:1/-1;height:4px;background:rgba(244,241,234,.12)}.mgn-gbar i{display:block;height:100%;background:#FFD900}',

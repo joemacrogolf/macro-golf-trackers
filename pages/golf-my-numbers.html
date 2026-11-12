@@ -271,7 +271,7 @@ var app=document.getElementById('app'),N=window.MGNumbers;N.css();
 function $(i){return document.getElementById(i)}
 function creds(){try{return JSON.parse(localStorage.getItem('mgsync-group:golf')||'null')}catch(e){return null}}
 function setCreds(c){try{localStorage.setItem('mgsync-group:golf',JSON.stringify(c))}catch(e){}}
-function greet(n){var h=new Date().getHours();$('hi').textContent='Good '+(h<12?'morning':h<18?'afternoon':'evening')+(n?', '+String(n).split(/\s+/)[0]:'')}
+function greet(n){var h=new Date().getHours();$('hi').textContent='Good '+(h<12?'morning':h<18?'afternoon':'evening')+(n?', '+String(n).split(/\s+/)[0].replace(/^./,function(c){return c.toUpperCase()}):'')}
 function signin(msg){greet('');app.innerHTML='<form class="signin" id="sf"><h2>See your numbers</h2><p>Sign in with the email and PIN you use for the practice games and tests.</p>'+
   '<label>Email<input id="em" type="email" autocomplete="email" required></label><label>PIN<input id="pin" type="password" inputmode="numeric" autocomplete="current-password" required></label>'+
   '<p class="err" id="err">'+(msg?N.esc(msg):'')+'</p><button type="submit">Show my numbers</button></form>';
