@@ -24,6 +24,14 @@
 .mt-ghost{min-height:52px;border:1px solid rgba(244,241,234,.35);background:transparent;color:#F4F1EA;font:400 20px 'Anton',Impact,sans-serif;text-transform:uppercase;cursor:pointer;width:100%}
 .mt-link{align-self:flex-start;background:none;border:0;padding:6px 0;color:#FFD900;font:600 14px 'Inter',system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .mt-go:focus-visible,.mt-ghost:focus-visible,.mt-link:focus-visible,.mt-card:focus-visible{outline:3px solid #FFD900;outline-offset:3px}
+.mt-sw{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.mt-sw button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:84px;padding:14px;background:#141414;border:2px solid rgba(244,241,234,.25);color:#F4F1EA;cursor:pointer;font:inherit}
+.mt-sw button b{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:21px;line-height:1.05}
+.mt-sw button span{font-size:12.5px;color:#b7b2a6;line-height:1.35}
+.mt-sw button[aria-pressed=true]{border-color:#FFD900;background:#1f1d14}
+.mt-sw button[aria-pressed=true] b{color:#FFD900}
+.mt-sw button:focus-visible{outline:3px solid #FFD900;outline-offset:2px}
+.mt-sub{font-family:'Anton',Impact,sans-serif;text-transform:uppercase;font-size:22px;color:#F4F1EA;margin:8px 0 0}
 .mt-err{min-height:1.2em;margin:0;color:#ffb4a8;font-weight:600;font-size:14px}
 .mt-note{background:#1a1916;border-left:6px solid #FFD900;padding:14px 16px;color:#d9d5cb;font-size:14px;line-height:1.5}
 .mt-help{margin-top:10px;padding-top:14px;border-top:1px solid rgba(244,241,234,.15);color:#9C988C;font-size:13px;line-height:1.5}
@@ -40,14 +48,21 @@
   <div class="mt-k">Macro Golf</div>
   <h1 class="mt-h">My Training</h1>
   <div class="mt-bar"></div>
-  <p class="mt-p">Log in to open your training plan. New here? Use your email and choose a 4-digit PIN, and we'll build your plan.</p>
+  <p class="mt-p">Your training plan, built around your goals, your kit and your week.</p>
+  <div class="mt-sw" role="group" aria-label="New or returning">
+    <button type="button" data-mode="new" aria-pressed="true"><b>New here</b><span>Get started and build your plan</span></button>
+    <button type="button" data-mode="login" aria-pressed="false"><b>Log in</b><span>I've used My Training before</span></button>
+  </div>
   <form id="mt-form" novalidate>
+    <p class="mt-sub" id="mt-sub">Get started</p>
+    <p class="mt-p" id="mt-lead">Enter your email and choose a 4-digit PIN. You'll use these to log in next time.</p>
     <label>Email<input name="email" type="email" autocomplete="email" inputmode="email" required></label>
-    <label>PIN<input name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" autocomplete="current-password" required placeholder="4 digits"></label>
+    <label><span id="mt-pinl">Choose a 4-digit PIN</span><input name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" autocomplete="new-password" required placeholder="4 digits"></label>
+    <label id="mt-pin2l">Type your PIN again<input name="pin2" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" placeholder="4 digits"></label>
     <p class="mt-err" id="mt-err" role="alert"></p>
-    <button class="mt-go" type="submit">Open my training</button>
+    <button class="mt-go" type="submit">Build my plan</button>
   </form>
-  <p class="mt-help">Forgotten your PIN? Message your coach and they will reset it.</p>
+  <p class="mt-help" id="mt-help">Already have a Macro Golf training plan? Tap <b>Log in</b> and use the same email and PIN.</p>
 </div></div>
 <script>
 (function(){
@@ -69,18 +84,31 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return
 function me(){try{var m=JSON.parse(ls(ME)||'null');return m&&m.em&&m.target?m:null}catch(e){return null}}
 function save(m){ls(ME,JSON.stringify(m))}
 var box=document.getElementById('mt-in'),f=document.getElementById('mt-form'),err=document.getElementById('mt-err'),go=f.querySelector('.mt-go');
-try{var last=ls('mgtrain:email')||ls('mgplan:email');if(last)f.email.value=last}catch(e){}
+var mode='new',GO={new:'Build my plan',login:'Open my training'};
+function setMode(md){mode=md;
+  [].forEach.call(box.querySelectorAll('[data-mode]'),function(b){b.setAttribute('aria-pressed',b.dataset.mode===md?'true':'false')});
+  var n=md==='new';document.getElementById('mt-sub').textContent=n?'Get started':'Log in';
+  document.getElementById('mt-lead').textContent=n?"Enter your email and choose a 4-digit PIN. You'll use these to log in next time.":'Use the email and PIN you chose when you started.';
+  document.getElementById('mt-pinl').textContent=n?'Choose a 4-digit PIN':'Your PIN';
+  document.getElementById('mt-pin2l').style.display=n?'':'none';f.pin.autocomplete=n?'new-password':'current-password';
+  document.getElementById('mt-help').innerHTML=n?'Already have a Macro Golf training plan? Tap <b>Log in</b> and use the same email and PIN.':'Forgotten your PIN? Message your coach and they will reset it.';
+  go.textContent=GO[md];err.textContent=''}
+box.querySelector('.mt-sw').addEventListener('click',function(e){var b=e.target.closest('[data-mode]');if(b){setMode(b.dataset.mode);(f.email.value?f.pin:f.email).focus()}});
+try{var last=ls('mgtrain:email')||ls('mgplan:email');if(last){f.email.value=last;setMode('login')}}catch(e){}
 
 f.addEventListener('submit',function(e){e.preventDefault();err.textContent='';
   var em=String(f.email.value).trim().toLowerCase(),pin=String(f.pin.value).trim();
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){err.textContent='Check your email address.';f.email.focus();return}
-  if(!/^\d{4,8}$/.test(pin)){err.textContent='Your PIN is 4 to 8 numbers.';f.pin.focus();return}
+  if(!/^\d{4,8}$/.test(pin)){err.textContent=mode==='new'?'Choose a PIN of 4 numbers.':'Your PIN is 4 to 8 numbers.';f.pin.focus();return}
+  if(mode==='new'&&String(f.pin2.value).trim()!==pin){err.textContent="The two PINs don't match. Type them again.";f.pin2.value='';f.pin2.focus();return}
   go.disabled=true;go.textContent='Checking…';
   fetch(RPC+'mg_whoami',{method:'POST',headers:{apikey:APIKEY,'Content-Type':'application/json'},body:JSON.stringify({p_email:em,p_pin:pin})})
    .then(function(r){return r.json()}).then(function(j){
-     if(!j||j.error||j.message){err.textContent=(j&&(j.error||j.message))||'Something went wrong. Try again.';throw 0}
+     if(!j||j.error||j.message){var t=(j&&(j.error||j.message))||'Something went wrong. Try again.';
+       if(mode==='new'&&/does not match/.test(t))t='You already have a plan with this email. Tap Log in and use your PIN.';err.textContent=t;throw 0}
+     if(mode==='login'&&j.new){err.textContent="We can't find a plan for that email. Check it, or tap New here to get started.";throw 0}
      ls('mgtrain:email',em);route(j,em,pin)})
-   .catch(function(x){if(x!==0)err.textContent='Could not reach the server. Check your connection and try again.';go.disabled=false;go.textContent='Open my training'})});
+   .catch(function(x){if(x!==0)err.textContent='Could not reach the server. Check your connection and try again.';go.disabled=false;go.textContent=GO[mode]})});
 
 /* decide where this member goes */
 function route(j,em,pin){
@@ -122,7 +150,9 @@ function openPlan(m,pin){save(m);var pl=PLANS[m.target.plan];
     var s=html.match(/<script[^>]+src="(https:\/\/cdn\.jsdelivr\.net\/gh\/joemacrogolf\/macro-golf-trackers@[0-9a-f]{7,40}\/src\/mount\.js)"[^>]*data-page="([a-z0-9-]+)"/i);
     if(!s)throw 0;
     var sc=document.createElement('script');sc.src=s[1];sc.setAttribute('data-page',s[2]);
-    root.innerHTML='';document.body.appendChild(sc);footer(m)}).catch(function(){failed(m)})}
+    lightBg();root.innerHTML='';document.body.appendChild(sc);footer(m)}).catch(function(){failed(m)})}
+/* plan pages are designed on a light page: make sure nothing dark from this log-in screen sits behind them */
+function lightBg(){var el=root;while(el&&el!==document.documentElement){var bg=getComputedStyle(el).backgroundColor;if(bg&&!/rgba?\(0, 0, 0, 0\)|transparent/.test(bg)){var c=bg.match(/\d+/g);if(c&&(+c[0]+ +c[1]+ +c[2])<300)el.style.setProperty('background-color','#FFFFFF','important')}el=el.parentElement}}
 function loading(){root.innerHTML='<div class="mt-load" role="status"><i aria-hidden="true"></i>Loading your training…</div>'}
 function failed(m){root.innerHTML='<div class="mt-load" role="alert">Could not load your plan. Check your connection.<button type="button">Try again</button></div>';
   root.querySelector('button').addEventListener('click',function(){openPlan(m)})}
