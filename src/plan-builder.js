@@ -239,6 +239,8 @@ var PARTS=[
   {id:'hips',label:'Hips + Lower Back'},{id:'torso',label:'Torso'},{id:'upper',label:'Shoulders, Neck + Arms'},{id:'legs',label:'Legs'}
 ];
 /* VidApp · Train › Mobility › Advanced Mobility › 10 Minute Mobility Routines (intro video left out) */
+/* Wistia IDs for the mobility videos (from the Team Macro Golf lessons), so Play now opens the video in the page */
+var MOBILITY_VIDS={"Fight Club":"sclxfwjsz0","Tommy's Honour":"aky921szr9","Fantastic Four":"nzohox57lc","Memento":"8qs02u53wl","Rushmore":"ujjm78ro46","Logan":"0t9nlcb1y0","Argo":"bhvilo09qr","Parasite":"mpu5zc579o","Joker":"2w904xisbc","Paul":"zifm7lhcgl","Aladdin":"i498vzg29p","Grease":"0npffnabqm","Snakes on a Plane":"y8c1ogfsig","Top Gun":"tq1mhirdsz","The Breakfast Club":"t42rjnzii3","Shutter Island":"kzfmcv8wtb","Shawshank Redemption":"6xidpwyfhb","Return of the Jedi":"v76o24gax5","Dirty Dancing":"lc2y8nf3uw","Fast Furious":"pk16b6xu4h","Double Jeopardy":"39f7dejysk","Point Break":"mfh6gowmv3","The Secret Window":"hx2873ivx8","The Shining":"o8bz39s8zh","The Negotiator":"b03657qz6s","Deep Impact":"d1pgl79sue","Interstellar":"w9wjx5310u","Leon":"mm5cgj2nfm","Banded Wrist Mobilisation":"eieagc2uug","Tricep Smash":"15ra7bphee","Fargo":"gqi88ftu1l","Twister":"zeaisxm7gk","X-Men":"g8xbvgtuoi","Mash":"r3vadg9218","Pickpocket":"3xssz4zgww","Congo":"aa8wod6omt","Kill Bill":"y7qmzf1i7b","Jurassic Park":"ygrwso80h9","Deep Blue Sea":"met6eom9ik","Blade":"czxa4h1jdb","Sleeping Beauty":"w20m2h3n7c","The Invasion":"9cij8gqhin","Sunset Boulevard":"o6z43y42pk","The Hand That Rocks the Cradle":"fp3yupzjvb","Taxi Driver":"2hq36zcjr2","Space Odyssey":"uf63c61t9x","Silence of the Lambs":"tmo8tbbort","School of Rock":"7719nk7chc","Psycho":"xjv3rs64cn","Mean Machine":"2cm6e0c25g","Monsters Inc":"kdvpcrv0z0","North By Northwest":"a99d2ij38n","Lost in Translation":"zxojapyzyw","Lost in New York":"oij0bc131a","Godfather":"88hd015nid","Happy Feet":"xals0tqn7h","Inception":"ytownhvt07","Inside Man":"m6we8gla2a","Ferris Bueller's Day Off":"b1tr96gv4f","Chicken Run":"4b2bhtjxgm","Con Air":"8ic4ww2mn5","Armageddon":"c45ey0nvqb","Birdman":"kgala33was","Casablanca":"oj1rcncy64"};
 var MOBILITY=[
  ['Memento','Glutes & Lower Back','17:49','hips torso'],['Fantastic Four','Hamstrings, Hips, Lower Back and Upper Back','24:14','hips legs torso'],
  ['Logan','Traps','19:07','upper'],['Tommy\'s Honour','Glutes & Lower Back','17:53','hips'],['Rushmore','Hips','15:30','hips'],
@@ -261,7 +263,7 @@ var MOBILITY=[
  ['Armageddon','Forearms','11:09','upper'],['Happy Feet','Feet and Calves','14:14','legs'],['Chicken Run','Lower Leg','06:07','legs'],
  ['Inception','Upper Back','14:16','torso'],['Silence of the Lambs','Calves','19:12','legs'],['The Breakfast Club','Hamstrings','03:10','legs'],
  ['X-Men','Adductors','14:04','legs'],['Twister','IT Band','15:36','legs'],['School of Rock','Hips','10:16','hips'],['Birdman','Hips','06:16','hips']
-].map(function(v){return {name:v[0],area:v[1],mins:v[2],parts:v[3].split(' ')}});
+].map(function(v){return {name:v[0],area:v[1],mins:v[2],parts:v[3].split(' '),wistia:MOBILITY_VIDS[v[0]]||null}});
 var MOBILITY_WHERE='Train › Mobility › Advanced Mobility › 10 Minute Mobility Routines';
 
 var DEFAULTS={first:'',goals:['strength','speed'],equip:'gym',level:'intermediate',days:3,minutes:45,trackers:['checkin'],custom:[],mobility:false,parts:[]};
@@ -370,7 +372,7 @@ var CSS='.mgb{position:fixed;inset:0;z-index:65;background:#0B0B0B;color:#F4F1EA
 '.mgb-in{max-width:560px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top,0px)) 18px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px;min-height:100%}'+
 '.mgb-top{display:flex;justify-content:space-between;align-items:center;gap:12px}.mgb-wm{font-family:Anton,Impact,sans-serif;color:#FFD900;font-size:20px;line-height:.9;text-transform:uppercase}'+
 '.mgb-step{font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#9C988C}.mgb-prog{height:5px;background:#2a2926;position:relative}.mgb-prog i{position:absolute;inset:0 auto 0 0;background:#FFD900;transition:width .25s}'+
-'.mgb-k{font-weight:700;font-size:12px;letter-spacing:2.4px;text-transform:uppercase;color:#FFD900}.mgb-h{font-family:Anton,Impact,sans-serif;text-transform:uppercase;font-size:38px;line-height:1;margin:0}'+
+'.mgb-k{font-weight:700;font-size:12px;letter-spacing:2.4px;text-transform:uppercase;color:#FFD900}.mgb .mgb-h{font-family:Anton,Impact,\'Arial Narrow Bold\',sans-serif!important;font-weight:400!important;text-transform:uppercase;font-size:38px!important;line-height:1!important;letter-spacing:.2px!important;margin:0!important;color:#F4F1EA!important}'+
 '.mgb-bar{width:74px;height:6px;background:#FFD900}.mgb-p{margin:0;color:#d9d5cb;font-size:15px;line-height:1.45}'+
 '.mgb-opts{display:flex;flex-direction:column;gap:8px}.mgb-opt{display:flex;gap:14px;align-items:flex-start;text-align:left;width:100%;background:#1a1916;border:1px solid rgba(244,241,234,.18);border-left:6px solid #3a3833;color:#F4F1EA;padding:14px 16px;cursor:pointer;font:inherit;min-height:64px}'+
 '.mgb-opt[aria-pressed=true]{border-color:#FFD900;border-left-color:#FFD900;background:#24221d}.mgb-opt b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:20px;line-height:1.05}'+
@@ -389,7 +391,7 @@ var CSS='.mgb{position:fixed;inset:0;z-index:65;background:#0B0B0B;color:#F4F1EA
 '.mgb-day ol{margin:8px 0 0;padding-left:18px;color:#d9d5cb;font-size:13.5px;line-height:1.5}.mgb-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:rgba(244,241,234,.18)}'+
 '.mgb-sum div{background:#0B0B0B;padding:10px 12px}.mgb-sum span{display:block;font-weight:700;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:#FFD900}.mgb-sum b{display:block;font-size:15px;margin-top:4px}'+
 '.mgb-err{color:#ffb27a;font-size:14px;margin:0;min-height:1.2em}.mgb :focus-visible{outline:3px solid #FFD900;outline-offset:2px}'+
-'@media (max-width:420px){.mgb-h{font-size:32px}.mgb-grid .mgb-opt b{font-size:24px}}';
+'@media (max-width:420px){.mgb .mgb-h{font-size:32px!important}.mgb-grid .mgb-opt b{font-size:24px}}';
 function open(opts){
   opts=opts||{};var a=JSON.parse(JSON.stringify(opts.answers||DEFAULTS));a.custom=a.custom||[];a.trackers=a.trackers||[];a.parts=a.parts||[];
   if(!opts.answers){a.goals=[];a.trackers=['checkin']}

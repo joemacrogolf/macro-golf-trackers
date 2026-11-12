@@ -414,6 +414,7 @@ body{padding-top:0}
 .coachbtn:hover{border-color:var(--yellow);color:var(--yellow)}
 #rebuildBtn{align-self:flex-start}
 .mobpick select{border:1px solid var(--border);background:var(--paper);height:48px;padding:0 12px;font:inherit;font-size:16px;color:var(--ink);border-radius:0}
+.mobplay{display:inline-flex;align-items:center;justify-content:center;gap:10px;align-self:flex-start;flex:0 0 auto;padding:12px 22px}
 </style>
 <div class="wrap">
 
@@ -778,7 +779,8 @@ var mobChoose=false;
 function mobLibHtml(){
   var d=todayIso(),y=S.mobDay[d]||{},st=streak('mobility'),name=mobToday(d),v=mobFind(name)||{name:name,area:'',mins:''};
   var h='<div class="habitwrap'+(y.done?' on':'')+'"><label class="habit" for="mobDone"><input type="checkbox" id="mobDone"'+(y.done?' checked':'')+'><span class="txt"><span class="disp">Mobility</span><p>'+(y.done?'Done: ':'Today\'s video: ')+'<b style="color:var(--ink)">'+esc(v.name)+'</b>'+(v.area?' · '+esc(v.area):'')+(v.mins?' · '+esc(v.mins):'')+'</p></span><span class="streak"><b>'+st+'</b><span>day'+(st===1?'':'s')+'</span></span></label>';
-  h+='<div class="mobpick"><p class="small" style="margin:0">Find it in the app: '+esc(CLIENT.mobilityWhere||'')+'</p>';
+  var canPlay=!!v.wistia;
+  h+='<div class="mobpick">'+(canPlay?'<button type="button" class="btn primary mobplay" data-mlib="play"><svg width="16" height="16" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg> Play now</button>':'<p class="small" style="margin:0">Find it in the app: '+esc(CLIENT.mobilityWhere||'')+'</p>');
   if(!y.done)h+='<div class="chips"><button type="button" data-mlib="another">Another video</button><button type="button" data-mlib="choose" aria-pressed="'+mobChoose+'">Choose my own</button></div>';
   if(mobChoose&&!y.done){var pool=mobPool(),others=(CLIENT.mobilityVideos||[]).filter(function(z){return pool.indexOf(z)<0});
     h+='<div class="field"><label for="mobSel">Pick a video</label><select id="mobSel"><option value="">Choose…</option><optgroup label="Your areas">'+pool.map(function(z){return '<option'+(z.name===name?' selected':'')+'>'+esc(z.name)+'</option>'}).join('')+'</optgroup>'+(others.length?'<optgroup label="Other areas">'+others.map(function(z){return '<option>'+esc(z.name)+'</option>'}).join('')+'</optgroup>':'')+'</select></div>'}
@@ -826,7 +828,8 @@ $('habits').addEventListener('change',function(e){var t=e.target;
 $('habits').addEventListener('input',function(e){if(e.target.id!=='mobVid')return;mobRec().video=e.target.value;save()});
 $('habits').addEventListener('click',function(e){
   var v=e.target.closest('[data-mvid]');if(v){mobRec().video=v.dataset.mvid;save();renderToday();return}
-  var ml=e.target.closest('[data-mlib]');if(ml){if(ml.dataset.mlib==='another'){var r0=mobRec();r0.own=false;r0.video='';r0.alt=(r0.alt||0)+1;mobChoose=false}else mobChoose=!mobChoose;save();renderToday();return}
+  var ml=e.target.closest('[data-mlib]');if(ml&&ml.dataset.mlib==='play'){var pv0=mobFind(mobToday(todayIso()));if(pv0&&pv0.wistia){if(window.MGVideo&&MGVideo.open)MGVideo.open(pv0.name+' · '+pv0.area,pv0.wistia);else window.open('https://fast.wistia.net/embed/iframe/'+pv0.wistia,'_blank')}return}
+  if(ml){if(ml.dataset.mlib==='another'){var r0=mobRec();r0.own=false;r0.video='';r0.alt=(r0.alt||0)+1;mobChoose=false}else mobChoose=!mobChoose;save();renderToday();return}
   var a=e.target.closest('[data-alc]');if(a){var d=todayIso();S.alcohol[d]=alc(d)===a.dataset.alc?'':a.dataset.alc;save();renderToday()}});
 $('grid7').addEventListener('click',function(e){
   var c=e.target.closest('[data-ciday]');if(c&&!c.disabled){editDate=c.dataset.ciday===todayIso()?null:c.dataset.ciday;renderToday();$('checkin').scrollIntoView({behavior:'smooth',block:'center'});return}
