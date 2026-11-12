@@ -2,7 +2,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap">
 <style>
-/* My Plan: one log-in page for every 1-to-1 client plan (VidApp "My Plan" button).
+/* My Plan: one log-in page for every 1-to-1 client plan and golf personal plan (VidApp "My Plan" button).
    Email + PIN (first time: + plan code) -> mg_myplan() -> loads that client's own live Kajabi page loader in place. */
 .mp{min-height:100vh;background:#0B0B0B;color:#F4F1EA;font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;display:flex;align-items:flex-start;justify-content:center;
   padding:calc(36px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box}
@@ -71,7 +71,7 @@ f.addEventListener('submit',function(e){e.preventDefault();err.textContent='';
    .then(function(r){return r.json()}).then(function(j){
      if(!j||j.error||!j.code){err.textContent=(j&&(j.error||j.message))||'Something went wrong. Try again.';if(j&&j.first)showFirst();throw 0}
      ls('mgplan:email',em);
-     ls('mgsync-handoff',JSON.stringify({code:j.code,pin:pin,t:Date.now()}));
+     ls('mgsync-handoff',JSON.stringify(j.kind==='golf'?{plan:j.plan,em:em,pin:pin,t:Date.now()}:{code:j.code,pin:pin,t:Date.now()}));
      var m={code:j.code,path:j.path||('p-'+j.code),name:j.name||''};ls(ME,JSON.stringify(m));open(m)})
    .catch(function(x){if(x!==0)err.textContent='Could not reach the server. Check your connection and try again.';go.disabled=false;go.textContent='Open my plan'})});
 function loading(t){root.innerHTML='<div class="mp-load" role="status"><i aria-hidden="true"></i>'+(t||'Loading your plan…')+'</div>'}

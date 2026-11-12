@@ -54,7 +54,8 @@ update public.mg_clients set pin_hash = null, fails = 0, locked_until = null whe
 
 ## My Plan log-in (`pages/my-plan.html`, www.macro.golf/my-plan)
 
-One page for every 1-to-1 client plan (the VidApp "My Plan" button). Not the same as Build My Plan.
+One page for every 1-to-1 client plan and golf personal plan (the VidApp "My Plan" button). Not the same as Build My Plan.
+- Golf personal plans (e.g. Paul Goddard, p-482615): a registry row in `mg_clients` (code = page number, `kind = 'golf'`, `plan` = page name) lets My Plan find them; their PIN and games stay on the page's own `pure:<plan>:<email>` record. `supabase/006-myplan-golf.sql`.
 - First time: email + plan code (the 6-digit code, e.g. 576900) + PIN. That links the email to the plan. If the client already set a PIN on their personal page, they use that PIN.
 - After that: email + PIN. The device remembers them, so the button opens straight into their plan.
 - It loads whatever loader is live on the client's own Kajabi page (`/p-<code>`, or `mg_clients.path` when different, e.g. Kevin `w-849288`), so new clients work without touching My Plan.

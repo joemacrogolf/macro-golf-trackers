@@ -23,18 +23,22 @@ If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude h
 
 ## New client plan: always write the welcome message (everyone)
 
-Whenever you create a new 1-to-1 plan (a new `clients/*.js`, a new 6-digit page code, a new Kajabi page), finish by writing the client's welcome message and giving it to your human in your reply, ready to copy into WhatsApp or email. Don't send it yourself unless your human asks. The plan isn't finished until this message exists.
+Whenever you create a new client plan, fitness or golf (a new `clients/*.js`, a new golf personal plan page like `golf-paul-goddard`, a new 6-digit page code, a new Kajabi page), finish by writing the client's welcome message and giving it to your human in your reply, ready to copy into WhatsApp or email. Don't send it yourself unless your human asks. The plan isn't finished until this message exists.
 
 - Put the plan code on its own line, in bold, so the client can't miss it.
 - Use the client's first name. Keep it short, warm and plain. No jargon.
-- Check the code matches the `@code` in `clients/<name>.js`, the Kajabi path `p-<code>` and the `mg_clients` row before you hand it over.
+- The plan code is the Kajabi page number: `p-482615` → **482615**.
+- Check the code matches the Kajabi path `p-<code>`, the `@code` in `clients/<name>.js` (fitness) and the `mg_clients` row before you hand it over.
+- **Golf personal plans** need a registry row so My Plan can find them (no PIN, no data; the client's games stay on their own email + PIN record):
+  `insert into public.mg_clients(code, name, plan, kind, pin_hash) values ('<page number>', '<Full Name>', '<page name>', 'golf', crypt(gen_random_uuid()::text, gen_salt('bf')));`
+  Ask your human to run it in the Supabase SQL editor if you can't. See `supabase/006-myplan-golf.sql`.
 - Log in `WORKLOG.md` that the welcome message was written.
 
 Template (fill in the brackets, keep the steps):
 
 > Hi [First name],
 >
-> Your personalised Macro Golf training plan is ready.
+> Your personalised Macro Golf [training / golf] plan is ready.
 >
 > Your plan code:
 > **[123456]**
@@ -49,11 +53,13 @@ Template (fill in the brackets, keep the steps):
 >
 > Every session you log saves automatically, and your coach can see how you're getting on.
 >
+> (Golf plans: "Every round you log saves automatically, and your coach can see how you're getting on.")
+>
 > Any questions, just reply to this message.
 >
 > [Coach name]
 
-For golf one-person plans that sign in with email + PIN on their own page (like Paul Goddard), there's no plan code: send the page link and say "sign in with your email and choose a 4-digit PIN".
+Golf personal plans use exactly the same message and the same My Plan button.
 
 ## How pages work (short version; README.md has the detail)
 
@@ -81,7 +87,7 @@ For golf one-person plans that sign in with email + PIN on their own page (like 
 | `src/golfwarm.js` | Golf pages: Express 5-minute warm-up card. Also "How to play" for games with a video. |
 | `src/golf-sg.js` | Golf pages: strokes gained. |
 
-**My Plan (live).** www.macro.golf/my-plan: one email + PIN log-in for every 1-to-1 plan (first time adds the 6-digit plan code). It loads the loader live on the client's own page, so keep each client's page pinned as usual. New client plans need nothing extra; see README.
+**My Plan (live).** www.macro.golf/my-plan: one email + PIN log-in for every 1-to-1 plan and golf personal plan (first time adds the 6-digit plan code). It loads the loader live on the client's own page, so keep each client's page pinned as usual. New client plans need nothing extra; see README.
 
 **Golf leaderboards (live).** Each golf page exposes `window.MG_SCORE()`; `summary()` sends it as `_mgSummary.golf` plus `lbHide`. `src/leaderboard.js` (loaded by `golfwarm.js`) shows a Leaders tab with This month / All time boards, read from the public read-only `mg_leaderboard` function (`supabase/004-leaderboard.sql`). `MGSync.init({…, fixedName:'Name'})` skips the name box on one-person plans.
 
@@ -117,7 +123,7 @@ For golf one-person plans that sign in with email + PIN on their own page (like 
 | Rob Seeley (template build) | p-741365 | 2168241904 | plan / mg_loader |
 | Colin Howard (template build) | p-576900 | 2168250329 | plan / mg_loader |
 | Paul Goddard golf plan | p-482615 | 2168242786 | game / loader |
-| My Plan log-in (all 1-to-1 plans, `pages/my-plan.html`) | my-plan | 2168251504 | plan / mg_loader |
+| My Plan log-in (all 1-to-1 and golf personal plans, `pages/my-plan.html`) | my-plan | 2168251504 | plan / mg_loader |
 | Build My Plan (app users, `clients/build-my-plan.js` + `src/plan-builder.js`) | p-258147 | 2168251525 | plan / mg_loader |
 
 
@@ -129,7 +135,7 @@ For golf one-person plans that sign in with email + PIN on their own page (like 
   1. Create a new item with the right URL and thumbnail.
   2. Remove the old item from its parent.
   3. Save.
-- **My Plan** button (Joe added it): a Website item opening www.macro.golf/my-plan, the log-in for every 1-to-1 plan.
+- **My Plan** button (Joe added it): a Website item opening www.macro.golf/my-plan, the log-in for every 1-to-1 and golf personal plan.
 - Golf thumbnail style:
   - 1280×720 image, background `rgb(32,31,27)`.
   - Game name in Anton, near-white.
