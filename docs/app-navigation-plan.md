@@ -48,7 +48,7 @@ Today each page signs in on its own (1-to-1 by plan code + PIN; Pure and Build M
 - **Existing Pure users:** `mg_whoami` finds their existing `pure:<plan>:<email>` record and offers Continue (history intact, no data move) or Build a new plan.
 - Build My Plan: `onRebuild` / Change plan stays inside the plan; "Change plan" on the hub can also switch between built and ready-made.
 
-### 3. 1-to-1 Coaching tab
+### 3. 1-to-1 Coaching tab (BUILT 2026-11-12: my-plan.html 'I'm a client' / 'About coaching', live)
 - Reuse `pages/my-plan.html` (owned by Joe's other session: coordinate in WORKLOG before changing it).
 - Add the non-client view: short coaching intro + **Enquire about coaching** → macro.golf/coaching.
 - Later: one "Speak to a coach" / enquiry page shared by all plans (see the reminder for Joe on 13 Nov).
