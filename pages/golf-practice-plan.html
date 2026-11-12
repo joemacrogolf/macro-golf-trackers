@@ -187,6 +187,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 .sess .st{display:flex;flex-direction:column;min-width:0}.sess .st b{font-family:var(--display);font-weight:400;font-size:20px;text-transform:uppercase;color:var(--fg);line-height:1.1}.sess .st small{color:var(--muted);font-size:12.5px}
 .sess ul.sg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .sess ul.sg li{display:flex;align-items:baseline;gap:8px;font-size:14px;color:var(--fg)}.sess ul.sg li small{color:var(--muted)}.sess ul.sg li span{margin-left:auto;font-family:var(--display);font-size:15px}
+.sess ul.sg li small.tag{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--line,rgba(0,0,0,.08));color:var(--muted);white-space:nowrap}.sess ul.sg li small.tag.g{background:var(--accent,#ffda00);color:#201f1b}
 .why{display:flex;flex-direction:column;gap:5px}.why .wh{display:flex;justify-content:space-between;gap:10px;color:var(--fg)}.why .wh span{font-family:var(--display);font-size:16px}
 .why .wbar{height:8px;background:var(--soft)}.why .wbar i{display:block;height:100%;background:var(--gold)}.why small{color:var(--body);font-size:13px}
 .playbtn{display:block;text-align:center;text-decoration:none;font-family:var(--display);font-weight:400;font-size:20px;text-transform:uppercase;letter-spacing:.5px;padding:14px 18px}
@@ -1282,29 +1283,63 @@ function fetchTests(){if(fetching||fetched)return;let g=null;try{g=JSON.parse(lo
 
 function defProfile(){const a=Object.assign({},rd("macroAudit")||{},PG().audit||{});
   return {name:window.S.player||"",sessions:+a.sessions||3,mins:+a.minutes||60,sim:a.sim===false?false:a.sim===true?true:null,target:"10"}}
+/* ---------- The plan: share the week's practice time across everything the tests found, in proportion to the shots lost.
+   Each area gets at least 8 minutes. An area only gets a full game (the real game page, which counts on its leaderboard)
+   when it has enough time for the whole game and the player has what the game needs; otherwise it gets a focused block:
+   a drill for that area, plus a short strokes gained game when there are 14 minutes or more. ---------- */
+const GROUP_AREA={"Driving":"drive","Approach":"app","Short game":"short","Putting":"putt"};
+const MIN_SLOT=8;
+function focusFor(key,area){return recFocus({area,sub:key},area)||({drive:"accuracy",app:"distance",short:"distance",putt:"pace"})[area]}
 function makePlan(){const P=PG(),pr=P.profile,ents=testEntries(),used=TEST_ORDER.filter(k=>ents[k]&&!(P.skip||{})[k]);
   let raw=[];used.forEach(k=>{raw=raw.concat(ents[k].raw)});
-  const leaks=MacroPlan.leaks(raw),p=MacroPlan.build(leaks,{sessions:pr.sessions,minutes:Math.max(15,pr.mins-7),sim:pr.sim!==false});
-  P.plan={t:Date.now(),from:used,missing:TEST_ORDER.filter(k=>!used.includes(k)),target:pr.target,sessions:pr.sessions,mins:pr.mins,
-    week:layoutWeek(p.chosen,pr.sessions,pr.mins),
-    chosen:p.chosen.map(c=>({game:c.game,plays:c.plays,minutes:c.minutes,share:c.share,loss:c.loss,maintain:!!c.maintain,leaks:c.leaks.map(l=>({name:l.name,group:l.group,perRound:l.perRound}))})),
-    strengths:p.strengths.slice(0,3).map(l=>({name:l.name,perRound:l.perRound})),totalLoss:p.totalLoss,gain:p.gain,start:weekKey(),retestWeeks:6};
+  const leaks=MacroPlan.leaks(raw),simOk=pr.sim!==false,sessions=Math.max(1,Math.min(7,pr.sessions||3));
+  let T=leaks.filter(l=>l.perRound<=-0.05).sort((a,b)=>a.perRound-b.perRound).map(l=>({key:l.key,name:l.name,group:l.group,area:GROUP_AREA[l.group],loss:-l.perRound,game:l.game}));
+  const maintain=!T.length&&leaks.length;
+  if(maintain){const w=leaks.slice().sort((a,b)=>a.perRound-b.perRound).slice(0,2);T=w.map(l=>({key:l.key,name:l.name,group:l.group,area:GROUP_AREA[l.group],loss:0.05,game:l.game,maintain:true}))}
+  /* split the sessions between range days and green days by the shots each side is losing, then share each side's minutes
+     across its areas in proportion to the shots lost (at least 8 minutes each), so every session fits its time */
+  const fam=a=>a==="app"||a==="drive"?"range":"green",warm={range:8,green:5},F={range:T.filter(t=>fam(t.area)==="range"),green:T.filter(t=>fam(t.area)==="green")};
+  const lossOf=L=>sum(L.map(t=>t.loss)),fams=["range","green"].filter(f=>F[f].length),ns={range:0,green:0};
+  if(fams.length===2&&sessions>=2){ns.range=Math.max(1,Math.min(sessions-1,Math.round(sessions*lossOf(F.range)/(lossOf(F.range)+lossOf(F.green)))));ns.green=sessions-ns.range}
+  else if(fams.length===1)ns[fams[0]]=sessions;
+  const groups=fams.length===2&&sessions<2?[{list:T,n:1,cap:pr.mins-warm.range}]:fams.map(f=>({list:F[f],n:ns[f],cap:pr.mins-warm[f]}));
+  const week=[];T=[];
+  groups.forEach(G=>{const budget=G.n*G.cap,L=G.list.slice(0,Math.max(1,Math.floor(budget/MIN_SLOT))),W=sum(L.map(t=>t.loss))||1,spare=Math.max(0,budget-L.length*MIN_SLOT);
+    let given=0;L.forEach((t,i)=>{t.mins=i===L.length-1?budget-given:MIN_SLOT+Math.floor(spare*t.loss/W);given+=t.mins});
+    const mine=[];
+    L.forEach(t=>{const g=MacroPlan.GAMES[t.game],gm=g&&!(g.sim&&!simOk)?g.mins:999;let left=t.mins,n=0;
+      /* a full game only when it fits in a session; never more than one a session, and with lots of time most of it
+         goes on full games but the rest stays focused work */
+      const nMax=Math.min(G.n,Math.max(t.mins>=gm?1:0,Math.floor(0.7*t.mins/gm)));
+      while(n<nMax&&left>=gm&&gm<=G.cap){mine.push({key:t.key,area:t.area,name:t.name,mins:gm,full:true,game:t.game});left-=gm;n++}
+      if(left>=5||!n)mine.push({key:t.key,area:t.area,name:t.name,mins:left,full:false,game:t.game});
+      t.full=n});
+    week.push(...pack(mine,G.n,G.cap));T.push(...L)});
+  T.sort((a,b)=>b.loss-a.loss);
+  P.plan={v:2,t:Date.now(),from:used,missing:TEST_ORDER.filter(k=>!used.includes(k)),target:pr.target,sessions,mins:pr.mins,maintain:!!maintain,
+    week,targets:T.map(t=>({key:t.key,name:t.name,group:t.group,area:t.area,loss:t.loss,mins:t.mins,full:t.full,game:t.game,maintain:!!t.maintain})),
+    strengths:leaks.filter(l=>l.perRound>=0.05).sort((a,b)=>b.perRound-a.perRound).slice(0,3).map(l=>({name:l.name,perRound:l.perRound})),
+    totalLoss:sum(T.filter(t=>!t.maintain).map(t=>t.loss)),start:weekKey(),retestWeeks:6};
   P.weeks=P.weeks||{};window.save()}
-/* lay the week out so each session stays in one place: range days (driving and approach) and green days (short game and putting).
-   Sessions go to each side in proportion to the practice time its games need; within a side, biggest games first into the emptiest session */
-function layoutWeek(chosen,sessions,mins){const fam=g=>["app","drive"].includes(GAME_AREA[g])?"range":"green",warm={range:8,green:5};
-  const plays={range:[],green:[]};chosen.forEach(c=>{for(let k=0;k<c.plays;k++)plays[fam(c.game)].push(c.game)});
-  const need=f=>sum(plays[f].map(g=>MacroPlan.GAMES[g].mins));let fams=["range","green"].filter(f=>plays[f].length);
-  if(sessions<2||fams.length<2){const cap=mins-(fams.includes("range")?warm.range:warm.green);return pack([].concat(plays.range,plays.green),sessions,cap)}
-  let nr=Math.round(sessions*need("range")/(need("range")+need("green")));nr=Math.max(1,Math.min(sessions-1,nr));
-  return pack(plays.range,nr,mins-warm.range).concat(pack(plays.green,sessions-nr,mins-warm.green))}
-function pack(list,n,cap){const W=Array.from({length:n},()=>({games:[],mins:0}));
-  list.slice().sort((a,b)=>MacroPlan.GAMES[b].mins-MacroPlan.GAMES[a].mins).forEach(g=>{const m=MacroPlan.GAMES[g].mins,by=(a,b)=>a.mins-b.mins;
-    const s=W.filter(x=>x.mins+m<=cap&&!x.games.includes(g)).sort(by)[0]||W.filter(x=>x.mins+m<=cap).sort(by)[0];if(s){s.games.push(g);s.mins+=m}});
-  return W.filter(s=>s.games.length)}
-function sessMins(s){return sum(planBlocks(s,PG().plan?PG().plan.mins:60).map(b=>b.mins))}
+/* fill the sessions: full games first into the emptiest session they fit, then pour each area's focused minutes into the sessions
+   with the most room, in pieces of at least 8 minutes, so every session ends up close to its time and no session runs over */
+function pack(list,n,cap){const W=Array.from({length:n},()=>({items:[],mins:0})),room=s=>cap-s.mins,fluid=[];
+  list.filter(c=>c.full).sort((a,b)=>b.mins-a.mins).forEach(c=>{const s=W.filter(x=>room(x)>=c.mins).sort((a,b)=>(a.items.some(i=>i.game===c.game)-b.items.some(i=>i.game===c.game))||room(b)-room(a))[0];
+    if(s){s.items.push(Object.assign({},c));s.mins+=c.mins}else fluid.push(Object.assign({},c,{full:false}))});
+  list.filter(c=>!c.full).forEach(c=>fluid.push(Object.assign({},c)));
+  const tot={};fluid.forEach(c=>{tot[c.key]=tot[c.key]?(tot[c.key].mins+=c.mins,tot[c.key]):c});
+  /* in turns, so a big area is spread over the week in pieces of up to 30 minutes rather than one long block */
+  const Q=Object.values(tot).sort((a,b)=>b.mins-a.mins).map(c=>Object.assign({},c,{rem:c.mins}));
+  for(let guard=0;Q.some(c=>c.rem>0)&&guard<200;guard++)Q.forEach(c=>{if(c.rem<=0)return;const rem=Math.min(c.rem,c.rem-30>=MIN_SLOT?30:c.rem);
+      const fits=x=>room(x)>=Math.min(rem,MIN_SLOT),hasK=x=>x.items.some(i=>i.key===c.key),any=W.some(fits),s=W.slice().sort((a,b)=>any?(fits(b)-fits(a))||(hasK(a)-hasK(b))||room(b)-room(a):room(b)-room(a))[0],r=room(s);
+      let take=r>=MIN_SLOT?Math.min(rem,r):rem;
+      if(take<c.rem&&c.rem-take<MIN_SLOT)take=take-(MIN_SLOT-(c.rem-take))>=MIN_SLOT?take-(MIN_SLOT-(c.rem-take)):c.rem;
+      const ex=s.items.find(i=>i.key===c.key&&!i.full);if(ex)ex.mins+=take;else s.items.push({key:c.key,area:c.area,name:c.name,mins:take,full:false,game:c.game});s.mins+=take;c.rem-=take});
+  W.forEach(s=>s.items.sort((a,b)=>(b.full-a.full)||b.mins-a.mins));
+  return W.filter(s=>s.items.length)}
+/* plans made before this change listed whole games only */
+function itemsOf(s){return s.items||(s.games||[]).map(g=>({key:g,area:GAME_AREA[g],name:MacroPlan.GAMES[g].name,mins:MacroPlan.GAMES[g].mins,full:true,game:g}))}
 function doneThisWeek(){const P=PG();return ((P.weeks||{})[weekKey()]||[]).slice()}
-function gameAreas(games){return ORDER.filter(a=>games.some(g=>GAME_AREA[g]===a))}
 
 /* pictures for each game: drawn with the same course art as the games */
 function gameArt(game){const A=window.GART,area=GAME_AREA[game],W=300,H=150;if(!A)return "";const C2=A.C;let g="";
@@ -1320,21 +1355,30 @@ function gameArt(game){const A=window.GART,area=GAME_AREA[game],W=300,H=150;if(!
   else{const G=A.makeGreen(12.5,null,A.rng(4),{pin:.2});return A.holeSVG({kind:"tee",L:410,fwHalf:16,haz:game==="corridor"?{type:"ob",side:"R",line:30,name:"OB right"}:null,G},null)}
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(MacroPlan.GAMES[game].name)}">${g}</svg>`}
 
-/* the blocks for one planned session: warm up, a strike check on long-game days, the prescribed games, then your own work */
-function planBlocks(s,mins){const B=[],areas=gameAreas(s.games),long=areas.includes("app")||areas.includes("drive");
+function gameAreas(games){return ORDER.filter(a=>games.some(g=>GAME_AREA[g]===a))}
+function sessAreas(s){const it=itemsOf(s);return ORDER.filter(a=>it.some(i=>i.area===a))}
+/* the blocks for one planned session: warm up (and a strike check on range days), then each area:
+   a full game when the plan gave it one, otherwise a focused drill and, with 14+ minutes, a short strokes gained game; then your own work */
+function planBlocks(s,mins,cfg){const B=[],it=itemsOf(s),areas=sessAreas(s),long=areas.includes("app")||areas.includes("drive");let u=0;const id=x=>x+(++u);
   if(long){B.push({type:"tick",id:"body",title:"Body warm up",mins:5,video:true,lines:["Play the Express 5 minute body warm up and follow along.","Tick it off when you're done."]});
     B.push({type:"strike",id:"strike1",title:"Strike check",mins:3,balls:5,hits:[],lines:["Five balls with a mid iron, same target every time.","After each ball, tap where it came off the face. Foot spray on the face makes the mark easy to see."]})}
   else if(areas.includes("short"))B.push({type:"zones",id:"warm",title:"Warm-up ladder",mins:5,zones:[[10,12],[12,14],[14,16],[16,18],[18,20]],rounds:1,res:[],area:"short",lines:["Land each ball in the next zone. Each zone is 2 yds deep.","One trip up the ladder."]});
   else B.push({type:"tick",id:"pwarm",title:"Putting warm up",mins:5,lines:["Five 3 ft putts through a gate of two tees, just wider than the ball.","Then three long putts to the fringe to feel the pace of the green."]});
-  s.games.forEach((g,i)=>{const r=s.games.slice(0,i).filter(x=>x===g).length;B.push({type:"play",id:"play"+i,game:g,title:MacroPlan.GAMES[g].name+(r?" · round "+(r+1):""),mins:MacroPlan.GAMES[g].mins,opened:false})});
+  it.forEach(i=>{
+    if(i.full){B.push({type:"play",id:id("play"),game:i.game,title:MacroPlan.GAMES[i.game].name+(MacroPlan.GAMES[i.game].set?" · "+MacroPlan.GAMES[i.game].set:""),mins:i.mins,opened:false,why:i.name});return}
+    const c=cfg?JSON.parse(JSON.stringify(cfg)):defaultCfg(),a=i.area,f=focusFor(i.key,a);c.focus={};c.focus[a]=[f];
+    if(a==="app"){const z=recZones({area:"app",sub:i.key});if(z)c.zones=z}
+    const v=view(c,a),dm=i.mins>=14?Math.max(5,Math.round(i.mins*0.4)):i.mins;
+    const d=drill(v,dm);d.id=id("drill");d.title=i.name+": "+d.title;d.area=a;d.focusOf=i.key;B.push(d);
+    if(i.mins>=14){const g=game(v,i.mins-dm);g.id=id("game");g.title=i.name+": strokes gained game";g.area=a;B.push(g)}});
   const left=mins-sum(B.map(b=>b.mins));
   if(left>=5)B.push({type:"tick",id:"tech",title:"Your own technical work",mins:left,timer:true,lines:["Whatever you're working on with your coach. Rehearse it, then bring it into a few balls.","Focus on the movement, not where the ball goes."]});
   return B}
-function startPlanSession(i){const P=PG(),s=P.plan.week[i],pr=P.profile,areas=gameAreas(s.games);
-  const c=Object.assign(defaultCfg(),{name:pr.name||window.S.player||"",target:P.plan.target||pr.target||"10",mins:pr.mins,areas,focus:{}});
-  S={step:"run",cfg:c,blocks:planBlocks(s,pr.mins),bi:0,t0:Date.now(),plan:{week:weekKey(),idx:i,n:P.plan.week.length}};ui={};save();render();window.scrollTo(0,0)}
+function startPlanSession(i){const P=PG(),s=P.plan.week[i],pr=P.profile,areas=sessAreas(s);
+  const c=Object.assign(defaultCfg(),{name:pr.name||window.S.player||"",target:P.plan.target||pr.target||"10",mins:pr.mins,areas,focus:{},lm:pr.sim===true?true:pr.sim===false?false:null});
+  S={step:"run",cfg:c,blocks:planBlocks(s,pr.mins,c),bi:0,t0:Date.now(),plan:{week:weekKey(),idx:i,n:P.plan.week.length}};ui={};save();render();window.scrollTo(0,0)}
 
-function stripHome(){const P=PG(),p=P.plan;$("sArea").textContent=p?(gameAreas([].concat(...p.week.map(s=>s.games))).map(a=>AREAS[a]).join(" · ")||"–"):"Your tests";
+function stripHome(){const P=PG(),p=P.plan;$("sArea").textContent=p?(ORDER.filter(a=>p.week.some(s=>sessAreas(s).includes(a))).map(a=>AREAS[a]).join(" · ")||"–"):"Your tests";
   $("sTime").textContent=p?p.week.length+" × "+p.mins+" min":"–";$("sTarget").textContent=p?hcName(p.target||"10"):"–"}
 function hiLine(){const e=$("coverHi");if(e)e.innerHTML=greeting()}
 const pf=(k,v)=>`data-act="pf" data-k="${k}" data-v="${v}"`;
@@ -1367,21 +1411,22 @@ function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,ne
    <div class="bstat">${next<0?"Every session done this week. That's how you get better.":done.length?`${n-done.length} to go this week. Keep it going.`:`You've got ${n} practice session${n===1?"":"s"} this week. Start whenever you're ready.`}</div></div>`;
   if(retest)h+=`<div class="warnbox"><b>Time to retest</b>It's been ${p.retestWeeks} weeks. Take your tests again and rebuild your plan to see what's improved.</div>`;
   if(p.missing&&p.missing.length)h+=`<div class="recnote">This plan doesn't cover ${p.missing.map(k=>TEST_PLAN[k][1]).join(" or ")}. <button class="linky" data-act="tests">Add ${p.missing.length>1?"them":"it"}</button></div>`;
-  p.week.forEach((s,i)=>{const isDone=done.includes(i),areas=gameAreas(s.games);
+  p.week.forEach((s,i)=>{const isDone=done.includes(i),areas=sessAreas(s),it=itemsOf(s);
     h+=`<div class="sess ${isDone?"done":i===next?"next":""}"><div class="sh"><span class="sn">${isDone?"✓":i+1}</span><div class="st"><b>Session ${i+1} · ${areas.map(a=>AREAS[a]).join(" + ")}</b><small>${["app","drive"].some(a=>areas.includes(a))?"On the range or simulator":"Short game area and putting green"} · ${p.mins} min · ${isDone?"done this week":"to do"}</small></div></div>
-     <ul class="sg">${[...new Set(s.games)].map(g=>{const G=MacroPlan.GAMES[g],k=s.games.filter(x=>x===g).length;return `<li><b>${esc(G.name)}${k>1?" ×"+k:""}</b>${G.set?` <small>${G.set}</small>`:""}<span>${G.mins*k} min</span></li>`}).join("")}</ul>
+     <ul class="sg">${it.map(x=>`<li><b>${x.full?esc(MacroPlan.GAMES[x.game].name)+(MacroPlan.GAMES[x.game].set?` <small>${MacroPlan.GAMES[x.game].set}</small>`:""):esc(x.name)}</b> <small class="tag ${x.full?"g":""}">${x.full?"Full game":"Focused"}</small><span>${x.mins} min</span></li>`).join("")}</ul>
      ${isDone?`<button class="linky" data-act="startPlan" data-v="${i}">Do it again</button>`:`<button class="${i===next?"primary":"ghost"}" data-act="startPlan" data-v="${i}">Start session ${i+1}</button>`}</div>`});
   h+=whyCard();
   h+=`<div class="btns"><button class="ghost" data-act="build">Build a one-off session</button><button class="ghost" data-act="tests">Tests and plan</button></div>`;
   return h}
-function whyCard(){const P=PG(),p=P.plan,T=hcName(p.target||"10");if(!p.chosen.length)return "";
+function whyCard(){const P=PG(),p=P.plan,T=hcName(p.target||"10");
+  if(!p.targets){if(!p.chosen||!p.chosen.length)return "";return `<div class="recnote">Rebuild your plan to see the new layout. <button class="linky" data-act="tests">Rebuild</button></div>`}
+  const mx=Math.max(...p.targets.map(t=>t.mins));
   return `<details class="card" ${ui.why?"open":""}><summary class="label" style="cursor:pointer">Why your plan looks like this</summary>
-   <p style="margin:0">Built from your ${p.from.map(k=>TEST_PLAN[k][1]).join(", ")} on ${niceDay(p.t)}, compared with a ${T} player. Practice time goes where you lose the most shots.</p>
-   ${p.chosen.map(c=>{const G=MacroPlan.GAMES[c.game],w=c.leaks.slice().sort((a,b)=>a.perRound-b.perRound)[0];
-     return `<div class="why"><div class="wh"><b>${esc(G.name)}</b><span>${c.plays}× a week</span></div><div class="wbar"><i style="width:${Math.round(Math.max(.06,c.share||0)*100)}%"></i></div>
-      <small>${c.maintain?"Nothing big to fix here, this keeps you sharp.":`${esc(w.name)}: losing ${Math.abs(w.perRound).toFixed(1)} shot${Math.abs(w.perRound)>=1.05?"s":""} a round against a ${T} player.`}</small></div>`}).join("")}
+   <p style="margin:0">Built from your ${p.from.map(k=>TEST_PLAN[k][1]).join(", ")} on ${niceDay(p.t)}, compared with a ${T} player. Every area that's costing you shots gets practice time, and the biggest leaks get the most.</p>
+   ${p.targets.map(t=>`<div class="why"><div class="wh"><b>${esc(t.name)}</b><span>${t.mins} min a week</span></div><div class="wbar"><i style="width:${Math.round(t.mins/mx*100)}%"></i></div>
+      <small>${t.maintain?"Nothing big to fix, this keeps it sharp.":`Losing ${t.loss.toFixed(1)} shot${t.loss>=1.05?"s":""} a round against a ${T} player.`} ${t.full?`${t.full>1?t.full+" full games":"A full game"} of ${esc(MacroPlan.GAMES[t.game].name)}${t.mins>t.full*MacroPlan.GAMES[t.game].mins+2?", plus focused work":""}.`:"Focused drills and short strokes gained games. Better use of the time than a full game."}</small></div>`).join("")}
    ${p.strengths.length?`<p class="muted" style="margin:0">Already strong: ${p.strengths.map(s=>esc(s.name).toLowerCase()).join(", ")}.</p>`:""}
-   ${p.gain>0.05?`<div class="recnote">Fix half of what these games target and that's about <b>${p.gain.toFixed(1)} shots a round</b>.</div>`:""}</details>`}
+   ${p.totalLoss>0.1?`<div class="recnote">These areas cost you about <b>${p.totalLoss.toFixed(1)} shots a round</b> against a ${T} player. Halve that and you're ${(p.totalLoss/2).toFixed(1)} shots better.</div>`:""}</details>`}
 function renderHome(){const P=PG();stripHome();hiLine();fetchTests();
   let h="";const ip=rd(KEY);
   if(ip&&ip.step==="run"&&ip.blocks){const b=ip.blocks[ip.bi]||{};h+=`<div class="resume"><b>${ip.plan?"Session "+(ip.plan.idx+1)+" is in progress":"You have a session in progress"}</b><span class="muted">${b.type==="play"&&b.opened?"Back from "+esc(b.title)+"? Carry on to tick it off.":"Block "+(ip.bi+1)+" of "+ip.blocks.length+": "+esc(b.title||"")}</span><div class="btns"><button class="dark" data-act="resume">Carry on</button><button class="ghost" data-act="discard">Start again</button></div></div>`}
