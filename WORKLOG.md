@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 23:50 · Jack's Claude · VidApp RE-PUBLISHED preview then live (no content change): the 23:35 live publish didn't reach phones (Jack still saw My Numbers last + old Warm Up image). Likely cause: Live was pressed before the preview build finished. This time waited ~3 min between Preview and Live. Tip: leave a few minutes between the two · live
 2026-11-12 23:40 · Jack's Claude · Strokes gained card fix: 'Biggest strength / leak' now by area (matched the bars wrongly before: showed driver accuracy +1.4 while Approach was +2.4), with the top shot type underneath; greeting capitalised. my-numbers (2168260310) and Practice Plan p-274816 (2168255841, was d323bfc) re-pinned 42091a5 · live
 2026-11-12 23:35 · Jack's Claude · VidApp PUBLISHED TO PREVIEW then LIVE (Jack's go-ahead): Warm Up tile artwork, My Numbers first on Home. OUT OF VIDAPP · live
 2026-11-12 23:31 · Jack's Claude · OUT OF VIDAPP. Not published yet: waiting on Jack's OK to publish preview + live · saved
