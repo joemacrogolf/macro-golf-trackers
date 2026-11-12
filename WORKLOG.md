@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 13:15 · Joe's Claude · CLAUDE.md rule (Joe's call, everyone): every new 1-to-1 plan ends with a welcome message showing the plan code in bold, using the template in CLAUDE.md. VidApp My Plan button added by Joe · done
 2026-11-12 13:08 · Joe's Claude · My Plan done: updated mg_myplan (clients link their own email with the plan code) run in Supabase and answering; my-plan + all 8 1-to-1 pages confirmed live on aaf40be. Next: VidApp "My Plan" Website item (Joe to say where) · live
 2026-11-12 13:10 · Jack's Claude · Long Game Test: yardages spread evenly across each club group's range for the player, no repeats (approaches or hole lengths), no back-to-back near-identical shots · live
 2026-11-12 12:45 · Joe's Claude · My Plan live at www.macro.golf/my-plan (theme 2168251504) pinned to aaf40be. All 8 1-to-1 client pages (Dan, Harry, Kevin, Paul Bruce, Sam McDowell, Luis, Rob, Colin) re-pinned to aaf40be (contains each old pin and 51ebf1b; tested each through My Plan, no errors) so they sign in from My Plan without a second PIN prompt. Clients link their own email with the plan code, no coach entry. Still to run in Supabase: the updated mg_myplan in supabase/005-myplan.sql (Chrome stopped responding) · nearly done

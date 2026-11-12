@@ -21,6 +21,40 @@ If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude h
 - **Never** ask for, store or use the Supabase service_role/secret key, or any password. The publishable key in `src/sync.js` is meant to be public. All data access goes through the PIN-checked database functions.
 - Ask your human before deleting anything permanently (Kajabi pages, VidApp items, database rows).
 
+## New client plan: always write the welcome message (everyone)
+
+Whenever you create a new 1-to-1 plan (a new `clients/*.js`, a new 6-digit page code, a new Kajabi page), finish by writing the client's welcome message and giving it to your human in your reply, ready to copy into WhatsApp or email. Don't send it yourself unless your human asks. The plan isn't finished until this message exists.
+
+- Put the plan code on its own line, in bold, so the client can't miss it.
+- Use the client's first name. Keep it short, warm and plain. No jargon.
+- Check the code matches the `@code` in `clients/<name>.js`, the Kajabi path `p-<code>` and the `mg_clients` row before you hand it over.
+- Log in `WORKLOG.md` that the welcome message was written.
+
+Template (fill in the brackets, keep the steps):
+
+> Hi [First name],
+>
+> Your personalised Macro Golf training plan is ready.
+>
+> Your plan code:
+> **[123456]**
+>
+> To open it:
+> 1. Open the Macro Golf app and tap **My Plan**.
+> 2. Enter your email address.
+> 3. Tap **First time here?** and type your plan code: **[123456]**
+> 4. Choose a 4-digit PIN you'll remember.
+>
+> That's it. From then on, tapping My Plan opens your plan straight away. If you change phones, just log in with your email and PIN.
+>
+> Every session you log saves automatically, and your coach can see how you're getting on.
+>
+> Any questions, just reply to this message.
+>
+> [Coach name]
+
+For golf one-person plans that sign in with email + PIN on their own page (like Paul Goddard), there's no plan code: send the page link and say "sign in with your email and choose a 4-digit PIN".
+
 ## How pages work (short version; README.md has the detail)
 
 - Every tracker lives in `pages/<name>.html`. Kajabi pages hold only a loader:
@@ -95,6 +129,7 @@ If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude h
   1. Create a new item with the right URL and thumbnail.
   2. Remove the old item from its parent.
   3. Save.
+- **My Plan** button (Joe added it): a Website item opening www.macro.golf/my-plan, the log-in for every 1-to-1 plan.
 - Golf thumbnail style:
   - 1280×720 image, background `rgb(32,31,27)`.
   - Game name in Anton, near-white.
