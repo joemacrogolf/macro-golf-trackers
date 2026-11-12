@@ -107,8 +107,26 @@ f.addEventListener('submit',function(e){e.preventDefault();err.textContent='';
      if(!j||j.error||j.message){var t=(j&&(j.error||j.message))||'Something went wrong. Try again.';
        if(mode==='new'&&/does not match/.test(t))t='You already have a plan with this email. Tap Log in and use your PIN.';err.textContent=t;throw 0}
      if(mode==='login'&&j.new){err.textContent="We can't find a plan for that email. Check it, or tap New here to get started.";throw 0}
-     ls('mgtrain:email',em);route(j,em,pin)})
+     ls('mgtrain:email',em);j.mixed?onePin(j,em,pin):route(j,em,pin)})
    .catch(function(x){if(x!==0)err.textContent='Could not reach the server. Check your connection and try again.';go.disabled=false;go.textContent=GO[mode]})});
+
+/* one PIN for everything: this email's records don't all use the PIN just typed. Offer to make it the PIN for all of them. */
+function onePin(j,em,pin){
+  box.innerHTML='<div class="mt-k">One PIN for everything</div><h1 class="mt-h">'+(j.name?'Hi '+esc(j.name):'Welcome back')+'</h1><div class="mt-bar"></div>'+
+    '<p class="mt-p">Some of your Macro Golf plans and games use a different PIN. Do you want to use the PIN you just typed for all of them? Then one email and one PIN opens everything.</p>'+
+    '<button type="button" class="mt-go" data-one="yes">Use this PIN for everything</button>'+
+    '<button type="button" class="mt-ghost" data-one="no">Not now</button>'+
+    '<p class="mt-err" id="mt-err1" role="alert"></p>';
+  var y=box.querySelector('[data-one=yes]');
+  box.querySelector('[data-one=no]').addEventListener('click',function(){route(j,em,pin)});
+  y.addEventListener('click',function(){y.disabled=true;y.textContent='Saving…';
+    fetch(RPC+'mg_onepin',{method:'POST',headers:{apikey:APIKEY,'Content-Type':'application/json'},body:JSON.stringify({p_email:em,p_pin:pin})})
+     .then(function(r){return r.json()}).then(function(k){if(!k||k.error)throw new Error((k&&k.error)||'');fixCreds(k.codes||[],em,pin);route(j,em,pin)})
+     .catch(function(e){document.getElementById('mt-err1').textContent=(e&&e.message)||'Could not save. Try again.';y.disabled=false;y.textContent='Use this PIN for everything'})})}
+/* pages on this phone remember their sign-in: give them the new PIN so nobody is asked to log in again */
+function fixCreds(codes,em,pin){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i),v;
+  if(k.indexOf('mgsync:')===0){try{v=JSON.parse(localStorage.getItem(k))}catch(e){continue}if(v&&v.code&&codes.indexOf(String(v.code))>=0){v.pin=pin;localStorage.setItem(k,JSON.stringify(v))}}
+  else if(k.indexOf('mgsync-group:')===0){try{v=JSON.parse(localStorage.getItem(k))}catch(e){continue}if(v&&String(v.em||'').toLowerCase()===em){v.pin=pin;localStorage.setItem(k,JSON.stringify(v))}}}}catch(e){}}
 
 /* decide where this member goes */
 function route(j,em,pin){
