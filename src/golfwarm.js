@@ -2,6 +2,8 @@
    Load before videos.js:  <script src="{{BASE}}src/golfwarm.js"></script><script src="{{BASE}}src/videos.js"></script>
    Sits under "How to play". "Done" is remembered for the day across every golf page on this device. */
 window.MGV_NOAUTO=true;
+/* golf leaderboards live in their own file next to this one */
+(function(){var me=document.currentScript;if(!me||!me.src||window.MGBoard)return;var s=document.createElement('script');s.src=me.src.replace(/golfwarm\.js(\?.*)?$/,'leaderboard.js');document.head.appendChild(s)})();
 var MGWarm=(function(){
 var VID='rxkqwwoq0t',TITLE='Express 5 Minute Golf Warm Up';
 /* "How to play" videos from the Practice Games library, by page */

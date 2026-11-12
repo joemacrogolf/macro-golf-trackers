@@ -2,6 +2,7 @@
    Usage (after the tracker script):  MGSync.init({code:'836790'})            // personal page
                                       MGSync.init({plan:'pure-power-gym', planName:'Pure Power (gym)'})  // Pure plan: client signs in with email + PIN
                                       MGSync.init({plan:'golf-hole-out', planName:'Hole Out', group:'golf'})  // group: one sign-in covers every page in the group
+                                      MGSync.init({plan:'golf-paul-goddard', planName:'…', fixedName:'Paul Goddard'})  // one-person plan: no name box at sign-in
    Needs the tracker's globals: S (state), KEY (localStorage key), save().
    group (optional): pages sharing a group remember the email + PIN once per device, so the next page in the
    group signs in by itself. Each page still keeps its own data (its own code). Pages without group are unchanged. */
@@ -41,7 +42,7 @@ function summary(){var S=window.S||{},dates=[];
   try{if(window.UX&&UX.points){var P=UX.points(),top={},first={};
     P.forEach(function(p){var b=top[p.id];if(!b||p.w>b.w||(p.w===b.w&&p.r>b.r))top[p.id]=p;if(!first[p.id]||p.date<first[p.id].date||(p.date===first[p.id].date&&p.w>first[p.id].w))first[p.id]=p});
     bests=Object.keys(top).map(function(id){var b=top[id];return {n:b.name,w:b.w,r:b.r,u:b.u,d:b.date,gain:+(b.w-first[id].w).toFixed(1)}}).sort(function(a,b){return b.gain-a.gain||a.n.localeCompare(b.n)}).slice(0,12)}}catch(e){}
-  return {sessions:dates.length,last:dates[dates.length-1]||null,dates:dates.slice(-60),bests:bests,player:S.player||S.name||'',page:CFG.planName||document.title,golf:(typeof window.MG_SCORE==='function' ? (function(){try{return window.MG_SCORE()}catch(e){return null}})() : null)}}
+  return {sessions:dates.length,last:dates[dates.length-1]||null,dates:dates.slice(-60),bests:bests,player:CFG.fixedName||S.player||S.name||'',lbHide:!!S._lbHide,page:CFG.planName||document.title,golf:(typeof window.MG_SCORE==='function' ? (function(){try{return window.MG_SCORE()}catch(e){return null}})() : null)}}
 
 /* ---------- push / pull ---------- */
 function payload(){var d=JSON.parse(JSON.stringify(window.S||{}));d._mgSummary=summary();return d}
@@ -72,10 +73,10 @@ function pull(){if(!cred||busy)return Promise.resolve();setPill('saving');
 function gate(msg){if($q('.mgs-gate'))return;var pure=!!CFG.plan&&!CFG.code,g=document.createElement('div');g.className='mgs-gate';g.setAttribute('role','dialog');g.setAttribute('aria-label','Save your progress');
   g.innerHTML='<form class="mgs-gin"><div class="mgs-gk">Save your progress</div><div class="mgs-gh">'+(pure?'Sign in to keep your training safe':'Set your PIN')+'</div><div class="mgs-gbar"></div>'+
    '<p class="mgs-gp">'+(pure?'Use the same email and PIN on any phone or computer and your logs follow you.':'Pick a 4-digit PIN. Use it on any phone or computer and your training follows you. If you have already set one, enter it.')+'</p>'+
-   (pure?'<label class="mgs-gl">Your name<input name="pname" autocomplete="name" maxlength="60" placeholder="First and last name"></label><label class="mgs-gl">Email<input name="email" type="email" autocomplete="email" required></label>':'')+
+   (pure?(CFG.fixedName?'<input type="hidden" name="pname">':'<label class="mgs-gl">Your name<input name="pname" autocomplete="name" maxlength="60" placeholder="First and last name"></label>')+'<label class="mgs-gl">Email<input name="email" type="email" autocomplete="email" required></label>':'')+
    '<label class="mgs-gl">PIN<input name="pin" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" autocomplete="off" required placeholder="4 digits"></label>'+
    '<p class="mgs-gerr" role="alert">'+esc(msg||'')+'</p><button class="mgs-gy" type="submit">Save to cloud</button><button class="mgs-gn" type="button">Not now</button></form>';
-  document.body.appendChild(g);var f=$q('form',g),pin=f.pin;var nm=f.elements['pname'];if(nm){var cur=document.getElementById('player');if(cur&&cur.value)nm.value=cur.value}setTimeout(function(){(nm&&!nm.value?nm:(pure?f.elements['email']:pin)).focus()},50);
+  document.body.appendChild(g);var f=$q('form',g),pin=f.pin;var nm=f.elements['pname'];if(nm){var cur=document.getElementById('player');if(CFG.fixedName)nm.value=CFG.fixedName;else if(cur&&cur.value)nm.value=cur.value}setTimeout(function(){(nm&&!nm.value&&nm.type!=='hidden'?nm:(pure?f.elements['email']:pin)).focus()},50);
   $q('.mgs-gn',g).addEventListener('click',function(){ls('mgsync-skip:'+KEY,String(Date.now()));g.remove();setPill('off')});
   f.addEventListener('submit',function(e){e.preventDefault();var p=String(pin.value).replace(/\D/g,'');if(p.length<4){$q('.mgs-gerr',g).textContent='PIN must be at least 4 digits.';return}
     var code=CFG.code,name=CFG.name||null,em=null;if(pure){em=String(f.email.value).trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){$q('.mgs-gerr',g).textContent='Check your email address.';return}code='pure:'+CFG.plan+':'+em;name=String(f.elements['pname'].value).trim()||null}

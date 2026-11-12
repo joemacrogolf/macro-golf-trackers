@@ -47,7 +47,7 @@ If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude h
 | `src/golfwarm.js` | Golf pages: Express 5-minute warm-up card. Also "How to play" for games with a video. |
 | `src/golf-sg.js` | Golf pages: strokes gained. |
 
-**Coming next: golf leaderboards.** Each golf page will expose `window.MG_SCORE()`, and `summary()` will add it as `_mgSummary.golf`. The leaderboard (database function and UI) is built after that.
+**Golf leaderboards (live).** Each golf page exposes `window.MG_SCORE()`; `summary()` sends it as `_mgSummary.golf` plus `lbHide`. `src/leaderboard.js` (loaded by `golfwarm.js`) shows a Leaders tab with This month / All time boards, read from the public read-only `mg_leaderboard` function (`supabase/004-leaderboard.sql`). `MGSync.init({…, fixedName:'Name'})` skips the name box on one-person plans.
 
 ## Live Kajabi pages (site 2147673115)
 

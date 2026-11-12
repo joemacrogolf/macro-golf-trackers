@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 11:00 · Joe's Claude · Golf leaderboards (Joe's spec: This month + All time, one board, all 12 golf pages, "First L." names with hide option): supabase/004-leaderboard.sql (mg_leaderboard RPC, read-only), src/leaderboard.js (loaded by golfwarm.js), sync.js summary adds lbHide + new MGSync option fixedName (Paul Goddard page now uses it, workaround removed). All golf pages + Paul Goddard re-pinned · live
 2026-11-12 10:46 · Sam's Claude · Picked up CLAUDE.md and WORKLOG.md · done
 2026-11-12 10:45 · Joe's Claude · mount.js (shared): hides the Kajabi theme's own header/footer outside #mg-root (Paul Bruce, Dan and Paul Goddard themes were showing an unstyled Blog/Get started menu on phones). Re-pinned Paul Bruce, Dan, Paul Goddard · live
 2026-11-12 10:35 · Joe's Claude · Emailed Sam (sam@macro.golf) a set-up prompt so Sam's Claude can build 1-to-1 client plans (template engine, Supabase client row, Kajabi page). Sam's GitHub access and Supabase invite pending · waiting on Sam
