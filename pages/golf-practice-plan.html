@@ -1248,6 +1248,8 @@ document.addEventListener("click",e=>{const t=e.target.closest("[data-act]");if(
    plan {t, from, missing, sessions, mins, target, week:[{games,mins}], chosen, start, retestWeeks}, weeks {"YYYY-MM-DD": [session index done]}
    ===================================================================== */
 let hview="home";
+/* My Practice front door (pages/my-practice.html) can ask to open straight on the one-off session builder */
+try{if(localStorage.getItem("mgprac:start")==="build"){localStorage.removeItem("mgprac:start");hview="build"}}catch(e){}
 const PG=()=>{const s=window.S;s.practice=s.practice||{};return s.practice};
 const GAME_URL={holeout:"p-151044",insanity:"p-208731",ms12:"p-529063",ms24:"p-529063",bank:"p-472096",par18:"p-615974",darts:"p-386417",lava:"p-740258",corridor:"p-937452",strikes:"p-863140"};
 const GAME_AREA={holeout:"putt",insanity:"putt",ms12:"putt",ms24:"putt",bank:"short",par18:"short",darts:"app",lava:"app",corridor:"drive",strikes:"drive"};
