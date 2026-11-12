@@ -3,6 +3,7 @@
 Shared log between Joe's Claude and Jack's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 10:28 · Jack's Claude · Lava rename live: p-740258 + Putting/Short/Long tests re-pinned to 8826d04 (contains dd4f926), Kajabi page title now Lava · done
 2026-11-12 10:35 · Jack's Claude · Renamed Left Is Lava to "Lava" (Jack's call): page text, share card, report, test suggestions, Kajabi page title, CLAUDE.md/README rows. File, plan code and data unchanged (still golf-left-is-lava) so saved games carry over. VidApp item name not changed (Joe's builder). · live
 2026-11-12 09:10 · Jack's Claude · Strokes gained accuracy pass (Jack's call): putting by distance only, no slope/break adjustment (src/golf-sg.js puttSG, Putting Test, Hole Out, Insanity); tee shots entered as TOTAL distance + offline (Driver Corridor, Long Game Test, Paul Goddard); approaches valued from the fairway number; start-screen choice of carry + offline or distance from pin (Wedge Darts, Left Is Lava, Long Game Test, Paul Goddard). Shared file: src/golf-sg.js (golf only, backward compatible). All 12 golf pages + Paul Goddard re-pinned to dd4f926 (contains fde58bd) · live
 2026-11-12 08:40 · Joe's Claude · Demo video matches for Sam McDowell, Luis Vega, Rob Seeley (confirmed by Joe) in videos.js; re-pinned those 3 pages · live
