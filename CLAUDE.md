@@ -47,6 +47,8 @@ If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude h
 | `src/golfwarm.js` | Golf pages: Express 5-minute warm-up card. Also "How to play" for games with a video. |
 | `src/golf-sg.js` | Golf pages: strokes gained. |
 
+**My Plan (live).** www.macro.golf/my-plan: one email + PIN log-in for every 1-to-1 plan (first time adds the 6-digit plan code). It loads the loader live on the client's own page, so keep each client's page pinned as usual. New client plans need nothing extra; see README.
+
 **Golf leaderboards (live).** Each golf page exposes `window.MG_SCORE()`; `summary()` sends it as `_mgSummary.golf` plus `lbHide`. `src/leaderboard.js` (loaded by `golfwarm.js`) shows a Leaders tab with This month / All time boards, read from the public read-only `mg_leaderboard` function (`supabase/004-leaderboard.sql`). `MGSync.init({…, fixedName:'Name'})` skips the name box on one-person plans.
 
 ## Live Kajabi pages (site 2147673115)
@@ -81,6 +83,7 @@ If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude h
 | Rob Seeley (template build) | p-741365 | 2168241904 | plan / mg_loader |
 | Colin Howard (template build) | p-576900 | 2168250329 | plan / mg_loader |
 | Paul Goddard golf plan | p-482615 | 2168242786 | game / loader |
+| My Plan log-in (all 1-to-1 plans, `pages/my-plan.html`) | my-plan | 2168251504 | plan / mg_loader |
 | Build My Plan (app users, `clients/build-my-plan.js` + `src/plan-builder.js`) | p-258147 | 2168251525 | plan / mg_loader |
 
 

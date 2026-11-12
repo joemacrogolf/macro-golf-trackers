@@ -52,6 +52,18 @@ Reset a forgotten PIN (client sets a new one on next open):
 update public.mg_clients set pin_hash = null, fails = 0, locked_until = null where code = '<code>';
 ```
 
+## My Plan log-in (`pages/my-plan.html`, www.macro.golf/my-plan)
+
+One page for every 1-to-1 client plan (the VidApp "My Plan" button). Not the same as Build My Plan.
+- First time: email + plan code (the 6-digit code, e.g. 576900) + PIN. That links the email to the plan. If the client already set a PIN on their personal page, they use that PIN.
+- After that: email + PIN. The device remembers them, so the button opens straight into their plan.
+- It loads whatever loader is live on the client's own Kajabi page (`/p-<code>`, or `mg_clients.path` when different, e.g. Kevin `w-849288`), so new clients work without touching My Plan.
+- Welcome message for a new client: "Open My Plan in the app, enter your email, tap First time here?, then your plan code <code> and a 4-digit PIN."
+- Database: `supabase/005-myplan.sql` (`mg_clients.email`, `mg_clients.path`, `mg_myplan()`). Coaches don't need to enter emails. To fix a wrong one:
+```sql
+update public.mg_clients set email = null where code = '<code>';   -- client links again with the plan code
+```
+
 ## Hosted pages (`pages/` + `src/mount.js`)
 
 Full tracker pages live in `pages/`. A Kajabi Custom Code block only needs:
