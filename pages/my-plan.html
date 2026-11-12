@@ -9,9 +9,10 @@
 .mp *{box-sizing:border-box}
 .mp-in{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px}
 .mp-k{font-weight:700;font-size:12px;letter-spacing:2.4px;text-transform:uppercase;color:#FFD900}
-.mp-h{font-family:'Anton',Impact,'Arial Narrow Bold',sans-serif;font-weight:400;text-transform:uppercase;font-size:44px;line-height:.98;margin:0}
+.mp .mp-h{font-family:'Anton',Impact,'Arial Narrow Bold',sans-serif!important;font-weight:400!important;text-transform:uppercase;font-size:48px!important;line-height:.98!important;letter-spacing:.2px!important;margin:0!important;color:#F4F1EA!important}
 .mp-bar{width:74px;height:6px;background:#FFD900}
-.mp-p{margin:0;color:#cfcabd;font-size:15px;line-height:1.5}
+.mp .mp-p{margin:0!important;color:#cfcabd;font-size:15px;line-height:1.5}
+.mp .mp-err,.mp .mp-help{margin-bottom:0!important}
 .mp form{display:flex;flex-direction:column;gap:12px;margin-top:6px}
 .mp label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:13px;letter-spacing:.3px;color:#F4F1EA}
 .mp input{min-height:50px;padding:0 14px;border:1px solid rgba(244,241,234,.35);background:#141414;color:#F4F1EA;font:500 17px 'Inter',system-ui,sans-serif;border-radius:0;width:100%}
@@ -34,7 +35,7 @@
     <div class="mp-k">Macro Golf</div>
     <h1 class="mp-h">My Plan</h1>
     <div class="mp-bar"></div>
-    <p class="mp-p">Log in to open your personal training plan.</p>
+    <p class="mp-p">Log in to open your personal plan.</p>
     <form id="mp-form" novalidate>
       <label>Email<input name="email" type="email" autocomplete="email" inputmode="email" required></label>
       <label>PIN<input name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" autocomplete="current-password" required placeholder="4 digits"></label>

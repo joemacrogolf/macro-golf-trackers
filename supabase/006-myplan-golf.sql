@@ -1,10 +1,10 @@
 -- 006: My Plan also opens golf personal plans (email + PIN pages like Paul Goddard's).
 -- Each golf personal plan gets a registry row in mg_clients: code = its 6-digit Kajabi page number,
--- kind = 'golf', plan = the page name (e.g. golf-paul-goddard). The registry row holds no data and no PIN.
+-- kind = 'golf', plan = the page name (e.g. golf-paul-goddard). The registry row holds no data and a random PIN nobody knows.
 -- The PIN and the saved games stay on the page's own email + PIN row ('pure:<plan>:<email>'), exactly as before.
 -- First time: email + plan code + PIN links the email to the registry row (and sets the PIN if the client is new).
 -- Add a new golf personal plan:
---   insert into public.mg_clients(code, name, plan, kind) values ('<page number>', '<Full Name>', '<page name>', 'golf');
+--   insert into public.mg_clients(code, name, plan, kind, pin_hash) values ('<page number>', '<Full Name>', '<page name>', 'golf', crypt(gen_random_uuid()::text, gen_salt('bf')));
 
 alter table public.mg_clients add column if not exists kind text;   -- null = 1-to-1 plan, 'golf' = golf personal plan registry row
 

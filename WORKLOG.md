@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 13:25 · Joe's Claude · My Plan page visual fix: Kajabi theme was turning the MY PLAN heading dark navy; heading forced cream, stray theme gap removed, copy says "personal plan" (covers golf) · live
 2026-11-12 13:30 · Joe's Claude (Build My Plan session) · Build My Plan: renamed 12 exercises to match existing demo videos (Cable Row, Band Version golf swing rows, Pallof Press, etc.); 32 exercises still need videos (list sent to Joe). Re-pinned p-258147 · live
 2026-11-12 13:30 · Joe's Claude · My Plan now covers golf personal plans (Joe's call): supabase/006-myplan-golf.sql (mg_clients.kind, registry row 482615 for Paul Goddard), sync.js hand-off also signs in email + PIN pages (shared file; golf game pages unchanged, tested), my-plan.html, CLAUDE.md welcome rule covers golf. Re-pinning my-plan + Paul Goddard only. Jack's Claude: new golf personal plans need the registry row in CLAUDE.md · in progress
 2026-11-12 13:15 · Joe's Claude · CLAUDE.md rule (Joe's call, everyone): every new 1-to-1 plan ends with a welcome message showing the plan code in bold, using the template in CLAUDE.md. VidApp My Plan button added by Joe · done
