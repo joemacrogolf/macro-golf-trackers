@@ -678,7 +678,7 @@ function chipCls(p){return p===3?"s3":p===1?"s1":p===0?"s0":p===-1?"sm1":"sm2"}
    Safe = that far away on the safe side; Short = that far short on line; In the lava = at least 10.5 yds out on the lava side */
 var pres=null,pinMode=()=>S.inMode==="pin";
 function readInputs(){
-  if(pinMode()){const p=parseFloat($("carry").value),t=S.order[idx()];if(isNaN(p)||p<0||!pres)return {c:isNaN(p)?NaN:t,off:0,side:"C",ok:false,pin:p};
+  if(pinMode()){const p=parseFloat($("carry").value)/3,t=S.order[idx()];if(isNaN(p)||p<0||!pres)return {c:isNaN(p)?NaN:t,off:0,side:"C",ok:false,pin:p};
     if(pres==="short")return {c:Math.max(0,t-p),off:0,side:"C",ok:true,pin:p};
     if(pres==="lava")return {c:t,off:Math.max(p,10.5),side:S.lava,ok:true,pin:p};
     return {c:t,off:p,side:p===0?"C":(S.lava==="L"?"R":"L"),ok:true,pin:p}}
@@ -926,7 +926,7 @@ function boardVis(){const b=document.querySelector(".board");if(b)b.hidden=!(S.s
 boardVis();
 
 /* entry mode chosen on the start screen: carry + offline, or distance from pin */
-(function(){function paint(){var pm=pinMode();$("carryLbl").textContent=pm?"Distance from pin (yds)":"Carry (yds)";$("carry").placeholder=pm?"e.g. 6.5":"e.g. 131.4";$("offWrap").hidden=pm;$("dirWrap").hidden=pm;$("resWrap").hidden=!pm;
+(function(){function paint(){var pm=pinMode();$("carryLbl").textContent=pm?"Distance from pin (ft)":"Carry (yds)";$("carry").placeholder=pm?"e.g. 20":"e.g. 131.4";$("offWrap").hidden=pm;$("dirWrap").hidden=pm;$("resWrap").hidden=!pm;
     var lk=S.shots.length>0;document.querySelectorAll("#gMode button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.v===(S.inMode||"lm")));b.disabled=lk&&b.dataset.v!==(S.inMode||"lm")})}
   document.querySelectorAll("#gMode button").forEach(function(b){b.addEventListener("click",function(){if(S.shots.length)return;S.inMode=b.dataset.v;save();paint();updatePreview()})});
   [["resSafe","safe"],["resShort","short"],["resLava","lava"]].forEach(function(x){$(x[0]).addEventListener("click",function(){pres=x[1];updatePreview()})});

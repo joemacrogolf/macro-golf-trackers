@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 11:20 · Jack's Claude · Distance from pin now typed in feet (Wedge Darts, Lava, Long Game Test, Paul Goddard); Wedge Darts yardages in a mixed order with no 10-yd steps · live
 2026-11-12 11:01 · Joe's Claude · VidApp: Publish To Live Apps pressed (Joe's call). Members get the direct-link Practice games next time they open the app · live
 2026-11-12 11:05 · Joe's Claude · VidApp: pressed Publish To Preview (Joe's call) so the direct-link Practice games reach the preview app. Did NOT press Publish To Live Apps. Sam invited to Supabase (Developer, pending his accept); SamMacroGolf already a GitHub collaborator · done
 2026-11-12 11:05 · Sam's Claude · Built Colin Howard 1-to-1 plan (clients/colin-howard.js, code 576900, 2 workouts, daily mobility, gratitude journal habit). Pushed, tested in Playwright. Not on Kajabi yet; waiting on Sam to confirm assumptions and 5 demo video matches · built

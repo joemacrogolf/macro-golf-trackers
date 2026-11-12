@@ -679,7 +679,7 @@ function makeShot(cat,set){
 
 /* ---------- State ---------- */
 var S,dir=null,pen=false;
-/* approach entry mode: "lm" = carry + offline, "pin" = distance from the pin (yds). Tee shots: total distance + offline. */
+/* approach entry mode: "lm" = carry + offline, "pin" = distance from the pin (typed in ft, kept in yds). Tee shots: total distance + offline. */
 var pinMode=s=>S.appMode==="pin"&&s&&s.kind==="app";
 function blank(){return {player:"",target:"10",len:"full",set:{drv:240,fw:210},started:false,shots:[],res:[],history:[],saved:false,notes:""}}
 function save(){try{localStorage.setItem("macroLGT",JSON.stringify(S))}catch(e){}}
@@ -763,13 +763,13 @@ function renderEntry(){
   if(s.kind==="app"){$("distTxt").innerHTML=`${s.d}<small>yds</small>`;$("shotName").textContent=shotTitle(s);$("shotFacts").innerHTML=["Fairway lie","Target "+s.d+" yds"].map(x=>`<span>${x}</span>`).join("")}
   else{$("distTxt").innerHTML=`${s.L}<small>yd hole</small>`;$("shotName").textContent=shotTitle(s);$("shotFacts").innerHTML=[s.club,"Fairway "+(s.fwHalf*2)+" yds wide"].concat(s.haz&&s.haz.type==="bunker"?["Bunker "+s.haz.from+"–"+s.haz.to+" yds out"]:[]).map(x=>`<span>${x}</span>`).join("")}
   $("holeViz").innerHTML=holeSVG(s);
-  const pm=pinMode(s);$("carryLbl").textContent=pm?"Distance from pin (yds)":s.kind==="app"?"Carry (yds)":"Total distance (yds)";
-  $("carry").placeholder=pm?"e.g. 7.5":s.kind==="app"?"e.g. 148.2":"e.g. 255";
+  const pm=pinMode(s);$("carryLbl").textContent=pm?"Distance from pin (ft)":s.kind==="app"?"Carry (yds)":"Total distance (yds)";
+  $("carry").placeholder=pm?"e.g. 22":s.kind==="app"?"e.g. 148.2":"e.g. 255";
   $("offWrap").hidden=pm;$("dirWrap").hidden=pm;$("penWrap").hidden=!(pm&&s.haz&&s.haz.type!=="bunker");
   $("penN").setAttribute("aria-pressed",String(!pen));$("penY").setAttribute("aria-pressed",String(pen));
   updateEnter();
 }
-function readIn(){const s=S.shots[n()];if(pinMode(s)){const p=parseFloat($("carry").value);return {pin:p,ok:p>=0}}
+function readIn(){const s=S.shots[n()];if(pinMode(s)){const p=parseFloat($("carry").value)/3;return {pin:p,ok:p>=0}} /* typed in feet, kept in yards */
   const c=parseFloat($("carry").value),o=parseFloat($("off").value),off=isNaN(o)?0:Math.abs(o);const side=off===0?"C":dir;return {c,off,side,ok:c>0&&(off===0||side==="L"||side==="R")}}
 /* a distance-from-pin result is stored as the same carry/offline pair it implies (short by that much, on line),
    or, in the hazard, wide on the hazard side, so every score and picture uses one model */
@@ -815,7 +815,7 @@ function renderCard(){
   if(!S.started||!n()){$("card").innerHTML=`<tr><td class="l muted">Each shot appears here with its strokes gained against your target.</td></tr>`;return}
   let h=`<thead><tr><th>#</th><th class="l">Shot</th><th>Dist</th><th>Off</th><th class="l">Result</th><th>SG</th></tr></thead><tbody>`;
   S.res.forEach((r,i)=>{const s=S.shots[i],x=shotSG(s,r.c,r.o,tn());
-    h+=`<tr><td>${i+1}</td><td class="l">${s.kind==="app"?s.d+" yds":s.L+" yd hole"}</td><td>${r.pin!=null?r.pin.toFixed(1)+" to pin":r.c.toFixed(1)}</td><td>${r.pin!=null?"\u2013":Math.abs(r.o).toFixed(1)+(r.o<0?"L":r.o>0?"R":"")}</td><td class="l">${x.st.desc}</td><td class="${x.sg>=0?"up":"down"}"><b>${fmt2(x.sg)}</b></td></tr>`});
+    h+=`<tr><td>${i+1}</td><td class="l">${s.kind==="app"?s.d+" yds":s.L+" yd hole"}</td><td>${r.pin!=null?Math.round(r.pin*3)+" ft to pin":r.c.toFixed(1)}</td><td>${r.pin!=null?"\u2013":Math.abs(r.o).toFixed(1)+(r.o<0?"L":r.o>0?"R":"")}</td><td class="l">${x.st.desc}</td><td class="${x.sg>=0?"up":"down"}"><b>${fmt2(x.sg)}</b></td></tr>`});
   $("card").innerHTML=h+"</tbody>";
 }
 function renderHist(){

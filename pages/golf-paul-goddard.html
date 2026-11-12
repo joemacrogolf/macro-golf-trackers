@@ -492,6 +492,9 @@ var $=function(id){return document.getElementById(id)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 var ri=function(a,b){return a+Math.floor(Math.random()*(b-a+1))};
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+/* random order with no 10-yd steps between neighbours (so it never runs 90, 80, 70...) */
+function mixed(a,prev){for(var n=0;n<500;n++){var s=shuffle(a);var ok=prev==null||Math.abs(s[0]-prev)!==10;for(var i=1;ok&&i<s.length;i++)if(Math.abs(s[i]-s[i-1])===10)ok=false;if(ok)return s}return shuffle(a)}
+
 function pick(a){return a[Math.floor(Math.random()*a.length)]}
 var sgf=function(x){return (x>=0?"+":"−")+Math.abs(x).toFixed(2)};
 function iso(d){var z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)}
@@ -529,7 +532,7 @@ function rangeBlocks(){
   B.push({t:"tick",id:"down",grp:grp,title:"Warm down",mins:3,lines:["Three balls with your full on-course routine. New target and new club every ball.","Finish on a shot you like."]});
   return B}
 function practiceBlocks(){
-  var grp="Range practice",B=warmBlocks(grp),plan=[];for(var r=0;r<3;r++)plan=plan.concat(shuffle([50,60,70,80,90,100]));
+  var grp="Range practice",B=warmBlocks(grp),plan=[];for(var r=0;r<3;r++)plan=plan.concat(mixed([50,60,70,80,90,100],plan.length?plan[plan.length-1]:null));
   B.push({t:"wd",id:"wd",grp:grp,title:"Wedge Darts",mins:25,plan:plan,res:[],
     lines:["3 rounds of 6 balls. Balls 1 to 5: hit the number on screen. Ball 6 is the finisher: pick your own target.","Score a zone when the ball is inside it both ways: 3 pts within 3 yds, 2 within 6, 1 within 9. More than 8 yds offline scores 0.","Finisher: a 3 doubles to 6 and a 0 costs 3. Enter carry and offline from the launch monitor."]});
   B.push({t:"tick",id:"down",grp:grp,title:"Warm down",mins:3,lines:["Three balls with your full on-course routine. New target and new club every ball.","Finish on a shot you like."]});
@@ -614,7 +617,7 @@ function act(a,v){var b=cur();
   if(a==="face"){if(b.res.length<b.balls)b.res.push(v);save();render();return}
   if(a==="faceUndo"){b.res.pop();save();render();return}
   if(a==="lm"){var c=parseFloat($("carryIn").value),o=parseFloat(($("offIn")||{}).value),pin=null;
-    if(pinOn(b)){pin=c;if(!(pin>=0))return;var dd=b.t==="app"?b.ds[b.res.length]:(wdFin(b.res.length)?(+$("finPick").value||b.plan[b.res.length]):b.plan[b.res.length]);c=Math.max(0,dd-pin);o=0}
+    if(pinOn(b)){pin=c/3;if(!(pin>=0))return; /* typed in feet, kept in yards */var dd=b.t==="app"?b.ds[b.res.length]:(wdFin(b.res.length)?(+$("finPick").value||b.plan[b.res.length]):b.plan[b.res.length]);c=Math.max(0,dd-pin);o=0}
     else{if(!(c>0)||isNaN(o))return;if(S.side==="L")o=-Math.abs(o);else o=Math.abs(o)}
     if(b.t==="drive"){var k=b.res.length,h=b.holes[k];b.res.push({tot:c,carry:c,off:o});var aft=driveAfter(+GOAL,h,{tot:c,off:o});sgFlash({k:"drive",h:h,tot:c,carry:c,off:o},"Hole "+(k+1)+" · "+Math.round(c)+" total · "+aft.lie)}
     else if(b.t==="app"){var m=b.res.length,d=b.ds[m];b.res.push(pin!=null?{carry:c,off:o,pin:pin}:{carry:c,off:o});var px=Math.sqrt((c-d)*(c-d)+o*o);sgFlash({k:"app",d:d,carry:c,off:o},d+" yds · finished "+Math.round(px*3)+" ft away")}
@@ -745,7 +748,7 @@ function nextBtn(){var b=cur(),last=S.cur.bi===S.cur.blocks.length-1,done=blockD
 function blockDone(b){return b.t==="tick"?true:b.t==="count"?b.res.length>=b.total:b.t==="holeout"?b.res.length>=b.putts.length:b.t==="money"?b.res.length>=b.st.length:
   b.t==="ladder"?(b.res.length&&b.res[b.res.length-1].c>=70):b.t==="strike"?b.res.length>=b.balls:b.t==="drive"?b.res.length>=b.holes.length:b.t==="app"?b.res.length>=b.ds.length:b.t==="wd"?b.res.length>=b.plan.length:false}
 function lmInputs(eg){var b=cur(),drv=b&&b.t==="drive";
-  if(pinOn(b))return '<div class="viz" id="pic">'+shotPic(b)+'</div><div class="fields"><label style="grid-column:1/-1"><span class="label">Distance from pin (yds)</span><input id="carryIn" inputmode="decimal" placeholder="e.g. 6.5"></label></div>'+
+  if(pinOn(b))return '<div class="viz" id="pic">'+shotPic(b)+'</div><div class="fields"><label style="grid-column:1/-1"><span class="label">Distance from pin (ft)</span><input id="carryIn" inputmode="decimal" placeholder="e.g. 18"></label></div>'+
     '<p class="preview">Enter the distance from the pin on the launch monitor.</p><div class="btns"><button class="primary" data-act="lm">Score shot</button>'+(b.res.length?'<button class="ghost" data-act="undo">Undo</button>':"")+"</div>";
   return '<div class="viz" id="pic">'+shotPic(b)+'</div><p class="preview" style="margin:0">The ball moves as you type the numbers.</p><div class="seg"><button data-act="side" data-v="L" aria-pressed="'+(S.side==="L")+'">Offline left</button><button data-act="side" data-v="R" aria-pressed="'+(S.side!=="L")+'">Offline right</button></div>'+
   '<div class="fields"><label><span class="label">'+(drv?"Total distance (yds)":"Carry (yds)")+'</span><input id="carryIn" inputmode="decimal" placeholder="e.g. '+eg+'"></label><label><span class="label">Offline (yds)</span><input id="offIn" inputmode="decimal" placeholder="e.g. 3.2"></label></div>'+
