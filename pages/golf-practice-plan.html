@@ -255,6 +255,7 @@ td.r,th.r{text-align:right}
 </div>
 
 <script src="{{BASE}}src/golf-art.js"></script>
+<script src="{{BASE}}src/golf-numbers.js"></script>
 <script id="mgplanLib">/* =====================================================================
    Macro Golf plan engine
    Turns test results + the pre-test audit into a weekly practice plan,
@@ -1501,7 +1502,7 @@ function welcomeCard(){const P=PG(),p=P.plan,G=goalsOf(p),wk=weekNo(),W=p.retest
       <div class="gbar" aria-label="${o}% likely"><i style="width:${o}%"></i></div><small class="gp">${o}% likely · ${minsDoneOn(g.key)} of ${g.mins*W} practice minutes done</small></li>`}).join("")}</ul>
    <details class="ghow"><summary>How these goals work</summary><p>Each number is strokes gained a round against a ${T} player, from your tests. Minus means it's costing you shots. A gap of half a shot or less, we aim to close completely. A bigger gap, we aim to halve it in ${W} weeks. That's a realistic step, and the next ${W} weeks take it further.</p><p>Your goals change with your tests. One player might need wedges from 100–150 yds, another 150–175 yds and their short putts. When you retest, you'll see which goals you hit and get new ones.</p><p>The chance goes up as you complete sessions that work on each goal. It's a guide to how much of the work you've put in, not a promise.</p></details></section>`}
 function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,next=p.week.findIndex((_,i)=>!done.includes(i)),wk=weekNo(),retest=wk>p.retestWeeks;
-  let h=welcomeCard()+`<div class="board"><div><span class="label">${wk>p.retestWeeks?"Your "+p.retestWeeks+" week plan is done":"This week"}</span><div class="big tnum">${done.length}<small style="font-size:.4em;color:var(--on-ink-muted)"> / ${n}</small></div></div>
+  let h=welcomeCard()+(window.MGNumbers?(MGNumbers.css(),MGNumbers.sgCard(testEntries(),{empty:false})):"")+`<div class="board"><div><span class="label">${wk>p.retestWeeks?"Your "+p.retestWeeks+" week plan is done":"This week"}</span><div class="big tnum">${done.length}<small style="font-size:.4em;color:var(--on-ink-muted)"> / ${n}</small></div></div>
    <div class="side"><span class="label">Sessions</span><b>${n} × ${p.mins} min</b></div>
    <div class="prog">${p.week.map((_,i)=>`<i class="${done.includes(i)?"on":i===next?"cur":""}"></i>`).join("")}</div>
    <div class="bstat">${next<0?"Every session done this week. That's how you get better.":done.length?`${n-done.length} to go this week. Keep it going.`:`You've got ${n} practice session${n===1?"":"s"} this week. Pick whichever suits today.`}</div></div>`;
