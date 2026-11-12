@@ -24,7 +24,7 @@ After sign-in:
 3. **No plan yet** → **Build a plan** (Build My Plan questionnaire, `build-my-plan`). No ready-made choice: Joe has decided the six Pure plans are obsolete.
 4. **Existing Pure plan user** → "Continue your current plan" (history intact) plus **Build a new plan**. Pure pages stay live for them; don't delete any page without asking Joe.
 
-### My Practice (`pages/my-practice.html`, new; content by Jack)
+### My Practice (`pages/my-practice.html`, BUILT 2026-11-12 on Jack's Practice Plan p-274816: Kajabi draft `my-practice`)
 After sign-in:
 1. **1-to-1 client whose plan includes practice** → same message as above, button to their 1-to-1 plan. If their plan doesn't include practice, they use My Practice like everyone else.
 2. **First time:** **Build a plan** (a weekly practice plan) or **Build a session** (just today).

@@ -134,6 +134,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | My Plan log-in (all 1-to-1 and golf personal plans, `pages/my-plan.html`) | my-plan | 2168251504 | plan / mg_loader |
 | Build My Plan (app users, `clients/build-my-plan.js` + `src/plan-builder.js`) | p-258147 | 2168251525 | plan / mg_loader |
 | My Training front door (`pages/my-training.html`, uses `mg_whoami` from `supabase/007-whoami.sql`; draft, not in app yet) | my-training | 2168255763 | plan / mg_loader |
+| My Practice front door (`pages/my-practice.html`, opens Practice Plan p-274816; uses `mg_whoami`; draft, not in app yet) | my-practice | 2168256020 | plan / mg_loader |
 
 
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)
