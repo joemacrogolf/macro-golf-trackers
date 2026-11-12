@@ -56,7 +56,7 @@ begin
     if nm is null and r.name is not null then nm := split_part(r.name, ' ', 1); end if;
     if r.code like 'pure:%' then
       plans := plans || jsonb_build_array(jsonb_build_object('plan', split_part(r.code, ':', 2), 'since', r.created_at,
-        'hasPlan', coalesce((select (st.data->'practice'->'plan') is not null from public.mg_state st where st.code = r.code), false)));
+        'hasPlan', coalesce((select jsonb_typeof(st.data->'practice'->'plan') = 'object' from public.mg_state st where st.code = r.code), false)));
     elsif one is null then
       one := jsonb_build_object('code', r.code, 'path', coalesce(r.path, 'p-' || r.code),
                                 'includes', coalesce(to_jsonb(r.includes), '["training"]'::jsonb));
