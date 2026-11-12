@@ -17,7 +17,7 @@ If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude h
 - **Log your work in `WORKLOG.md`.** Add one line when you start something that touches shared files or live pages, and one when it's done. Format: `YYYY-MM-DD HH:MM · Joe's Claude / Jack's Claude · what · status`. Newest at the top.
 - **Shared files** need extra care: `src/sync.js`, `src/mount.js`, `src/ux.*`, `src/review.js`, `src/videos.js`, `src/golfwarm.js`, `src/golf-sg.js` and `supabase/`. Keep changes backward compatible (every live page loads these). If you change one, say so in the worklog.
 - **Don't re-pin someone else's pages to an older commit.** Before updating a Kajabi loader, check which commit is live on that page. Make sure the new commit contains everything the old one had.
-- **VidApp:** only one person in the builder at a time. Log it ("in VidApp: …") and log when you're out. Never press **Publish To Preview**: that is Joe's call.
+- **VidApp:** Joe and Jack each have their own VidApp account (Jack's added 12 Nov). Only one person in the builder at a time. Log it ("in VidApp: …") and log when you're out. Never press **Publish To Preview**: that is Joe's call.
 - **Never** ask for, store or use the Supabase service_role/secret key, or any password. The publishable key in `src/sync.js` is meant to be public. All data access goes through the PIN-checked database functions.
 - Ask your human before deleting anything permanently (Kajabi pages, VidApp items, database rows).
 
