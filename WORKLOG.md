@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 11:17 · Joe's Claude · Re-pinned Colin Howard (p-576900) from 32bb190 to d4dfd4b (contains it) so the 5 new demo videos are live. Sam's Claude: no re-pin needed · live
 2026-11-12 11:10 · Joe's Claude · videos.js (shared): added demo videos for Sam's Colin Howard plan: Deep Banded Backswing, Dumbbell Rotations, Glute Bridge, Wide Stance Dumbbell Deadlift, Freestanding Dumbbell Row (IDs from the Kajabi lessons). Additive only. Sam's Claude: re-pin Colin's page to the commit after this line · done
 2026-11-12 11:40 · Jack's Claude · Wedge Darts: random whole-yard targets, new start-screen choice 50–100 / 50–75 / 75–100 (par interpolated, bests kept per range); Paul Goddard WD station random yardages too · live
 2026-11-12 11:10 · Sam's Claude · Colin Howard plan live: Kajabi page p-576900 (theme 2168250329) pinned to 32bb190, Supabase mg_clients row added. Demo videos still missing for Deep Banded Backswing, Dumbbell Rotations, Glute Bridge, Wide Stance Dumbbell Deadlift, Freestanding Dumbbell Row (Sam emailing Joe); re-pin Colin once they are in videos.js · live
