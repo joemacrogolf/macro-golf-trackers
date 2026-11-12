@@ -70,7 +70,7 @@ Full tracker pages live in `pages/`. A Kajabi Custom Code block only needs:
 | Pure Sequencing (gym / home) | `pure-sequencing-gym`, `pure-sequencing-home` |
 | Dan Jones / Harry / Kevin (1-to-1) | `dan-jones`, `harry`, `kevin` |
 | Coach dashboard | `coach` |
-| Golf games (Jack): Hole Out, Wedge Darts, Money Stealers, Left Is Lava, Par 18, Insanity, 3 Strikes, 50ft Bank, Driver Corridor | `golf-hole-out`, `golf-wedge-darts`, `golf-money-stealers`, `golf-left-is-lava`, `golf-par-18`, `golf-insanity`, `golf-three-strikes`, `golf-fifty-ft-bank`, `golf-driver-corridor` |
+| Golf games (Jack): Hole Out, Wedge Darts, Money Stealers, Lava, Par 18, Insanity, 3 Strikes, 50ft Bank, Driver Corridor | `golf-hole-out`, `golf-wedge-darts`, `golf-money-stealers`, `golf-left-is-lava`, `golf-par-18`, `golf-insanity`, `golf-three-strikes`, `golf-fifty-ft-bank`, `golf-driver-corridor` |
 | Golf tests (Jack): Putting, Short Game, Long Game | `golf-putting-test`, `golf-short-game-test`, `golf-long-game-test` |
 | Paul Goddard golf plan (Jack): round day warm-ups, range practice, SG vs scratch, weekly report | `golf-paul-goddard` |
 

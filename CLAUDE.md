@@ -66,7 +66,7 @@ If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude h
 | Hole Out | p-151044 | 2168233619 | holeout / loader |
 | Wedge Darts | p-386417 | 2168234180 | game / loader |
 | Money Stealers | p-529063 | 2168234181 | game / loader |
-| Left Is Lava | p-740258 | 2168234183 | game / loader |
+| Lava (was Left Is Lava; page golf-left-is-lava) | p-740258 | 2168234183 | game / loader |
 | Par 18 | p-615974 | 2168234184 | game / loader |
 | Insanity | p-208731 | 2168234188 | game / loader |
 | 3 Strikes | p-863140 | 2168234190 | game / loader |
