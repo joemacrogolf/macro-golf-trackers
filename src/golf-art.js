@@ -62,9 +62,7 @@ function holeSVG(s,ball){
     /* tee box */
     g+=`<rect x="138" y="${bot+1}" width="24" height="12" rx="3" fill="${C.fw2}"/><circle cx="144" cy="${bot+6}" r="2" fill="${C.white}"/><circle cx="156" cy="${bot+6}" r="2" fill="${C.white}"/>`;
     if(h){
-      if(h.type==="water"){const x1=X(sg*h.line),x2=sg<0?-4:W+4,yA=Y(L-5),yB=Y(Math.max(80,L*0.3)),a=[];for(let y=yA;y<=yB;y+=6)a.push([x1+sg*(3+2.5*Math.sin(y/13+ph)),y]);
-        const poly=[[x2,yA]].concat(a).concat([[x2,yB]]);g+=`<path d="${pth(poly)}" fill="${C.water}"/>`;for(let y=yA+14;y<yB-6;y+=22)g+=`<path d="M${(x1+x2)/2-10} ${y} q5 -3 10 0 t10 0" fill="none" stroke="${C.water2}" stroke-width="1.5"/>`;
-        for(let d=Math.max(80,L*0.3)+10;d<L-5;d+=35)g+=`<rect x="${x1-1.5}" y="${Y(d)-6}" width="3" height="10" fill="${C.red}"/>`;g+=T((x1+x2)/2,Y(L*0.55),"WATER",{s:10,halo:1})}
+      if(h.type==="water"){const x1=X(sg*h.line),x2=sg<0?-4:W+4,yA=Y(L-5),yB=Y(Math.max(80,L*0.3));g+=waterSVG(x1,sg,yA,yB,x2,ph);g+=T((x1+sg*8+x2)/2,Y(L*0.55),"WATER",{s:10,halo:1})}
       if(h.type==="ob"){const x1=X(sg*h.line);g+=`<line x1="${x1}" y1="${Y(L+10)}" x2="${x1}" y2="${Y(40)}" stroke="${C.white}" stroke-width="1.5" stroke-dasharray="2 6" opacity=".85"/>`;for(let d=60;d<L+10;d+=35)g+=`<rect x="${x1-1.5}" y="${Y(d)-7}" width="3" height="11" fill="${C.white}"/><rect x="${x1-1.5}" y="${Y(d)+3}" width="3" height="2" fill="${C.ink}" opacity=".5"/>`;
         g+=T(sg<0?x1-16:x1+16,Y(L*0.55),"OB",{s:10,halo:1})}
       if(h.type==="bunker"){const xi=X(sg*h.inner),xo=X(sg*h.outer),cy=(Y(h.from)+Y(h.to))/2,rx=Math.abs(xo-xi)/2,ry=(Y(h.from)-Y(h.to))/2,cx=(xi+xo)/2,a=[],l=[];
@@ -90,9 +88,7 @@ function holeSVG(s,ball){
   if(h){const x1=X(sg*h.line),x2=sg<0?-4:W+4;
     if(h.type==="ob"){g+=`<rect x="${Math.min(x1,x2)}" y="0" width="${Math.abs(x2-x1)}" height="${H}" fill="${C.deep}"/>`;for(let i=0;i<10;i++){const tx=x1+sg*(10+R()*(Math.abs(x2-x1)-10)),ty=R()*H,rr=6+R()*6;g+=`<circle cx="${tx}" cy="${ty}" r="${rr}" fill="${C.tree}"/><circle cx="${tx-rr*.25}" cy="${ty-rr*.25}" r="${rr*.6}" fill="${C.tree2}"/>`}
       g+=`<line x1="${x1}" y1="0" x2="${x1}" y2="${H}" stroke="${C.white}" stroke-width="1.5" stroke-dasharray="2 6" opacity=".85"/>`;for(let y=14;y<H;y+=34)g+=`<rect x="${x1-1.5}" y="${y}" width="3" height="11" fill="${C.white}"/>`;g+=T(x1+sg*16,cy+3,"OB",{s:10,halo:1})}
-    else{const a=[];for(let y=-4;y<=H+4;y+=6)a.push([x1+sg*(3+2.5*Math.sin(y/14+ph)),y]);g+=`<path d="${pth([[x2,-4]].concat(a).concat([[x2,H+4]]))}" fill="${C.water}"/>`;
-      for(let y=20;y<H-10;y+=26){const wx=(x1+sg*3+x2)/2;g+=`<path d="M${wx-10} ${y} q5 -3 10 0 t10 0" fill="none" stroke="${C.water2}" stroke-width="1.5"/>`}
-      for(let y=10;y<H;y+=34)g+=`<rect x="${x1-1.5}" y="${y}" width="3" height="10" fill="${C.red}"/>`;g+=T((x1+sg*3+x2)/2,cy+3,"WATER",{s:10,halo:1})}}
+    else{g+=waterSVG(x1,sg,-30,H+30,x2,ph);g+=T((x1+sg*8+x2)/2,cy+3,"WATER",{s:10,halo:1})}}
   g+=greenSVG(G,map,k,uid);
   const lab=s.d+" yds to the flag";g+=`<rect x="${cx-58}" y="${H-24}" width="116" height="18" rx="9" fill="rgba(0,0,0,.45)"/>`+T(cx,H-11.5,lab,{s:10,w:600});
   if(ball){const bx=Math.max(8,Math.min(W-8,X(ball.o))),by=Math.max(8,Math.min(H-8,Y(ball.c-s.d)));
@@ -103,17 +99,42 @@ function holeSVG(s,ball){
 function treeSVG(x,y,r){return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${LGC.tree}"/><circle cx="${(x-r*0.25).toFixed(1)}" cy="${(y-r*0.25).toFixed(1)}" r="${(r*0.6).toFixed(1)}" fill="${LGC.tree2}"/>`}
 /* trees scattered over a box, skipping anything keep(x,y) says to leave clear */
 function treesSVG(R,n,x0,x1,y0,y1,keep){let g="";for(let i=0;i<n;i++){const x=x0+R()*(x1-x0),y=y0+R()*(y1-y0),r=6+R()*6;if(keep&&keep(x,y,r))continue;g+=treeSVG(x,y,r)}return g}
-/* a water hazard bounded by a vertical line at x (pixels), running from y0 to y1, on side sg (-1 left, +1 right) out to xOut,
-   with a soft edge that only bulges INTO the water, ripples and red stakes on the line */
-function waterSVG(x,sg,y0,y1,xOut,ph,R){const a=[];for(let y=y0;y<=y1;y+=6)a.push([x+sg*(2+2*Math.sin(y/13+(ph||0))),y]);a.push([x+sg*2,y1]);
-  let g=`<path d="${pth([[xOut,y0]].concat(a).concat([[xOut,y1]]))}" fill="${LGC.water}"/>`,mid=(x+xOut)/2;
-  for(let y=y0+14;y<y1-6;y+=24)g+=`<path d="M${mid-10} ${y} q5 -3 10 0 t10 0" fill="none" stroke="${LGC.water2}" stroke-width="1.5"/>`;
-  for(let y=y0+8;y<y1-6;y+=34)g+=`<rect x="${x-1.5}" y="${y}" width="3" height="10" fill="${LGC.red}"/>`;return g}
+/* smooth path through points (Catmull-Rom as cubic Beziers) */
+function smooth(p){if(p.length<3)return "M"+p.map(q=>q[0].toFixed(1)+" "+q[1].toFixed(1)).join("L");let d=`M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
+  for(let i=0;i<p.length-1;i++){const a=p[Math.max(0,i-1)],b=p[i],c=p[i+1],e=p[Math.min(p.length-1,i+2)];
+    d+=`C${(b[0]+(c[0]-a[0])/6).toFixed(1)} ${(b[1]+(c[1]-a[1])/6).toFixed(1)} ${(c[0]-(e[0]-b[0])/6).toFixed(1)} ${(c[1]-(e[1]-b[1])/6).toFixed(1)} ${c[0].toFixed(1)} ${c[1].toFixed(1)}`}return d}
+var wid=0;
+/* ripples scattered over the water, away from the bank */
+function ripples(R,n,inside){let g="";for(let i=0,k=0;i<n&&k<n*6;k++){const x=R.x0+R()*(R.x1-R.x0),y=R.y0+R()*(R.y1-R.y0);if(!inside(x,y))continue;const w=6+R()*7;
+  g+=`<path d="M${(x-w).toFixed(1)} ${y.toFixed(1)} q${(w/2).toFixed(1)} -3 ${w.toFixed(1)} 0 t${w.toFixed(1)} 0" fill="none" stroke="${LGC.water2}" stroke-width="1.3" stroke-linecap="round" opacity="${(0.45+R()*0.4).toFixed(2)}"/>`;i++}return g}
+/* water to one side of a hazard line at x (pixels), from y0 to y1, on side sg (-1 left, +1 right) out to xOut.
+   The shoreline wanders only INTO the water (the line itself is where the penalty starts) and the ends are rounded off */
+function waterSVG(x,sg,y0,y1,xOut,ph,stakes){ph=ph||0;const id="gw"+(++wid),R0=Math.min(22,(y1-y0)/2.5),a=[];
+  const far=sg>0?Math.max(xOut,x+40):Math.min(xOut,x-40),span=Math.abs(far-x);
+  /* the bank all the way round: in from the far edge along the top, down the hazard side, back out along the bottom.
+     Every point sits on or inside the hazard area, so the picture never shows water where the ball would be safe */
+  const cap=(yE,dir,rev)=>{const q=[];for(let k=0;k<=8;k++){const u=k/8,xx=far+(x-far)*u*0.75,yy=yE+dir*(3+5*Math.sin(u*Math.PI*1.4+ph+(dir>0?0:2))*Math.sin(u*Math.PI)+R0*0.35*u*u);q.push([xx,yy])}return rev?q.reverse():q};
+  const top=y0>-20?cap(y0,1,false):[[far,y0]],bot=y1<9e3&&y1<y0+2000?cap(y1,-1,true):[[far,y1]];
+  for(let y=y0;y<=y1+0.01;y+=4){const dy=Math.min(y-y0,y1-y),end=dy<R0?R0-Math.sqrt(Math.max(0,R0*R0-(R0-dy)*(R0-dy))):0,
+    w=3.2+1.8*Math.sin(y/17+ph)+1.1*Math.sin(y/6.1+ph*2.3);a.push([x+sg*(w+end*(1+span/120)),y])}
+  const ring=top.concat(a.slice(2,-2)).concat(bot),path=smooth(ring)+"Z",shore=smooth(a);
+  let g=`<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${x}" y1="0" x2="${far}" y2="0"><stop offset="0" stop-color="#4fa3e2"/><stop offset=".3" stop-color="${LGC.water}"/><stop offset="1" stop-color="#1c5f9e"/></linearGradient></defs>`;
+  g+=`<path d="${path}" fill="url(#${id})"/><path d="${smooth(ring)}" fill="none" stroke="#bfe2f8" stroke-width="2" opacity=".75"/>`;
+  const R=rng(ph*1000+y0);R.x0=Math.min(x,far);R.x1=Math.max(x,far);R.y0=y0+R0;R.y1=y1-R0;
+  g+=ripples(R,Math.max(2,Math.round((y1-y0)/30)),(px,py)=>sg*(px-x)>16&&Math.abs(px-far)>8);
+  if(stakes!==false)for(let y=y0+R0;y<y1-R0;y+=34)g+=`<rect x="${x-1.5}" y="${y}" width="3" height="10" fill="${LGC.red}"/>`;return g}
+/* a burn across the hole between y1 (far bank) and y2 (near bank), x0 to x1, banks wander outward only */
+function creekSVG(x0,x1,y1,y2,ph){ph=ph||0;const id="gw"+(++wid),top=[],bot=[];
+  for(let x=x0;x<=x1+0.01;x+=6){top.push([x,y1-(1.6+1.2*Math.sin(x/21+ph)+0.7*Math.sin(x/7+ph*2))]);bot.push([x,y2+(1.6+1.2*Math.sin(x/25+ph*1.7)+0.7*Math.sin(x/8+ph))])}
+  let g=`<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d93d6"/><stop offset=".5" stop-color="#1f68a8"/><stop offset="1" stop-color="#3d93d6"/></linearGradient></defs>`;
+  const back=bot.slice().reverse();g+=`<path d="${smooth(top)}L${back[0][0]} ${back[0][1]}${smooth(back).replace(/^M[^C]*/,"")}Z" fill="url(#${id})"/>`;
+  g+=`<path d="${smooth(top)}" fill="none" stroke="#bfe2f8" stroke-width="1.6" opacity=".75"/><path d="${smooth(bot)}" fill="none" stroke="#bfe2f8" stroke-width="1.6" opacity=".75"/>`;
+  const R=rng(ph*1000+y1);R.x0=x0;R.x1=x1;R.y0=y1+3;R.y1=y2-3;g+=ripples(R,Math.round((x1-x0)/70),()=>true);return g}
 /* white OB stakes along a vertical line */
 function obSVG(x,y0,y1){let g=`<line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}" stroke="${LGC.white}" stroke-width="1.5" stroke-dasharray="2 6" opacity=".85"/>`;
   for(let y=y0+12;y<y1-8;y+=34)g+=`<rect x="${x-1.5}" y="${y}" width="3" height="11" fill="${LGC.white}"/><rect x="${x-1.5}" y="${y+11}" width="3" height="2" fill="${LGC.ink}" opacity=".5"/>`;return g}
 /* a bunker of any ellipse (pixels), with a darker lip */
 function bunkerSVG(cx,cy,rx,ry,ph){const a=[],l=[];for(let i=0;i<40;i++){const u=i/40*TAU,w=1+0.08*Math.sin(3*u+(ph||0));a.push([cx+rx*w*Math.cos(u),cy+ry*w*Math.sin(u)]);l.push([cx+(rx*w+2)*Math.cos(u),cy+(ry*w+2)*Math.sin(u)])}
   return `<path d="${pth(l)}" fill="${LGC.lip}"/><path d="${pth(a)}" fill="${LGC.sand}"/>`}
-window.GART={TAU,C:LGC,rng,pth,r3,gRad,circleG,gOf,makeGreen,gEdge,bunkC,inBunker,gReach,text:svgT,greenSVG,ballSVG,holeSVG,treeSVG,treesSVG,waterSVG,obSVG,bunkerSVG};
+window.GART={TAU,C:LGC,rng,pth,r3,gRad,circleG,gOf,makeGreen,gEdge,bunkC,inBunker,gReach,text:svgT,greenSVG,ballSVG,holeSVG,treeSVG,treesSVG,waterSVG,creekSVG,smooth,obSVG,bunkerSVG};
 })();

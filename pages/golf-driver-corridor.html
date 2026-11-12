@@ -483,8 +483,7 @@ function pic(h,shot,ghost){
     if(z.t==="water"){const sg=z.side==="R"?1:-1;
       o.push(GART.waterSVG(X(z.x),sg,Y(z.d2),Y(z.d1),sg>0?W+4:-4,ph));
       o.push(`<text x="${z.side==="R"?X(z.x)+6:X(z.x)-6}" y="${Y(z.d1)-6}" fill="#fff" font-family="Inter,sans-serif" font-weight="700" font-size="10" text-anchor="${z.side==="R"?"start":"end"}">${Math.round(z.d1)}–${Math.round(z.d2)}</text>`)}
-    if(z.t==="creek"){const y1=Y(z.d2),y2=Y(z.d1),a=[],b=[];for(let x=-4;x<=W+4;x+=8){a.push([x,y1+1.5*Math.sin(x/19+ph)]);b.push([x,y2-1.5*Math.sin(x/23+ph)])}
-      o.push(`<path d="${GART.pth(a.concat(b.reverse()))}" fill="${AC.water}"/>`);for(let x=20;x<W;x+=60)o.push(`<path d="M${x} ${(y1+y2)/2} q5 -2.5 10 0 t10 0" fill="none" stroke="${AC.water2}" stroke-width="1.3"/>`);
+    if(z.t==="creek"){o.push(GART.creekSVG(-6,W+6,Y(z.d2),Y(z.d1),ph));
       o.push(`<text x="8" y="${Y(z.d2)-5}" fill="#fff" font-family="Inter,sans-serif" font-weight="700" font-size="10">BURN ${Math.round(z.d1)}–${Math.round(z.d2)}</text>`)}
     if(z.t==="bunker"){o.push(GART.bunkerSVG(X(z.x),Y(z.d),z.rx*3,Math.max(4,z.ry*k),ph+z.x));
       if(z.d<h.len-25)o.push(`<text x="${X(z.x)}" y="${Y(z.d)+3.5}" fill="#6b5a2a" font-family="Inter,sans-serif" font-weight="700" font-size="9.5" text-anchor="middle">${Math.round(z.d-z.ry)}–${Math.round(z.d+z.ry)}</text>`)}
