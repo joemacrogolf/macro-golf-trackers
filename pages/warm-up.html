@@ -1,0 +1,120 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Warm Up front door (VidApp Home › Warm Up tile). No sign-in: four quick questions → the right warm-up or cool-down,
+   built from the Kajabi "Warm Up and Recovery" videos plus a short 10 Minute Mobility routine for a tight area
+   (MGBuild.MOBILITY from src/plan-builder.js). Videos open in the page through src/videos.js. Answers are remembered on the phone. */
+.wu{min-height:100vh;background:#0B0B0B;color:#F4F1EA;font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;display:flex;justify-content:center;
+  padding:calc(30px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(110px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));box-sizing:border-box}
+.wu *{box-sizing:border-box}
+.wu-in{width:100%;max-width:460px;display:flex;flex-direction:column;gap:14px}
+.wu-k{font-weight:700;font-size:12px;letter-spacing:2.4px;text-transform:uppercase;color:#FFD900}
+.wu .wu-h{font-family:'Anton',Impact,'Arial Narrow Bold',sans-serif!important;font-weight:400!important;text-transform:uppercase;font-size:48px!important;line-height:.98!important;margin:0!important;color:#F4F1EA!important}
+.wu-bar{width:74px;height:6px;background:#FFD900}
+.wu .wu-p{margin:0!important;color:#cfcabd;font-size:15px;line-height:1.5}
+.wu .wu-q{font-family:'Anton',Impact,sans-serif!important;font-weight:400!important;text-transform:uppercase;font-size:21px!important;line-height:1.1!important;color:#F4F1EA!important;margin:14px 0 0!important}
+.wu-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wu-opts button{min-height:56px;padding:10px 12px;text-align:left;background:#141414;border:2px solid rgba(244,241,234,.22);color:#F4F1EA;font:600 15px 'Inter',system-ui,sans-serif;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.wu-opts button small{font-weight:500;font-size:12px;color:#a9a497}
+.wu-opts button[aria-pressed=true]{border-color:#FFD900;background:#1f1d14;color:#FFD900}
+.wu-opts button:focus-visible,.wu-go:focus-visible,.wu-play:focus-visible,.wu-link:focus-visible{outline:3px solid #FFD900;outline-offset:2px}
+.wu-opts.three{grid-template-columns:1fr 1fr 1fr}
+.wu-go{min-height:56px;border:0;background:#FFD900;color:#0B0B0B;font:400 22px 'Anton',Impact,sans-serif;text-transform:uppercase;cursor:pointer;margin-top:10px;width:100%}
+.wu-go[disabled]{opacity:.45;cursor:default}
+.wu-sum{display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-top:1px solid rgba(244,241,234,.15);padding-top:14px}
+.wu-sum b{font-family:'Anton',Impact,sans-serif;font-weight:400;font-size:26px;text-transform:uppercase}
+.wu-sum span{color:#a9a497;font-size:13px}
+.wu-item{display:grid;grid-template-columns:38px 1fr;gap:12px;background:#1a1916;border-left:6px solid #FFD900;padding:14px}
+.wu-n{width:38px;height:38px;background:#FFD900;color:#0B0B0B;font:400 20px Anton,Impact,sans-serif;display:flex;align-items:center;justify-content:center}
+.wu-item h3{margin:0!important;font:400 21px Anton,Impact,sans-serif!important;text-transform:uppercase;color:#F4F1EA!important;line-height:1.1!important}
+.wu-item p{margin:4px 0 10px!important;color:#c9c4b7;font-size:13.5px;line-height:1.45}
+.wu-play{min-height:44px;padding:0 16px;border:0;background:#FFD900;color:#0B0B0B;font:400 17px Anton,Impact,sans-serif;text-transform:uppercase;cursor:pointer}
+.wu-play.done{background:#2b2a25;color:#FFD900}
+.wu-link{align-self:flex-start;background:none;border:0;padding:6px 0;color:#FFD900;font:600 14px 'Inter',system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.wu-note{background:#1a1916;border-left:6px solid #3a3833;padding:12px 14px;color:#c9c4b7;font-size:13.5px;line-height:1.45}
+</style>
+<div class="wu" id="wu"><div class="wu-in" id="wu-in"></div></div>
+<script charset="utf-8" src="{{BASE}}src/videos.js"></script>
+<script charset="utf-8" src="{{BASE}}src/plan-builder.js"></script>
+<script>
+(function(){
+var root=document.getElementById('mg-root')||document.getElementById('wu').parentNode;
+[].forEach.call(root.querySelectorAll('style'),function(st){st.id='wu-css';document.head.appendChild(st)});
+var KEY='mgwarm:last',box=document.getElementById('wu-in');
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+/* Team Macro Golf › Warm Up and Recovery (Kajabi module 2152996977). Seconds from Wistia. */
+var V={
+  express:{t:'Express 5 Minute Golf Warm Up',id:'rxkqwwoq0t',s:292,d:'Gets your body moving the way the swing needs it, in five minutes.'},
+  full:{t:'Full Body Warm Up',id:'9fiyljfsxn',s:187,d:'Head to toe, to raise your temperature and wake everything up.'},
+  upper:{t:'Upper Body Warm Up',id:'54gjsobpxj',s:304,d:'Shoulders, upper back and arms ready to work.'},
+  lower:{t:'Lower Body Warm Up',id:'38uets7li0',s:301,d:'Hips, glutes and legs ready to work.'},
+  core:{t:'Core Warm Up',id:'jmn8hs1z42',s:268,d:'Switches your trunk on so it holds and turns well.'},
+  cool:{t:'Cool Down',id:'r3ekzpoh9d',s:342,d:'Brings your heart rate down and loosens off what you have just worked.'}
+};
+var FOR=[['round','Golf round','On the course'],['range','Range or practice','Before you hit balls'],['gym','Gym workout',''],['home','Home workout',''],['cool','Cool down','After golf or training']];
+var TRAIN=[['upper','Upper body'],['lower','Lower body'],['full','Full body'],['core','Core']];
+var TIME=[[5,'5 min'],[10,'10 min'],[15,'15+ min']];
+var TIGHT=[['hips','Hips + lower back'],['torso','Back + rotation'],['upper','Shoulders, neck + arms'],['legs','Legs'],['none',"No, I'm good"]];
+
+function mobility(){var M=(window.MGBuild&&MGBuild.MOBILITY)||[];return M.map(function(m){
+  if(Array.isArray(m))m={name:m[0],area:m[1],len:m[2],parts:String(m[3]||'').split(' ')};
+  var p=String(m.mins||m.len||'').split(':'),s=(+p[0]||0)*60+(+p[1]||0);
+  return {t:m.name,area:m.area,s:s,parts:Array.isArray(m.parts)?m.parts:String(m.parts||'').split(' '),id:m.wistia||(MGBuild.MOBILITY_VIDS||{})[m.name]||m.id}}).filter(function(m){return m.id&&m.s})}
+/* a short routine for that area that fits the time left; a different one most days */
+function pickMob(part,maxS){var day=new Date().toISOString().slice(0,10),all=mobility().filter(function(m){return m.parts.indexOf(part)>=0});
+  if(part==='upper')all=all.filter(function(m){return /shoulder|neck|trap|upper back/i.test(m.area)});
+  var fit=all.filter(function(m){return m.s<=maxS&&m.s>=240});if(!fit.length)return null;
+  fit.sort(function(a,b){return a.s-b.s});fit=fit.slice(0,4);var h=0;for(var i=0;i<day.length;i++)h=(h*31+day.charCodeAt(i))>>>0;return fit[h%fit.length]}
+
+function build(a){var list=[],budget=a.time*60+60,used=0;
+  function add(v,why){list.push({t:v.t,id:v.id,s:v.s,d:why||v.d});used+=v.s}
+  var golf=a.for==='round'||a.for==='range',cool=a.for==='cool',mob=a.tight&&a.tight!=='none';
+  if(cool){add(V.cool);
+    if(a.time>=10&&mob){var m=pickMob(a.tight,budget-used);if(m)add({t:m.t,id:m.id,s:m.s},'10 Minute Mobility · '+m.area+'. Gentle work for the area that feels tight.');else add(V.full,'Light movement to finish loose.')}
+    else if(a.time>=10)add(V.full,'Light movement to finish loose.');
+    return list}
+  if(mob&&a.time>=10){var mm=pickMob(a.tight,Math.min(budget-(golf?V.express.s:V[a.train||'full'].s),a.time>=15?660:330));
+    if(mm)add({t:mm.t,id:mm.id,s:mm.s},'10 Minute Mobility · '+mm.area+'. Loosen this off first, then warm up.')}
+  if(golf){
+    if(a.time>=10&&used+V.full.s+V.express.s<=budget)add(V.full);
+    add(V.express,a.for==='round'?'Your pre-round routine. Do it near the first tee if you can.':V.express.d);
+    if(a.time>=15&&used+V.core.s<=budget)add(V.core,'Extra trunk work so you turn and hold your posture from the first ball.');
+  }else{var main=V[a.train||'full'];
+    if(a.time>=10&&a.train!=='full'&&used+V.full.s+main.s<=budget)add(V.full);
+    add(main);
+    if(a.time>=15&&a.train!=='core'&&used+V.core.s<=budget)add(V.core);
+  }
+  return list}
+
+var A={};try{A=JSON.parse(ls(KEY)||'{}')||{}}catch(e){A={}}
+function opts(key,items,cls){return '<div class="wu-opts'+(cls?' '+cls:'')+'" data-k="'+key+'">'+items.map(function(o){return '<button type="button" data-v="'+o[0]+'" aria-pressed="'+(String(A[key])===String(o[0]))+'">'+esc(o[1])+(o[2]?'<small>'+esc(o[2])+'</small>':'')+'</button>'}).join('')+'</div>'}
+function ready(){return A.for&&A.time&&A.tight&&(A.for==='round'||A.for==='range'||A.for==='cool'||A.train)}
+function ask(){var work=A.for==='gym'||A.for==='home';
+  box.innerHTML='<div class="wu-k">Macro Golf</div><h1 class="wu-h">Warm Up</h1><div class="wu-bar"></div>'+
+    '<p class="wu-p">Four quick taps and we\'ll put together the right warm-up or cool-down for you.</p>'+
+    '<p class="wu-q">What is it for?</p>'+opts('for',FOR)+
+    (work?'<p class="wu-q">What are you training?</p>'+opts('train',TRAIN):'')+
+    '<p class="wu-q">How long have you got?</p>'+opts('time',TIME,'three')+
+    '<p class="wu-q">Anywhere feeling tight?</p>'+opts('tight',TIGHT)+
+    '<button type="button" class="wu-go" '+(ready()?'':'disabled')+'>'+(A.for==='cool'?'Show my cool-down':'Show my warm-up')+'</button>';
+  box.querySelectorAll('.wu-opts').forEach(function(g){g.addEventListener('click',function(e){var b=e.target.closest('[data-v]');if(!b)return;
+    var k=g.dataset.k,v=b.dataset.v;A[k]=k==='time'?+v:v;if(k==='for'&&!(v==='gym'||v==='home'))delete A.train;ls(KEY,JSON.stringify(A));
+    var y=window.scrollY;ask();window.scrollTo(0,y)})});
+  box.querySelector('.wu-go').addEventListener('click',function(){if(ready())show()})}
+function show(){var list=build(A),tot=Math.round(list.reduce(function(s,v){return s+v.s},0)/60),cool=A.for==='cool';
+  box.innerHTML='<div class="wu-k">'+(cool?'Your cool-down':'Your warm-up')+'</div><h1 class="wu-h">'+(cool?'Cool Down':'Warm Up')+'</h1><div class="wu-bar"></div>'+
+    '<div class="wu-sum"><b>About '+tot+' min</b><span>'+list.length+' video'+(list.length>1?'s':'')+', in this order</span></div>'+
+    list.map(function(v,i){return '<div class="wu-item"><div class="wu-n">'+(i+1)+'</div><div><h3>'+esc(v.t)+'</h3><p>'+esc(v.d)+' · '+Math.max(1,Math.round(v.s/60))+' min</p>'+
+      '<button type="button" class="wu-play" data-i="'+i+'">Watch now</button></div></div>'}).join('')+
+    (A.tight&&A.tight!=='none'&&A.time<10&&!cool?'<div class="wu-note">Got 10 minutes? Pick 10 min and we\'ll add a short routine for the tight area first.</div>':'')+
+    '<button type="button" class="wu-link" data-back>Change my answers</button>';
+  box.querySelectorAll('.wu-play').forEach(function(b){b.addEventListener('click',function(){var v=list[+b.dataset.i];b.classList.add('done');b.textContent='Watch again';
+    if(window.MGVideo)MGVideo.open(v.t,v.id,'Watch now · follow along');else window.open('https://fast.wistia.net/embed/iframe/'+v.id,'_blank','noopener')})});
+  box.querySelector('[data-back]').addEventListener('click',function(){ask();window.scrollTo(0,0)});window.scrollTo(0,0)}
+ask();
+window.MG_WARMUP={build:build,V:V};
+})();
+</script>
