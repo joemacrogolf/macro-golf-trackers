@@ -61,9 +61,9 @@ Template (fill in the brackets, keep the steps):
 
 Golf personal plans use exactly the same message and the same My Plan button.
 
-## Planned: app navigation (not built yet)
+## App navigation (live 12 Nov 2026)
 
-`docs/app-navigation-plan.md`: 1-to-1 Coaching top tab, My Training and My Practice front doors, one sign-in for all. Read it before building any of those pages. No VidApp changes until Joe says so.
+`docs/app-navigation-plan.md` has the background. Live in the app: bottom tabs Home · My Coach (/my-plan) · My Training (/my-training) · My Practice (/my-practice) · Playlists; one email + PIN across them (mg_whoami / mg_onepin). Still to do: coach dashboard view of each member's training and practice choice.
 
 ## How pages work (short version; README.md has the detail)
 
@@ -135,8 +135,8 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | Practice Plan (weekly plan from the three tests + one-off sessions; `pages/golf-practice-plan.html`) | p-274816 | 2168255841 | game / loader |
 | My Plan log-in (all 1-to-1 and golf personal plans, `pages/my-plan.html`) | my-plan | 2168251504 | plan / mg_loader |
 | Build My Plan (app users, `clients/build-my-plan.js` + `src/plan-builder.js`) | p-258147 | 2168251525 | plan / mg_loader |
-| My Training front door (`pages/my-training.html`, uses `mg_whoami` (latest `supabase/009-one-pin.sql`); live, not in app yet) | my-training | 2168255763 | plan / mg_loader |
-| My Practice front door (`pages/my-practice.html`, opens Practice Plan p-274816; uses `mg_whoami`; live, not in app yet) | my-practice | 2168256020 | plan / mg_loader |
+| My Training front door (`pages/my-training.html`, uses `mg_whoami` (latest `supabase/009-one-pin.sql`); live in app) | my-training | 2168255763 | plan / mg_loader |
+| My Practice front door (`pages/my-practice.html`, opens Practice Plan p-274816; uses `mg_whoami`; live in app) | my-practice | 2168256020 | plan / mg_loader |
 | Warm Up front door (`pages/warm-up.html`, no sign-in, Warm Up and Recovery videos + short mobility) | warm-up | 2168256625 | plan / mg_loader |
 | Coaching app view (`pages/coaching-app.html`: live /coaching content, no header/menu, Back bar) | coaching-app | 2168257984 | plan / mg_loader |
 

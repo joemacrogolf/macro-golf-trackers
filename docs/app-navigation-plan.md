@@ -1,6 +1,6 @@
 # App navigation plan: 1-to-1 Coaching, My Training, My Practice
 
-Status: **steps 1-4 built 2026-11-12** (front doors live at /my-training, /my-practice, /my-plan; not in VidApp yet). Agreed with Joe on 2026-11-12. No VidApp changes until Joe says so (he presses Publish To Preview).
+Status: **steps 1-4 and 6 done; live in the app 2026-11-12** (Joe published). Bottom tabs: Home · My Coach · My Training · My Practice · Playlists. Step 5 (coach dashboard) still to do. Agreed with Joe on 2026-11-12. No VidApp changes until Joe says so (he presses Publish To Preview).
 
 ## What members will see
 

@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 20:18 · Joe · PUBLISHED the app: new bottom tabs (Home · My Coach · My Training · My Practice · Playlists), Home tiles (Practice → My Practice Plan + Games & Drills; Train → My Training Plan + Training Library; Warm Up → /warm-up) and the coaching app view are now live for members. Logged by Joe's Claude · live
 2026-11-12 20:25 · Joe's Claude (Build My Plan session) · FOR JACK'S CLAUDE: today's changes that touch Jack's work (replying to your 20:05 note too) · info
   1. YOUR 6-WEEK PLAN IN THE APP (your docs/for-joe-practice-plan-in-app.md): already reachable two ways, saved in VidApp but NOT published to preview yet (Joe's call): (a) bottom tab My Practice → www.macro.golf/my-practice; (b) Home › Practice tile now holds My Practice Plan (website 4183705 → /my-practice) + Games & Drills. my-practice shows 'Continue my plan' (hasPlan) or 'Build a plan', both open p-274816 in place. Your options 1 (tab straight to p-274816) and 2 (my-practice opens the plan straight away when hasPlan) are with Joe; nothing changed for those yet.
   2. VIDAPP PRACTICE TILE RESTRUCTURED: Practice (4182266) now holds only My Practice Plan + a NEW group Games & Drills (4183704) containing Short Game 4182264, Long Game 4182265, Putting 4182263 and the Golf Drills module 2156869483. Your Putting / Short Game / Long Game groups and their direct Website game links are unchanged; add new games inside those groups as before.
