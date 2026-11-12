@@ -1,6 +1,6 @@
 # App navigation plan: 1-to-1 Coaching, My Training, My Practice
 
-Status: **planned, not built.** Agreed with Joe on 2026-11-12. No VidApp changes until Joe says so (he presses Publish To Preview).
+Status: **steps 1-4 built 2026-11-12** (front doors live at /my-training, /my-practice, /my-plan; not in VidApp yet). Agreed with Joe on 2026-11-12. No VidApp changes until Joe says so (he presses Publish To Preview).
 
 ## What members will see
 
@@ -33,7 +33,7 @@ After sign-in:
 
 ## Background work, in order
 
-### 1. One sign-in for everything (shared files: needs care)
+### 1. One sign-in for everything (BUILT 2026-11-12: mg_whoami + mg_onepin, supabase/007-009; offered on My Training / My Practice)
 Today each page signs in on its own (1-to-1 by plan code + PIN; Pure and Build My Plan by email + PIN per plan).
 - Add a sign-in group (e.g. `group:'macro'`) so one email + PIN on any of the three pages signs that phone into all of them. `sync.js` already has groups; extend it so a 1-to-1 code page can join through the existing `mgsync-handoff`.
 - **What a 1-to-1 plan includes:** every 6-week plan states clearly which areas it covers. Store it on the client's registry row: new column `mg_clients.includes` (e.g. `{training,practice}`), set by whoever creates the plan (Sam's / Jack's Claude) alongside `@code`; `clients/*.js` gets a matching `CLIENT.includes`. When this is built, add it to the welcome-message checklist in CLAUDE.md.

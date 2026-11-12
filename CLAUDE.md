@@ -93,6 +93,8 @@ Golf personal plans use exactly the same message and the same My Plan button.
 
 **Exercise library (the planning database).** Google Drive file `Macro_Golf_VidApp_Library_Audited_v5.xlsm` (id `1EQjn4IPZn2Lz-Qeb-LpIS7wRAPoUNnzk`). One row per Kajabi exercise lesson with its Wistia video ID, the other names plans use for it, setting, default dose, rest, each side, easier and harder options, golf purpose and filming status. The suggested columns are rule-based drafts for coaches to check. Use it when choosing exercises and video IDs for any plan.
 
+**One PIN for everything (live).** `mg_whoami` (009) returns `mixed:true` when an email's records use different PINs; My Training / My Practice then offer `mg_onepin` to set one PIN on all of them. If you replace `mg_whoami`, start from `supabase/009-one-pin.sql`.
+
 **My Plan (live).** www.macro.golf/my-plan: one email + PIN log-in for every 1-to-1 plan and golf personal plan (first time adds the 6-digit plan code). It loads the loader live on the client's own page, so keep each client's page pinned as usual. New client plans need nothing extra; see README.
 
 **Golf leaderboards (live).** Each golf page exposes `window.MG_SCORE()`; `summary()` sends it as `_mgSummary.golf` plus `lbHide`. `src/leaderboard.js` (loaded by `golfwarm.js`) shows a Leaders tab with This month / All time boards, read from the public read-only `mg_leaderboard` function (`supabase/004-leaderboard.sql`). `MGSync.init({…, fixedName:'Name'})` skips the name box on one-person plans.
@@ -133,8 +135,8 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | Practice Plan (weekly plan from the three tests + one-off sessions; `pages/golf-practice-plan.html`) | p-274816 | 2168255841 | game / loader |
 | My Plan log-in (all 1-to-1 and golf personal plans, `pages/my-plan.html`) | my-plan | 2168251504 | plan / mg_loader |
 | Build My Plan (app users, `clients/build-my-plan.js` + `src/plan-builder.js`) | p-258147 | 2168251525 | plan / mg_loader |
-| My Training front door (`pages/my-training.html`, uses `mg_whoami` from `supabase/007-whoami.sql`; draft, not in app yet) | my-training | 2168255763 | plan / mg_loader |
-| My Practice front door (`pages/my-practice.html`, opens Practice Plan p-274816; uses `mg_whoami`; draft, not in app yet) | my-practice | 2168256020 | plan / mg_loader |
+| My Training front door (`pages/my-training.html`, uses `mg_whoami` (latest `supabase/009-one-pin.sql`); live, not in app yet) | my-training | 2168255763 | plan / mg_loader |
+| My Practice front door (`pages/my-practice.html`, opens Practice Plan p-274816; uses `mg_whoami`; live, not in app yet) | my-practice | 2168256020 | plan / mg_loader |
 
 
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)
