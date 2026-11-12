@@ -28,13 +28,34 @@
 .mp-load{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#F4F1EA;color:#0B0B0B;font:600 15px 'Inter',system-ui,sans-serif;text-align:center;padding:24px}
 .mp-load i{width:42px;height:42px;border:5px solid #0B0B0B;border-top-color:#FFD900;border-radius:50%;animation:mpspin .8s linear infinite}@keyframes mpspin{to{transform:rotate(360deg)}}
 .mp-load button{min-height:48px;padding:0 20px;border:0;background:#FFD900;color:#0B0B0B;font:400 18px Anton,Impact,sans-serif;text-transform:uppercase;cursor:pointer}
+/* 1-to-1 Coaching tab: clients log in, everyone else can read about coaching and enquire */
+.mp-sw{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.mp-sw button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:84px;padding:14px;background:#141414;border:2px solid rgba(244,241,234,.25);color:#F4F1EA;cursor:pointer;font:inherit}
+.mp-sw button b{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:21px;line-height:1.05}
+.mp-sw button span{font-size:12.5px;color:#b7b2a6;line-height:1.35}
+.mp-sw button[aria-pressed=true]{border-color:#FFD900;background:#1f1d14}
+.mp-sw button[aria-pressed=true] b{color:#FFD900}
+.mp-sw button:focus-visible{outline:3px solid #FFD900;outline-offset:2px}
+.mp-pane{display:flex;flex-direction:column;gap:12px}
+.mp-pane[hidden]{display:none}
+.mp .mp-sub{font-family:'Anton',Impact,sans-serif!important;font-weight:400!important;text-transform:uppercase;font-size:22px!important;line-height:1.1!important;color:#F4F1EA!important;margin:8px 0 0!important}
+.mp-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.mp-list li{background:#1a1916;border-left:6px solid #FFD900;padding:12px 14px;color:#d9d5cb;font-size:14px;line-height:1.45}
+.mp-list li b{color:#F4F1EA}
+a.mp-go{display:flex;align-items:center;justify-content:center;text-decoration:none}
 @media (prefers-reduced-motion:reduce){.mp-load i{animation:none}}
 </style>
 <div class="mp" id="mp">
   <div class="mp-in">
-    <div class="mp-k">Macro Golf</div>
+    <div class="mp-k">1-to-1 Coaching</div>
     <h1 class="mp-h">My Plan</h1>
     <div class="mp-bar"></div>
+    <div class="mp-sw" role="group" aria-label="Client or not yet">
+      <button type="button" data-pane="client" aria-pressed="true"><b>I'm a client</b><span>Log in to my personal plan</span></button>
+      <button type="button" data-pane="coach" aria-pressed="false"><b>About coaching</b><span>Not a client yet? Find out more</span></button>
+    </div>
+    <div class="mp-pane" id="mp-client">
+    <p class="mp-sub">Log in</p>
     <p class="mp-p">Log in to open your personal plan.</p>
     <form id="mp-form" novalidate>
       <label>Email<input name="email" type="email" autocomplete="email" inputmode="email" required></label>
@@ -48,6 +69,18 @@
       <button class="mp-link" type="button" id="mp-firstbtn">First time here?</button>
     </form>
     <p class="mp-help">Forgotten your PIN? Message your coach and they will reset it.</p>
+    </div>
+    <div class="mp-pane" id="mp-coach" hidden>
+      <p class="mp-sub">1-to-1 coaching</p>
+      <p class="mp-p">Your coach looks at how you move, how you play and what you want from your golf, and builds your training and practice from there.</p>
+      <ul class="mp-list">
+        <li><b>Your own plan</b>, written by your coach for your body, your game and your week.</li>
+        <li><b>Log it here.</b> Every session you do saves to your plan in the app.</li>
+        <li><b>Your coach sees how you're getting on</b> and changes the plan as you go.</li>
+      </ul>
+      <a class="mp-go" href="https://www.macro.golf/coaching">Enquire about coaching</a>
+      <p class="mp-help">Already a client? Tap <b>I'm a client</b> and log in with your email.</p>
+    </div>
   </div>
 </div>
 <script>
@@ -61,6 +94,10 @@ function me(){try{var m=JSON.parse(ls(ME)||'null');return m&&/^\d{6}$/.test(m.co
 var f=document.getElementById('mp-form'),err=document.getElementById('mp-err'),first=document.getElementById('mp-first'),fb=document.getElementById('mp-firstbtn'),go=f.querySelector('.mp-go');
 function showFirst(){first.hidden=false;fb.hidden=true;setTimeout(function(){f.code.focus()},30)}
 fb.addEventListener('click',showFirst);
+function pane(p){[].forEach.call(document.querySelectorAll('.mp-sw [data-pane]'),function(b){b.setAttribute('aria-pressed',b.dataset.pane===p?'true':'false')});
+  document.getElementById('mp-client').hidden=p!=='client';document.getElementById('mp-coach').hidden=p!=='coach'}
+document.querySelector('.mp-sw').addEventListener('click',function(e){var b=e.target.closest('[data-pane]');if(b)pane(b.dataset.pane)});
+if(/[?&#]about\b/.test(location.search+location.hash))pane('coach');
 try{var last=ls('mgplan:email');if(last)f.email.value=last}catch(e){}
 f.addEventListener('submit',function(e){e.preventDefault();err.textContent='';
   var em=String(f.email.value).trim().toLowerCase(),pin=String(f.pin.value).trim(),code=String(f.code.value).replace(/\D/g,'');
