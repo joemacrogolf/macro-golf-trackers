@@ -166,6 +166,7 @@ body.danger #entry{box-shadow:inset 0 0 0 3px #E0352B}
 body.danger::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:40;box-shadow:inset 0 0 140px rgba(224,53,43,.55);animation:mgDanger 1.1s ease-in-out infinite}
 @keyframes mgDanger{50%{opacity:.6}}
 @media (prefers-reduced-motion:reduce){body.danger .board,body.danger::after{animation:none}}
+.spdwarn{border-left:6px solid #FFD900;background:#1c1b17;color:#e4e0d6;padding:12px 14px;font:400 14px/1.5 Inter,system-ui,sans-serif}.spdwarn b{display:block;color:#FFD900;font-size:15px;margin-bottom:3px}.wrap>.spdwarn{margin:16px 0}
 </style>
 
 <style>
@@ -390,6 +391,7 @@ body.gated{overflow:hidden}
   <h2>3 Strikes<span>Before you start</span></h2>
   <label class="fld"><span>Your name</span><input id="gName" autocomplete="name" placeholder="First and last name"></label>
   <div class="fld" id="gLvlWrap"><span>What are you measuring?</span><div class="opts" id="gLvl"><button type="button" data-v="club" aria-pressed="false"><b>Club speed</b><small>Clubhead speed from your launch monitor or speed radar</small></button><button type="button" data-v="ball" aria-pressed="false"><b>Ball speed</b><small>Ball speed from your launch monitor</small></button></div><span class="note" id="gLvlNote" hidden>Game in progress, so this stays as it is until you start a new one.</span></div>
+  <div class="spdwarn" role="note"><b>Take care with speed training</b>Swinging at maximum speed puts extra load on your body. Warm up fully first, and stop straight away if anything hurts. Macro Golf accepts no liability for any injury caused while training for speed. If you're unsure whether you should be pushing your speed, speak to a Macro Golf coach before you start.</div>
   <button class="go" id="gGo" disabled>Continue</button>
 </div></div>
 <div class="wrap">
@@ -403,6 +405,7 @@ body.gated{overflow:hidden}
       <div><span class="k">Best ever</span><span class="v tnum" id="pbTxt">–</span></div>
     </div>
   </header>
+  <div class="spdwarn" role="note"><b>Take care with speed training</b>Swinging at maximum speed puts extra load on your body. Warm up fully first, and stop straight away if anything hurts. Macro Golf accepts no liability for any injury caused while training for speed. If you're unsure whether you should be pushing your speed, speak to a Macro Golf coach before you start.</div>
 
   <details class="howto" id="howto">
     <summary><span><b>How to play</b><small>The aim, the warm-up and how strikes work</small></span><span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>

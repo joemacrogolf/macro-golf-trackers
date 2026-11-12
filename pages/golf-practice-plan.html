@@ -1000,6 +1000,7 @@ function renderSetup(){
     }
     as.forEach(a=>{const rf=recFocus(rec,a),f=fl(c,a);
       h+=`<div class="q"><span class="qh">${as.length>1?AREAS[a]+": what":"What"} do you want to work on?</span><span class="qs">Pick one or more. Each one gets its own drill.</span><div class="lvl">${FOCUS[a].map(([k,n,d])=>{const dis=k==="speed"&&c.lm===false;return `<button data-act="focus" data-v="${a}:${k}" ${pr(f.includes(k))} ${dis?"disabled":""}><b>${n}${rf===k?`<span class="rec">Recommended</span>`:""}</b><small>${dis?"Needs a launch monitor":d}</small></button>`}).join("")}</div></div>`;
+      if(a==="drive"&&f.includes("speed"))h+=SPEEDWARN;
       if(a==="app"&&f.includes("misses"))h+=`<div class="q"><span class="qh">Which side is your bad miss?</span><div class="yn"><button data-act="lava" data-v="L" ${pr(c.lavaSide==="L")}>Left</button><button data-act="lava" data-v="R" ${pr(c.lavaSide==="R")}>Right</button></div></div>`;});
     h+=`</div>`;
     const miss=missing(c);
@@ -1092,8 +1093,10 @@ function runCarry(b){const n=b.res.length,done=n>=b.targets.length,pts=sum(b.res
    ${ui.flash?flashHTML():""}
    ${done?"":`<div class="bigin"><input id="carIn" inputmode="numeric" placeholder="Carry (yds)" aria-label="Carry in yards"><button class="dark" data-act="carAdd">Enter</button></div>`}
    ${n?`<div class="tally">${b.res.map((c,i)=>{const p=carryPts(b.targets[i],c);return `<span class="${p>=2?"ok":p===1?"mid":"no"}">${b.targets[i]}→${c}</span>`}).join("")}</div><span class="muted">${pts} points so far</span><button class="linky" data-act="carUndo">Undo last</button>`:""}`+nextBtn(done?"✓ Next block":"Finish early")}
+/* speed training safety warning: shown on every speed block, 3 Strikes and the speed option */
+const SPEEDWARN=`<div class="warnbox speedwarn" role="note"><b>Take care with speed training</b>Swinging at maximum speed puts extra load on your body. Warm up fully first, and stop straight away if anything hurts. Macro Golf accepts no liability for any injury caused while training for speed. If you're unsure whether you should be pushing your speed, speak to a Macro Golf coach before you start.</div>`;
 function runSpeed(b){const best=b.base.length?Math.max(...b.base,...b.swings.filter(x=>x.up).map(x=>x.v)):0,st=b.swings.filter(x=>x.strike).length,inBase=b.base.length<5,over=st>=3;
-  return `<ul class="steps"><li>${inBase?"Hit 5 balls with maximum intent. Your fastest becomes the number to beat.":"Beat the number. Slower is a strike. Three strikes and you're done."}</li></ul>
+  return SPEEDWARN+`<ul class="steps"><li>${inBase?"Hit 5 balls with maximum intent. Your fastest becomes the number to beat.":"Beat the number. Slower is a strike. Three strikes and you're done."}</li></ul>
    <div class="seg"><button data-act="metric" data-v="club" ${pr(b.metric==="club")}>Club speed</button><button data-act="metric" data-v="ball" ${pr(b.metric==="ball")}>Ball speed</button></div>
    <div class="spd"><div><span class="label">To beat</span><b class="tnum">${best||"–"}</b></div><div><span class="label">Swings</span><b class="tnum">${b.base.length+b.swings.length}</b></div><div><span class="label">Strikes</span><div class="strikes" style="justify-content:center">${[0,1,2].map(i=>`<i class="${i<st?"on":""}">${i<st?"✕":""}</i>`).join("")}</div></div></div>
    ${over?`<div class="call"><span class="label">Top speed</span><div class="d">${best}<small>mph</small></div></div>`:`<div class="bigin"><input id="spdIn" inputmode="decimal" placeholder="${inBase?"Warm-up ball "+(b.base.length+1)+" (mph)":"Speed (mph)"}" aria-label="Speed in mph"><button class="dark" data-act="spdAdd">Enter</button></div>`}
@@ -1468,6 +1471,7 @@ function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,ne
   if(next>=0)h+=`<section class="sec-h"><span class="eyebrow">Pick today's session</span><h2>What are you practicing today?</h2></section><p class="muted" style="margin:-6px 0 0">Do them in any order. Every game is different, nothing repeats.</p>`;
   p.week.forEach((s,i)=>{const isDone=done.includes(i),it=itemsOf(s),k=kindOfS(s),nm=KN[k]||KN.mixed;cnt[k]=(cnt[k]||0)+1;
     h+=`<div class="sess ${isDone?"done":""}"><div class="sh"><span class="sn" ${k==="green"&&!isDone?'style="font-size:13px"':""}>${isDone?"✓":{range:"R",short:"S",putt:"P",green:"S+P",mixed:"M"}[k]||i+1}</span><div class="st"><b>${nm[0]}${tot[k]>1?" "+cnt[k]:""}</b><small>${nm[1]} · ${p.mins} min · ${isDone?"done this week":"to do"}</small></div></div>
+     ${it.some(x=>x.game==="strikes"&&x.full||x.key==="lg.speed")?`<p class="muted" style="margin:0;font-size:13px"><b style="color:var(--fg)">Includes speed training.</b> Take care, and speak to a Macro Golf coach if you're unsure about pushing your speed.</p>`:""}
      <ul class="sg">${it.map(x=>`<li><b>${x.full?esc(MacroPlan.GAMES[x.game].name)+(MacroPlan.GAMES[x.game].set?` <small>${MacroPlan.GAMES[x.game].set}</small>`:""):esc(x.name)}</b> <small class="tag ${x.full?"g":""}">${x.full?"Full game":"Focused"}</small><span>${x.mins} min</span></li>`).join("")}</ul>
      ${isDone?`<button class="linky" data-act="startPlan" data-v="${i}">Do it again</button>`:`<button class="primary" data-act="startPlan" data-v="${i}">Do this one today</button>`}</div>`});
   h+=progressCard();
@@ -1519,7 +1523,7 @@ function homeAct(act,v,el){const P=PG();
 
 /* a real game: open its page (scores save there and count on its leaderboard), then tick it off here */
 function runPlay(b){const G=MacroPlan.GAMES[b.game];
-  return `<div class="viz">${gameArt(b.game)}</div><p class="vizcap">${esc(G.what)}</p>
+  return (b.game==="strikes"?SPEEDWARN:"")+`<div class="viz">${gameArt(b.game)}</div><p class="vizcap">${esc(G.what)}</p>
    ${G.set?`<div class="recnote">Play it on the <b>${G.set}</b> setting.</div>`:""}
    <ul class="steps"><li>Tap Play. ${esc(G.name)} opens with its own scorecard.</li><li>Your score saves to your record and counts on the ${esc(G.name)} leaderboard.</li><li>When you've finished, come back here and tick it off.</li></ul>
    ${b.opened?`<div class="resume"><b>Back from ${esc(G.name)}?</b><span class="muted">Tick it off and move on to the next block.</span></div>`:""}
