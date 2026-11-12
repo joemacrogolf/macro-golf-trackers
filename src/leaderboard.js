@@ -5,6 +5,7 @@
    sent as _mgSummary.lbHide by sync.js). */
 (function(){
 if(window.MGBoard)return;
+var ME=document.currentScript&&document.currentScript.src;
 var URL='https://zhcgwtlyqriwlhbzkxcl.supabase.co/rest/v1/rpc/mg_leaderboard',APIKEY='sb_publishable__IBhmrVHOXsLHruU7XJB-g_OSN9Ljne';
 var view='month',cache={};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -78,7 +79,7 @@ function css(){var s=document.createElement('style');s.textContent=[
 /* after a finished round: if this player now leads a board (or is in the top 3 this month), tell them */
 var seen=null;
 function sig(){var s=score();if(!s)return '';var R=Array.isArray(s.rounds)?s.rounds:[],l=R[R.length-1]||{};return R.length+'|'+(l.d||'')+'|'+l.s+'|'+s.best}
-function watch(){var now=sig();if(seen===null){seen=now;return}if(now&&now!==seen){seen=now;if(myCode()&&!hidden())setTimeout(check,4500)}}
+function watch(){var now=sig();if(window.MG_H2H_GUEST){seen=now;return}if(seen===null){seen=now;return}if(now&&now!==seen){seen=now;if(myCode()&&!hidden())setTimeout(check,4500)}}
 function pos(j){var rows=(j&&j.rows)||[];for(var i=0;i<rows.length;i++)if(rows[i].me)return i+1;return 0}
 function check(){cache={};Promise.all([load('month'),load('all')]).then(function(r){var m=pos(r[0]),a=pos(r[1]),g=gameName(),msg=null;
   if(a===1)msg=['You\'re number 1','Top of the all-time '+g+' leaderboard. Nobody has done better.'];
@@ -88,7 +89,9 @@ function check(){cache={};Promise.all([load('month'),load('all')]).then(function
 function toast(h,p){var old=document.querySelector('.lb-toast');if(old)old.remove();var d=document.createElement('div');d.className='lb-toast';d.setAttribute('role','status');
   d.innerHTML='<svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0V4zM5 5H3v2a4 4 0 0 0 4 4M19 5h2v2a4 4 0 0 1-4 4M9 15h6l1 5H8l1-5z" stroke="#FFD900" stroke-width="2"/></svg><div><b>'+esc(h)+'</b><span>'+esc(p)+'</span></div><button type="button" data-lb="open">See it</button><button type="button" data-lb="x" aria-label="Close">×</button>';
   d.addEventListener('click',function(e){var b=e.target.closest('[data-lb]');if(!b)return;d.remove();if(b.dataset.lb==='open')open()});document.body.appendChild(d);setTimeout(function(){if(d.parentNode)d.remove()},12000)}
-function init(){var g=game();if(!/^golf-/.test(g)||g==='golf-paul-goddard'||typeof window.MG_SCORE!=='function')return;css();tab();setInterval(watch,2000)}
+function init(){var g=game();if(!/^golf-/.test(g)||g==='golf-paul-goddard'||typeof window.MG_SCORE!=='function')return;css();tab();setInterval(watch,2000);
+  /* head-to-head button on the games */
+  if(ME&&!window.MGH2H){var h=document.createElement('script');h.src=ME.replace(/leaderboard\.js(\?.*)?$/,'h2h.js');document.head.appendChild(h)}}
 window.MGBoard={open:open};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else setTimeout(init,0);
 })();
