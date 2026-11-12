@@ -1,0 +1,44 @@
+<style>
+/* Coaching (app view): the live www.macro.golf/coaching content inside the app, with a Back button and no site header/menu.
+   It fetches /coaching each time it opens and shows only the page's own content blocks, so it always matches the website page.
+   Opened from My Plan's "Enquire about coaching" (pages/my-plan.html). */
+.cap-bar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;background:#0B0B0B;border-bottom:1px solid rgba(244,241,234,.12);
+  padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+.cap-back{min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 14px 0 8px;background:transparent;border:1px solid rgba(244,241,234,.3);color:#F4F1EA;font:600 15px 'Inter',system-ui,sans-serif;cursor:pointer;text-decoration:none}
+.cap-back:focus-visible{outline:3px solid #FFD900;outline-offset:2px}
+.cap-back svg{width:20px;height:20px}
+.cap-t{color:#FFD900;font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:2.2px;text-transform:uppercase}
+.cap-body{background:#0B0B0B;min-height:80vh}
+.cap-load{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0B0B0B;color:#F4F1EA;font:600 15px 'Inter',system-ui,sans-serif;text-align:center;padding:24px}
+.cap-load i{width:42px;height:42px;border:5px solid #333;border-top-color:#FFD900;border-radius:50%;animation:capspin .8s linear infinite}@keyframes capspin{to{transform:rotate(360deg)}}
+.cap-load a{color:#FFD900}
+@media (prefers-reduced-motion:reduce){.cap-load i{animation:none}}
+</style>
+<div class="cap-bar"><a class="cap-back" href="/my-plan" id="cap-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Back</a><span class="cap-t">1-to-1 Coaching</span></div>
+<div class="cap-body" id="cap-body"><div class="cap-load" role="status"><i aria-hidden="true"></i>Loading…</div></div>
+<script>
+(function(){
+var root=document.getElementById('mg-root')||document.getElementById('cap-body').parentNode,body=document.getElementById('cap-body'),back=document.getElementById('cap-back');
+[].forEach.call(root.querySelectorAll('style'),function(st){st.id='cap-css';document.head.appendChild(st)});
+/* Back: to the page they came from inside the app (My Plan), else My Plan */
+back.addEventListener('click',function(e){if(history.length>1&&document.referrer&&document.referrer.indexOf(location.host)>=0){e.preventDefault();history.back()}});
+function run(list,i){if(i>=list.length)return;var old=list[i],s=document.createElement('script');
+  [].forEach.call(old.attributes,function(a){s.setAttribute(a.name,a.value)});
+  if(old.src){s.onload=s.onerror=function(){run(list,i+1)};old.parentNode.replaceChild(s,old)}else{s.textContent=old.textContent;old.parentNode.replaceChild(s,old);run(list,i+1)}}
+function failed(){body.innerHTML='<div class="cap-load" role="alert">Could not load this page. <a href="/coaching">Open it here</a></div>'}
+fetch('/coaching?x='+Date.now(),{credentials:'same-origin'}).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(html){
+  var doc=new DOMParser().parseFromString(html,'text/html');
+  /* the page's own content: each Custom Code block (they hold <link>/<style> + .mgw content) */
+  var tops=[].filter.call(doc.querySelectorAll('.mgw'),function(el){return !el.parentElement.closest('.mgw')});
+  var parts=[];tops.forEach(function(el){var p=el.parentElement;if(parts.indexOf(p)<0)parts.push(p)});
+  if(!parts.length){/* fallback: everything except the site header, footer and pop-ups */
+    [].forEach.call(doc.querySelectorAll('header,footer,nav,[class*="exit-pop"],[class*="two-step"],.header,.footer'),function(e){e.remove()});
+    var main=doc.querySelector('main')||doc.body;parts=[main]}
+  var wrap=document.createElement('div');parts.forEach(function(p){var d=document.createElement('div');d.innerHTML=p.innerHTML;wrap.appendChild(d)});
+  /* in-page anchors stay here; links to other site pages open normally */
+  [].forEach.call(wrap.querySelectorAll('a[href]'),function(a){var h=a.getAttribute('href');if(/^https?:\/\/(www\.)?macro\.golf\/coaching\/?(#.*)?$/.test(h))a.setAttribute('href',h.replace(/^.*?(#.*)?$/,'$1')||'#')});
+  var scripts=[].slice.call(wrap.querySelectorAll('script'));
+  body.innerHTML='';body.appendChild(wrap);run(scripts,0);
+}).catch(failed);
+})();
+</script>
