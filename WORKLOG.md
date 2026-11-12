@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 11:01 · Joe's Claude · VidApp: Publish To Live Apps pressed (Joe's call). Members get the direct-link Practice games next time they open the app · live
 2026-11-12 11:05 · Joe's Claude · VidApp: pressed Publish To Preview (Joe's call) so the direct-link Practice games reach the preview app. Did NOT press Publish To Live Apps. Sam invited to Supabase (Developer, pending his accept); SamMacroGolf already a GitHub collaborator · done
 2026-11-12 11:05 · Sam's Claude · Built Colin Howard 1-to-1 plan (clients/colin-howard.js, code 576900, 2 workouts, daily mobility, gratitude journal habit). Pushed, tested in Playwright. Not on Kajabi yet; waiting on Sam to confirm assumptions and 5 demo video matches · built
 2026-11-12 11:55 · Joe's Claude · Leaderboard SQL (supabase/004-leaderboard.sql) run in Supabase, RPC answering; 12 golf pages + Paul Goddard re-pinned to 8fe53e3 (contains dd4f926 + 8826d04) and checked live. Deleted Jack's test row on Paul Goddard's plan (pure:golf-paul-goddard:jack@macro.golf, Joe's call). Left the paul@ row (created 2026-11-11 21:40, no sessions) until Joe says whether it is Paul or a test · live
