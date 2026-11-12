@@ -127,7 +127,9 @@ function route(j,em,pin){
   if(j.oneToOne&&(j.oneToOne.includes||['training']).indexOf('practice')>=0){
     var m={em:em,name:name,target:{kind:'1to1',code:j.oneToOne.code,path:j.oneToOne.path}};save(m);
     handoff1to1(m,pin);coachScreen(m);return}
-  var b={em:em,name:name,target:{kind:'plan',plan:PRAC},hasPlan:!!(pr&&pr.hasPlan)};save(b);chooseScreen(b,pin);
+  var b={em:em,name:name,target:{kind:'plan',plan:PRAC},hasPlan:!!(pr&&pr.hasPlan)};save(b);
+  /* returning players with a plan go straight to this week (Joe, 12 Nov); 'Build a one-off session' is inside the plan */
+  if(b.hasPlan){ls('mgprac:start',null);openPlan(b,pin)}else chooseScreen(b,pin);
 }
 
 /* 1-to-1 clients whose plan includes practice: it's set by their coach */
@@ -174,7 +176,7 @@ function logout(){try{if(typeof window.KEY==='string')ls('mgsync:'+window.KEY,nu
 
 /* coming back: go straight to where they went last time */
 var m=me();
-if(m){if(m.target.kind==='1to1')coachScreen(m);else if(PLANS[m.target.plan])chooseScreen(m);}
+if(m){if(m.target.kind==='1to1')coachScreen(m);else if(PLANS[m.target.plan]){if(m.hasPlan){ls('mgprac:start',null);openPlan(m)}else chooseScreen(m)}}
 else setTimeout(function(){(f.email.value?f.pin:f.email).focus()},60);
 })();
 </script>
