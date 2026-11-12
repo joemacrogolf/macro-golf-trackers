@@ -497,6 +497,7 @@ body.gated{overflow:hidden}
       </div>
     </div>
     <button class="primary" id="startBtn">Start the test</button>
+<p id="sameNote" hidden style="margin:8px 0 0;font-size:14px;line-height:1.45;color:#77715F"></p>
   </section>
 
   <section class="card" id="entry" hidden>
@@ -693,8 +694,12 @@ function renderBench(){
 function renderAll(){renderSetup();renderBoard();renderEntry();renderCard();renderHist();renderBench()}
 
 /* ---------- Actions ---------- */
-function startTest(){const list=[];Object.entries(MIX[S.len]).forEach(([b,k])=>{for(let i=0;i<k;i++)list.push(makePutt(b))});
-  for(let i=list.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[list[i],list[j]]=[list[j],list[i]]}
+/* every retest is the same test: the first test's putts are kept (per length) and replayed in the same order */
+function startTest(){S.base=S.base&&typeof S.base==="object"?S.base:{};const B=S.base[S.len];let list;
+  if(B&&Array.isArray(B.list)&&B.list.length)list=JSON.parse(JSON.stringify(B.list));
+  else{list=[];Object.entries(MIX[S.len]).forEach(([b,k])=>{for(let i=0;i<k;i++)list.push(makePutt(b))});
+    for(let i=list.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[list[i],list[j]]=[list[j],list[i]]}
+    S.base[S.len]={list:JSON.parse(JSON.stringify(list)),d:new Date().toISOString().slice(0,10)}}
   S.putts=list;S.res=[];S.started=true;S.saved=false;S.notes="";save();renderAll();$("entry").scrollIntoView({behavior:"smooth",block:"start"})}
 function newTest(){S.started=false;S.putts=[];S.res=[];S.saved=false;S.notes="";$("flash").innerHTML="";save();renderAll();window.scrollTo({top:0,behavior:"smooth"})}
 function record(r){if(!S.started||done())return;const p=S.putts[n()];S.res.push(r);
@@ -725,6 +730,10 @@ function syncCoach(){const a=coachAddr(),r=$("report").value;
 $("vFull").addEventListener("click",()=>{if(S.started)return;S.len="full";save();renderAll()});
 $("vHalf").addEventListener("click",()=>{if(S.started)return;S.len="half";save();renderAll()});
 $("startBtn").addEventListener("click",startTest);
+/* retests replay the first test exactly, so the numbers compare like for like */
+(function(){function paint(){try{const e=$("sameNote");if(!e)return;const B=S.base&&S.base[S.len];
+  e.hidden=!B;if(B)e.textContent="Retest: exactly the same shots as your first test ("+new Date(B.d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+"), so you can see what's improved."}catch(x){}}
+  if(typeof renderAll==="function"){const r0=renderAll;renderAll=function(){const x=r0.apply(this,arguments);paint();return x}}paint()})();
 $("holedBtn").addEventListener("click",()=>record({holed:true}));
 $("leave").addEventListener("input",()=>{$("missBtn").disabled=!(parseFloat($("leave").value)>0)});
 var miss=()=>{const v=parseFloat($("leave").value);if(v>0)record({holed:false,leave:Math.round(v*2)/2})};

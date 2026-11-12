@@ -508,6 +508,7 @@ body.gated{overflow:hidden}
       </div>
     </div>
     <button class="primary" id="startBtn">Start the test</button>
+<p id="sameNote" hidden style="margin:8px 0 0;font-size:14px;line-height:1.45;color:#77715F"></p>
   </section>
 
   <section class="card" id="entry" hidden>
@@ -841,8 +842,10 @@ function testPlan(mix,set){const usedA=new Set(),usedT=new Set(),list=[];
   for(let n=0;n<300&&bestBad>0;n++){const a=list.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
     let bad=0;for(let i=1;i<a.length;i++)if(Math.abs(a[i][1]-a[i-1][1])<5)bad++;if(bad<bestBad){best=a;bestBad=bad}}
   return best}
-function startTest(){const list=testPlan(MIX[S.len],S.set);
-  S.shots=list.map(x=>makeShot(x[0],S.set,x[1],x[2]));S.res=[];S.started=true;S.saved=false;S.notes="";save();renderAll();$("entry").scrollIntoView({behavior:"smooth",block:"start"})}
+/* every retest is the same test: the first test's shots (yardages, holes, hazards, order) are kept per length and club set */
+function startTest(){S.base=S.base&&typeof S.base==="object"?S.base:{};const key=S.len+"|"+JSON.stringify(S.set||{}),B=S.base[key];
+  if(B&&Array.isArray(B.list)&&B.list.length)S.shots=JSON.parse(JSON.stringify(B.list));
+  else{const list=testPlan(MIX[S.len],S.set);S.shots=list.map(x=>makeShot(x[0],S.set,x[1],x[2]));S.base[key]={list:JSON.parse(JSON.stringify(S.shots)),d:new Date().toISOString().slice(0,10)}}S.res=[];S.started=true;S.saved=false;S.notes="";save();renderAll();$("entry").scrollIntoView({behavior:"smooth",block:"start"})}
 function newTest(){S.started=false;S.shots=[];S.res=[];S.saved=false;S.notes="";$("flash").innerHTML="";save();renderAll();window.scrollTo({top:0,behavior:"smooth"})}
 function enter(){
   const rd=readIn();if(!rd.ok||done())return;const s=S.shots[n()];let c,o;
@@ -879,6 +882,10 @@ $("vPin").addEventListener("click",()=>{if(S.started)return;S.appMode="pin";save
 $("drv").addEventListener("input",e=>{if(S.started)return;S.set.drv=+e.target.value;save();renderSetup()});
 $("fw").addEventListener("input",e=>{if(S.started)return;S.set.fw=+e.target.value;save();renderSetup()});
 $("startBtn").addEventListener("click",startTest);
+/* retests replay the first test exactly, so the numbers compare like for like */
+(function(){function paint(){try{const e=$("sameNote");if(!e)return;const B=S.base&&S.base[S.len+"|"+JSON.stringify(S.set||{})];
+  e.hidden=!B;if(B)e.textContent="Retest: exactly the same shots as your first test ("+new Date(B.d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+"), so you can see what's improved."}catch(x){}}
+  if(typeof renderAll==="function"){const r0=renderAll;renderAll=function(){const x=r0.apply(this,arguments);paint();return x}}paint()})();
 $("carry").addEventListener("input",updateEnter);
 $("off").addEventListener("input",()=>{const v=parseFloat($("off").value);if(v>0&&dir==="C")setDir(null);else updateEnter()});
 ["L","C","R"].forEach(k=>$("dir"+k).addEventListener("click",()=>setDir(k)));

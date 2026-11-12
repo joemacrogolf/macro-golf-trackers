@@ -99,6 +99,9 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 .board .side{text-align:right;display:flex;flex-direction:column;gap:2px}
 .board .side b{font-family:var(--display);font-weight:400;font-size:22px;color:var(--on-ink)}
 .prog{grid-column:1/-1;display:flex;gap:4px;margin-top:10px}
+.prog6 .pc{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}.pch{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.pch b{font-family:var(--display);font-weight:400;font-size:20px;text-transform:uppercase}.pch small{color:var(--muted);font-size:12px}
+.pcbig{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.pcbig span{font-family:var(--display);font-size:30px;line-height:1}.pcbig i{font-style:normal;color:var(--muted)}.pcbig em{font-style:normal;font-weight:700;font-size:13px;margin-left:auto;padding:3px 8px;background:var(--line)}.pcbig.up em{background:#1FA855;color:#fff}.pcbig.down em{background:#E0352B;color:#fff}
+.pcl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}.pcl li{display:grid;grid-template-columns:1fr auto 52px;gap:8px;align-items:baseline;font-size:14px}.pcl small{color:var(--muted);font-size:12px}.pcl b{text-align:right;font-size:13px}.pcl li.up b{color:#1FA855}.pcl li.down b{color:#E0352B}
 .wk6{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.wk6 div{border:1px solid var(--line);padding:6px 4px;text-align:center;display:flex;flex-direction:column;gap:2px}.wk6 small{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.wk6 b{font-family:var(--display);font-weight:400;font-size:17px}.wk6 .full{background:var(--ink);border-color:var(--ink)}.wk6 .full b,.wk6 .full small{color:var(--gold)}.wk6 .part{background:rgba(255,218,0,.18)}.wk6 .now{border:2px solid var(--gold)}.wk6 .next b{color:var(--muted)}
 .prog i{flex:1;height:5px;background:rgba(244,241,234,.18)}
 .prog i.on{background:var(--gold)}.prog i.cur{background:var(--on-ink)}
@@ -1327,7 +1330,11 @@ function makePlan(){const P=PG(),pr=P.profile,ents=testEntries(),used=TEST_ORDER
       t.full=n});
     pack(mine,G.n,G.cap).forEach(x=>{x.kind=G.kind;week.push(x)});T.push(...L)});
   T.sort((a,b)=>b.loss-a.loss);
-  P.plan={v:2,t:Date.now(),from:used,missing:TEST_ORDER.filter(k=>!used.includes(k)),target:pr.target,sessions,mins:pr.mins,maintain:!!maintain,
+  /* keep the results each 6-week plan was built from, so retests can be compared like for like */
+  const basis={};used.forEach(k=>{const e=ents[k];basis[k]={t:e.t,hc:e.hc,target:e.target,raw:e.raw}});
+  if(P.plan&&P.plan.basis){P.cycles=(P.cycles||[]).concat([{start:P.plan.start,end:weekKey(),basis:P.plan.basis}]).slice(-12)}
+  P.first=P.first||{};used.forEach(k=>{if(!P.first[k])P.first[k]=basis[k]});
+  P.plan={v:2,basis,t:Date.now(),from:used,missing:TEST_ORDER.filter(k=>!used.includes(k)),target:pr.target,sessions,mins:pr.mins,maintain:!!maintain,
     week,targets:T.map(t=>({key:t.key,name:t.name,group:t.group,area:t.area,loss:t.loss,mins:t.mins,full:t.full,game:t.game,games:t.games,maintain:!!t.maintain})),
     strengths:leaks.filter(l=>l.perRound>=0.05).sort((a,b)=>b.perRound-a.perRound).slice(0,3).map(l=>({name:l.name,perRound:l.perRound})),
     totalLoss:sum(T.filter(t=>!t.maintain).map(t=>t.loss)),start:weekKey(),retestWeeks:6};
@@ -1410,17 +1417,36 @@ function profileCard(){const pr=ui.prof||(ui.prof=Object.assign(defProfile(),PG(
    <label class="fld"><span class="label">Compare me with</span><select id="pTarget">${TARGETS.map(t=>`<option value="${t}" ${t===pr.target?"selected":""}>${hcName(t)}</option>`).join("")}</select></label>
    <button class="primary" data-act="saveProf" ${pr.sessions&&pr.mins&&pr.sim!==null&&String(pr.name||"").trim()?"":"disabled"}>Save and carry on</button></div>`}
 const pr_=on=>`aria-pressed="${on?"true":"false"}"`;
+/* ---------- Progress: each retest against the test before it (same shots, same scoring) ---------- */
+function retestDue(){const P=PG(),p=P.plan;return !!(p&&weekNo()>p.retestWeeks)}
+function compareFor(k){const P=PG(),after=testEntries()[k];if(!after)return null;
+  const bases=[P.plan&&P.plan.basis].concat((P.cycles||[]).slice().reverse().map(c=>c.basis)).filter(Boolean).map(b=>b[k]).filter(b=>b&&b.t<after.t);
+  const before=bases[0];if(!before)return null;const first=(P.first||{})[k];return {before,after,first:first&&first.t<before.t?first:null}}
+function progressCard(){const P=PG(),rows=TEST_ORDER.map(k=>[k,compareFor(k)]).filter(x=>x[1]);if(!rows.length)return "";
+  const lk=raw=>{const m={};try{MacroPlan.leaks(raw).forEach(l=>{m[l.key]=l})}catch(e){}return m};
+  const sh=v=>(v>=0?"+":"−")+Math.abs(v).toFixed(1);
+  let h=`<section class="sec-h"><span class="eyebrow">Your progress</span><h2>What's improved</h2></section><div class="card prog6"><p style="margin:0">Same test, same shots, same scoring. Here's your retest against the test your last plan was built from.</p>`;
+  rows.forEach(([k,c])=>{const b=c.before,a=c.after,dh=b.hc!=null&&a.hc!=null?b.hc-a.hc:null,LB=lk(b.raw),LA=lk(a.raw);
+    const keys=[...new Set(Object.keys(LB).concat(Object.keys(LA)))].filter(x=>LB[x]&&LA[x]).sort((x,y)=>(LA[y].perRound-LB[y].perRound)-(LA[x].perRound-LB[x].perRound));
+    const tot=keys.reduce((t,x)=>t+(LA[x].perRound-LB[x].perRound),0);
+    h+=`<div class="pc"><div class="pch"><b>${TEST_PLAN[k][1]}</b><small>${niceDay(b.t)} → ${niceDay(a.t)}</small></div>
+      ${dh!=null?`<div class="pcbig ${dh>0.05?"up":dh<-0.05?"down":""}"><span>${hcTxt(b.hc)}</span><i>→</i><span>${hcTxt(a.hc)}</span><em>${dh>0.05?"▲ "+dh.toFixed(1)+" better":dh<-0.05?"▼ "+Math.abs(dh).toFixed(1)+" worse":"Level"}</em></div>`:""}
+      ${keys.length?`<ul class="pcl">${keys.map(x=>{const d=LA[x].perRound-LB[x].perRound;return `<li class="${d>0.05?"up":d<-0.05?"down":""}"><span>${esc(LA[x].name)}</span><small>${sh(LB[x].perRound)} → ${sh(LA[x].perRound)}</small><b>${d>0.05?"▲ "+d.toFixed(1):d<-0.05?"▼ "+Math.abs(d).toFixed(1):"–"}</b></li>`}).join("")}</ul>
+      <p class="muted" style="margin:0;font-size:13px">Shots a round against a ${hcName(a.target||P.plan&&P.plan.target||"10")} player. ${tot>0.05?`<b style="color:var(--fg)">${tot.toFixed(1)} shots a round better</b> across this test.`:tot<-0.05?`${Math.abs(tot).toFixed(1)} shots a round down across this test. The next plan puts more time there.`:"About level overall."}</p>`:""}
+      ${c.first&&c.first.hc!=null&&a.hc!=null?`<p class="muted" style="margin:0;font-size:13px">Since your first test on ${niceDay(c.first.t)}: ${hcTxt(c.first.hc)} → ${hcTxt(a.hc)}.</p>`:""}</div>`});
+  return h+`</div>`}
 function testsCard(){const P=PG(),ents=testEntries(),skip=P.skip||{},done=TEST_ORDER.filter(k=>ents[k]),use=done.filter(k=>!skip[k]),miss=TEST_ORDER.filter(k=>!use.includes(k));
-  let h=`<section class="sec-h"><span class="eyebrow">02 / Your tests</span><h2>Your plan comes from your tests</h2></section><div class="card"><p style="margin:0">Each test finds where you're losing shots. Do all three and your plan covers your whole game. You can skip one or two, but the plan will only cover what you've tested.</p><div class="tests">`;
+  let h=(P.plan?progressCard():"")+`<section class="sec-h"><span class="eyebrow">02 / Your tests</span><h2>${retestDue()?"Retest time":"Your plan comes from your tests"}</h2></section><div class="card">${retestDue()?`<p style="margin:0">Your ${P.plan.retestWeeks} weeks are done. Take your tests again: exactly the same shots as last time, so you can see what's improved. Your next ${P.plan.retestWeeks} week plan is built from the new results.</p>`:""}<p style="margin:0">Each test finds where you're losing shots. Do all three and your plan covers your whole game. You can skip one or two, but the plan will only cover what you've tested.</p><div class="tests">`;
   /* one clear state per test: done (tick), to do (Take it / Skip for now), skipped (Undo) */
-  TEST_ORDER.forEach((k,i)=>{const e=ents[k],sk=!!skip[k],st=e&&!sk?"ok":sk?"skip":"todo";
-    const sub=st==="ok"?`${TEST_COVERS[k]} · done ${niceDay(e.t)}${e.hc!=null?" · played like "+hcTxt(e.hc):""}`:st==="skip"?`Skipped for now · your plan won't cover ${TEST_COVERS[k].toLowerCase()}`:TEST_COVERS[k];
-    const act=st==="ok"?"":st==="skip"?`<button class="ghost tsm" data-act="skipT" data-v="${k}">Undo</button>`:`<a class="dark tbtn" href="${site(TEST_URL[k])}">Take it</a><button class="ghost tsm" data-act="skipT" data-v="${k}">Skip for now</button>`;
-    h+=`<div class="trow ${st}"><span class="tn">${st==="ok"?"✓":st==="skip"?"–":i+1}</span><div class="tt"><b>${TEST_PLAN[k][1]}</b><small>${sub}</small></div><div class="ta">${act}</div></div>`});
+  const rt=retestDue(),pt=P.plan?P.plan.t:0;
+  TEST_ORDER.forEach((k,i)=>{const e=ents[k],sk=!!skip[k],st=e&&!sk?(rt&&e.t<=pt?"retest":"ok"):sk?"skip":"todo";
+    const sub=st==="retest"?`Last taken ${niceDay(e.t)} · retest with exactly the same shots`:st==="ok"?`${TEST_COVERS[k]} · ${rt&&e.t>pt?"retested":"done"} ${niceDay(e.t)}${e.hc!=null?" · played like "+hcTxt(e.hc):""}`:st==="skip"?`Skipped for now · your plan won't cover ${TEST_COVERS[k].toLowerCase()}`:TEST_COVERS[k];
+    const act=st==="retest"?`<a class="dark tbtn" href="${site(TEST_URL[k])}">Retest</a>`:st==="ok"?"":st==="skip"?`<button class="ghost tsm" data-act="skipT" data-v="${k}">Undo</button>`:`<a class="dark tbtn" href="${site(TEST_URL[k])}">Take it</a><button class="ghost tsm" data-act="skipT" data-v="${k}">Skip for now</button>`;
+    h+=`<div class="trow ${st}"><span class="tn">${st==="ok"?"✓":st==="skip"?"–":st==="retest"?"↻":i+1}</span><div class="tt"><b>${TEST_PLAN[k][1]}</b><small>${sub}</small></div><div class="ta">${act}</div></div>`});
   h+=`</div>`;
   if(!use.length)h+=`<div class="recnote">Take at least one test and your plan is built from it. Come back here when you've finished. Your results load automatically.</div>`;
   else if(miss.length&&!ui.confirm)h+=`<div class="warnbox"><b>Your plan won't be perfect yet</b>${miss.map(k=>TEST_PLAN[k][1]).join(" and ")} ${miss.length>1?"aren't":"isn't"} in it, so ${miss.length>1?"those parts":"that part"} of your game won't be covered. You can build it now and add ${miss.length>1?"them":"it"} later.</div><button class="primary" data-act="mkPlanAnyway">Build my 6 week plan anyway</button>`;
-  else h+=`<button class="primary" data-act="mkPlan">${P.plan?"Rebuild my 6 week plan":"Build my 6 week plan"}</button>`;
+  else h+=`<button class="primary" data-act="mkPlan">${P.plan?(retestDue()?"Build my next 6 week plan":"Rebuild my 6 week plan"):"Build my 6 week plan"}</button>`;
   if(P.plan)h+=`<button class="linky" data-act="home">← Back to this week</button>`;
   return h+`<button class="linky" data-act="editProf">Change how much you practise</button></div>`}
 function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,next=p.week.findIndex((_,i)=>!done.includes(i)),wk=weekNo(),retest=wk>p.retestWeeks;
@@ -1441,6 +1467,7 @@ function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,ne
     h+=`<div class="sess ${isDone?"done":""}"><div class="sh"><span class="sn" ${k==="green"&&!isDone?'style="font-size:13px"':""}>${isDone?"✓":{range:"R",short:"S",putt:"P",green:"S+P",mixed:"M"}[k]||i+1}</span><div class="st"><b>${nm[0]}${tot[k]>1?" "+cnt[k]:""}</b><small>${nm[1]} · ${p.mins} min · ${isDone?"done this week":"to do"}</small></div></div>
      <ul class="sg">${it.map(x=>`<li><b>${x.full?esc(MacroPlan.GAMES[x.game].name)+(MacroPlan.GAMES[x.game].set?` <small>${MacroPlan.GAMES[x.game].set}</small>`:""):esc(x.name)}</b> <small class="tag ${x.full?"g":""}">${x.full?"Full game":"Focused"}</small><span>${x.mins} min</span></li>`).join("")}</ul>
      ${isDone?`<button class="linky" data-act="startPlan" data-v="${i}">Do it again</button>`:`<button class="primary" data-act="startPlan" data-v="${i}">Do this one today</button>`}</div>`});
+  h+=progressCard();
   h+=whyCard();
   h+=`<div class="btns"><button class="ghost" data-act="build">Build a one-off session</button><button class="ghost" data-act="tests">Tests and plan</button></div>`;
   return h}

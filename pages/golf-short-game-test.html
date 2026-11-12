@@ -432,6 +432,7 @@ body.gated{overflow:hidden}
       <div class="rangeRow"><input type="range" id="maxBunk" min="5" max="50" step="5" aria-label="Longest bunker shot in yards"><output id="maxBunkOut" class="tnum"></output></div>
     </div>
     <button class="primary" id="startBtn">Start the test</button>
+<p id="sameNote" hidden style="margin:8px 0 0;font-size:14px;line-height:1.45;color:#77715F"></p>
   </section>
 
   <section class="card" id="entry" hidden>
@@ -731,7 +732,10 @@ function renderBench(){
 function renderAll(){renderSetup();renderBoard();renderEntry();renderCard();renderHist();renderBench()}
 
 /* ---------- Actions ---------- */
-function startTest(){S.order=shuffle(TEST.map(r=>r[0]));S.res=[];S.started=true;S.saved=false;S.notes="";save();renderAll();$("entry").scrollIntoView({behavior:"smooth",block:"start"})}
+/* every retest is the same test: the first test's shot order is kept and replayed */
+function startTest(){S.base=S.base&&typeof S.base==="object"?S.base:{};const ids=TEST.map(r=>r[0]),B=S.base.all;
+  S.order=B&&Array.isArray(B.list)&&B.list.length===ids.length&&B.list.every(x=>ids.includes(x))?B.list.slice():shuffle(ids);
+  if(!B||S.order!==B.list&&JSON.stringify(S.order)!==JSON.stringify(B.list))S.base.all={list:S.order.slice(),d:new Date().toISOString().slice(0,10)};S.res=[];S.started=true;S.saved=false;S.notes="";save();renderAll();$("entry").scrollIntoView({behavior:"smooth",block:"start"})}
 function newTest(){S.started=false;S.order=[];S.res=[];S.saved=false;S.notes="";$("flash").innerHTML="";save();renderAll();window.scrollTo({top:0,behavior:"smooth"})}
 function record(v){
   if(!S.started||done())return;
@@ -786,6 +790,10 @@ $("maxBunk").addEventListener("input",e=>{if(S.started)return;S.set.bunkMax=+e.t
 $("bunkYes").addEventListener("click",()=>{if(S.started)return;S.set.bunker=true;save();renderAll()});
 $("bunkNo").addEventListener("click",()=>{if(S.started)return;S.set.bunker=false;save();renderAll()});
 $("startBtn").addEventListener("click",startTest);
+/* retests replay the first test exactly, so the numbers compare like for like */
+(function(){function paint(){try{const e=$("sameNote");if(!e)return;const B=S.base&&S.base["all"];
+  e.hidden=!B;if(B)e.textContent="Retest: exactly the same shots as your first test ("+new Date(B.d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+"), so you can see what's improved."}catch(x){}}
+  if(typeof renderAll==="function"){const r0=renderAll;renderAll=function(){const x=r0.apply(this,arguments);paint();return x}}paint()})();
 $("ftIn").addEventListener("input",()=>{$("enterBtn").disabled=!(parseFloat($("ftIn").value)>=0)});
 $("ftIn").addEventListener("keydown",e=>{if(e.key==="Enter"){const v=parseFloat($("ftIn").value);if(v>=0)record(v)}});
 $("enterBtn").addEventListener("click",()=>{const v=parseFloat($("ftIn").value);if(v>=0)record(v)});
