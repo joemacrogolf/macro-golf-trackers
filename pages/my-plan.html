@@ -1,0 +1,94 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* My Plan: one log-in page for every 1-to-1 client plan (VidApp "My Plan" button).
+   Email + PIN (first time: + plan code) -> mg_myplan() -> loads that client's own live Kajabi page loader in place. */
+.mp{min-height:100vh;background:#0B0B0B;color:#F4F1EA;font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;display:flex;align-items:flex-start;justify-content:center;
+  padding:calc(36px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px));box-sizing:border-box}
+.mp *{box-sizing:border-box}
+.mp-in{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px}
+.mp-k{font-weight:700;font-size:12px;letter-spacing:2.4px;text-transform:uppercase;color:#FFD900}
+.mp-h{font-family:'Anton',Impact,'Arial Narrow Bold',sans-serif;font-weight:400;text-transform:uppercase;font-size:44px;line-height:.98;margin:0}
+.mp-bar{width:74px;height:6px;background:#FFD900}
+.mp-p{margin:0;color:#cfcabd;font-size:15px;line-height:1.5}
+.mp form{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.mp label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:13px;letter-spacing:.3px;color:#F4F1EA}
+.mp input{min-height:50px;padding:0 14px;border:1px solid rgba(244,241,234,.35);background:#141414;color:#F4F1EA;font:500 17px 'Inter',system-ui,sans-serif;border-radius:0;width:100%}
+.mp input:focus{outline:3px solid #FFD900;outline-offset:1px;border-color:#FFD900}
+.mp small{font-weight:400;color:#9C988C;font-size:12.5px}
+.mp-go{min-height:54px;border:0;background:#FFD900;color:#0B0B0B;font:400 22px 'Anton',Impact,sans-serif;text-transform:uppercase;cursor:pointer;margin-top:4px}
+.mp-go[disabled]{opacity:.6}
+.mp-link{align-self:flex-start;background:none;border:0;padding:6px 0;color:#FFD900;font:600 14px 'Inter',system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.mp-link:focus-visible,.mp-go:focus-visible{outline:3px solid #FFD900;outline-offset:3px}
+.mp-err{min-height:1.2em;margin:0;color:#ffb4a8;font-weight:600;font-size:14px}
+.mp-first[hidden]{display:none}
+.mp-help{margin-top:10px;padding-top:14px;border-top:1px solid rgba(244,241,234,.15);color:#9C988C;font-size:13px;line-height:1.5}
+.mp-load{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#F4F1EA;color:#0B0B0B;font:600 15px 'Inter',system-ui,sans-serif;text-align:center;padding:24px}
+.mp-load i{width:42px;height:42px;border:5px solid #0B0B0B;border-top-color:#FFD900;border-radius:50%;animation:mpspin .8s linear infinite}@keyframes mpspin{to{transform:rotate(360deg)}}
+.mp-load button{min-height:48px;padding:0 20px;border:0;background:#FFD900;color:#0B0B0B;font:400 18px Anton,Impact,sans-serif;text-transform:uppercase;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.mp-load i{animation:none}}
+</style>
+<div class="mp" id="mp">
+  <div class="mp-in">
+    <div class="mp-k">Macro Golf</div>
+    <h1 class="mp-h">My Plan</h1>
+    <div class="mp-bar"></div>
+    <p class="mp-p">Log in to open your personal training plan.</p>
+    <form id="mp-form" novalidate>
+      <label>Email<input name="email" type="email" autocomplete="email" inputmode="email" required></label>
+      <label>PIN<input name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" autocomplete="current-password" required placeholder="4 digits"></label>
+      <div class="mp-first" id="mp-first" hidden>
+        <label>Plan code <small>The 6-digit code in your welcome message. First time only: the PIN you type above becomes your PIN.</small>
+          <input name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code"></label>
+      </div>
+      <p class="mp-err" id="mp-err" role="alert"></p>
+      <button class="mp-go" type="submit">Open my plan</button>
+      <button class="mp-link" type="button" id="mp-firstbtn">First time here?</button>
+    </form>
+    <p class="mp-help">Forgotten your PIN? Message your coach and they will reset it.</p>
+  </div>
+</div>
+<script>
+(function(){
+var URL='https://zhcgwtlyqriwlhbzkxcl.supabase.co/rest/v1/rpc/mg_myplan',APIKEY='sb_publishable__IBhmrVHOXsLHruU7XJB-g_OSN9Ljne';
+var ME='mgplan:me',root=document.getElementById('mg-root')||document.getElementById('mp').parentNode;
+/* keep this page's styles when the plan replaces the page content */
+[].forEach.call(root.querySelectorAll('style'),function(st){st.id='mp-css';document.head.appendChild(st)});
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
+function me(){try{var m=JSON.parse(ls(ME)||'null');return m&&/^\d{6}$/.test(m.code)?m:null}catch(e){return null}}
+var f=document.getElementById('mp-form'),err=document.getElementById('mp-err'),first=document.getElementById('mp-first'),fb=document.getElementById('mp-firstbtn'),go=f.querySelector('.mp-go');
+function showFirst(){first.hidden=false;fb.hidden=true;setTimeout(function(){f.code.focus()},30)}
+fb.addEventListener('click',showFirst);
+try{var last=ls('mgplan:email');if(last)f.email.value=last}catch(e){}
+f.addEventListener('submit',function(e){e.preventDefault();err.textContent='';
+  var em=String(f.email.value).trim().toLowerCase(),pin=String(f.pin.value).trim(),code=String(f.code.value).replace(/\D/g,'');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){err.textContent='Check your email address.';f.email.focus();return}
+  if(!/^\d{4,8}$/.test(pin)){err.textContent='Your PIN is 4 to 8 numbers.';f.pin.focus();return}
+  if(!first.hidden&&code&&code.length!==6){err.textContent='The plan code has 6 numbers.';f.code.focus();return}
+  go.disabled=true;go.textContent='Checking…';
+  fetch(URL,{method:'POST',headers:{apikey:APIKEY,'Content-Type':'application/json'},body:JSON.stringify({p_email:em,p_pin:pin,p_code:first.hidden?null:(code||null)})})
+   .then(function(r){return r.json()}).then(function(j){
+     if(!j||j.error||!j.code){err.textContent=(j&&(j.error||j.message))||'Something went wrong. Try again.';if(j&&j.first)showFirst();throw 0}
+     ls('mgplan:email',em);
+     ls('mgsync-handoff',JSON.stringify({code:j.code,pin:pin,t:Date.now()}));
+     var m={code:j.code,path:j.path||('p-'+j.code),name:j.name||''};ls(ME,JSON.stringify(m));open(m)})
+   .catch(function(x){if(x!==0)err.textContent='Could not reach the server. Check your connection and try again.';go.disabled=false;go.textContent='Open my plan'})});
+function loading(t){root.innerHTML='<div class="mp-load" role="status"><i aria-hidden="true"></i>'+(t||'Loading your plan…')+'</div>'}
+function failed(m){root.innerHTML='<div class="mp-load" role="alert">Could not load your plan. Check your connection.<button type="button">Try again</button><button type="button" data-out style="background:transparent;text-decoration:underline;font:600 14px Inter,system-ui,sans-serif;text-transform:none">Log out</button></div>';
+  root.querySelector('button').addEventListener('click',function(){open(m)});root.querySelector('[data-out]').addEventListener('click',logout)}
+function logout(){try{if(typeof window.KEY==='string')ls('mgsync:'+window.KEY,null)}catch(e){}ls(ME,null);ls('mgsync-handoff',null);location.reload()}
+/* The client's own Kajabi page holds the loader pinned to the right commit; load exactly that here. */
+function open(m){loading();
+  fetch('/'+m.path+'?x='+Date.now(),{credentials:'same-origin'}).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(html){
+    var s=html.match(/<script[^>]+src="(https:\/\/cdn\.jsdelivr\.net\/gh\/joemacrogolf\/macro-golf-trackers@[0-9a-f]{7,40}\/src\/mount\.js)"[^>]*data-page="([a-z0-9-]+)"/i);
+    if(!s)throw 0;
+    var sc=document.createElement('script');sc.src=s[1];sc.setAttribute('data-page',s[2]);
+    root.innerHTML='';document.body.appendChild(sc);out(m)}).catch(function(){failed(m)})}
+function out(m){if(document.getElementById('mp-out'))return;var d=document.createElement('div');d.id='mp-out';
+  d.style.cssText='text-align:center;padding:18px 16px calc(120px + env(safe-area-inset-bottom,0px));font:500 13px Inter,system-ui,sans-serif;color:#77715F';
+  d.innerHTML='Not '+(m.name?String(m.name).replace(/[<>&"]/g,''):'you')+'? <button type="button" style="background:none;border:0;padding:6px;color:#0B0B0B;font:600 13px Inter,system-ui,sans-serif;text-decoration:underline;cursor:pointer">Log out</button>';
+  d.querySelector('button').addEventListener('click',logout);root.parentNode.insertBefore(d,root.nextSibling)}
+var m=me();if(m)open(m);else setTimeout(function(){(f.email.value?f.pin:f.email).focus()},60);
+})();
+</script>

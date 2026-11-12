@@ -3,6 +3,7 @@
                                       MGSync.init({plan:'pure-power-gym', planName:'Pure Power (gym)'})  // Pure plan: client signs in with email + PIN
                                       MGSync.init({plan:'golf-hole-out', planName:'Hole Out', group:'golf'})  // group: one sign-in covers every page in the group
                                       MGSync.init({plan:'golf-paul-goddard', planName:'…', fixedName:'Paul Goddard'})  // one-person plan: no name box at sign-in
+   My Plan (pages/my-plan.html) signs 1-to-1 pages in by leaving {code,pin,t} in localStorage 'mgsync-handoff' (used once, 10 minutes).
    Needs the tracker's globals: S (state), KEY (localStorage key), save().
    group (optional): pages sharing a group remember the email + PIN once per device, so the next page in the
    group signs in by itself. Each page still keeps its own data (its own code). Pages without group are unchanged. */
@@ -16,6 +17,11 @@ function getCred(){try{return JSON.parse(ls(CK)||'null')}catch(e){return null}}
 function setCred(c){cred=c;ls(CK,c?JSON.stringify(c):null)}
 function rpc(name,body){return fetch(URL+name,{method:'POST',headers:{apikey:APIKEY,'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){
   return r.text().then(function(t){var j=null;try{j=JSON.parse(t)}catch(e){}if(!r.ok||(j&&j.error)){var err=new Error((j&&(j.error||j.message))||('HTTP '+r.status));err.server=true;throw err}return j})})}
+/* ---------- My Plan hand-off: pages/my-plan.html has already checked email + PIN and leaves the code + PIN here ---------- */
+function handoff(){if(!CFG.code)return null;var h=null;try{h=JSON.parse(ls('mgsync-handoff')||'null')}catch(e){}ls('mgsync-handoff',null);
+  return h&&String(h.code)===String(CFG.code)&&h.pin&&Date.now()-(+h.t||0)<6e5?h:null}
+function signInWith(h){setPill('saving');rpc('mg_load',{p_code:String(CFG.code),p_pin:h.pin,p_name:CFG.name||null,p_plan:CFG.planName||CFG.plan||null}).then(function(r){
+  setCred({code:String(CFG.code),pin:h.pin,name:CFG.name||null,base:0});ls('mgsync-skip:'+KEY,null);if(!reconcile(r&&r.data))setPill('ok')}).catch(function(e){if(e&&e.server)gate(e.message);else setPill('offline')})}
 /* ---------- group sign-in (opt-in via CFG.group) ---------- */
 function setGroup(g){if(!CFG.group||!CFG.plan||CFG.code)return;ls('mgsync-group:'+CFG.group,g?JSON.stringify(g):null)}
 function getGroup(){if(!CFG.group||!CFG.plan||CFG.code)return null;try{return JSON.parse(ls('mgsync-group:'+CFG.group)||'null')}catch(e){return null}}
@@ -118,6 +124,7 @@ function init(o){if(started)return;started=true;for(var k in o)CFG[k]=o[k];
   window.addEventListener('online',function(){if(cred&&stamp()>(cred.base||0))push()});
   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&cred){if(stamp()>(cred.base||0))push();else pull()}else if(document.visibilityState==='hidden'&&cred&&stamp()>(cred.base||0))push()});
   setInterval(function(){if(cred&&state==='offline')push()},30000);
+  var ho=handoff();if(ho&&!cred){signInWith(ho);return}
   if(cred){applyName();pull()}else if(getGroup()){autoSignIn(getGroup())}else{var sk=+ls('mgsync-skip:'+KEY)||0;if(Date.now()-sk>3*864e5)setTimeout(function(){gate()},600);else setPill('off')}}
 return {init:init,_merge:merge,_summary:summary,push:push,pull:pull};
 })();
