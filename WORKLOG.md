@@ -3,7 +3,10 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
-2026-11-12 23:25 · Jack's Claude · IN VIDAPP: Warm Up tile new artwork (assets/thumbs/tile-warmup.png) and My Numbers moved to the top of Home · in progress
+2026-11-12 23:31 · Jack's Claude · OUT OF VIDAPP. Not published yet: waiting on Jack's OK to publish preview + live · saved
+2026-11-12 23:30 · Jack's Claude · VidApp MOVED Website item 'My Numbers' 4183747 to first place on Home (Home tab 312348, Home sub-tab). New order: My Numbers · Testing · Practice · Train · Warm Up · saved
+2026-11-12 23:28 · Jack's Claude · VidApp THUMBNAIL REPLACED on Website item 'Warm Up' 4183706 (parent Home sub-tab, → www.macro.golf/warm-up): now '04 · WARM UP / Ready to play in minutes' (assets/thumbs/tile-warmup.png). Old: large_landscape_4183706_image_20261112_192255_warmup.jpg · saved
+2026-11-12 23:25 · Jack's Claude · IN VIDAPP: Warm Up tile new artwork (assets/thumbs/tile-warmup.png) and My Numbers moved to the top of Home · done (see above)
 2026-11-12 23:22 · Jack's Claude · My Numbers: new 'Your trend' card (pick 1M / 3M / 6M / 1Y / All: plays-like handicap per test on a chart, change over the period, games trending recent vs earlier rounds; choice remembered on the phone). Top strip still shows the latest test. golf-numbers.js + golf-my-numbers.html; my-numbers (theme 2168260310) re-pinned c9f5763 → 370ffac · live
 2026-11-12 23:15 · Jack's Claude · VidApp PUBLISHED TO LIVE APPS (Jack's go-ahead): Home tile artwork, My Numbers tile 4183747, bottom tab 'MG Athletes'. OUT OF VIDAPP · live
 2026-11-12 23:10 · Jack's Claude · VidApp PUBLISHED TO PREVIEW (Home tiles, My Numbers tile, MG Athletes tab). Publish To Live Apps not pressed yet: waiting on Jack's OK for this batch · preview
