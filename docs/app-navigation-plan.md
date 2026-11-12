@@ -17,7 +17,7 @@ Status: **planned, not built.** Agreed with Joe on 2026-11-12. No VidApp changes
 
 Both are one page each on macro.golf, opened by a VidApp Website item. Same shell, same sign-in.
 
-### My Training (`pages/my-training.html`, new)
+### My Training (`pages/my-training.html`, BUILT 2026-11-12: Kajabi draft `my-training`, `mg_whoami` live)
 After sign-in:
 1. **1-to-1 client** → "Your training is set by your coach." Button: **Open my 1-to-1 plan**. Note: "If you want to do something outside your plan, head back to the Home page or use Search." (No self-built plan for 1-to-1 clients.)
 2. **Has a training plan** (built or ready-made) → opens it straight away. Small **Change plan** link.
