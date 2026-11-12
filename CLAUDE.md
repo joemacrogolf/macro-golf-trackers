@@ -138,9 +138,15 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | My Training front door (`pages/my-training.html`, uses `mg_whoami` (latest `supabase/009-one-pin.sql`); live, not in app yet) | my-training | 2168255763 | plan / mg_loader |
 | My Practice front door (`pages/my-practice.html`, opens Practice Plan p-274816; uses `mg_whoami`; live, not in app yet) | my-practice | 2168256020 | plan / mg_loader |
 | Warm Up front door (`pages/warm-up.html`, no sign-in, Warm Up and Recovery videos + short mobility) | warm-up | 2168256625 | plan / mg_loader |
+| Coaching app view (`pages/coaching-app.html`: live /coaching content, no header/menu, Back bar) | coaching-app | 2168257984 | plan / mg_loader |
 
 
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)
+
+- **Coaching page in the app:** www.macro.golf/coaching-app loads the live /coaching page's Custom Code blocks each time (no copy to keep in step). If /coaching is rebuilt WITHOUT `.mgw` content blocks, check coaching-app still shows the content (it falls back to everything except header/footer/nav).
+- **Bottom tabs (Joe, 12 Nov):** Home · My Coach (/my-plan) · My Training (/my-training) · My Practice (/my-practice) · Playlists. Sub tabs can't open a website directly; bottom tabs can (Website type).
+- **Home tiles:** Testing · Practice (My Practice Plan → /my-practice + Games & Drills group 4183704) · Train (My Training Plan → /my-training + Training Library group 4183703) · Warm Up (website → /warm-up).
+- New Website items can get a thumbnail by fetching an image (jsDelivr from `assets/thumbs/`, or the VidApp S3 `large_…` copy of an existing thumbnail) into the dialog's file input with DataTransfer.
 
 - Practice (4182266) contains three groups: Putting 4182263, Short Game 4182264 and Long Game 4182265.
   - Each game in those groups is a **direct Website link** to its scoring page, with no group or "Start Scoring" step. The old per-game groups were deleted on 2026-11-12.
