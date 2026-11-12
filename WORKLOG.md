@@ -4,7 +4,10 @@ Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line p
 `YYYY-MM-DD HH:MM · who · what · status`
 
 2026-11-12 22:15 · Jack's Claude · Lava 'Stopping the miss' and Driver Corridor 'Driving accuracy': tag on the first screen (re-pinning p-740258, p-937452) and new VidApp thumbnails · live
-2026-11-12 22:15 · Jack's Claude · IN VIDAPP: replacing thumbnails on Lava and Driver Corridor (Long Game group 4182265) · in progress
+2026-11-12 22:20 · Jack's Claude · VidApp PUBLISHED TO PREVIEW then LIVE (Jack's go-ahead) for the Lava and Driver Corridor thumbnails. OUT OF VIDAPP · live
+2026-11-12 22:19 · Jack's Claude · VidApp THUMBNAIL REPLACED on Website item 'Driver Corridor' 4183637 (parent Long Game 4182265): now shows 'DRIVING ACCURACY' (assets/thumbs/game-driver-corridor.png) · saved
+2026-11-12 22:18 · Jack's Claude · VidApp THUMBNAIL REPLACED on Website item 'Lava' 4183639 (parent Long Game 4182265): now shows 'STOPPING THE MISS' (assets/thumbs/game-lava.png) · saved
+2026-11-12 22:15 · Jack's Claude · IN VIDAPP: replacing thumbnails on Lava and Driver Corridor (Long Game group 4182265) · done
 2026-11-12 22:00 · Jack's Claude · Putting games: tag under the name on the first screen and new VidApp thumbnails (Money Stealers 'Lag putting game', Insanity '6–12 feet', Hole Out '3–5 feet'). Pinning all 9 games to this commit · live
 2026-11-12 22:08 · Jack's Claude · VidApp PUBLISHED TO PREVIEW then LIVE (Jack's go-ahead) for the three Putting thumbnails. OUT OF VIDAPP · live
 2026-11-12 22:06 · Jack's Claude · VidApp THUMBNAIL REPLACED on Website item 'Hole Out' 4183632 (parent Putting 4182263): now shows '3–5 FEET' under the name (assets/thumbs/game-hole-out.png) · saved
