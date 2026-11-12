@@ -114,6 +114,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 .gbar{height:7px;background:rgba(244,241,234,.14)}.gbar i{display:block;height:100%;background:var(--gold)}.goals .gp{font-size:12px;color:#c9c4b6}
 .ghow summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--gold)}.ghow p{margin:8px 0 0!important;font-size:14px!important}
 .pcg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}.pcg li{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:baseline;font-size:13px;padding:6px 8px;background:var(--line)}.pcg li.hit{background:rgba(31,168,85,.14)}.pcg small{color:var(--muted)}.pcg b{font-size:12px}.pcg li.hit b{color:#1FA855}
+.vlink{border:0;background:none;padding:2px 4px;font:700 12px Inter,system-ui,sans-serif;color:var(--fg);text-decoration:underline;cursor:pointer;white-space:nowrap}.gvid{width:100%}
 .wk6{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.wk6 div{border:1px solid var(--line);padding:6px 4px;text-align:center;display:flex;flex-direction:column;gap:2px}.wk6 small{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.wk6 b{font-family:var(--display);font-weight:400;font-size:17px}.wk6 .full{background:var(--ink);border-color:var(--ink)}.wk6 .full b,.wk6 .full small{color:var(--gold)}.wk6 .part{background:rgba(255,218,0,.18)}.wk6 .now{border:2px solid var(--gold)}.wk6 .next b{color:var(--muted)}
 .prog i{flex:1;height:5px;background:rgba(244,241,234,.18)}
 .prog i.on{background:var(--gold)}.prog i.cur{background:var(--on-ink)}
@@ -1516,7 +1517,7 @@ function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,ne
   p.week.forEach((s,i)=>{const isDone=done.includes(i),it=itemsOf(s),k=kindOfS(s),nm=KN[k]||KN.mixed;cnt[k]=(cnt[k]||0)+1;
     h+=`<div class="sess ${isDone?"done":""}"><div class="sh"><span class="sn" ${k==="green"&&!isDone?'style="font-size:13px"':""}>${isDone?"✓":{range:"R",short:"S",putt:"P",green:"S+P",mixed:"M"}[k]||i+1}</span><div class="st"><b>${nm[0]}${tot[k]>1?" "+cnt[k]:""}</b><small>${nm[1]} · ${p.mins} min · ${isDone?"done this week":"to do"}</small></div></div>
      ${it.some(x=>x.game==="strikes"&&x.full||x.key==="lg.speed")?`<p class="muted" style="margin:0;font-size:13px"><b style="color:var(--fg)">Includes speed training.</b> Take care, and speak to a Macro Golf coach if you're unsure about pushing your speed.</p>`:""}
-     <ul class="sg">${it.map(x=>`<li><b>${x.full?esc(MacroPlan.GAMES[x.game].name)+(MacroPlan.GAMES[x.game].set?` <small>${MacroPlan.GAMES[x.game].set}</small>`:""):esc(x.name)}</b> <small class="tag ${x.full?"g":""}">${x.full?"Full game":"Focused"}</small><span>${x.mins} min</span></li>`).join("")}</ul>
+     <ul class="sg">${it.map(x=>`<li><b>${x.full?esc(MacroPlan.GAMES[x.game].name)+(MacroPlan.GAMES[x.game].set?` <small>${MacroPlan.GAMES[x.game].set}</small>`:""):esc(x.name)}</b> <small class="tag ${x.full?"g":""}">${x.full?"Full game":"Focused"}</small>${x.full&&GAME_VID[x.game]?`<button class="vlink" data-act="gvid" data-v="${x.game}" aria-label="Watch how to play ${esc(MacroPlan.GAMES[x.game].name)}">▶ Video</button>`:""}<span>${x.mins} min</span></li>`).join("")}</ul>
      ${isDone?`<button class="linky" data-act="startPlan" data-v="${i}">Do it again</button>`:`<button class="primary" data-act="startPlan" data-v="${i}">Do this one today</button>`}</div>`});
   h+=progressCard();
   h+=whyCard();
@@ -1562,13 +1563,18 @@ function homeAct(act,v,el){const P=PG();
     case "startPlan":startPlanSession(+v);return true;
     case "play":{const b=S&&S.step==="run"?cur():null;if(b){b.opened=true;save()}return true}
     case "vid":if(window.MGVideo)MGVideo.open("Express 5 Minute Golf Warm Up","rxkqwwoq0t");return true;
+    case "gvid":{const g=GAME_VID[v];if(g&&window.MGVideo)MGVideo.open("How to play "+MacroPlan.GAMES[v].name,g);return true}
   }
   return false}
 
 /* a real game: open its page (scores save there and count on its leaderboard), then tick it off here */
+/* "How to play" videos from the Practice Games library (same ones the game pages use) */
+const GAME_VID={holeout:"v79x5jmgq4",ms12:"03wsak6uxo",ms24:"03wsak6uxo",insanity:"583iekejmx",bank:"fb5shey97s",par18:"jiak1zvshi"};
+const vidBtn=(g,cls)=>GAME_VID[g]?`<button class="${cls||"ghost"} gvid" data-act="gvid" data-v="${g}">▶ Watch how to play</button>`:"";
 function runPlay(b){const G=MacroPlan.GAMES[b.game];
   return (b.game==="strikes"?SPEEDWARN:"")+`<div class="viz">${gameArt(b.game)}</div><p class="vizcap">${esc(G.what)}</p>
    ${G.set?`<div class="recnote">Play it on the <b>${G.set}</b> setting.</div>`:""}
+   ${vidBtn(b.game)}
    <ul class="steps"><li>Tap Play. ${esc(G.name)} opens with its own scorecard.</li><li>Your score saves to your record and counts on the ${esc(G.name)} leaderboard.</li><li>When you've finished, come back here and tick it off.</li></ul>
    ${b.opened?`<div class="resume"><b>Back from ${esc(G.name)}?</b><span class="muted">Tick it off and move on to the next block.</span></div>`:""}
    <a class="${b.opened?"ghost":"dark"} playbtn" href="${site(GAME_URL[b.game])}?from=plan" data-act="play">▶ ${b.opened?"Open":"Play"} ${esc(G.name)}</a>`+nextBtn(b.opened?"✓ Played it, next block":"✓ Already played it, next block")}
