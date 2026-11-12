@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 16:55 · Jack's Claude · NEW page pages/golf-on-course.html (On-Course Games: Worst Ball + PGA Tour Average, any number of holes, shot-by-shot strokes gained or score only, courses remembered per player). Plan golf-on-course, group golf. Kajabi landing page being created · in progress
 2026-11-12 16:10 · Jack's Claude · Long Game Test shot mix: full 13 wedge / 14 mid / 11 long / 6 fairway-club approaches (was 18/14/8/4), half 7/7/5/3 · live
 2026-11-12 14:50 · Joe's Claude (Build My Plan session) · SHARED videos.js: MGVideo.open(name, id, label) gains an optional label (default stays 'Exercise demo'; backward compatible). Build My Plan: mobility shows 'Watch now' (player label 'Watch now · follow along'); yellow 'Change my plan' button in the hero. Engine: buttons only show when CLIENT.onRebuild / coachUrl set. Re-pinned p-258147 only · live
 2026-11-12 14:35 · Joe's Claude · Exercise library v5 on Drive (1EQjn4IPZn2Lz-Qeb-LpIS7wRAPoUNnzk): +10 columns (Wistia video ID for all 647 lessons, names used in plans, setting, default dose, rest, each side, easier/harder, golf purpose, status), 9 missing golf step drill IDs filled, 12 Needs filming rows. v4 untouched. Noted in CLAUDE.md · done
