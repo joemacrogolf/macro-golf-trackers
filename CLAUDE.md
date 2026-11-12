@@ -137,6 +137,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | Build My Plan (app users, `clients/build-my-plan.js` + `src/plan-builder.js`) | p-258147 | 2168251525 | plan / mg_loader |
 | My Training front door (`pages/my-training.html`, uses `mg_whoami` (latest `supabase/009-one-pin.sql`); live, not in app yet) | my-training | 2168255763 | plan / mg_loader |
 | My Practice front door (`pages/my-practice.html`, opens Practice Plan p-274816; uses `mg_whoami`; live, not in app yet) | my-practice | 2168256020 | plan / mg_loader |
+| Warm Up front door (`pages/warm-up.html`, no sign-in, Warm Up and Recovery videos + short mobility) | warm-up | 2168256625 | plan / mg_loader |
 
 
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)
