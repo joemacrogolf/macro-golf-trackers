@@ -409,6 +409,11 @@ body{padding-top:0}
 .cardio-list button{background:transparent;border:1px solid var(--border);min-width:40px;min-height:40px;cursor:pointer;color:var(--muted);font-size:16px}
 .gymnote{background:var(--ink);color:var(--cream);border-left:6px solid var(--yellow);padding:14px 16px;font-size:14px}
 .gymnote b{display:block;font-weight:700;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--yellow);margin-bottom:6px}
+.coachrow{padding:0 0 18px}
+.coachbtn{display:inline-flex;align-items:center;min-height:42px;padding:0 14px;border:1px solid var(--rule-dk);color:var(--cream);text-decoration:none;font-weight:600;font-size:13px;letter-spacing:.4px}
+.coachbtn:hover{border-color:var(--yellow);color:var(--yellow)}
+#rebuildBtn{align-self:flex-start}
+.mobpick select{border:1px solid var(--border);background:var(--paper);height:48px;padding:0 12px;font:inherit;font-size:16px;color:var(--ink);border-radius:0}
 </style>
 <div class="wrap">
 
@@ -426,6 +431,7 @@ body{padding-top:0}
         <select id="week"></select>
       </div>
     </div>
+    <div class="coachrow" id="coachRow" hidden><a class="coachbtn" id="coachBtn" href="#" target="_blank" rel="noopener">Speak to a coach</a></div>
     <div class="jstreak" id="jWrap" aria-label="Streak">
       <div class="jl"><div class="kick" id="jKick">Streak</div><div class="jn tnum" id="jNum">0 days</div></div>
       <div class="jdots" id="jDots"></div>
@@ -498,6 +504,7 @@ body{padding-top:0}
       </summary>
       <div class="body">
         <div class="field"><label for="startDate">Plan start date</label><input type="date" id="startDate"></div>
+        <button type="button" class="btn ghost" id="rebuildBtn" hidden>Change my plan</button>
         <p class="small">Turn on cloud save (the button bottom-left) and your entries follow you to any phone or computer.</p>
       </div>
     </details>
@@ -665,7 +672,7 @@ if(/landmine/.test(n))return wtW('Plates kg','Plates loaded on the landmine bar,
 if(/cable|machine|pull ?down|leg curl|leg press|leg extension|adductor|abductor|pallof|chop|swing row|resistance step|step rotation|tricep|row machine/.test(n)&&!/dumbbell|\bdb\b/.test(n))return wtW('Stack kg','The weight set on the cable or machine.','kg','kg (stack)');
 if(/kettlebell|\bkb\b/.test(n)||i===4)return wtW('Kg / KB','Weight of one kettlebell. If you hold two, enter the weight of one, not both added together.','kg/KB','kg per kettlebell');
 if(/barbell/.test(n))return wtW('Kg total','Total weight on the bar, including the bar.','kg','kg total');
-if(/\bdb\b|dumbbell|farmers|pull over|goblet|bicep curl|lateral raise/.test(n)||i===2){var one=/single arm|single-arm|one arm|goblet|single leg|pull over/.test(n);return wtW('Kg / DB',one?'Weight of the dumbbell.':'Weight of each dumbbell, not both added together.','kg/DB',one?'kg (one dumbbell)':'kg per dumbbell')}
+if(/\bdb\b|dumbbell|farmers|pull over|goblet|bicep curl|lateral raise/.test(n)||i===2){var one=/single arm|single-arm|one arm|goblet|single leg|pull over|snatch|swing|halo/.test(n);return wtW('Kg / DB',one?'Weight of the dumbbell.':'Weight of each dumbbell, not both added together.','kg/DB',one?'kg (one dumbbell)':'kg per dumbbell')}
 if(i===2.5)return wtW('Kg','The weight set on the cable, or the total weight you hold.','kg','kg');
 return wtW('Kg total','Total weight or resistance used.','kg','kg total')}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -720,6 +727,8 @@ $('tabs').addEventListener('click',function(e){var b=e.target.closest('[data-tab
   $('gridHint').textContent='Tap a square to fill in a day you missed.'+(F.checkin?' Tap an energy or motivation square to change that day\'s check-in.':'')+(F.alcohol?' Tap an alcohol square to switch between no, yes and blank.':'');
   $('guide').innerHTML=(CLIENT.guide||[]).map(function(g){return '<div class="note"><div class="kick">'+esc(g[0])+'</div><div>'+esc(g[1])+'</div></div>'}).join('');
   if(CLIENT.guideSub)$('guideSub').textContent=CLIENT.guideSub;
+  if(CLIENT.coachUrl){$('coachRow').hidden=false;$('coachBtn').href=CLIENT.coachUrl}
+  if(typeof CLIENT.onRebuild==='function'){$('rebuildBtn').hidden=false;$('rebuildBtn').addEventListener('click',function(){CLIENT.onRebuild()})}
 })();
 function renderHeader(){
   var hr=new Date().getHours();$('greet').textContent=(hr<12?'Good morning':hr<18?'Good afternoon':'Good evening')+', '+CLIENT.first;
@@ -744,6 +753,7 @@ function mobOn(d){var y=S.mobDay[d];return !!(y&&y.done)}
 function mobRec(d){d=d||todayIso();return S.mobDay[d]=S.mobDay[d]||{}}
 function pastVideos(){var seen={},out=[];Object.keys(S.mobDay).sort().reverse().forEach(function(d){var v=(S.mobDay[d]&&S.mobDay[d].video||'').trim();if(v&&!seen[v.toLowerCase()]){seen[v.toLowerCase()]=1;out.push(v)}});return out.slice(0,12)}
 function mobHtml(){
+  if(CLIENT.mobilityVideos)return mobLibHtml();
   var d=todayIso(),y=S.mobDay[d]||{},st=streak('mobility');
   var h='<div class="habitwrap'+(y.done?' on':'')+'"><label class="habit" for="mobDone"><input type="checkbox" id="mobDone"'+(y.done?' checked':'')+'><span class="txt"><span class="disp">Mobility</span><p>'+esc(CLIENT.mobilityDesc||'One of your mobility videos. Note which one you did.')+'</p></span><span class="streak"><b>'+st+'</b><span>day'+(st===1?'':'s')+'</span></span></label>';
   if(y.done){var pv=pastVideos();
@@ -751,7 +761,27 @@ function mobHtml(){
       (pv.length?'<div class="chips" aria-label="Videos you have done before">'+pv.map(function(v){return '<button type="button" data-mvid="'+esc(v)+'" aria-pressed="'+((y.video||'').trim().toLowerCase()===v.toLowerCase())+'">'+esc(v)+'</button>'}).join('')+'</div>':'')+'</div>'}
   return h+'</div>';
 }
-
+/* Mobility library: a "today's video" picked from the client's chosen body parts.
+   The same day always shows the same pick (seeded by date), avoiding videos done in the last week.
+   "Another video" steps to the next pick; "Choose my own" opens the filtered list. */
+function hashStr(t){var h=2166136261;for(var i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function mobPool(){var parts=CLIENT.mobilityParts||[],all=CLIENT.mobilityVideos||[];var f=parts.length?all.filter(function(v){return v.parts.some(function(p){return parts.indexOf(p)>=0})}):all;return f.length?f:all}
+function mobToday(d){
+  var y=S.mobDay[d]||{};if(y.video&&(y.own||y.done))return y.video;
+  var pool=mobPool(),recent={};for(var i=1;i<=7;i++){var r=S.mobDay[addDays(d,-i)];if(r&&r.video)recent[r.video]=1}
+  var fresh=pool.filter(function(v){return !recent[v.name]});if(fresh.length>=3)pool=fresh;
+  var start=hashStr(d+'|'+KEY)%pool.length;return pool[(start+(y.alt||0))%pool.length].name}
+function mobFind(n){return (CLIENT.mobilityVideos||[]).filter(function(v){return v.name===n})[0]}
+var mobChoose=false;
+function mobLibHtml(){
+  var d=todayIso(),y=S.mobDay[d]||{},st=streak('mobility'),name=mobToday(d),v=mobFind(name)||{name:name,area:'',mins:''};
+  var h='<div class="habitwrap'+(y.done?' on':'')+'"><label class="habit" for="mobDone"><input type="checkbox" id="mobDone"'+(y.done?' checked':'')+'><span class="txt"><span class="disp">Mobility</span><p>'+(y.done?'Done: ':'Today\'s video: ')+'<b style="color:var(--ink)">'+esc(v.name)+'</b>'+(v.area?' · '+esc(v.area):'')+(v.mins?' · '+esc(v.mins):'')+'</p></span><span class="streak"><b>'+st+'</b><span>day'+(st===1?'':'s')+'</span></span></label>';
+  h+='<div class="mobpick"><p class="small" style="margin:0">Find it in the app: '+esc(CLIENT.mobilityWhere||'')+'</p>';
+  if(!y.done)h+='<div class="chips"><button type="button" data-mlib="another">Another video</button><button type="button" data-mlib="choose" aria-pressed="'+mobChoose+'">Choose my own</button></div>';
+  if(mobChoose&&!y.done){var pool=mobPool(),others=(CLIENT.mobilityVideos||[]).filter(function(z){return pool.indexOf(z)<0});
+    h+='<div class="field"><label for="mobSel">Pick a video</label><select id="mobSel"><option value="">Choose…</option><optgroup label="Your areas">'+pool.map(function(z){return '<option'+(z.name===name?' selected':'')+'>'+esc(z.name)+'</option>'}).join('')+'</optgroup>'+(others.length?'<optgroup label="Other areas">'+others.map(function(z){return '<option>'+esc(z.name)+'</option>'}).join('')+'</optgroup>':'')+'</select></div>'}
+  return h+'</div></div>';
+}
 /* ---------- ALCOHOL (daily yes / no) ---------- */
 function alc(d){var v=S.alcohol[d];return v==='yes'||v==='no'?v:''}
 function alcHtml(){var v=alc(todayIso());
@@ -788,11 +818,13 @@ function renderToday(){
   $('startDate').value=S.start;
 }
 $('habits').addEventListener('change',function(e){var t=e.target;
-  if(t.id==='mobDone'){mobRec().done=t.checked;save();renderToday();if(t.checked){var n=$('mobVid');if(n&&!n.value)n.focus()}return}
+  if(t.id==='mobDone'){var mr=mobRec();if(CLIENT.mobilityVideos&&t.checked)mr.video=mobToday(todayIso());mr.done=t.checked;mobChoose=false;save();renderToday();if(t.checked){var n=$('mobVid');if(n&&!n.value)n.focus()}return}
+  if(t.id==='mobSel'){if(t.value){var mr2=mobRec();mr2.video=t.value;mr2.own=true;mobChoose=false;save();renderToday()}return}
   if(!t.dataset.habit)return;setHabit(todayIso(),t.dataset.habit,t.checked);renderToday()});
 $('habits').addEventListener('input',function(e){if(e.target.id!=='mobVid')return;mobRec().video=e.target.value;save()});
 $('habits').addEventListener('click',function(e){
   var v=e.target.closest('[data-mvid]');if(v){mobRec().video=v.dataset.mvid;save();renderToday();return}
+  var ml=e.target.closest('[data-mlib]');if(ml){if(ml.dataset.mlib==='another'){var r0=mobRec();r0.own=false;r0.video='';r0.alt=(r0.alt||0)+1;mobChoose=false}else mobChoose=!mobChoose;save();renderToday();return}
   var a=e.target.closest('[data-alc]');if(a){var d=todayIso();S.alcohol[d]=alc(d)===a.dataset.alc?'':a.dataset.alc;save();renderToday()}});
 $('grid7').addEventListener('click',function(e){
   var c=e.target.closest('[data-ciday]');if(c&&!c.disabled){editDate=c.dataset.ciday===todayIso()?null:c.dataset.ciday;renderToday();$('checkin').scrollIntoView({behavior:'smooth',block:'center'});return}
@@ -910,7 +942,7 @@ function renderDay(){
   renderLive();
 }
 function renderEx(b,g,e,tag,logged){
-  var tiles='<div class="tile y"><div class="n">'+e.sets+' × '+e.repsLabel+(e.unit?'<small>'+esc(e.unit.toUpperCase())+'</small>':'')+(e.side?'<small>/SIDE</small>':'')+'</div><div class="l">Sets × '+(e.unit==='m'?'metres':'reps')+'</div></div>'+(e.free?'':'<div class="tile k"><div class="n">'+esc(e.rpeLabel)+'</div><div class="l">'+(e.max?'Intent':'RPE')+'</div></div>');
+  var tiles='<div class="tile y"><div class="n">'+e.sets+' × '+e.repsLabel+(e.unit?'<small>'+esc(e.unit.toUpperCase())+'</small>':'')+(e.side?'<small>/SIDE</small>':'')+'</div><div class="l">Sets × '+(e.unit==='m'?'metres':e.unit==='s'?'secs':'reps')+'</div></div>'+(e.free?'':'<div class="tile k"><div class="n">'+esc(e.rpeLabel)+'</div><div class="l">'+(e.max?'Intent':'RPE')+'</div></div>');
   var rows='';
   for(var i=0;i<e.sets;i++){
     var s=logged[i]||{},done=isDone(e,s),sug=!done?suggestion(e,i,logged):null,base='s-'+e.id+'-'+i,opts,tr=tR(e,i),tp=tP(e,i);
@@ -928,7 +960,7 @@ function renderEx(b,g,e,tag,logged){
   var type=e.kind?'<div class="type'+(e.max?' power':'')+'">'+esc(e.kind)+'</div>':'';
   var note=(e.focus||e.note)?'<p class="ex-note">'+esc(e.focus)+(e.focus&&e.note?' ':'')+esc(e.note)+'</p>':'';
   return '<div class="ex"><div class="ex-top"><div class="tag">'+esc(tag)+'</div><div class="ex-name">'+head+type+'</div><div class="targets">'+tiles+'</div></div>'+note+
-    (e.inc?'<p class="wt">'+esc(wtInfo(e).t)+'</p>':'')+'<table class="sets"><thead><tr><th>Set</th><th>'+(e.inc?wtInfo(e).h:'Load')+'</th><th>'+(e.unit==='m'?'Metres':'Reps')+'</th><th>'+(e.max?'Speed':e.free?'RPE (opt.)':'RPE')+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+    (e.inc?'<p class="wt">'+esc(wtInfo(e).t)+'</p>':'')+'<table class="sets"><thead><tr><th>Set</th><th>'+(e.inc?wtInfo(e).h:'Load')+'</th><th>'+(e.unit==='m'?'Metres':e.unit==='s'?'Secs':'Reps')+'</th><th>'+(e.max?'Speed':e.free?'RPE (opt.)':'RPE')+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
 function sessionStats(key,day){
   var log=S.logs[key]||{},total=0,done=0,on=0,rs=0,rn=0;

@@ -98,3 +98,18 @@ Exercises use `x(id, name, {sets, reps, rpe, side, kind, inc, note, slot})`. `re
 | Luis Vega | `luis-vega` | 694218 |
 | Rob Seeley | `rob-seeley` | 741365 |
 | Colin Howard | `colin-howard` | 576900 |
+
+## Build My Plan (`src/plan-builder.js` + `clients/build-my-plan.js`)
+
+For paying app users. A questionnaire (name, goals, equipment, level, days, session length, pain screen, daily trackers, mobility) builds a plan with fixed rules, no AI, so the same answers always give the same plan. Clients sign in with email + PIN.
+
+How a plan is built:
+- **Days** pick the split by golf power source: 2 = two full-body days, 3 = Arm Chop / Vertical / Wrist Release + Rotation + Lateral, 4 = Arm Chop / Vertical / Wrist Release / Rotation + Lateral, 5 = the 4-day split plus a Movement, Sequencing + Core day.
+- **Session length** keeps the first 2, 3 or 4 pairs of each day (30 / 45 / 60 min).
+- **Goals** decide each pair: strength + speed = strength + power; strength = strength + strength; speed = power-led; sequencing adds a strength + sequencing pair; longevity adds a strength + core pair and swaps jumps for low-impact power. Sequencing or longevity without strength or speed uses straight sets at RPE 7.
+- **Level**: beginner = 1 fewer set, +2 reps and 1 lower RPE on strength work, +15s rest, easier versions; advanced = 1 more strength set, harder versions.
+- **Equipment** picks the best version of each exercise from the slot lists (gym, then dumbbells + bands, then bands / bodyweight). Exercises are never repeated within a session.
+
+Edit `EX` (exercise library), `SLOT` (options per movement), `PAIRS` / `DAYS` / `SPLIT` (session design), `LEVELS`, `TRACKERS` and `MOBILITY` (10 Minute Mobility Routines from VidApp, tagged by body part) in `src/plan-builder.js`. `NEW_IDS` lists exercises that need a demo video in the app. "Speak to a coach" goes to `MGB_COACH` in `clients/build-my-plan.js`.
+
+Retaking the questions starts a new plan at week 1. Old sessions are kept in `S.archive`; habits, check-ins and weigh-ins carry on.

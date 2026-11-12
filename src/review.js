@@ -3,7 +3,7 @@
    Adds a "My review" tab beside "My PBs" and a button inside the bests screen. */
 var MGReview=(function(){
 var PLANS={'pure-muscle-strength-gym':'Pure Muscle & Strength · Gym','pure-muscle-strength-home':'Pure Muscle & Strength · Home',
-  'pure-power-gym':'Pure Power · Gym','pure-power-home':'Pure Power · Home','pure-sequencing-gym':'Pure Sequencing · Gym','pure-sequencing-home':'Pure Sequencing · Home'};
+  'pure-power-gym':'Pure Power · Gym','pure-power-home':'Pure Power · Home','pure-sequencing-gym':'Pure Sequencing · Gym','pure-sequencing-home':'Pure Sequencing · Home','build-my-plan':'Build My Plan'};
 var LIBS=['https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js','https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js'];
 var view={type:'week',off:0};
 
