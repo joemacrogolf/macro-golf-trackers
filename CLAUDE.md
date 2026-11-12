@@ -81,6 +81,7 @@ If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude h
 | Rob Seeley (template build) | p-741365 | 2168241904 | plan / mg_loader |
 | Colin Howard (template build) | p-576900 | 2168250329 | plan / mg_loader |
 | Paul Goddard golf plan | p-482615 | 2168242786 | game / loader |
+| Build My Plan (app users, `clients/build-my-plan.js` + `src/plan-builder.js`) | p-258147 | 2168251525 | plan / mg_loader |
 
 
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)
