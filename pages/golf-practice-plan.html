@@ -236,7 +236,7 @@ td.r,th.r{text-align:right}
   </header>
   <main id="app" class="wrap" style="max-width:none"></main>
   <footer class="cta">
-    <b>Practise with a plan. <span>Measure it in strokes gained.</span></b>
+    <b>Practice with a plan. <span>Measure it in strokes gained.</span></b>
     <small>Copyright Macro Golf Studios Ltd · macro.golf</small>
   </footer>
 </div>
@@ -545,7 +545,7 @@ function report(ctx){
    <div class="what">${esc(g.what)}${g.sim?" · simulator or launch monitor":""}</div>
    <ul class="wh">${why(c,ctx.target).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`};
   h+=`<section class="pg">${run()}<div class="eb">05 / Your plan${ctx.complete===false?" · provisional":""}</div><h2>What to play and why</h2><div class="bar"></div>
-  <p>You told us you practise ${plan.sessions} time${plan.sessions>1?"s":""} a week for about ${plan.mins} minutes. That's ${plan.weekly} minutes a week. The games below use that time in proportion to the shots each area costs you.</p>
+  <p>You told us you practice ${plan.sessions} time${plan.sessions>1?"s":""} a week for about ${plan.mins} minutes. That's ${plan.weekly} minutes a week. The games below use that time in proportion to the shots each area costs you.</p>
   ${plan.chosen.map(gcard).join("")}
   ${foot()}</section>`;
 
@@ -960,12 +960,12 @@ function render(){
 
 /* ---------- setup ---------- */
 function renderSetup(){
-  if(!draft)draft=defaultCfg();const c=draft,rec=recommend();strip(c);
+  if(!draft)draft=defaultCfg();const c=draft,rec=recommend(),kn=knownName();if(kn&&!String(c.name||"").trim())c.name=kn;strip(c);
   let h=`<button class="linky" data-act="home">← Back to my plan</button><section class="sec-h"><span class="eyebrow">One-off session</span><h2>What are we working on today?</h2></section>`;hiLine();
     const ip=rd(KEY);
   if(ip&&ip.step==="run"&&ip.cfg&&ip.cfg.areas){h+=`<div class="resume"><b>You have a session in progress</b><span class="muted">${areaNames(ip.cfg.areas)} · ${ip.cfg.mins} min · block ${ip.bi+1} of ${ip.blocks.length}</span><div class="btns"><button class="dark" data-act="resume">Carry on</button><button class="ghost" data-act="discard">Start a new one</button></div></div>`}
   h+=`<div class="card">
-   <div class="two"><label class="fld"><span class="label">Your name</span><input id="cName" value="${esc(c.name)}" placeholder="Name" autocomplete="off"></label>
+   <div class="${kn?"":"two"}">${kn?"":`<label class="fld"><span class="label">Your name</span><input id="cName" value="${esc(c.name)}" placeholder="Name" autocomplete="off"></label>`}
    <label class="fld"><span class="label">Target handicap</span><select id="cTarget">${TARGETS.map(t=>`<option value="${t}" ${t===c.target?"selected":""}>${hcName(t)}</option>`).join("")}</select></label></div>
    <div class="q"><span class="qh">How long have you got?</span><span class="qs">Two hours is the most. After that, take a break.</span>
      <div class="chips">${[30,45,60,90,120].map(m=>`<button class="chip" data-act="mins" data-v="${m}" ${pr(c.mins===m)}>${m} min</button>`).join("")}</div></div>
@@ -1152,8 +1152,8 @@ function renderReport(){if(S.plan)return renderPlanReport();
   let h=`<section class="sec-h"><span class="eyebrow">Session report · ${new Date(S.t0).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})}</span><h2>${esc(c.name)?esc(c.name)+"'s":"Your"} ${areaNames(as).toLowerCase()} session</h2></section>`;
   if(!n){h+=`<div class="card"><p style="margin:0">You didn't play any shots in the strokes gained game, so there's no handicap for this session. Your drill scores are below.</p></div>`}
   else{const diff=tn-hc,pill=diff>=1?["g","Better than your target"]:diff>=-2?["a","Close to your target"]:["r","Behind your target"];
-    const msg=diff>=1?`You practised like a ${hcTxt(hc)} player, about ${Math.abs(diff).toFixed(0)} shots better than ${hcName(c.target)}. That's a strong session.`:diff>=-2?`You practised like a ${hcTxt(hc)} player, right around your ${hcName(c.target)} target.`:`You practised like a ${hcTxt(hc)} player, about ${Math.abs(diff).toFixed(0)} shots behind your ${hcName(c.target)} target. This is the area to keep working on.`;
-    h+=`<div class="verdict"><span class="k">You practised like</span><span class="hc">${hcTxt(hc)}</span><span class="pill ${pill[0]}">${pill[1]}</span><p>${msg}</p></div>
+    const msg=diff>=1?`You practiced like a ${hcTxt(hc)} player, about ${Math.abs(diff).toFixed(0)} shots better than ${hcName(c.target)}. That's a strong session.`:diff>=-2?`You practiced like a ${hcTxt(hc)} player, right around your ${hcName(c.target)} target.`:`You practiced like a ${hcTxt(hc)} player, about ${Math.abs(diff).toFixed(0)} shots behind your ${hcName(c.target)} target. This is the area to keep working on.`;
+    h+=`<div class="verdict"><span class="k">You practiced like</span><span class="hc">${hcTxt(hc)}</span><span class="pill ${pill[0]}">${pill[1]}</span><p>${msg}</p></div>
      <div class="stats"><div><span class="label">Strokes gained</span><b class="${sg>=0?"up":"down"}">${fmt(sg)}</b></div><div><span class="label">Per shot</span><b class="${sg>=0?"up":"down"}">${fmt2(sg/n)}</b></div><div><span class="label">Shots</span><b>${n}</b></div></div>`;
     if(as.length>1)h+=`<div class="card"><span class="eyebrow">By area</span><div class="grid"><table><thead><tr><th>Area</th><th class="r">Played like</th><th class="r">SG</th><th class="r">Per shot</th></tr></thead><tbody>${as.map(a=>{const gg=combo(games().filter(x=>x.area===a)),l=gg.res.map((r,i)=>shotSG(gg.shots[i],r,tn).sg);return l.length?`<tr><td>${AREAS[a]}</td><td class="r">${hcTxt(playsLike(gg))}</td><td class="r ${sum(l)>=0?"up":"down"}">${fmt(sum(l))}</td><td class="r">${fmt2(sum(l)/l.length)}</td></tr>`:""}).join("")}</tbody></table></div></div>`;
     as.forEach(a=>{const l=list.filter(x=>areaOf(x.s)===a);if(l.length)h+=keyStats(view(c,a),l,as.length>1)});
@@ -1267,7 +1267,7 @@ const TEST_PLAN={long:["golf-long-game-test","Long Game Test"],short:["golf-shor
 const TEST_ORDER=["long","short","putting"];
 const TEST_COVERS={long:"Driving and approach play",short:"Chips, pitches and bunkers",putting:"Every length of putt"};
 const site=p=>"https://www.macro.golf/"+p;
-function firstName(){const n=String(window.S.player||(PG().profile||{}).name||"").trim();return n.split(/\s+/)[0]||""}
+function firstName(){const n=String(window.S.player||(PG().profile||{}).name||knownName()||"").trim();return n.split(/\s+/)[0]||""}
 function greeting(){const h=new Date().getHours();return "Good "+(h<12?"morning":h<18?"afternoon":"evening")+(firstName()?", "+esc(firstName()):"")}
 function weekKey(d){d=d?new Date(d):new Date();const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")}
 function weekNo(){const P=PG();if(!P.plan)return 1;const a=new Date(P.plan.start),b=new Date(weekKey());return Math.max(1,Math.round((b-a)/(7*864e5))+1)}
@@ -1287,8 +1287,11 @@ function fetchTests(){if(fetching||fetched)return;let g=null;try{g=JSON.parse(lo
       if(d&&d.player&&!window.S.player){window.S.player=d.player;ch=true}});
     if(ch){window.save();if(!S)render()}}).catch(()=>{fetching=false})}
 
+/* the player's name is already known from sign-in or earlier answers, so it isn't asked again */
+function knownName(){let n="";try{const g=JSON.parse(localStorage.getItem("mgsync-group:golf")||"null");if(g&&g.name)n=g.name}catch(e){}
+  if(!n)try{n=(PG().profile||{}).name||window.S.player||""}catch(e){}return String(n||"").trim()}
 function defProfile(){const a=Object.assign({},rd("macroAudit")||{},PG().audit||{});
-  return {name:window.S.player||"",sessions:+a.sessions||3,mins:+a.minutes||60,sim:a.sim===false?false:a.sim===true?true:null,target:"10"}}
+  return {name:knownName(),sessions:+a.sessions||3,mins:+a.minutes||60,sim:a.sim===false?false:a.sim===true?true:null,target:"10"}}
 /* ---------- The plan: share the week's practice time across everything the tests found, in proportion to the shots lost.
    Each area gets at least 8 minutes. An area only gets a full game (the real game page, which counts on its leaderboard)
    when it has enough time for the whole game and the player has what the game needs; otherwise it gets a focused block:
@@ -1408,9 +1411,9 @@ function stripHome(){const P=PG(),p=P.plan;$("sArea").textContent=p?(ORDER.filte
   $("sTime").textContent=p?p.week.length+" × "+p.mins+" min":"–";$("sTarget").textContent=p?hcName(p.target||"10"):"–"}
 function hiLine(){const e=$("coverHi");if(e)e.innerHTML=greeting()}
 const pf=(k,v)=>`data-act="pf" data-k="${k}" data-v="${v}"`;
-function profileCard(){const pr=ui.prof||(ui.prof=Object.assign(defProfile(),PG().profile||{}));
-  return `<section class="sec-h"><span class="eyebrow">01 / About your practice</span><h2>How much can you practise?</h2></section><div class="card">
-   <label class="fld"><span class="label">Your name</span><input id="pName" value="${esc(pr.name)}" placeholder="First and last name" autocomplete="name"></label>
+function profileCard(){const pr=ui.prof||(ui.prof=Object.assign(defProfile(),PG().profile||{}));if(!String(pr.name||"").trim()&&knownName())pr.name=knownName();
+  return `<section class="sec-h"><span class="eyebrow">01 / About your practice</span><h2>How much can you practice?</h2></section><div class="card">
+   ${knownName()?"":`<label class="fld"><span class="label">Your name</span><input id="pName" value="${esc(pr.name)}" placeholder="First and last name" autocomplete="name"></label>`}
    <div class="q"><span class="qh">Practice sessions a week</span><span class="qs">Be honest. A plan you actually do beats a perfect one you don't.</span><div class="chips">${[1,2,3,4,5,6,7].map(n=>`<button class="chip" ${pf("sessions",n)} ${pr_(pr.sessions===n)}>${n}</button>`).join("")}</div></div>
    <div class="q"><span class="qh">Minutes each session</span><div class="chips">${[30,45,60,90,120].map(n=>`<button class="chip" ${pf("mins",n)} ${pr_(pr.mins===n)}>${n} min</button>`).join("")}</div></div>
    <div class="q"><span class="qh">Can you use a simulator or launch monitor?</span><span class="qs">Wedge Darts, Lava and Driver Corridor need one.</span><div class="yn"><button ${pf("sim","yes")} ${pr_(pr.sim===true)}>Yes</button><button ${pf("sim","no")} ${pr_(pr.sim===false)}>No</button></div></div>
@@ -1448,7 +1451,7 @@ function testsCard(){const P=PG(),ents=testEntries(),skip=P.skip||{},done=TEST_O
   else if(miss.length&&!ui.confirm)h+=`<div class="warnbox"><b>Your plan won't be perfect yet</b>${miss.map(k=>TEST_PLAN[k][1]).join(" and ")} ${miss.length>1?"aren't":"isn't"} in it, so ${miss.length>1?"those parts":"that part"} of your game won't be covered. You can build it now and add ${miss.length>1?"them":"it"} later.</div><button class="primary" data-act="mkPlanAnyway">Build my 6 week plan anyway</button>`;
   else h+=`<button class="primary" data-act="mkPlan">${P.plan?(retestDue()?"Build my next 6 week plan":"Rebuild my 6 week plan"):"Build my 6 week plan"}</button>`;
   if(P.plan)h+=`<button class="linky" data-act="home">← Back to this week</button>`;
-  return h+`<button class="linky" data-act="editProf">Change how much you practise</button></div>`}
+  return h+`<button class="linky" data-act="editProf">Change how much you practice</button></div>`}
 function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,next=p.week.findIndex((_,i)=>!done.includes(i)),wk=weekNo(),retest=wk>p.retestWeeks;
   let h=`<div class="board"><div><span class="label">${wk>p.retestWeeks?"Your "+p.retestWeeks+" week plan is done":"Week "+wk+" of "+p.retestWeeks+" · this week"}</span><div class="big tnum">${done.length}<small style="font-size:.4em;color:var(--on-ink-muted)"> / ${n}</small></div></div>
    <div class="side"><span class="label">Sessions</span><b>${n} × ${p.mins} min</b></div>
@@ -1462,7 +1465,7 @@ function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,ne
   /* the player picks which session to do today: each one is a kind (range, short game, putting) */
   const KN={range:["Range session","On the range or simulator"],short:["Short game session","Chipping and pitching area"],putt:["Putting session","Putting green"],green:["Short game + putting","Chipping area and putting green"],mixed:["Mixed session","Range, then the short game area"]};
   const kindOfS=s=>s.kind||(sessAreas(s).some(a=>a==="app"||a==="drive")?"range":"green"),cnt={},tot={};p.week.forEach(s=>{const k=kindOfS(s);tot[k]=(tot[k]||0)+1});
-  if(next>=0)h+=`<section class="sec-h"><span class="eyebrow">Pick today's session</span><h2>What are you practising today?</h2></section><p class="muted" style="margin:-6px 0 0">Do them in any order. Every game is different, nothing repeats.</p>`;
+  if(next>=0)h+=`<section class="sec-h"><span class="eyebrow">Pick today's session</span><h2>What are you practicing today?</h2></section><p class="muted" style="margin:-6px 0 0">Do them in any order. Every game is different, nothing repeats.</p>`;
   p.week.forEach((s,i)=>{const isDone=done.includes(i),it=itemsOf(s),k=kindOfS(s),nm=KN[k]||KN.mixed;cnt[k]=(cnt[k]||0)+1;
     h+=`<div class="sess ${isDone?"done":""}"><div class="sh"><span class="sn" ${k==="green"&&!isDone?'style="font-size:13px"':""}>${isDone?"✓":{range:"R",short:"S",putt:"P",green:"S+P",mixed:"M"}[k]||i+1}</span><div class="st"><b>${nm[0]}${tot[k]>1?" "+cnt[k]:""}</b><small>${nm[1]} · ${p.mins} min · ${isDone?"done this week":"to do"}</small></div></div>
      <ul class="sg">${it.map(x=>`<li><b>${x.full?esc(MacroPlan.GAMES[x.game].name)+(MacroPlan.GAMES[x.game].set?` <small>${MacroPlan.GAMES[x.game].set}</small>`:""):esc(x.name)}</b> <small class="tag ${x.full?"g":""}">${x.full?"Full game":"Focused"}</small><span>${x.mins} min</span></li>`).join("")}</ul>
