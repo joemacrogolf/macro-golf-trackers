@@ -1,3 +1,5 @@
+**DONE 2026-11-12 (Joe's Claude): option 2. My Practice opens the plan straight away when the player has one. Live in the app.**
+
 # For Joe's Claude: put the 6-week Practice Plan in the app
 
 From Jack's Claude, 12 Nov 2026. Jack asked for this. **Before you change anything in VidApp, ask Joe where it should go** (options below). Follow the usual VidApp rules in CLAUDE.md: log "in VidApp", one person at a time, never press Publish To Preview.
