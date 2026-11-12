@@ -15,8 +15,8 @@ function pick(assets){var want=window.innerWidth>800?['hd_mp4_video','md_mp4_vid
 var cache={},ready={};
 function media(id){if(cache[id])return cache[id];cache[id]=fetch('https://fast.wistia.com/embed/medias/'+id+'.json').then(function(r){if(!r.ok)throw r.status;return r.json()}).then(function(j){var a=(j.media&&j.media.assets)||[],v=pick(a),st=a.filter(function(x){return x.type==='still_image'})[0];if(!v)throw 'no mp4';
   var m={src:file(v.url,'mp4'),poster:st?file(st.url,'jpg'):'',w:v.width,h:v.height};ready[id]=m;return m});cache[id].catch(function(){delete cache[id]});return cache[id]}
-function open(name,id){close();last=document.activeElement;var o=document.createElement('div');o.className='mgv-wrap';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',name+' demo');
-  o.innerHTML='<div class="mgv-in"><div class="mgv-top"><div><div class="mgv-k">Exercise demo</div><div class="mgv-h">'+esc(name)+'</div></div><button type="button" class="mgv-x" data-x>Close</button></div>'+
+function open(name,id,label){label=label||'Exercise demo';close();last=document.activeElement;var o=document.createElement('div');o.className='mgv-wrap';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',name+' · '+label);
+  o.innerHTML='<div class="mgv-in"><div class="mgv-top"><div><div class="mgv-k">'+esc(label)+'</div><div class="mgv-h">'+esc(name)+'</div></div><button type="button" class="mgv-x" data-x>Close</button></div>'+
    '<div class="mgv-frame"><div class="mgv-spin" aria-hidden="true"></div></div><div class="mgv-bar"></div></div>';
   document.body.appendChild(o);document.documentElement.classList.add('mgv-lock');
   o.addEventListener('click',function(e){if(e.target===o||e.target.closest('[data-x]'))close()});
