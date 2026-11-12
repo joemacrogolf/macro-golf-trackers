@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 21:55 · Jack's Claude · Every game now opens with 'How are you playing? Single player / Head to head' (once per visit; not when opened from the Practice Plan). 50ft Bank / Wedge Darts first-screen tags now 'Chipping' / 'Pitching'. 9 games re-pinned (e5ce17b / 02fabad) → this commit · live
 2026-11-12 21:50 · Jack's Claude · VidApp PUBLISHED TO PREVIEW then LIVE (Jack's go-ahead) for the three thumbnails below. OUT OF VIDAPP · live
 2026-11-12 21:48 · Jack's Claude · VidApp THUMBNAIL REPLACED on Website item 'Wedge Darts' 4183636 (parent Short Game 4182264): now shows 'PITCHING' under the name (assets/thumbs/game-wedge-darts.png) · saved
 2026-11-12 21:46 · Jack's Claude · VidApp THUMBNAIL REPLACED on Website item 'Par 18' 4183635 (parent Short Game 4182264): now shows 'CHIPPING AND PUTTING' under the name (assets/thumbs/game-par-18.png) · saved

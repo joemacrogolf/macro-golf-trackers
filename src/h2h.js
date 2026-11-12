@@ -54,7 +54,7 @@ function stop(){var g=guard;M=null;store();clearInterval(timer);setGuard(false);
 function closeO(){var o=document.querySelector('.h2h-wrap');if(o)o.remove();document.documentElement.classList.remove('h2h-lock')}
 function shell(inner){closeO();var o=document.createElement('div');o.className='h2h-wrap';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Head-to-head');
   o.innerHTML='<div class="h2h-in">'+inner+'</div>';document.body.appendChild(o);document.documentElement.classList.add('h2h-lock');var f=o.querySelector('input,button.h2h-y');if(f)f.focus();return o}
-function setup(){var mine=me(),o=shell('<div class="h2h-top"><div><div class="h2h-k">Head-to-head</div><div class="h2h-h">One round each</div></div><button type="button" class="h2h-x" data-x>Close</button></div>'+
+function setup(){var mine=me(),o=shell('<div class="h2h-top"><div><div class="h2h-k">Head-to-head</div><div class="h2h-h">One round each</div></div><button type="button" class="h2h-x" data-x>Back</button></div>'+
   '<p>Play one round each on this phone, then see who won.</p>'+
   '<div class="h2h-warn"><b>Only '+esc(mine==='You'?'your':mine+'’s')+' round is saved</b>'+(signedIn()?esc(mine==='You'?'Your':mine+'’s')+' round saves and counts on the leaderboard as normal.':'Your round saves on this phone as normal. Sign in with your PIN to put it on the leaderboard.')+' Your opponent’s round is just for fun: it isn’t saved anywhere and doesn’t count on any leaderboard.</div>'+
   '<label class="h2h-l">Your opponent’s name<input id="h2hName" maxlength="20" autocomplete="off" placeholder="First name"></label>'+
@@ -62,7 +62,7 @@ function setup(){var mine=me(),o=shell('<div class="h2h-top"><div><div class="h2
   '<button type="button" class="h2h-y" data-go disabled>Start head-to-head</button>');
   var first=0,inp=o.querySelector('#h2hName'),go=o.querySelector('[data-go]');
   inp.addEventListener('input',function(){var v=inp.value.trim();go.disabled=!v;o.querySelector('#h2hOpp').textContent=v||'Opponent'});
-  o.addEventListener('click',function(e){var b=e.target.closest('button');if(e.target===o||(b&&b.hasAttribute('data-x')))return closeO();if(!b)return;
+  o.addEventListener('click',function(e){var b=e.target.closest('button');if(e.target===o||(b&&b.hasAttribute('data-x'))){closeO();if(!M){choose('');chooser()}return}if(!b)return;
     if(b.dataset.f){first=+b.dataset.f;[].forEach.call(o.querySelectorAll('[data-f]'),function(x){x.setAttribute('aria-pressed',String(x===b))})}
     else if(b.hasAttribute('data-go')){var n=inp.value.trim();if(!n)return;
       M={page:PAGE,players:[{n:mine,me:true},{n:n,me:false}],order:first?[1,0]:[0,1],turn:0,scores:[null,null],t:Date.now()};store();closeO();startTurn();window.scrollTo(0,0)}})}
@@ -88,6 +88,17 @@ function paintBar(){var p=cur(),b=document.querySelector('.h2h-bar');if(!p){if(b
     b.addEventListener('click',function(e){if(e.target.closest('[data-s]'))stop()})}
   document.documentElement.classList.add('h2h-on');
   b.innerHTML='<span class="h2h-dot'+(p.me?'':' g')+'"></span><div><b>'+esc(p.n)+'’s turn</b><small>Head-to-head · '+(p.me?'this round saves':'just for fun, not saved')+' · finish a round to swap</small></div><button type="button" data-s>Stop</button>'}
+
+/* ---- the first choice on every game: single player or head-to-head (once per visit) ---- */
+var MK='mgh2h-mode:'+PAGE;
+function chosen(){try{return sessionStorage.getItem(MK)}catch(e){return null}}
+function choose(v){try{sessionStorage.setItem(MK,v)}catch(e){}}
+function chooser(){var o=shell('<div class="h2h-k">'+esc(gameName())+'</div><div class="h2h-h">How are you playing?</div>'+
+  '<div class="h2h-pick"><button type="button" data-m="solo"><b>Single player</b><span>Just you. Your round saves and counts on the leaderboard.</span></button>'+
+  '<button type="button" data-m="h2h"><b>Head to head</b><span>You against a friend on this phone. Only your round is saved.</span></button></div>');
+  o.addEventListener('click',function(e){var b=e.target.closest('button');if(!b||!b.dataset.m)return;choose(b.dataset.m);closeO();if(b.dataset.m==='h2h')setup()})}
+var NAMES={'golf-hole-out':'Hole Out','golf-insanity':'Insanity','golf-money-stealers':'Money Stealers','golf-fifty-ft-bank':'50ft Bank','golf-par-18':'Par 18','golf-wedge-darts':'Wedge Darts','golf-left-is-lava':'Lava','golf-driver-corridor':'Driver Corridor','golf-three-strikes':'3 Strikes'};
+function gameName(){return NAMES[PAGE]||'Practice game'}
 
 /* ---- the button ---- */
 function tab(){if(document.querySelector('.h2h-tab'))return;var b=document.createElement('button');b.type='button';b.className='h2h-tab';b.setAttribute('aria-label','Head-to-head');
@@ -117,10 +128,14 @@ function css(){var s=document.createElement('style');s.textContent=[
  '.h2h-res{display:grid;grid-template-columns:1fr 1fr;gap:10px}.h2h-res div{background:#1c1b17;padding:14px;display:flex;flex-direction:column;gap:6px;border-top:4px solid #3a3830}',
  '.h2h-res div.win{border-top-color:#FFD900}.h2h-res span{font-weight:700;font-size:15px}.h2h-res small{display:block;font-weight:500;font-size:12px;color:#9d988a}.h2h-res b{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:44px;line-height:1}.h2h-res .win b{color:#FFD900}',
  '.h2h-small{font-size:13px!important;color:#9d988a!important}',
+ '.h2h-pick{display:flex;flex-direction:column;gap:12px}.h2h-pick button{display:flex;flex-direction:column;gap:6px;text-align:left;padding:20px 18px;border:2px solid rgba(244,241,234,.25);background:#1a1916;color:#F4F1EA;cursor:pointer;font-family:Inter,system-ui,sans-serif}',
+ '.h2h-pick button b{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:30px;text-transform:uppercase;line-height:1;color:#F4F1EA}.h2h-pick button span{font-size:15px;line-height:1.45;color:#c9c4b6}',
+ '.h2h-pick button:first-child{border-color:#FFD900}.h2h-pick button:first-child b{color:#FFD900}.h2h-pick button:active{transform:scale(.99)}',
  '.h2h-wrap button:focus-visible,.h2h-tab:focus-visible,.h2h-bar button:focus-visible{outline:3px solid #FFD900;outline-offset:2px}'].join('');document.head.appendChild(s)}
 
 function init(){css();tab();M=load();
-  if(M){if(M.turn>=M.players.length)overlay('result');else startTurn()}}
+  if(M){if(M.turn>=M.players.length)overlay('result');else startTurn()}
+  else if(!chosen())setTimeout(chooser,300)}
 window.MGH2H={stop:stop,_state:function(){return M}};
 /* a guest turn must block storage before anything else runs after a reload */
 (function(){var m=load();if(m&&m.turn<m.players.length&&!m.players[m.order[m.turn]].me)setGuard(true)})();
