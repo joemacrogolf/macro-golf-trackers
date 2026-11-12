@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 14:00 · Joe's Claude (Build My Plan session) · Build My Plan exercise swaps (Joe's call): everything now uses filmed exercises; calf raise, lateral med ball throw, kneeling power swing removed; Banded Squat → Banded Deadlift. SHARED videos.js: +3 videos (Kettlebell Snatch, Power Lunge, Kettlebell Halo), additive. 99 of 99 exercises have a demo video. Re-pinned p-258147 only · live
 2026-11-12 13:52 · Joe's Claude · in VidApp: lock Build My Plan to paid members, delete detached old game groups + duplicate Wedge Darts in Live Games (Joe's call) · in progress
 2026-11-12 13:50 · Joe's Claude · videos.js (shared): GRF Cable Press = Kajabi GRF Cable Push, Explosive Step Ups = Explosive Step Downs (Joe confirmed); coach dashboard hides My Plan golf registry rows. Re-pinned Dan, Pure Power gym, coach · live
 2026-11-12 13:28 · Joe's Claude · supabase/006-myplan-golf.sql run in Supabase (Joe's go-ahead): registry row 482615 for Paul Goddard linked to his existing email; my-plan + Paul Goddard page on cd41c58. Emailed Jack the golf My Plan summary · done

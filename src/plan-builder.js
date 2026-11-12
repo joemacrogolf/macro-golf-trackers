@@ -28,8 +28,6 @@ var EX={
   bandrow:{n:'Banded Row',k:'S',eq:'b',inc:BW},
   sapd:{n:'Cable Straight Arm Pull Downs',k:'S',eq:'g',inc:CABLE},
   dbpullover:{n:'Dumbbell Pull Over',k:'S',eq:'h',inc:DB},
-  bandsapd:{n:'Banded Straight Arm Pull Down',k:'S',eq:'b',inc:BW},
-  facepull:{n:'Face Pull',k:'S',eq:'g',inc:CABLE},
   bandfacepull:{n:'Face Pull with Band',k:'S',eq:'b',inc:BW},
   /* strength · pushing */
   dbincline:{n:'Dumbbell Incline Bench Press',k:'S',eq:'g',inc:DB},
@@ -42,9 +40,9 @@ var EX={
   bandohpress:{n:'Banded Shoulder Press',k:'S',eq:'b',inc:BW},
   /* strength · lower body */
   goblet:{n:'Dumbbell Goblet Squat',k:'S',eq:'h',inc:DB},
-  bandsquat:{n:'Banded Squat',k:'S',eq:'b',inc:BW},
+  banddl:{n:'Banded Deadlift',k:'S',eq:'b',inc:BW},
   dbrdl:{n:'Dumbbell RDL',k:'S',eq:'h',inc:DB},
-  bandrdl:{n:'Banded RDL',k:'S',eq:'b',inc:BW},
+  cablerdl:{n:'Cable RDL',k:'S',eq:'g',inc:CABLE},
   dbsplit:{n:'Dumbbell Split Squat',k:'S',eq:'h',inc:DB,side:1},
   splitbw:{n:'Split Squat',k:'S',eq:'b',inc:BW,side:1},
   dbrevlunge:{n:'Dumbbell Reverse Lunge',k:'S',eq:'h',inc:DB,side:1},
@@ -55,12 +53,10 @@ var EX={
   slbridge:{n:'Single Leg Glute Bridge',k:'S',eq:'b',inc:BW,side:1},
   legext:{n:'Leg Extension Machine',k:'S',eq:'g',inc:CABLE},
   dbstepup:{n:'Dumbbell Step Ups',k:'S',eq:'h',inc:DB,side:1},
-  calf:{n:'Standing Calf Raise',k:'S',eq:'b',inc:DB},
   /* strength · rotation and arms */
   cablechop:{n:'Cable Woodchop',k:'S',eq:'g',inc:CABLE,side:1},
   bandchop:{n:'Banded Half Kneeling Chop',k:'S',eq:'b',inc:BW,side:1},
   cablerot:{n:'Cable Full Rotation',k:'S',eq:'g',inc:CABLE,side:1},
-  bandrot:{n:'Banded Full Rotation',k:'S',eq:'b',inc:BW,side:1},
   pallof:{n:'Pallof Press',k:'S',eq:'g',inc:CABLE,side:1},
   bandpallof:{n:'Pallof Press',k:'S',eq:'b',inc:BW,side:1},
   dbcurl:{n:'Dumbbell Bicep Curl',k:'S',eq:'h',inc:DB},
@@ -73,24 +69,22 @@ var EX={
   mbslam:{n:'Med Ball Slam',k:'P',eq:'g',inc:MB},
   jbslam:{n:'Jump Back Overhead Slam',k:'P',eq:'g',inc:MB,low:['mbslam','hhslam']},
   ohthrow:{n:'Overhead Throw',k:'P',eq:'g',inc:MB},
-  dbsnatch:{n:'Dumbbell Snatch',k:'P',eq:'h',inc:DB,side:1},
-  bandfastpd:{n:'Fast Banded Pull Down',k:'P',eq:'b',inc:BW},
-  bandohchop:{n:'Banded Overhead Chop',k:'P',eq:'b',inc:BW},
+  dbsnatch:{n:'Kettlebell Snatch',k:'P',eq:'g',inc:KB,side:1},
+  bandfastpd:{n:'Banded Lat Pull Down',k:'P',eq:'b',inc:BW,note:'Pull down as fast as you can.'},
+  bandohchop:{n:'Banded Half Kneeling Chop',k:'P',eq:'b',inc:BW,side:1,note:'Chop as fast as you can.'},
   cablecross:{n:'Low to High Cable Cross Chop',k:'P',eq:'g',inc:CABLE,side:1},
   bandcross:{n:'Low to High Cross Chop with Band',k:'P',eq:'b',inc:BW,side:1},
   cablepowrow:{n:'Cable Power Row',k:'P',eq:'g',inc:CABLE},
   bandpowrow:{n:'Banded Power Row',k:'P',eq:'b',inc:BW},
   /* power · vertical */
-  cmj:{n:'Counter Movement Jump',k:'P',eq:'b',inc:BW,jump:1,low:['expstepup','grfkbswing','dbswing'],hard:'boxjump'},
-  boxjump:{n:'Box Jumps',k:'P',eq:'g',inc:BW,jump:1,low:['expstepup','grfkbswing','dbswing'],easy:'cmj'},
-  powjump:{n:'Power Jumps',k:'P',eq:'b',inc:BW,jump:1,low:['expstepdown','grfkbswing','dbswing','expstepup']},
-  fwdlunge:{n:'Forward Power Lunge',k:'P',eq:'b',inc:BW,side:1,low:['grfkbswing','dbswing','expstepup','expstepdown']},
-  slhop:{n:'Single Leg Hop',k:'P',eq:'b',inc:BW,side:1,jump:1,low:['expstepdown','expstepup','dbswing'],easy:'expstepup',hard:'sldefhop'},
-  sldefhop:{n:'Single Leg Deficit Hop',k:'P',eq:'b',inc:BW,side:1,jump:1,low:['expstepdown','expstepup','dbswing'],easy:'slhop'},
-  expstepup:{n:'Explosive Step Ups',k:'P',eq:'b',inc:BW,side:1},
+  cmj:{n:'Counter Movement Jump',k:'P',eq:'b',inc:BW,jump:1,low:['expstepup','grfkbswing'],hard:'boxjump'},
+  boxjump:{n:'Box Jumps',k:'P',eq:'g',inc:BW,jump:1,low:['expstepup','grfkbswing'],easy:'cmj'},
+  powjump:{n:'Power Jumps',k:'P',eq:'b',inc:BW,jump:1,low:['expstepdown','grfkbswing','expstepup']},
+  fwdlunge:{n:'Forward Power Lunge',k:'P',eq:'b',inc:BW,side:1,low:['grfkbswing','expstepup','expstepdown']},
+  sldefhop:{n:'Single Leg Deficit Hop',k:'P',eq:'b',inc:BW,side:1,jump:1,low:['expstepdown','expstepup','grfkbswing'],easy:'fwdlunge'},
+  expstepup:{n:'Dumbbell Step Ups',k:'P',eq:'h',inc:DB,side:1,note:'Drive up as fast as you can.'},
   expstepdown:{n:'Explosive Step Downs',k:'P',eq:'b',inc:BW,side:1},
   grfkbswing:{n:'GRF Kettlebell Swing',k:'P',eq:'g',inc:KB},
-  dbswing:{n:'Dumbbell Swing',k:'P',eq:'h',inc:DB},
   /* power · wrist release */
   chestthrow:{n:'Supine Chest Throws',k:'P',eq:'g',inc:MB},
   powpressup:{n:'Power Press Up',k:'P',eq:'b',inc:BW,easy:'incpowpressup'},
@@ -101,13 +95,11 @@ var EX={
   grflmpress:{n:'GRF Landmine Press',k:'P',eq:'g',inc:PLATE,side:1},
   /* power · rotation and lateral */
   discus:{n:'Med Ball Discus Throw',k:'P',eq:'g',inc:MB,side:1},
-  latthrow:{n:'Lateral Medicine Ball Throw',k:'P',eq:'g',inc:MB,side:1},
-  kpswing:{n:'Kneeling Power Swing',k:'P',eq:'g',inc:CABLE,side:1},
   bandrotfast:{n:'Banded Rotations',k:'P',eq:'b',inc:BW,side:1},
   bandpressrot:{n:'Banded Press with Rotation',k:'P',eq:'b',inc:BW,side:1},
-  skater:{n:'Skater Jumps',k:'P',eq:'b',inc:BW,side:1,jump:1,low:['sidepowlunge','latthrow','bandrotfast']},
+  skater:{n:'Skater Jumps',k:'P',eq:'b',inc:BW,side:1,jump:1,low:['sidepowlunge','bandrotfast']},
   heiden:{n:'Heiden to Vertical Jump',k:'P',eq:'b',inc:BW,side:1,jump:1,low:['sidepowlunge','discus','bandpressrot'],easy:'skater'},
-  sidepowlunge:{n:'Side Power Lunge',k:'P',eq:'b',inc:BW,side:1},
+  sidepowlunge:{n:'Power Lunge',k:'P',eq:'b',inc:BW,side:1},
   /* sequencing */
   grfseq:{n:'Resistance GRF Sequence',k:'Q',eq:'b',side:1},
   gsrback:{n:'Golf Swing Row (Backswing)',k:'Q',eq:'g',inc:CABLE,side:1},
@@ -134,26 +126,26 @@ var EX={
   bandcorechop:{n:'Core Stability Chop',k:'C',eq:'b',side:1},
   dorsal:{n:'Dorsal Raise',k:'C',eq:'b'},
   sbclams:{n:'Side Bridge Clams',k:'C',eq:'b',side:1},
-  dbhalo:{n:'Dumbbell Halos',k:'C',eq:'h',inc:DB}
+  dbhalo:{n:'Kettlebell Halo',k:'C',eq:'g',inc:KB}
 };
 /* exercises that are new to the Macro Golf library (check a demo video exists) */
-var NEW_IDS=['bandlatpd','bandsapd','bandfacepull','dbfloor','incpressup','hkdbpress','bandohpress','bandsquat','bandrdl','splitbw','revlungebw','sidelungebw','dbstepup','bandrot','bandcurl','bandpushdown','dbtriext','bandfastpd','bandohchop','bandpowrow','dbswing','incpowpressup','bandpowpress','bandgsrback','bandgsrdown','bandresstep','bandsplitrot','bandslpallof','bandcorechop','dbhalo','cablepush','latthrow','kpswing'];
+var NEW_IDS=['banddl'];
 
 /* ---------------- SLOTS: best option first ---------------- */
 var SLOT={
   vpull:['pullup','latpd','bandlatpd'], vpull2:['hklatpd','latpd','bandlatpd'],
   hpull:['dbrow','bandrow'], hpull2:['cablerow','dbrow','bandrow'],
-  pullover:['sapd','dbpullover','bandsapd'], facepull:['facepull','bandfacepull'],
+  pullover:['sapd','dbpullover'], facepull:['bandfacepull'],
   hpush:['dbincline','dbfloor','pressup'], hpush2:['dbflat','dbfloor','pressup'], vpush:['lmpress','hkdbpress','bandohpress'],
-  squat:['goblet','bandsquat'], hinge:['dbrdl','bandrdl'], split:['dbsplit','splitbw'], revlunge:['dbrevlunge','revlungebw'],
-  sidelunge:['dbsidelunge','sidelungebw'], hamcurl:['legcurl','slbridge'], bridge:['slbridge'], quad:['legext','dbstepup','splitbw'], calf:['calf'],
-  woodchop:['cablechop','bandchop'], fullrot:['cablerot','bandrot'], antirot:['pallof','bandpallof'],
+  squat:['goblet','banddl'], hinge:['dbrdl','cablerdl','banddl'], split:['dbsplit','splitbw'], revlunge:['dbrevlunge','revlungebw'],
+  sidelunge:['dbsidelunge','sidelungebw'], hamcurl:['legcurl','slbridge'], bridge:['slbridge'], quad:['legext','dbstepup','splitbw'],
+  woodchop:['cablechop','bandchop'], fullrot:['cablerot'], antirot:['pallof','bandpallof'],
   curl:['dbcurl','bandcurl'], tricep:['pushdown','dbtriext','bandpushdown'],
   chop:['hhslam','dbsnatch','bandfastpd'], chop2:['jbslam','dbsnatch','bandohchop'], slam:['mbslam','bandohchop'],
   crosschop:['cablecross','bandcross'], powrow:['cablepowrow','bandpowrow'], ohthrow:['ohthrow','dbsnatch','bandfastpd'],
-  vjump:['cmj'], vjump2:['powjump'], fwdlunge:['fwdlunge'], slhop:['slhop'], stepdown:['expstepdown'], swing:['grfkbswing','dbswing','fwdlunge'],
+  vjump:['cmj'], vjump2:['powjump'], fwdlunge:['fwdlunge'], slhop:['sldefhop'], stepdown:['expstepdown'], swing:['grfkbswing','fwdlunge'],
   wthrow:['chestthrow','powpressup'], powpress:['powpressup'], pushpress:['cablepush','dbpushpress','bandpowpress'], lmpush:['grflmpress','dbpushpress','bandpowpress'],
-  rthrow:['discus','bandrotfast'], rthrow2:['latthrow','bandpressrot'], kpswing:['kpswing','bandpressrot'],
+  rthrow:['discus','bandrotfast'], rthrow2:['discus','bandpressrot'], kpswing:['cablepowrow','bandrotfast','bandpressrot'],
   skater:['skater'], heiden:['heiden'], sidepow:['sidepowlunge'],
   grfseq:['grfseq'], gsrback:['gsrback','bandgsrback'], gsrdown:['gsrdown','bandgsrdown'], steprot:['steprot'], steptrig:['steptrig'],
   resstep:['resstep','bandresstep'], splitrot:['splitrot','bandsplitrot'], hipaero:['hipaero'], hipdrops:['hipdrops'], kneesup:['kneesup'], deepbs:['deepbs'], slpallof:['slpallof','bandslpallof'],
@@ -161,7 +153,7 @@ var SLOT={
 };
 /* if a slot runs out (equipment, or already used in the session), fall back to these */
 var FALLBACK={
-  S:['dbrow','goblet','dbrdl','dbsplit','dbsidelunge','cablechop','pallof','bandrow','bandsquat','bandrdl','splitbw','revlungebw','sidelungebw','bandchop','bandrot','bandpallof','pressup','slbridge'],
+  S:['dbrow','goblet','dbrdl','dbsplit','dbsidelunge','cablechop','pallof','bandrow','banddl','splitbw','revlungebw','sidelungebw','bandchop','bandpallof','pressup','slbridge'],
   P:['powpressup','fwdlunge','sidepowlunge','expstepup','bandrotfast','bandpressrot','bandfastpd','bandcross','bandpowrow','expstepdown'],
   Q:['grfseq','steprot','steptrig','hipaero','hipdrops','kneesup','deepbs','bandgsrdown','bandresstep','bandsplitrot','bandslpallof'],
   C:['deadbug','birddog','sideplank','dorsal','sbclams','bandcorechop']
@@ -178,7 +170,7 @@ var PAIRS={
     {s:'woodchop',a:'antirot',p:'crosschop',p2:'powrow',q:'splitrot',c:'corechop'}],
   VERT:[
     {s:'squat',a:'hamcurl',p:'vjump',p2:'vjump2',q:'steptrig',c:'deadbug'},
-    {s:'hinge',a:'calf',p:'fwdlunge',p2:'swing',q:'hipaero',c:'birddog'},
+    {s:'hinge',a:'bridge',p:'fwdlunge',p2:'swing',q:'hipaero',c:'birddog'},
     {s:'split',a:'quad',p:'slhop',p2:'stepdown',q:'hipdrops',c:'sideplank'},
     {s:'hamcurl',a:'bridge',p:'stepdown',p2:'vjump2',q:'kneesup',c:'dorsal'}],
   WRIST:[
