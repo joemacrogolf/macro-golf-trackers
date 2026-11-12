@@ -248,7 +248,7 @@ body.gated{overflow:hidden}
       <div class="meta"><span id="holePar">Par 4</span><small id="holeYds">385 yds</small></div>
     </div>
     <div class="holewrap"><svg id="pic" viewBox="0 0 360 560" role="img" aria-label="Hole layout"></svg></div>
-    <div class="legend"><span><i style="background:#9ccd55"></i>Fairway</span><span><i style="background:#5f8c32"></i>Rough</span><span><i style="background:#ecdcab"></i>Bunker</span><span><i style="background:#3b8fd4"></i>Water</span><span><i style="background:#24401a"></i>Trees</span><span><i style="background:#fff;border-color:#0B0B0B"></i>OB stakes</span></div>
+    <div class="legend"><span><i style="background:#6db05c"></i>Fairway</span><span><i style="background:#3f7d46"></i>Rough</span><span><i style="background:#ecdfb3"></i>Bunker</span><span><i style="background:#2b7fc4"></i>Water</span><span><i style="background:#173a21"></i>Trees</span><span><i style="background:#fff;border-color:#0B0B0B"></i>OB stakes</span></div>
     <div class="plan" id="plan" hidden></div>
     <div><span class="label">Club off the tee</span><div class="clubs" id="clubs" role="group" aria-label="Club"></div></div>
     <div class="fields">
@@ -328,6 +328,7 @@ body.gated{overflow:hidden}
   </div></footer>
 </div>
 
+<script src="{{BASE}}src/golf-art.js"></script>
 <script>
 var N=14, BASE=240, GR=15, KEY="driverCorridor";
 var $=id=>document.getElementById(id);
@@ -383,9 +384,10 @@ var hcName=h=>h==="Tour"?"Tour":h==="0"?"Scratch":h+" hc";
 var S;
 function TEE(){return TEES.find(t=>t.id===S.tee)||TEES[2]}
 function recTee(c){let best=TEES[2],bd=1e9;TEES.forEach(t=>{const d=Math.abs(t.ref-c);if(d<bd){bd=d;best=t}});return best}
+var _hg={};function holeGreen(i){return _hg[i]||(_hg[i]=GART.makeGreen(GR,null,GART.rng(i*131+17),{pin:0.3}))}
 function hole(i,teeId){
   const t=teeId?TEES.find(x=>x.id===teeId):TEE(), f=t.ref/BASE, h=HOLES[i];
-  return {...h,i,f,len:h.len*f,fw:h.fw.map(p=>[p[0]*f,p[1],p[2]]),
+  return {...h,i,f,G:holeGreen(i),len:h.len*f,fw:h.fw.map(p=>[p[0]*f,p[1],p[2]]),
     haz:h.haz.map(z=>({...z,d:z.d!=null?z.d*f:null,d1:z.d1!=null?z.d1*f:null,d2:z.d2!=null?z.d2*f:null,ry:z.ry!=null?z.ry*f:null})),
     note:h.note.replace(/\{(\d+)\}/g,(m,n)=>Math.round(n*f))};
 }
@@ -402,7 +404,8 @@ function hazAt(h,x,d){
 function lieAt(h,x,d){
   const z=hazAt(h,x,d); if(z)return z.t==="bunker"?"bunker":z.t;
   if(x<h.rough[0])return h.out[0]; if(x>h.rough[1])return h.out[1];
-  if(Math.hypot(x-h.gx,d-h.len)<=GR)return "green";
+  if(GART.gEdge(h.G,x-h.gx,d-h.len)<=0)return "green";
+  if(GART.inBunker(h.G,x-h.gx,d-h.len))return "bunker";
   const e=fwAt(h,d); if(e&&x>=e[0]&&x<=e[1])return "fairway";
   return "rough";
 }
@@ -439,7 +442,7 @@ function sim(h,club,total,off){
 }
 var fmt2=x=>(x>=0?"+":"−")+Math.abs(x).toFixed(2);
 var sgCol=x=>x>=0.1?"#1FA855":x>=-0.1?"#5a9a3c":x>=-0.5?"#F5A800":"#E0352B";
-var LIECOL={fairway:["#9ccd55","#0B0B0B"],green:["#b8e07c","#0B0B0B"],rough:["#5f8c32","#fff"],bunker:["#ecdcab","#0B0B0B"],water:["#3b8fd4","#fff"],creek:["#3b8fd4","#fff"],trees:["#24401a","#fff"],ob:["#fff","#E0352B"]};
+var LIECOL={fairway:["#6db05c","#0B0B0B"],green:["#98d886","#0B0B0B"],rough:["#3f7d46","#fff"],bunker:["#ecdfb3","#0B0B0B"],water:["#2b7fc4","#fff"],creek:["#2b7fc4","#fff"],trees:["#173a21","#fff"],ob:["#fff","#E0352B"]};
 var LIENAME={fairway:"Fairway",green:"Green",rough:"Rough",bunker:"Bunker",water:"Water",creek:"Burn",trees:"Trees",ob:"OB"};
 
 /* ---------- picture ---------- */
@@ -449,24 +452,23 @@ function pic(h,shot,ghost){
   const k=490/(h.len+28), Y=d=>HH-30-d*k;
   const o=[];
   o.push(`<defs>
-   <pattern id="mow" width="360" height="22" patternUnits="userSpaceOnUse"><rect width="360" height="11" fill="#a3d35c"/><rect y="11" width="360" height="11" fill="#93c64c"/></pattern>
+   <pattern id="mow" width="360" height="26" patternUnits="userSpaceOnUse"><rect width="360" height="13" fill="#79bb67"/><rect y="13" width="360" height="13" fill="#6db05c"/></pattern>
    <pattern id="trees" width="26" height="26" patternUnits="userSpaceOnUse"><rect width="26" height="26" fill="#2c4a1f"/><circle cx="7" cy="7" r="7" fill="#1d3614"/><circle cx="20" cy="19" r="7.5" fill="#203b16"/><circle cx="7" cy="7" r="3" fill="#2f5a22"/><circle cx="20" cy="19" r="3" fill="#2f5a22"/></pattern>
    <pattern id="obz" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="10" height="10" fill="#3d4a33"/><rect width="4" height="10" fill="#47553b"/></pattern>
    <pattern id="wav" width="24" height="8" patternUnits="userSpaceOnUse"><rect width="24" height="8" fill="#3b8fd4"/><path d="M0 5 Q6 2 12 5 T24 5" fill="none" stroke="#7fbdf0" stroke-width="1.2"/></pattern>
   </defs>`);
-  // outside
-  o.push(`<rect x="0" y="0" width="${W}" height="${HH}" fill="#2c4a1f"/>`);
-  ["L","R"].forEach((s,i)=>{const kind=h.out[i], x0=i?X(h.rough[1]):0, w=i?W-X(h.rough[1]):X(h.rough[0]);
-    o.push(`<rect x="${x0}" y="0" width="${w}" height="${HH}" fill="${kind==="ob"?"url(#obz)":"url(#trees)"}"/>`)});
+  // outside: trees, both sides (OB ground is wooded too)
+  const R=GART.rng(h.i*977+31),ph=R()*6,AC=GART.C;
+  o.push(`<rect x="0" y="0" width="${W}" height="${HH}" fill="${AC.deep}"/>`);
+  o.push(GART.treesSVG(R,220,-6,W+6,-6,HH+6,(x,y,r)=>x>X(h.rough[0])-r*0.4&&x<X(h.rough[1])+r*0.4));
   // rough
-  o.push(`<rect x="${X(h.rough[0])}" y="0" width="${X(h.rough[1])-X(h.rough[0])}" height="${HH}" fill="#5f8c32"/>`);
-  // fairway
-  const L=h.fw.map(p=>`${X(p[1])},${Y(p[0])}`), R=h.fw.slice().reverse().map(p=>`${X(p[2])},${Y(p[0])}`);
-  o.push(`<polygon points="${L.concat(R).join(" ")}" fill="url(#mow)" stroke="#b6e070" stroke-width="1" stroke-linejoin="round"/>`);
+  o.push(`<rect x="${X(h.rough[0])}" y="0" width="${X(h.rough[1])-X(h.rough[0])}" height="${HH}" fill="${AC.rough}"/>`);
+  // fairway, with mowing stripes
+  const L=h.fw.map(p=>`${X(p[1])},${Y(p[0])}`), R2=h.fw.slice().reverse().map(p=>`${X(p[2])},${Y(p[0])}`);
+  o.push(`<polygon points="${L.concat(R2).join(" ")}" fill="url(#mow)" stroke="${AC.fw2}" stroke-width="1" stroke-linejoin="round"/>`);
   // OB stakes
   h.out.forEach((kind,i)=>{if(kind!=="ob")return;const x=X(h.rough[i]);
-    o.push(`<line x1="${x}" y1="0" x2="${x}" y2="${HH}" stroke="#fff" stroke-width="1.5" stroke-dasharray="2 10"/>`);
-    for(let y=20;y<HH;y+=48)o.push(`<rect x="${x-2}" y="${y}" width="4" height="12" fill="#fff" stroke="#0B0B0B" stroke-width=".6"/>`);
+    o.push(GART.obSVG(x,0,HH));
     o.push(`<text x="${i?X(h.rough[1])+8:X(h.rough[0])-8}" y="${HH/2}" fill="#fff" font-family="Anton,Impact,sans-serif" font-size="15" text-anchor="${i?"start":"end"}" opacity=".9">OB</text>`)});
   // distance lines
   for(let d=100;d<h.len-30;d+=50){const y=Y(d);
@@ -478,19 +480,19 @@ function pic(h,shot,ghost){
     o.push(`<text x="6" y="${a-4}" fill="#FFD900" font-family="Inter,sans-serif" font-weight="700" font-size="10.5">${c[1].toUpperCase()} CARRY ~${Math.round(cc)}</text>`)}
   // hazards
   h.haz.forEach(z=>{
-    if(z.t==="water"){const x0=z.side==="R"?X(z.x):0,w=z.side==="R"?W-X(z.x):X(z.x);
-      o.push(`<rect x="${x0}" y="${Y(z.d2)}" width="${w}" height="${Y(z.d1)-Y(z.d2)}" rx="10" fill="url(#wav)" stroke="#9fd0f5" stroke-width="1.5"/>`);
+    if(z.t==="water"){const sg=z.side==="R"?1:-1;
+      o.push(GART.waterSVG(X(z.x),sg,Y(z.d2),Y(z.d1),sg>0?W+4:-4,ph));
       o.push(`<text x="${z.side==="R"?X(z.x)+6:X(z.x)-6}" y="${Y(z.d1)-6}" fill="#fff" font-family="Inter,sans-serif" font-weight="700" font-size="10" text-anchor="${z.side==="R"?"start":"end"}">${Math.round(z.d1)}–${Math.round(z.d2)}</text>`)}
-    if(z.t==="creek"){o.push(`<rect x="0" y="${Y(z.d2)}" width="${W}" height="${Y(z.d1)-Y(z.d2)}" fill="url(#wav)" stroke="#9fd0f5" stroke-width="1.2"/>`);
+    if(z.t==="creek"){const y1=Y(z.d2),y2=Y(z.d1),a=[],b=[];for(let x=-4;x<=W+4;x+=8){a.push([x,y1+1.5*Math.sin(x/19+ph)]);b.push([x,y2-1.5*Math.sin(x/23+ph)])}
+      o.push(`<path d="${GART.pth(a.concat(b.reverse()))}" fill="${AC.water}"/>`);for(let x=20;x<W;x+=60)o.push(`<path d="M${x} ${(y1+y2)/2} q5 -2.5 10 0 t10 0" fill="none" stroke="${AC.water2}" stroke-width="1.3"/>`);
       o.push(`<text x="8" y="${Y(z.d2)-5}" fill="#fff" font-family="Inter,sans-serif" font-weight="700" font-size="10">BURN ${Math.round(z.d1)}–${Math.round(z.d2)}</text>`)}
-    if(z.t==="bunker"){o.push(`<ellipse cx="${X(z.x)}" cy="${Y(z.d)}" rx="${z.rx*3}" ry="${Math.max(4,z.ry*k)}" fill="#ecdcab" stroke="#d6c38a" stroke-width="1.5"/>`);
+    if(z.t==="bunker"){o.push(GART.bunkerSVG(X(z.x),Y(z.d),z.rx*3,Math.max(4,z.ry*k),ph+z.x));
       if(z.d<h.len-25)o.push(`<text x="${X(z.x)}" y="${Y(z.d)+3.5}" fill="#6b5a2a" font-family="Inter,sans-serif" font-weight="700" font-size="9.5" text-anchor="middle">${Math.round(z.d-z.ry)}–${Math.round(z.d+z.ry)}</text>`)}
   });
   // green
-  o.push(`<ellipse cx="${X(h.gx)}" cy="${Y(h.len)}" rx="${GR*3}" ry="${Math.max(10,GR*k)}" fill="#b8e07c" stroke="#d4f0a0" stroke-width="2"/>`);
-  o.push(`<line x1="${X(h.gx)+3}" y1="${Y(h.len)}" x2="${X(h.gx)+3}" y2="${Y(h.len)-24}" stroke="#fff" stroke-width="1.6"/><path d="M${X(h.gx)+3} ${Y(h.len)-24} l12 4 -12 4z" fill="#FFD900"/>`);
+  {const vk=Math.max(k,1.9);o.push(GART.greenSVG(h.G,(x,y)=>[X(h.gx+x),Y(h.len)-y*vk],2.4,"dcg"+h.i))}
   // tee
-  o.push(`<rect x="${W/2-16}" y="${HH-30}" width="32" height="14" fill="#9ccd55" stroke="#b6e070"/><circle cx="${W/2-7}" cy="${HH-23}" r="3.2" fill="${TEE().col}" stroke="#0B0B0B" stroke-width=".8"/><circle cx="${W/2+7}" cy="${HH-23}" r="3.2" fill="${TEE().col}" stroke="#0B0B0B" stroke-width=".8"/>`);
+  o.push(`<rect x="${W/2-16}" y="${HH-30}" width="32" height="14" rx="3" fill="#79bb67"/><circle cx="${W/2-7}" cy="${HH-23}" r="3.2" fill="${TEE().col}" stroke="#0B0B0B" stroke-width=".8"/><circle cx="${W/2+7}" cy="${HH-23}" r="3.2" fill="${TEE().col}" stroke="#0B0B0B" stroke-width=".8"/>`);
   o.push(`<text x="${W-6}" y="${HH-10}" fill="#fff" font-family="Anton,Impact,sans-serif" font-size="13" text-anchor="end">${yds(h)} YDS · PAR ${h.par}</text>`);
   // shot
   const r=shot||ghost;

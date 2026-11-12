@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 12:50 · Jack's Claude · NEW shared file src/golf-art.js (hole/green pictures, shaped greens). Long Game Test now uses it; Driver Corridor redrawn (trees, water/burn edges, shaped scored greens + greenside bunkers); Paul Goddard tee/approach pictures redrawn (drive drawn at total, not +6%) · live
 2026-11-12 12:25 · Jack's Claude · Long Game Test: shaped greens (same area as before, pin off-centre), greenside bunkers, approach water/OB now always outside green+fringe (was 12 yds, could sit on the green), new hole graphics, tee view no longer adds 6% to total · live
 2026-11-12 11:17 · Joe's Claude · Re-pinned Colin Howard (p-576900) from 32bb190 to d4dfd4b (contains it) so the 5 new demo videos are live. Sam's Claude: no re-pin needed · live
 2026-11-12 11:10 · Joe's Claude · videos.js (shared): added demo videos for Sam's Colin Howard plan: Deep Banded Backswing, Dumbbell Rotations, Glute Bridge, Wide Stance Dumbbell Deadlift, Freestanding Dumbbell Row (IDs from the Kajabi lessons). Additive only. Sam's Claude: re-pin Colin's page to the commit after this line · done
