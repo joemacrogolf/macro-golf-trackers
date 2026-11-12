@@ -1482,7 +1482,7 @@ function runPlay(b){const G=MacroPlan.GAMES[b.game];
    ${G.set?`<div class="recnote">Play it on the <b>${G.set}</b> setting.</div>`:""}
    <ul class="steps"><li>Tap Play. ${esc(G.name)} opens with its own scorecard.</li><li>Your score saves to your record and counts on the ${esc(G.name)} leaderboard.</li><li>When you've finished, come back here and tick it off.</li></ul>
    ${b.opened?`<div class="resume"><b>Back from ${esc(G.name)}?</b><span class="muted">Tick it off and move on to the next block.</span></div>`:""}
-   <a class="${b.opened?"ghost":"dark"} playbtn" href="${site(GAME_URL[b.game])}" data-act="play">▶ ${b.opened?"Open":"Play"} ${esc(G.name)}</a>`+nextBtn(b.opened?"✓ Played it, next block":"✓ Already played it, next block")}
+   <a class="${b.opened?"ghost":"dark"} playbtn" href="${site(GAME_URL[b.game])}?from=plan" data-act="play">▶ ${b.opened?"Open":"Play"} ${esc(G.name)}</a>`+nextBtn(b.opened?"✓ Played it, next block":"✓ Already played it, next block")}
 /* end of a planned session: tick it off for the week */
 function planDone(){const P=PG(),wk=S.plan.week,i=S.plan.idx;P.weeks=P.weeks||{};const a=P.weeks[wk]=P.weeks[wk]||[];if(!a.includes(i))a.push(i);
   Object.keys(P.weeks).sort().slice(0,-12).forEach(k=>delete P.weeks[k]);window.save()}

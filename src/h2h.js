@@ -9,6 +9,8 @@ if(window.MGH2H)return;
 var GAMES={'golf-hole-out':1,'golf-insanity':1,'golf-money-stealers':1,'golf-fifty-ft-bank':1,'golf-par-18':1,'golf-wedge-darts':1,'golf-left-is-lava':1,'golf-driver-corridor':1,'golf-three-strikes':1};
 var tag=document.querySelector('script[data-page]'),PAGE=tag?tag.getAttribute('data-page'):'';
 if(!GAMES[PAGE]||typeof window.MG_SCORE!=='function')return;
+/* no head-to-head when the game was opened from a practice plan: plans have no competitive extras */
+try{if(/[?&]from=plan\b/.test(location.search)&&!sessionStorage.getItem('mgh2h'))return}catch(e){}
 var SK='mgh2h',M=null,base=null,timer=null,done=false;
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function load(){try{var m=JSON.parse(sessionStorage.getItem(SK)||'null');return m&&m.page===PAGE?m:null}catch(e){return null}}
