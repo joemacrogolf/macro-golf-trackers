@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 23:15 · Jack's Claude · VidApp PUBLISHED TO LIVE APPS (Jack's go-ahead): Home tile artwork, My Numbers tile 4183747, bottom tab 'MG Athletes'. OUT OF VIDAPP · live
 2026-11-12 23:10 · Jack's Claude · VidApp PUBLISHED TO PREVIEW (Home tiles, My Numbers tile, MG Athletes tab). Publish To Live Apps not pressed yet: waiting on Jack's OK for this batch · preview
 2026-11-12 23:08 · Jack's Claude · VidApp TAB RENAMED: bottom tab 4183648 (Website → www.macro.golf/my-plan) title 'Golf 1 on 1' → 'MG Athletes' (12-char limit), header 'Golf 1 on 1 Only' → 'Macro Golf Athletes'. Icon unchanged · saved
 2026-11-12 23:05 · Jack's Claude · VidApp REMOVED Website item 'My Numbers' 4183745 from its parent Practice 4182266 (made there first by mistake; not deleted) · saved
