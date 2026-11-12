@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 17:20 · Jack's Claude · On-Course Games live: Kajabi p-631482 (theme 2168255012, game/loader) pinned to 7c94b4b, published, header/footer hidden. Added to CLAUDE.md page table. VidApp tile not added yet · live
 2026-11-12 16:55 · Jack's Claude · NEW page pages/golf-on-course.html (On-Course Games: Worst Ball + PGA Tour Average, any number of holes, shot-by-shot strokes gained or score only, courses remembered per player). Plan golf-on-course, group golf. Kajabi landing page being created · in progress
 2026-11-12 16:10 · Jack's Claude · Long Game Test shot mix: full 13 wedge / 14 mid / 11 long / 6 fairway-club approaches (was 18/14/8/4), half 7/7/5/3 · live
 2026-11-12 14:50 · Joe's Claude (Build My Plan session) · SHARED videos.js: MGVideo.open(name, id, label) gains an optional label (default stays 'Exercise demo'; backward compatible). Build My Plan: mobility shows 'Watch now' (player label 'Watch now · follow along'); yellow 'Change my plan' button in the hero. Engine: buttons only show when CLIENT.onRebuild / coachUrl set. Re-pinned p-258147 only · live

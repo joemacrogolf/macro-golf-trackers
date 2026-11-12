@@ -125,6 +125,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | Rob Seeley (template build) | p-741365 | 2168241904 | plan / mg_loader |
 | Colin Howard (template build) | p-576900 | 2168250329 | plan / mg_loader |
 | Paul Goddard golf plan | p-482615 | 2168242786 | game / loader |
+| On-Course Games (Worst Ball, PGA Tour Average; `pages/golf-on-course.html`) | p-631482 | 2168255012 | game / loader |
 | My Plan log-in (all 1-to-1 and golf personal plans, `pages/my-plan.html`) | my-plan | 2168251504 | plan / mg_loader |
 | Build My Plan (app users, `clients/build-my-plan.js` + `src/plan-builder.js`) | p-258147 | 2168251525 | plan / mg_loader |
 
