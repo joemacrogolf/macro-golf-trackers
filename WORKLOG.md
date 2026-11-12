@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-12 13:28 · Joe's Claude · supabase/006-myplan-golf.sql run in Supabase (Joe's go-ahead): registry row 482615 for Paul Goddard linked to his existing email; my-plan + Paul Goddard page on cd41c58. Emailed Jack the golf My Plan summary · done
 2026-11-12 13:25 · Joe's Claude · My Plan page visual fix: Kajabi theme was turning the MY PLAN heading dark navy; heading forced cream, stray theme gap removed, copy says "personal plan" (covers golf) · live
 2026-11-12 13:30 · Joe's Claude (Build My Plan session) · Build My Plan: renamed 12 exercises to match existing demo videos (Cable Row, Band Version golf swing rows, Pallof Press, etc.); 32 exercises still need videos (list sent to Joe). Re-pinned p-258147 · live
 2026-11-12 13:30 · Joe's Claude · My Plan now covers golf personal plans (Joe's call): supabase/006-myplan-golf.sql (mg_clients.kind, registry row 482615 for Paul Goddard), sync.js hand-off also signs in email + PIN pages (shared file; golf game pages unchanged, tested), my-plan.html, CLAUDE.md welcome rule covers golf. Re-pinning my-plan + Paul Goddard only. Jack's Claude: new golf personal plans need the registry row in CLAUDE.md · in progress
