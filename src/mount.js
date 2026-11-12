@@ -8,6 +8,9 @@
   var base=me.src.replace(/src\/mount\.js(\?.*)?$/,''),page=me.getAttribute('data-page');
   var root=document.getElementById(me.getAttribute('data-root')||'mg-root');
   if(!root){root=document.createElement('div');me.parentNode.insertBefore(root,me)}
+  /* Hide the Kajabi theme's own header and footer: some themes' CSS doesn't hide them on these pages */
+  function chrome(){[].forEach.call(document.querySelectorAll('header,footer'),function(e){if(root.contains(e)||e.contains(root))return;e.style.setProperty('display','none','important')})}
+  chrome();document.addEventListener('DOMContentLoaded',chrome);window.addEventListener('load',chrome);
   var css='#mg-load{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#F4F1EA;color:#0B0B0B;font:600 15px Inter,system-ui,sans-serif;text-align:center;padding:24px}'+
     '#mg-load i{width:42px;height:42px;border:5px solid #0B0B0B;border-top-color:#FFD900;border-radius:50%;animation:mgspin .8s linear infinite}@keyframes mgspin{to{transform:rotate(360deg)}}'+
     '#mg-load button{min-height:48px;padding:0 20px;border:0;background:#FFD900;color:#0B0B0B;font:400 18px Anton,Impact,sans-serif;text-transform:uppercase;cursor:pointer}'+
