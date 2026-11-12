@@ -84,6 +84,43 @@ function testsCard(hist){var ks=Object.keys(TESTS).filter(function(k){return his
     return '<div class="mgn-test"><div><b>'+TESTS[k][1]+'</b><small>'+H.length+' test'+(H.length>1?'s':'')+' \u00b7 last '+day(H[H.length-1].date)+'</small></div>'+spark(H.map(function(h){return h.hc}),true)+
      '<div class="mgn-hc"><b>'+hcTxt(b)+'</b>'+(H.length>1?'<em class="'+(d>0.05?'up':d<-0.05?'down':'')+'">'+(d>0.05?'\u25b2 '+d.toFixed(1):d<-0.05?'\u25bc '+Math.abs(d).toFixed(1):'level')+'</em>':'')+'</div></div>'}).join('')+'</div></div>'}
 
+
+/* ---------- trends over a chosen period ---------- */
+var PERIODS=[['1m','1 month',30,'1M'],['3m','3 months',91,'3M'],['6m','6 months',182,'6M'],['1y','1 year',365,'1Y'],['all','All time',0,'All']];
+var TCOL={long:'#FFD900',short:'#3ad37a',putting:'#7cc4ff'},TSHORT={long:'Long game',short:'Short game',putting:'Putting'};
+function ds(t){var d=new Date(String(t).length<=10?t+'T12:00:00':t);return isNaN(d)?null:d.getTime()}
+function avg(a){return a.length?a.reduce(function(x,y){return x+y},0)/a.length:null}
+function trendsCard(d,per){per=per||'3m';var P=PERIODS.filter(function(p){return p[0]===per})[0]||PERIODS[1],now=Date.now(),H=d.history||{};
+  var all=[];Object.keys(TESTS).forEach(function(k){(H[k]||[]).forEach(function(h){var t=ds(h.date);if(t)all.push(t)})});
+  Object.keys(d.games||{}).forEach(function(g){(d.games[g].rounds||[]).forEach(function(r){var t=ds(r.d);if(t)all.push(t)})});
+  var from=P[2]?now-P[2]*864e5:(all.length?Math.min.apply(null,all):now-30*864e5);if(now-from<7*864e5)from=now-7*864e5;
+  var chips='<div class="mgn-chips" role="tablist">'+PERIODS.map(function(p){return '<button type="button" class="mgn-chip'+(p[0]===P[0]?' on':'')+'" data-per="'+p[0]+'" aria-label="'+p[1]+'">'+p[3]+'</button>'}).join('')+'</div>';
+  /* tests: plays-like handicap points inside the period (lower is better) */
+  var series={},ys=[];Object.keys(TESTS).forEach(function(k){var pts=(H[k]||[]).map(function(h){return {t:ds(h.date),v:Number(h.hc)}}).filter(function(x){return x.t&&x.t>=from&&isFinite(x.v)});
+    if(pts.length){series[k]=pts;pts.forEach(function(x){ys.push(x.v)})}});
+  var ks=Object.keys(series),chart='',legend='',head='';
+  if(ks.length){var W=320,Ht=150,L=30,R=8,T=10,B=22,mn=Math.min.apply(null,ys),mx=Math.max.apply(null,ys);if(mx-mn<2){var c=(mx+mn)/2;mn=c-1;mx=c+1}var pad=(mx-mn)*.12;mn-=pad;mx+=pad;
+    var X=function(t){return L+(t-from)/Math.max(1,now-from)*(W-L-R)},Y=function(v){return T+(v-mn)/(mx-mn)*(Ht-T-B)};
+    var grid='',step=(mx-mn)>12?4:(mx-mn)>6?2:1;for(var g=Math.ceil(mn/step)*step;g<=mx;g+=step){grid+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(g).toFixed(1)+'" y2="'+Y(g).toFixed(1)+'" class="gl"/><text x="'+(L-5)+'" y="'+(Y(g)+3.5).toFixed(1)+'" text-anchor="end">'+hcTxt(g)+'</text>'}
+    var xl='<text x="'+L+'" y="'+(Ht-6)+'">'+day(from)+'</text><text x="'+(W-R)+'" y="'+(Ht-6)+'" text-anchor="end">Today</text>';
+    var lines=ks.map(function(k){var p=series[k],col=TCOL[k];return (p.length>1?'<polyline fill="none" stroke="'+col+'" stroke-width="2.4" stroke-linejoin="round" points="'+p.map(function(x){return X(x.t).toFixed(1)+','+Y(x.v).toFixed(1)}).join(' ')+'"/>':'')+
+      p.map(function(x,i){return '<circle cx="'+X(x.t).toFixed(1)+'" cy="'+Y(x.v).toFixed(1)+'" r="'+(i===p.length-1?4.2:3)+'" fill="'+(i===p.length-1?col:'#0B0B0B')+'" stroke="'+col+'" stroke-width="2"/>'}).join('')}).join('');
+    chart='<svg class="mgn-chart" viewBox="0 0 '+W+' '+Ht+'" role="img" aria-label="Plays-like handicap from each test over '+P[1]+'">'+grid+xl+lines+'</svg><div class="mgn-axis">Higher on the chart is better (lower handicap)</div>';
+    var ch=[];legend='<div class="mgn-leg">'+ks.map(function(k){var p=series[k],a=p[0].v,b=p[p.length-1].v,dd=a-b;if(p.length>1)ch.push(dd);
+      return '<div><i style="background:'+TCOL[k]+'"></i><span>'+TSHORT[k]+'</span><b>'+hcTxt(b)+'</b><em class="'+(p.length<2?'':dd>0.05?'up':dd<-0.05?'down':'')+'">'+(p.length<2?'1 test':dd>0.05?'\u25b2 '+dd.toFixed(1)+' better':dd<-0.05?'\u25bc '+Math.abs(dd).toFixed(1)+' worse':'level')+'</em></div>'}).join('')+'</div>';
+    if(ch.length){var m=avg(ch);head='<div class="mgn-tot '+(m>0.05?'up':m<-0.05?'down':'gold')+'"><b>'+(m>0.05?'\u25b2':m<-0.05?'\u25bc':'')+Math.abs(m).toFixed(1)+'</b><small>'+(m>0.05?'hc better':m<-0.05?'hc worse':'hc, holding level')+' on average</small></div>'}}
+  else chart='<p class="mgn-p">No tests in the last '+P[1].toLowerCase()+'. Take a test (or pick a longer period) to see your trend.</p>';
+  /* games: average score in the period vs the same length of time before it */
+  var rows=Object.keys(GAMES).map(function(g){var s=(d.games||{})[g];if(!s)return null;var R=(s.rounds||[]).map(function(r){return {t:ds(r.d),s:Number(r.s)}}).filter(function(r){return r.t&&isFinite(r.s)});
+    var inP=R.filter(function(r){return r.t>=from}).sort(function(x,y){return x.t-y.t});if(!inP.length)return null;
+    /* trend inside the period: the later half of the rounds against the earlier half */
+    var h=Math.floor(inP.length/2),a=avg(inP.map(function(r){return r.s})),low=s.better==='low',dd=null;
+    if(inP.length>=2){var e=avg(inP.slice(0,h).map(function(r){return r.s})),l=avg(inP.slice(inP.length-h).map(function(r){return r.s}));dd=low?e-l:l-e;var sc=Math.max(1,Math.abs(e))*0.03;if(Math.abs(dd)<sc)dd=0}
+    return '<div class="mgn-gt"><div><b>'+GAMES[g][0]+'</b><small>'+inP.length+' round'+(inP.length>1?'s':'')+' \u00b7 avg '+fmtScore(a,s.unit)+'</small></div>'+spark(inP.map(function(r){return r.s}),low)+
+      '<em class="'+(dd==null?'':dd>0.05?'up':dd<-0.05?'down':'')+'">'+(dd==null?'1 round':dd>0.05?'\u25b2 better':dd<-0.05?'\u25bc worse':'level')+'</em></div>'}).filter(Boolean);
+  var games=rows.length?'<div class="mgn-k2">Games in this period</div><div class="mgn-sub">Your recent rounds against your earlier ones in this period</div><div class="mgn-gts">'+rows.join('')+'</div>':'';
+  return '<div class="mgn-card" id="mgn-trends"><div class="mgn-top"><div><div class="mgn-k">Your trend</div><div class="mgn-sub">'+P[1]+' \u00b7 '+day(from)+' to today</div></div>'+head+'</div>'+chips+chart+legend+games+'</div>'}
+
 /* ---------- game bests ---------- */
 function fmtScore(v,u){var n=Number(v);if(!isFinite(n))return '\u2013';if(u==='hc')return hcTxt(n)+' hc';if(u==='SG')return sg(n);return String(Math.round(n*10)/10)+(u?' '+u:'')}
 function gamesCard(games){var ks=Object.keys(GAMES).filter(function(g){return games[g]});
@@ -110,8 +147,12 @@ function css(){if(document.getElementById('mgn-css'))return;var s=document.creat
  '.mgn-tests{display:flex;flex-direction:column;gap:10px}.mgn-test{display:grid;grid-template-columns:1fr 120px 64px;gap:10px;align-items:center}.mgn-test b{font-size:14px}.mgn-test small{display:block;font-size:11px;color:#9C988C}',
  '.mgn-spark{width:100%;height:40px;color:#F4F1EA}.mgn-hc{text-align:right}.mgn-hc b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;font-size:26px;line-height:1}.mgn-hc em{font-style:normal;font-size:11px;font-weight:700}.mgn-hc em.up{color:#3ad37a}.mgn-hc em.down{color:#ff6b5e}',
  '.mgn-games{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mgn-game{display:flex;flex-direction:column;gap:2px;background:rgba(244,241,234,.06);padding:12px;color:#F4F1EA;text-decoration:none}',
+ '.mgn-chips{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.mgn-chip{background:transparent;color:#d9d5cb;border:1px solid rgba(244,241,234,.25);padding:7px 11px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer}.mgn-chip.on{background:#FFD900;border-color:#FFD900;color:#0B0B0B}',
+ '.mgn-chart{width:100%;height:auto;display:block}.mgn-chart text{fill:#9C988C;font:10px Inter,system-ui,sans-serif}.mgn-chart .gl{stroke:rgba(244,241,234,.1)}.mgn-axis{font-size:11px;color:#9C988C;margin-top:-6px}',
+ '.mgn-leg{display:flex;flex-direction:column;gap:6px}.mgn-leg div{display:grid;grid-template-columns:10px 1fr auto auto;gap:8px;align-items:center;font-size:13px}.mgn-leg i{width:10px;height:10px;border-radius:50%}.mgn-leg b{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:18px}.mgn-leg em{font-style:normal;font-size:11px;font-weight:700;min-width:74px;text-align:right;color:#9C988C}.mgn-leg em.up{color:#3ad37a}.mgn-leg em.down{color:#ff6b5e}',
+ '.mgn-k2{font-weight:700;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#F4F1EA;margin-top:4px;padding-top:12px;border-top:1px solid rgba(244,241,234,.12)}.mgn-gts{display:flex;flex-direction:column;gap:8px}.mgn-gt{display:grid;grid-template-columns:1fr 100px 62px;gap:10px;align-items:center}.mgn-gt b{font-size:14px}.mgn-gt small{display:block;font-size:11px;color:#9C988C}.mgn-gt em{font-style:normal;font-size:11px;font-weight:700;text-align:right;color:#9C988C}.mgn-gt em.up{color:#3ad37a}.mgn-gt em.down{color:#ff6b5e}.mgn-gt .mgn-spark{height:30px}',
  '.mgn-game small{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#9C988C;font-weight:700}.mgn-game b{font-size:14px}.mgn-best{font-family:Anton,Impact,sans-serif;font-size:30px;line-height:1.1;color:#FFD900}.mgn-game em{font-style:normal;font-size:11px;color:#9C988C}.mgn-game .mgn-spark{height:30px}'
  ].join('');document.head.appendChild(s)}
 
-window.MGNumbers={load:load,shape:shape,byArea:byArea,sgCard:sgCard,planCard:planCard,testsCard:testsCard,gamesCard:gamesCard,planStats:planStats,css:css,TESTS:TESTS,GAMES:GAMES,esc:esc};
+window.MGNumbers={load:load,shape:shape,byArea:byArea,sgCard:sgCard,planCard:planCard,testsCard:testsCard,trendsCard:trendsCard,PERIODS:PERIODS,gamesCard:gamesCard,planStats:planStats,css:css,TESTS:TESTS,GAMES:GAMES,esc:esc};
 })();
