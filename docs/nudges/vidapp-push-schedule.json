@@ -1,0 +1,146 @@
+[
+ {
+  "send": "Mon 16 Nov 2026",
+  "time": "07:30",
+  "title": "New week, new plan 📋",
+  "message": "Your Practice Plan has this week's sessions ready. Tick off the first one today and get the week moving.",
+  "theme": "plan",
+  "title_chars": 20,
+  "message_chars": 104
+ },
+ {
+  "send": "Wed 18 Nov 2026",
+  "time": "18:00",
+  "title": "Who's top of Par 18? 🏆",
+  "message": "The leaderboards change every week. Play a round tonight and see where you land.",
+  "theme": "leaderboard",
+  "title_chars": 22,
+  "message_chars": 80
+ },
+ {
+  "send": "Fri 20 Nov 2026",
+  "time": "18:00",
+  "title": "Keep your streak alive 🔥",
+  "message": "Open Macro Golf today to keep your day streak going. Even 5 minutes counts.",
+  "theme": "streak",
+  "title_chars": 24,
+  "message_chars": 75
+ },
+ {
+  "send": "Sun 22 Nov 2026",
+  "time": "10:00",
+  "title": "Weekend practice ⛳",
+  "message": "Got 45 minutes? Your plan's next session is built from your tests, so every ball counts.",
+  "theme": "plan",
+  "title_chars": 18,
+  "message_chars": 88
+ },
+ {
+  "send": "Mon 23 Nov 2026",
+  "time": "07:30",
+  "title": "Where are you losing shots? 📊",
+  "message": "Check My Numbers: your strokes gained by area, live from every game you've played.",
+  "theme": "numbers",
+  "title_chars": 29,
+  "message_chars": 82
+ },
+ {
+  "send": "Wed 25 Nov 2026",
+  "time": "18:00",
+  "title": "Beat your PB tonight",
+  "message": "Pick a game, warm up, and go after your personal best. A new PB gets its own celebration.",
+  "theme": "pb",
+  "title_chars": 20,
+  "message_chars": 89
+ },
+ {
+  "send": "Fri 27 Nov 2026",
+  "time": "18:00",
+  "title": "Don't break the chain 🔥",
+  "message": "Your day streak resets at midnight. Open Macro Golf today to keep it.",
+  "theme": "streak",
+  "title_chars": 23,
+  "message_chars": 69
+ },
+ {
+  "send": "Sun 29 Nov 2026",
+  "time": "10:00",
+  "title": "Challenge a mate 🤝",
+  "message": "Every game has Head to Head. Two players, one phone, one winner. Who's buying the coffee?",
+  "theme": "h2h",
+  "title_chars": 18,
+  "message_chars": 89
+ },
+ {
+  "send": "Tue 1 Dec 2026",
+  "time": "07:30",
+  "title": "New month, new leaderboards 🏆",
+  "message": "December's boards are wide open. Post a score early and make them chase you.",
+  "theme": "leaderboard",
+  "title_chars": 29,
+  "message_chars": 76
+ },
+ {
+  "send": "Wed 2 Dec 2026",
+  "time": "18:00",
+  "title": "Short game session? 🎯",
+  "message": "Tight lie strike, then the landing ladder: up and back down. Can you beat your best?",
+  "theme": "plan",
+  "title_chars": 21,
+  "message_chars": 84
+ },
+ {
+  "send": "Fri 4 Dec 2026",
+  "time": "18:00",
+  "title": "Keep your streak alive 🔥",
+  "message": "A few minutes in Macro Golf today keeps your day streak going. Don't let it reset.",
+  "theme": "streak",
+  "title_chars": 24,
+  "message_chars": 82
+ },
+ {
+  "send": "Sun 6 Dec 2026",
+  "time": "10:00",
+  "title": "Time to retest? 📈",
+  "message": "Six weeks since your last test? Retest to see how far you've come and get your next plan.",
+  "theme": "retest",
+  "title_chars": 17,
+  "message_chars": 89
+ },
+ {
+  "send": "Mon 7 Dec 2026",
+  "time": "07:30",
+  "title": "Plan your practice week 📋",
+  "message": "Open your Practice Plan and see this week's sessions. Most of the time goes to your biggest leak.",
+  "theme": "plan",
+  "title_chars": 25,
+  "message_chars": 97
+ },
+ {
+  "send": "Wed 9 Dec 2026",
+  "time": "18:00",
+  "title": "One putt from the top? ⛳",
+  "message": "Putting games move fast on the leaderboard. Try Hole Out or Money Stealers tonight.",
+  "theme": "leaderboard",
+  "title_chars": 24,
+  "message_chars": 83
+ },
+ {
+  "send": "Fri 11 Dec 2026",
+  "time": "18:00",
+  "title": "Don't break the chain 🔥",
+  "message": "Your day streak resets at midnight. Open Macro Golf today to keep it.",
+  "theme": "streak",
+  "title_chars": 23,
+  "message_chars": 69
+ },
+ {
+  "send": "Sun 13 Dec 2026",
+  "time": "10:00",
+  "title": "Your numbers are moving 📊",
+  "message": "Every game you play moves your strokes gained in My Numbers. Have a look at your trend.",
+  "theme": "numbers",
+  "title_chars": 25,
+  "message_chars": 87
+ }
+]

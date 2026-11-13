@@ -7,6 +7,8 @@
    Any other page can add it with one tag: <script src="{{BASE}}src/day-streak.js"></script>  (no sign-in needed). */
 (function(){
 if(window.MGDays)return;
+/* nudges.js (personal nudge card under this bar) comes from the same place as this script */
+try{var me=document.currentScript&&document.currentScript.src;if(me&&!window.MGNudges&&!document.querySelector('script[src*="src/nudges.js"]')){var ns=document.createElement('script');ns.src=me.replace(/day-streak\.js(\?.*)?$/,'nudges.js');ns.defer=true;document.head.appendChild(ns)}}catch(e){}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function today(){return iso(new Date())}

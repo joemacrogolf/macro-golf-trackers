@@ -1,0 +1,76 @@
+-- DRAFT, NOT RUN (Jack's Claude, 13 Nov). For Joe to review before anything goes into supabase/.
+-- Personal nudges: works out, for every golf player (email), which nudges are due today.
+-- Read by a scheduled sender (see send-nudges.ts.draft) that runs with the service role on Supabase's own servers.
+-- Nothing here is callable from a web page: execute is revoked from anon and authenticated.
+--
+-- Nudges (same as the in-app card, src/nudges.js):
+--   streak  : day streak of 3+ that breaks tonight (opened yesterday, not yet today). Evening send.
+--   plan    : Practice Plan sessions still to do this week, sent Thursday or later.
+--   board   : someone pushed the player down an all-time leaderboard place since the last check.
+--   retest  : 6+ weeks since a test (one nudge per test, then not again for 4 weeks).
+-- Players can switch them off: _mgSummary.nudgeOff = true on any of their records (needs a toggle in the app; not built yet).
+
+create table if not exists public.mg_nudge_state (
+  email   text not null,
+  k       text not null,           -- e.g. 'board:golf-par-18', 'retest:short', 'sent:streak'
+  v       text,
+  at      timestamptz not null default now(),
+  primary key (email, k)
+);
+alter table public.mg_nudge_state enable row level security;   -- no policies: not readable from pages
+
+create or replace function public.mg_nudges_due()
+returns table(email text, name text, nudges jsonb)
+language sql stable security definer set search_path = public as $$
+with rec as (
+  select split_part(s.code, ':', 3) as email, split_part(s.code, ':', 2) as plan, s.data, c.name
+  from public.mg_state s join public.mg_clients c on c.code = s.code
+  where s.code like 'pure:golf-%:%@%'
+),
+off as (select distinct email from rec where coalesce((data->'_mgSummary'->>'nudgeOff')::boolean, false)),
+today as (select (now() at time zone 'Europe/London')::date as d),
+-- day streak from S.appDays (copied from the phone by day-streak.js)
+days as (
+  select r.email, x::date as d from rec r, jsonb_array_elements_text(case when jsonb_typeof(r.data->'appDays')='array' then r.data->'appDays' else '[]' end) x
+  where x ~ '^\d{4}-\d{2}-\d{2}$' group by 1, 2
+),
+streak as (
+  select d1.email, count(*) as n
+  from days d1, today t
+  where d1.d <= t.d - 1
+    and not exists (select 1 from days g where g.email = d1.email and g.d = t.d)       -- not opened today yet
+    and (t.d - 1 - d1.d) = (select count(*) from days d2 where d2.email = d1.email and d2.d > d1.d and d2.d <= t.d - 1)  -- unbroken run to yesterday
+  group by d1.email
+),
+-- Practice Plan sessions left this week (golf-practice-plan record)
+wk as (select (date_trunc('week', d))::date as monday, extract(isodow from d) as dow from today),
+plan as (
+  select r.email,
+         jsonb_array_length(r.data->'practice'->'plan'->'week')
+           - coalesce(jsonb_array_length(r.data->'practice'->'weeks'->to_char(w.monday,'YYYY-MM-DD')), 0) as left_n,
+         (r.data->'practice'->'plan'->>'mins') as mins
+  from rec r, wk w
+  where r.plan = 'golf-practice-plan' and jsonb_typeof(r.data->'practice'->'plan'->'week') = 'array' and w.dow >= 4
+),
+-- tests older than 6 weeks (planEntry.t is a JS timestamp in ms)
+tests as (
+  select r.email, r.plan, to_timestamp((r.data->'planEntry'->>'t')::bigint / 1000.0) as t
+  from rec r where r.plan in ('golf-putting-test','golf-short-game-test','golf-long-game-test')
+    and (r.data->'planEntry'->>'t') ~ '^\d+$'
+)
+select e.email, max(e.name) as name,
+  jsonb_strip_nulls(jsonb_build_object(
+    'streak', (select jsonb_build_object('n', s.n) from streak s where s.email = e.email and s.n >= 3),
+    'plan',   (select jsonb_build_object('left', p.left_n, 'mins', p.mins) from plan p where p.email = e.email and p.left_n > 0),
+    'retest', (select jsonb_agg(jsonb_build_object('test', t.plan, 'weeks', floor(extract(epoch from now() - t.t) / 604800)))
+               from tests t where t.email = e.email and t.t < now() - interval '42 days'
+                 and not exists (select 1 from mg_nudge_state ns where ns.email = e.email and ns.k = 'retest:' || t.plan and ns.at > now() - interval '28 days'))
+  )) as nudges
+from rec e
+where e.email not in (select email from off)
+group by e.email;
+$$;
+-- Leaderboard drops are worked out in the sender (it already has mg_leaderboard) and remembered in mg_nudge_state ('board:<game>' = last rank).
+
+revoke all on function public.mg_nudges_due() from public, anon, authenticated;
+revoke all on table public.mg_nudge_state from public, anon, authenticated;
