@@ -31,7 +31,9 @@ function load(em,pin){em=String(em||'').trim().toLowerCase();
     return Promise.all(have.map(function(plan){return rpc('mg_load',{p_code:'pure:'+plan+':'+em,p_pin:String(pin),p_name:null,p_plan:null}).then(function(r){return [plan,r&&r.data||null]}).catch(function(){return [plan,null]})}))
       .then(function(rows){var d={name:w.name||'',records:{}};rows.forEach(function(r){if(r[1])d.records[r[0]]=r[1]});return shape(d)})})}
 /* turn raw records into what the cards need */
-function shape(d){var R=d.records,pn=function(){var n='';Object.keys(R).forEach(function(k){var r=R[k];if(!n&&r)n=r.player||(r.practice&&r.practice.profile&&r.practice.profile.name)||''});return n},out={name:d.name||pn(),tests:{},history:{},games:{},practice:null,records:R};
+function shape(d){var R=d.records,pn=function(){var n='';Object.keys(R).forEach(function(k){var r=R[k];if(!n&&r)n=r.player||(r.practice&&r.practice.profile&&r.practice.profile.name)||''});return n},out={name:d.name||pn(),tests:{},history:{},games:{},practice:null,records:R,coach:[]};
+  /* coach-built golf plans (MG Athletes, e.g. golf-paul-goddard): their sessions count for the streak like Practice Plan sessions */
+  Object.keys(R).forEach(function(k){var r=R[k];if(!r||!Array.isArray(r.history))return;r.history.forEach(function(h){if(h&&h.date&&Array.isArray(h.blocks))out.coach.push(h.date)})});
   Object.keys(TESTS).forEach(function(k){var r=R[TESTS[k][0]];if(!r)return;if(r.planEntry&&r.planEntry.raw)out.tests[k]=r.planEntry;
     if(Array.isArray(r.history))out.history[k]=r.history.filter(function(h){return h&&h.hc!=null}).slice().reverse()});
   var pp=R['golf-practice-plan'];if(pp&&pp.practice){out.practice=pp.practice;var T=pp.practice.tests||{};Object.keys(T).forEach(function(k){if(T[k]&&T[k].raw&&(!out.tests[k]||(T[k].t||0)>(out.tests[k].t||0)))out.tests[k]=T[k]})}
@@ -97,6 +99,7 @@ function activity(d){var A={},add=function(k,f){if(!k)return;var a=A[k]||(A[k]={
   Object.keys(d.games||{}).forEach(function(g){(d.games[g].rounds||[]).forEach(function(r){if(r&&r.d)add(weekKey(String(r.d).slice(0,10)+'T12:00:00'),'g')})});
   Object.keys(d.history||{}).forEach(function(k){(d.history[k]||[]).forEach(function(h){if(h&&h.date)add(weekKey(String(h.date).slice(0,10)+'T12:00:00'),'g')})});
   var W=(d.practice&&d.practice.weeks)||{};Object.keys(W).forEach(function(k){(W[k]||[]).forEach(function(){add(k,'s')})});
+  (d.coach||[]).forEach(function(ds){add(weekKey(String(ds).slice(0,10)+'T12:00:00'),'s')});
   return A}
 function counts(a){return !!a&&(a.s>=1||a.g>=2)}
 function streak(d){var A=activity(d),ks=Object.keys(A).sort(),now=weekKey(),out={streak:0,best:0,rain:1,weeks:[],now:A[now]||{g:0,s:0},done:counts(A[now]),started:!!ks.length};

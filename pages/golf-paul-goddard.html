@@ -488,7 +488,15 @@ var KEY="mgPaulGoddard",COACH="jack@macro.golf",GOAL="0",WEEK_ROUNDS=2;
 function blank(){return {player:"Paul Goddard",order:"putt",drv:250,history:[],cur:null,sent:{}}}
 function load(){try{var v=JSON.parse(localStorage.getItem(KEY));if(v&&Array.isArray(v.history))return v}catch(e){}return null}
 var S=load()||blank();S.player="Paul Goddard";
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+/* live strokes gained (same rows as the app's games and Practice Plan, read by My Numbers): one row per session and area,
+   every shot's strokes gained against the plan's goal handicap */
+function logSG(sess){try{if(!sess||!sess.blocks||typeof sgOf!=="function")return;var n=GSG.num(GOAL),A={putt:"Putting",ms:"Putting",drive:"Driving",app:"Approach"},acc={};
+  shotsOf(sess).forEach(function(x){var a=A[x.k];if(!a)return;var v=sgOf(x,n);if(!isFinite(v))return;var c=acc[a]||(acc[a]={n:0,sum:0});c.n+=x.k==="ms"?2:1;c.sum+=v});
+  S.sgLog=Array.isArray(S.sgLog)?S.sgLog:[];Object.keys(acc).forEach(function(a){var id="coach|"+sess.id+"|"+a,e=S.sgLog.filter(function(x){return x&&x.id===id})[0];if(!e){e={id:id};S.sgLog.unshift(e)}
+    e.d=sess.date;e.a=a;e.n=acc[a].n;e.sum=Math.round(acc[a].sum*1000)/1000;e.hc=String(GOAL)});S.sgLog=S.sgLog.slice(0,80)}catch(e){}}
+/* sessions already in the history get their rows too (once), so the live numbers start from everything already played */
+function backfillSG(){try{if(S._sgBack)return;(S.history||[]).forEach(logSG);S._sgBack=1}catch(e){}}
+function save(){backfillSG();logSG(S.cur);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 var $=function(id){return document.getElementById(id)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 var ri=function(a,b){return a+Math.floor(Math.random()*(b-a+1))};
@@ -922,3 +930,5 @@ render();
 <script src="{{BASE}}src/golfwarm.js"></script>
 <script src="{{BASE}}src/videos.js"></script>
 <script>MGSync.init({plan:'golf-paul-goddard',planName:'Paul Goddard Golf Plan',fixedName:'Paul Goddard'})</script>
+<script>/* once the cloud copy has settled, give past sessions their live strokes gained rows and save them */
+setTimeout(function(){try{if(!S._sgBack&&(S.history||[]).length){backfillSG();window.save()}}catch(e){}},3000);</script>

@@ -97,6 +97,8 @@ Golf personal plans use exactly the same message and the same My Plan button.
 
 **My Plan (live).** www.macro.golf/my-plan: one email + PIN log-in for every 1-to-1 plan and golf personal plan (first time adds the 6-digit plan code). It loads the loader live on the client's own page, so keep each client's page pinned as usual. New client plans need nothing extra; see README.
 
+**Live strokes gained (13 Nov, Jack).** My Numbers and the Practice Plan show strokes gained a round per area as the player's tests moved by every practice shot since (`MGNumbers.live` in `src/golf-numbers.js`; tests keep 40%+, recent sessions count most, last 60 days). Every golf record can add rows to `S.sgLog` = `[{id, d:'YYYY-MM-DD', a:'Driving'|'Approach'|'Short game'|'Putting', n:shots, sum:strokes gained, hc}]`: games do it through `GSG.logRound` (`src/golf-sg.js`), the Practice Plan in `practice.sgLog`. **Coach-built golf plans (MG Athletes, like `golf-paul-goddard`) must do the same:** keep `S.sgLog` rows per session and area (see `logSG` in `pages/golf-paul-goddard.html`) and keep sessions in `S.history` as `{date, blocks}` so they count for the weekly streak. Use the same email + PIN record as the games so My Numbers finds it.
+
 **Golf leaderboards (live).** Each golf page exposes `window.MG_SCORE()`; `summary()` sends it as `_mgSummary.golf` plus `lbHide`. `src/leaderboard.js` (loaded by `golfwarm.js`) shows a Leaders tab with This month / All time boards, read from the public read-only `mg_leaderboard` function (`supabase/004-leaderboard.sql`). `MGSync.init({…, fixedName:'Name'})` skips the name box on one-person plans.
 
 ## Live Kajabi pages (site 2147673115)
