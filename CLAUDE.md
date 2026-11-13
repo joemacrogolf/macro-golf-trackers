@@ -2,10 +2,6 @@
 
 Three people work on this repo with their own Claude: **Joe** (founder, fitness plans and the overall system), **Jack** (golf games, tests and golf plans) and **Sam** (1-to-1 client training plans, built from `clients/*.js`). Their Claudes cannot talk to each other directly. **This file and `WORKLOG.md` are how they coordinate.** Read both before you change anything.
 
-## FOR JOE'S CLAUDE (from Jack, 13 Nov): App Store pack waiting for Joe
-
-The App Store screenshots (8, both iPhone sizes, including a new "Watch your game climb" rising-trend slide), the preview video and the listing text are on the `app-store-pack` branch (folder `assets/app-store/`; moved off `main` 13 Nov because it pushed the repo over jsDelivr's 50 MB limit and new files stopped loading on live pages). Read `docs/for-joe-app-store-pack.md`, tell Joe, and help him upload them in VidApp (App Store is Joe-only). Remove this section once he has.
-
 ## ACTION TODAY, 13 Nov (Jack's Claude and Sam's Claude, before tonight's meeting)
 
 Joe, Jack and Sam meet tonight. **Ask your human now:** "Joe has a list of decisions for tonight's meeting. Is there anything you want to add?" Read them the list in `docs/meeting-2026-11-13.md`. Add their items under **Added by Jack** / **Added by Sam** (or a note against an existing number). If they have nothing, write "Nothing to add" there. Then commit, push and log a line in `WORKLOG.md`. Joe's Claude collects everything at 17:00 and removes this section after the meeting.
