@@ -236,6 +236,9 @@ td.r,th.r{text-align:right}
 @media (max-width:380px){.stats b{font-size:22px}.call .d{font-size:46px}}
 .wrap{max-width:580px;margin:0 auto}
 .cover h1 .hello{display:block;font-family:var(--text);font-weight:700;font-size:16px;letter-spacing:0;text-transform:none;color:var(--gold);margin-bottom:6px}
+html,body{background:#0B0B0B!important}
+.addname{font:700 12px var(--text);letter-spacing:1px;text-transform:uppercase;color:#0B0B0B;background:var(--gold);border:0;padding:6px 10px;vertical-align:middle;cursor:pointer}
+.nmin{font:600 16px var(--text);width:150px;padding:6px 8px;border:1px solid rgba(244,241,234,.35);background:#1a1916;color:#F4F1EA;vertical-align:middle;margin-right:6px}
 .signin{background:var(--ink);color:var(--on-ink);padding:20px;display:flex;flex-direction:column;gap:12px;border-left:6px solid var(--gold)}
 .signin h2{color:var(--on-ink);font-size:30px}.signin p{margin:0;color:#d9d5cb}
 .signin label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold)}
@@ -271,8 +274,17 @@ var app=document.getElementById('app'),N=window.MGNumbers;N.css();
 function $(i){return document.getElementById(i)}
 function creds(){try{return JSON.parse(localStorage.getItem('mgsync-group:golf')||'null')}catch(e){return null}}
 function setCreds(c){try{localStorage.setItem('mgsync-group:golf',JSON.stringify(c))}catch(e){}}
-function greet(n){var h=new Date().getHours();$('hi').textContent='Good '+(h<12?'morning':h<18?'afternoon':'evening')+(n?', '+String(n).split(/\s+/)[0].replace(/^./,function(c){return c.toUpperCase()}):'')}
-function signin(msg){greet('');app.innerHTML='<form class="signin" id="sf"><h2>See your numbers</h2><p>Sign in with the email and PIN you use for the practice games and tests.</p>'+
+/* the player's name: from the sign-in, else any name this phone already knows from the app's other sections; if none, ask once */
+function nameFrom(n){if(n)return n;var c=creds();if(c&&c.name)return c.name;
+  try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(/^mgsync-group:/.test(k)){var g=JSON.parse(localStorage.getItem(k)||'null');if(g&&g.name)return g.name}}}catch(e){}return ''}
+function keepName(n){var c=creds();if(c&&n&&!c.name){c.name=n;try{localStorage.setItem('mgsync-group:golf',JSON.stringify(c))}catch(e){}}}
+function greet(n,ask){var h=new Date().getHours(),hi=$('hi'),w='Good '+(h<12?'morning':h<18?'afternoon':'evening');n=ask===false?n:nameFrom(n);
+  if(n){keepName(n);hi.textContent=w+', '+String(n).trim().split(/\s+/)[0].replace(/^./,function(c){return c.toUpperCase()});return}
+  hi.textContent=w;if(ask===false)return;var b=document.createElement('button');b.type='button';b.className='addname';b.textContent='Add your name';hi.appendChild(document.createTextNode(' ')),hi.appendChild(b);
+  b.addEventListener('click',function(){hi.innerHTML=w+', <input id="nmIn" class="nmin" placeholder="First name" autocomplete="given-name" maxlength="30"><button type="button" class="addname" id="nmOk">Save</button>';var inp=$('nmIn');inp.focus();
+    var save=function(){var v=inp.value.trim();if(!v)return;var c=creds()||{};c.name=v;try{localStorage.setItem('mgsync-group:golf',JSON.stringify(c))}catch(e){}greet(v)};
+    $('nmOk').addEventListener('click',save);inp.addEventListener('keydown',function(e){if(e.key==='Enter')save()})})}
+function signin(msg){greet('',false);app.innerHTML='<form class="signin" id="sf"><h2>See your numbers</h2><p>Sign in with the email and PIN you use for the practice games and tests.</p>'+
   '<label>Email<input id="em" type="email" autocomplete="email" required></label><label>PIN<input id="pin" type="password" inputmode="numeric" autocomplete="current-password" required></label>'+
   '<p class="err" id="err">'+(msg?N.esc(msg):'')+'</p><button type="submit">Show my numbers</button></form>';
   $('sf').addEventListener('submit',function(e){e.preventDefault();var em=$('em').value.trim(),pin=$('pin').value.trim();if(!em||!pin)return;$('err').textContent='Checking…';

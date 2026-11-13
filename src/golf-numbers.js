@@ -31,7 +31,7 @@ function load(em,pin){em=String(em||'').trim().toLowerCase();
     return Promise.all(have.map(function(plan){return rpc('mg_load',{p_code:'pure:'+plan+':'+em,p_pin:String(pin),p_name:null,p_plan:null}).then(function(r){return [plan,r&&r.data||null]}).catch(function(){return [plan,null]})}))
       .then(function(rows){var d={name:w.name||'',records:{}};rows.forEach(function(r){if(r[1])d.records[r[0]]=r[1]});return shape(d)})})}
 /* turn raw records into what the cards need */
-function shape(d){var R=d.records,out={name:d.name,tests:{},history:{},games:{},practice:null};
+function shape(d){var R=d.records,pn=function(){var n='';Object.keys(R).forEach(function(k){var r=R[k];if(!n&&r)n=r.player||(r.practice&&r.practice.profile&&r.practice.profile.name)||''});return n},out={name:d.name||pn(),tests:{},history:{},games:{},practice:null};
   Object.keys(TESTS).forEach(function(k){var r=R[TESTS[k][0]];if(!r)return;if(r.planEntry&&r.planEntry.raw)out.tests[k]=r.planEntry;
     if(Array.isArray(r.history))out.history[k]=r.history.filter(function(h){return h&&h.hc!=null}).slice().reverse()});
   var pp=R['golf-practice-plan'];if(pp&&pp.practice){out.practice=pp.practice;var T=pp.practice.tests||{};Object.keys(T).forEach(function(k){if(T[k]&&T[k].raw&&(!out.tests[k]||(T[k].t||0)>(out.tests[k].t||0)))out.tests[k]=T[k]})}
