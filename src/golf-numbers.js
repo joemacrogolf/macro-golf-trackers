@@ -62,6 +62,46 @@ function sgCard(tests,opts){opts=opts||{};var A=byArea(tests),T=target(tests),ha
    (opts.note!==false?'<p class="mgn-note">Plus means you gain shots on a '+esc(hcName(T))+' player, minus means you lose them. Retest to update.</p>':'')+'</div>'}
 function testLinks(){return '<div class="mgn-links">'+Object.keys(TESTS).map(function(k){return '<a href="https://www.macro.golf/'+TESTS[k][2]+'">'+TESTS[k][1]+' \u2192</a>'}).join('')+'</div>'}
 
+
+/* ---------- weekly practice streak ----------
+   A week (Mon-Sun) counts when the player logs at least 1 Practice Plan session, or 2 rounds of
+   games/tests. Worked out from data already saved (game rounds, test history, plan weeks), so
+   nothing new is stored and it can't be lost. One "rain week" (a missed week that doesn't break
+   the streak) to start with; earn another every 6 counted weeks, hold at most 2. */
+var MILESTONES=[1,3,6,12,26,52];
+function weekAdd(k,n){var d=new Date(k+'T12:00:00');d.setDate(d.getDate()+7*n);return weekKey(d)}
+function activity(d){var A={},add=function(k,f){if(!k)return;var a=A[k]||(A[k]={g:0,s:0});a[f]++};
+  Object.keys(d.games||{}).forEach(function(g){(d.games[g].rounds||[]).forEach(function(r){if(r&&r.d)add(weekKey(String(r.d).slice(0,10)+'T12:00:00'),'g')})});
+  Object.keys(d.history||{}).forEach(function(k){(d.history[k]||[]).forEach(function(h){if(h&&h.date)add(weekKey(String(h.date).slice(0,10)+'T12:00:00'),'g')})});
+  var W=(d.practice&&d.practice.weeks)||{};Object.keys(W).forEach(function(k){(W[k]||[]).forEach(function(){add(k,'s')})});
+  return A}
+function counts(a){return !!a&&(a.s>=1||a.g>=2)}
+function streak(d){var A=activity(d),ks=Object.keys(A).sort(),now=weekKey(),out={streak:0,best:0,rain:1,weeks:[],now:A[now]||{g:0,s:0},done:counts(A[now]),started:!!ks.length};
+  if(!ks.length){out.weeks=[0,1,2,3,4,5,6].map(function(){return {k:'',state:'pre'}}).concat([{k:now,state:'now'}]);return out}var st=0,best=0,rain=1,earned=0,log=[];
+  for(var k=ks[0],guard=0;k<=now&&guard<600;k=weekAdd(k,1),guard++){var c=counts(A[k]),state;
+    if(c){st++;earned++;if(earned%6===0&&rain<2)rain++;state='done'}
+    else if(k===now){state='now'}
+    else if(st>0&&rain>0){rain--;state='rain'}
+    else{st=0;state='miss'}
+    if(st>best)best=st;log.push({k:k,state:state})}
+  out.streak=st;out.best=best;out.rain=rain;out.weeks=log.slice(-8);while(out.weeks.length<8)out.weeks.unshift({k:'',state:'pre'});return out}
+function flame(sz,on){return '<svg viewBox="0 0 24 24" width="'+sz+'" height="'+sz+'" aria-hidden="true"><path d="M12 2c1 3.2-.6 5.1-2.2 6.9C8.3 10.6 7 12.2 7 14.6A5 5 0 0 0 12 20a5 5 0 0 0 5-5.2c0-2-1-3.5-2-4.6.1 1.6-.5 2.8-1.6 3.3.4-3.8-.6-7.6-1.4-11.5z" fill="'+(on?'#FFD900':'#3a3832')+'"/><path d="M12 20a2.6 2.6 0 0 1-2.6-2.7c0-1.4.9-2.3 1.7-3.1.2 1 .8 1.5 1.5 1.6-.2-1.3.3-2.5 1-3.4.6 1 1 2.1 1 3.5A2.6 2.6 0 0 1 12 20z" fill="'+(on?'#FF8A00':'#2a2925')+'"/></svg>'}
+function streakCard(t,opts){opts=opts||{};if(!t)return '';var n=t.now,need=t.done?'':(n.s>=1?'':n.g===1?'1 more game, or 1 plan session':'2 games, or 1 plan session');
+  var lab={done:'Done',rain:'Rain week',miss:'Missed',now:'This week'};
+  var strip='<div class="mgn-wks">'+t.weeks.map(function(w){return w.state==='pre'?'<i class="pre"></i>':'<i class="'+w.state+'" title="'+esc(lab[w.state]+' \u00b7 w/c '+day(w.k+'T12:00:00'))+'"></i>'}).join('')+'</div>';
+  var head=t.streak>0?'<b class="mgn-sn">'+t.streak+'</b><span class="mgn-sl">week streak'+(t.done?'':'<em> \u00b7 keep it going this week</em>')+'</span>':'<b class="mgn-sn">0</b><span class="mgn-sl">'+(t.started?'Start a new streak this week':'Start your streak this week')+'</span>';
+  return '<div class="mgn-card mgn-streak'+(t.done?' on':'')+'"><div class="mgn-top"><div class="mgn-sh">'+flame(40,t.streak>0)+'<div>'+head+'</div></div><div class="mgn-sbest"><small>Best</small><b>'+t.best+'</b></div></div>'+
+   '<div class="mgn-sweek">'+(t.done?'<span class="ok">\u2713 This week counts.</span> See you next week.':'<b>This week:</b> '+need+' to keep it going.')+'</div>'+strip+'<div class="mgn-skey">Last 8 weeks <i class="done"></i>practised <i class="rain"></i>rain week</div>'+
+   '<div class="mgn-sub">'+(t.rain>0?'\u2602 '+t.rain+' rain week'+(t.rain>1?'s':'')+' saved: a missed week won\u2019t break your streak.':'No rain weeks left: earn one every 6 weeks you practise.')+'</div></div>'}
+/* full-screen celebration, once per milestone per player on this phone */
+function celebrate(t,who){if(!t||!t.streak)return;var m=null;MILESTONES.forEach(function(x){if(t.streak>=x)m=x});if(!m)return;
+  var key='mgn-ms:'+String(who||'').toLowerCase()+':'+m;try{if(localStorage.getItem(key))return;localStorage.setItem(key,'1')}catch(e){return}
+  var line={1:'One week down. Practise again next week to make it two.',3:'You keep turning up. This is how habits start.',6:'That is a full 6 week block. Time to see what moved: retest.',12:'Three months of steady practice. That is rare.',26:'Half a year without a break. Seriously impressive.',52:'A whole year. You are the standard.'}[m],msg=[t.streak===1?'Your streak has started':t.streak+' week streak',line];
+  var cf='';for(var i=0;i<28;i++){cf+='<i style="left:'+((i*37)%100)+'%;animation-delay:'+((i*7)%10)/10+'s;background:'+(i%3?'#FFD900':'#F4F1EA')+'"></i>'}
+  var o=document.createElement('div');o.className='mgn-cele';o.setAttribute('role','dialog');o.setAttribute('aria-label',msg[0]);
+  o.innerHTML='<div class="mgn-cf">'+cf+'</div><div class="mgn-cbox">'+flame(84,true)+'<div class="mgn-cn">'+t.streak+'</div><div class="mgn-ct">'+esc(msg[0])+'</div><p>'+esc(msg[1])+'</p><button type="button">Keep going</button></div>';
+  document.body.appendChild(o);o.querySelector('button').addEventListener('click',function(){o.remove()});o.addEventListener('click',function(e){if(e.target===o)o.remove()})}
+
 /* ---------- the 6 week plan ---------- */
 function weekKey(d){d=d?new Date(d):new Date();var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')}
 function itemsOf(s){return s.items||(s.games||[]).map(function(g){return {key:g,mins:0,full:true,game:g}})}
@@ -155,8 +195,16 @@ function css(){if(document.getElementById('mgn-css'))return;var s=document.creat
  '.mgn-chart{width:100%;height:auto;display:block}.mgn-chart text{fill:#9C988C;font:10px Inter,system-ui,sans-serif}.mgn-chart .gl{stroke:rgba(244,241,234,.1)}.mgn-axis{font-size:11px;color:#9C988C;margin-top:-6px}',
  '.mgn-leg{display:flex;flex-direction:column;gap:6px}.mgn-leg div{display:grid;grid-template-columns:10px 1fr auto auto;gap:8px;align-items:center;font-size:13px}.mgn-leg i{width:10px;height:10px;border-radius:50%}.mgn-leg b{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:18px}.mgn-leg em{font-style:normal;font-size:11px;font-weight:700;min-width:74px;text-align:right;color:#9C988C}.mgn-leg em.up{color:#3ad37a}.mgn-leg em.down{color:#ff6b5e}',
  '.mgn-k2{font-weight:700;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#F4F1EA;margin-top:4px;padding-top:12px;border-top:1px solid rgba(244,241,234,.12)}.mgn-gts{display:flex;flex-direction:column;gap:8px}.mgn-gt{display:grid;grid-template-columns:1fr 100px 62px;gap:10px;align-items:center}.mgn-gt b{font-size:14px}.mgn-gt small{display:block;font-size:11px;color:#9C988C}.mgn-gt em{font-style:normal;font-size:11px;font-weight:700;text-align:right;color:#9C988C}.mgn-gt em.up{color:#3ad37a}.mgn-gt em.down{color:#ff6b5e}.mgn-gt .mgn-spark{height:30px}',
+'.mgn-streak .mgn-sh{display:flex;align-items:center;gap:12px}.mgn-sn{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:44px;line-height:1;color:#F4F1EA;display:block}.mgn-streak.on .mgn-sn{color:#FFD900}.mgn-sl{display:block;font-weight:700;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:#F4F1EA;margin-top:4px}.mgn-sl em{font-style:normal;letter-spacing:0;text-transform:none;font-weight:500;color:#9C988C}',
+ '.mgn-sbest{text-align:right}.mgn-sbest small{display:block;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#9C988C;font-weight:700}.mgn-sbest b{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:26px}',
+ '.mgn-sweek{font-size:14px;color:#F4F1EA;background:#1a1916;padding:10px 12px}.mgn-sweek .ok{color:#3ad37a;font-weight:700}',
+ '.mgn-wks{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}.mgn-wks i{height:10px;background:#2a2925}.mgn-wks i.done{background:#FFD900}.mgn-wks i.rain{background:#7cc4ff}.mgn-wks i.now{background:transparent;box-shadow:inset 0 0 0 2px #FFD900}.mgn-wks i.miss{background:#2a2925}.mgn-wks i.pre{background:#161512}',
+ '.mgn-skey{font-size:11px;color:#9C988C;display:flex;align-items:center;gap:6px;margin-top:-6px}.mgn-skey i{width:10px;height:10px;display:inline-block;margin-left:6px}.mgn-skey i.done{background:#FFD900}.mgn-skey i.rain{background:#7cc4ff}',
+ '.mgn-cele{position:fixed;inset:0;z-index:99999;background:rgba(5,5,5,.92);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Inter,system-ui,sans-serif;animation:mgnfade .25s ease}.mgn-cbox{text-align:center;color:#F4F1EA;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:6px;animation:mgnpop .45s cubic-bezier(.2,1.4,.4,1)}',
+ '.mgn-cn{font-family:Anton,Impact,sans-serif;font-size:96px;line-height:1;color:#FFD900}.mgn-ct{font-family:Anton,Impact,sans-serif;font-size:28px;text-transform:uppercase;letter-spacing:.5px}.mgn-cbox p{margin:4px 0 14px;color:#cfcabd;font-size:15px;line-height:1.45}.mgn-cbox button{background:#FFD900;color:#0B0B0B;border:0;padding:14px 28px;font:700 15px Inter,system-ui,sans-serif;letter-spacing:1px;text-transform:uppercase;cursor:pointer;min-width:200px}',
+ '.mgn-cf{position:absolute;inset:0;overflow:hidden;pointer-events:none}.mgn-cf i{position:absolute;top:-12px;width:8px;height:14px;animation:mgnfall 2.6s linear infinite}@keyframes mgnfall{to{transform:translateY(110vh) rotate(540deg)}}@keyframes mgnpop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}@keyframes mgnfade{from{opacity:0}}@media (prefers-reduced-motion:reduce){.mgn-cf{display:none}.mgn-cbox,.mgn-cele{animation:none}}',
  '.mgn-game small{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#9C988C;font-weight:700}.mgn-game b{font-size:14px}.mgn-best{font-family:Anton,Impact,sans-serif;font-size:30px;line-height:1.1;color:#FFD900}.mgn-game em{font-style:normal;font-size:11px;color:#9C988C}.mgn-game .mgn-spark{height:30px}'
  ].join('');document.head.appendChild(s)}
 
-window.MGNumbers={load:load,shape:shape,byArea:byArea,sgCard:sgCard,planCard:planCard,testsCard:testsCard,trendsCard:trendsCard,PERIODS:PERIODS,gamesCard:gamesCard,planStats:planStats,css:css,TESTS:TESTS,GAMES:GAMES,esc:esc};
+window.MGNumbers={streak:streak,streakCard:streakCard,celebrate:celebrate,load:load,shape:shape,byArea:byArea,sgCard:sgCard,planCard:planCard,testsCard:testsCard,trendsCard:trendsCard,PERIODS:PERIODS,gamesCard:gamesCard,planStats:planStats,css:css,TESTS:TESTS,GAMES:GAMES,esc:esc};
 })();

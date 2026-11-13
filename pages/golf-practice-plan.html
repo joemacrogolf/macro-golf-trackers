@@ -1293,6 +1293,13 @@ function niceDay(t){return new Date(t).toLocaleDateString("en-GB",{day:"numeric"
 function testEntries(){const P=PG(),out={},loc=rd("macroResults")||{};
   TEST_ORDER.forEach(k=>{const p=[(P.tests||{})[k],loc[k]].filter(x=>x&&x.raw&&x.raw.length).sort((x,y)=>(y.t||0)-(x.t||0))[0];if(p)out[k]=p});return out}
 let fetching=false,fetched=false;
+/* weekly practice streak (shared with My Numbers): needs the player's games too, so load them once in the background;
+   this plan's own sessions always come from the live local copy, so ticking a session updates the streak at once */
+let streakData=null,streakLoading=false;
+function streakFor(){return MGNumbers.streak(Object.assign({},streakData,{practice:PG()}))}
+function streakSlot(){loadStreak();if(!streakData)return '<div id="mgnStreak"></div>';const st=streakFor();setTimeout(()=>{let g=null;try{g=JSON.parse(localStorage.getItem("mgsync-group:golf")||"null")}catch(e){}MGNumbers.celebrate(st,g&&g.em)},300);return '<div id="mgnStreak">'+MGNumbers.streakCard(st)+'</div>'}
+function loadStreak(){if(streakData||streakLoading||!MGNumbers.load)return;let g=null;try{g=JSON.parse(localStorage.getItem("mgsync-group:golf")||"null")}catch(e){}if(!g||!g.em||!g.pin)return;streakLoading=true;
+  MGNumbers.load(g.em,g.pin).then(d=>{streakLoading=false;if(!d||d.error)return;streakData=d;const el=document.getElementById("mgnStreak");if(el){const st=streakFor();el.innerHTML=MGNumbers.streakCard(st);MGNumbers.celebrate(st,g.em)}}).catch(()=>{streakLoading=false})}
 function fetchTests(){if(fetching||fetched)return;let g=null;try{g=JSON.parse(localStorage.getItem("mgsync-group:golf")||"null")}catch(e){}if(!g||!g.em||!g.pin)return;fetching=true;
   const U="https://zhcgwtlyqriwlhbzkxcl.supabase.co/rest/v1/rpc/mg_load",AK="sb_publishable__IBhmrVHOXsLHruU7XJB-g_OSN9Ljne";
   Promise.all(TEST_ORDER.map(k=>fetch(U,{method:"POST",headers:{apikey:AK,"Content-Type":"application/json"},
@@ -1502,7 +1509,7 @@ function welcomeCard(){const P=PG(),p=P.plan,G=goalsOf(p),wk=weekNo(),W=p.retest
       <div class="gbar" aria-label="${o}% likely"><i style="width:${o}%"></i></div><small class="gp">${o}% likely · ${minsDoneOn(g.key)} of ${g.mins*W} practice minutes done</small></li>`}).join("")}</ul>
    <details class="ghow"><summary>How these goals work</summary><p>Each number is strokes gained a round against a ${T} player, from your tests. Minus means it's costing you shots. A gap of half a shot or less, we aim to close completely. A bigger gap, we aim to halve it in ${W} weeks. That's a realistic step, and the next ${W} weeks take it further.</p><p>Your goals change with your tests. One player might need wedges from 100–150 yds, another 150–175 yds and their short putts. When you retest, you'll see which goals you hit and get new ones.</p><p>The chance goes up as you complete sessions that work on each goal. It's a guide to how much of the work you've put in, not a promise.</p></details></section>`}
 function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,next=p.week.findIndex((_,i)=>!done.includes(i)),wk=weekNo(),retest=wk>p.retestWeeks;
-  let h=welcomeCard()+(window.MGNumbers?(MGNumbers.css(),MGNumbers.sgCard(testEntries(),{empty:false})):"")+`<div class="board"><div><span class="label">${wk>p.retestWeeks?"Your "+p.retestWeeks+" week plan is done":"This week"}</span><div class="big tnum">${done.length}<small style="font-size:.4em;color:var(--on-ink-muted)"> / ${n}</small></div></div>
+  let h=welcomeCard()+(window.MGNumbers?(MGNumbers.css(),streakSlot()+MGNumbers.sgCard(testEntries(),{empty:false})):"")+`<div class="board"><div><span class="label">${wk>p.retestWeeks?"Your "+p.retestWeeks+" week plan is done":"This week"}</span><div class="big tnum">${done.length}<small style="font-size:.4em;color:var(--on-ink-muted)"> / ${n}</small></div></div>
    <div class="side"><span class="label">Sessions</span><b>${n} × ${p.mins} min</b></div>
    <div class="prog">${p.week.map((_,i)=>`<i class="${done.includes(i)?"on":i===next?"cur":""}"></i>`).join("")}</div>
    <div class="bstat">${next<0?"Every session done this week. That's how you get better.":done.length?`${n-done.length} to go this week. Keep it going.`:`You've got ${n} practice session${n===1?"":"s"} this week. Pick whichever suits today.`}</div></div>`;
