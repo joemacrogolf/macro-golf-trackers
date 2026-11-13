@@ -1603,7 +1603,7 @@ function homeAct(act,v,el){const P=PG();
     case "resetYes":{const P=PG();delete P.plan;P.weeks={};const ip=rd(KEY);if(ip&&ip.plan)wr(KEY,null);window.save();ui={tests:true};render();window.scrollTo(0,0);return true}
     case "mkPlan":case "mkPlanAnyway":makePlan();ui={why:true};render();window.scrollTo(0,0);return true;
     case "startPlan":startPlanSession(+v);return true;
-    case "play":{const b=S&&S.step==="run"?cur():null;if(b){b.opened=true;save();try{localStorage.setItem("mgplan-return",JSON.stringify({url:location.href.split("#")[0],g:GAME_URL[b.game],t:Date.now()}))}catch(e){}}return true}
+    case "play":{const b=S&&S.step==="run"?cur():null;if(b){b.opened=true;save();try{localStorage.setItem("mgplan-return",JSON.stringify({url:location.href.split("#")[0],g:GAME_URL[b.game],t:Date.now(),name:String((PG().profile||{}).name||window.S.player||knownName()||"").trim(),hc:String(S.cfg.target||(PG().plan||{}).target||"")}))}catch(e){}}return true}
     case "vid":if(window.MGVideo)MGVideo.open("Express 5 Minute Golf Warm Up","rxkqwwoq0t");return true;
     case "gvid":{const g=GAME_VID[v];if(g&&window.MGVideo)MGVideo.open("How to play "+MacroPlan.GAMES[v].name,g);return true}
   }

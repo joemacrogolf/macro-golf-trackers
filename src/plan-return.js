@@ -52,6 +52,16 @@ function done(){finished=true;mark(true);css();contBar();var w=document.createEl
 /* once the game is done the small corner button becomes one big, obvious button */
 function contBar(){var o=document.querySelector('.mgpr-back');if(o)o.remove();if(document.querySelector('.mgpr-cont'))return;var b=document.createElement('button');b.type='button';b.className='mgpr-cont';
   b.innerHTML='Continue with plan <span aria-hidden="true">&rarr;</span>';b.addEventListener('click',function(){go(true)});document.body.appendChild(b)}
-function start(){backBtn();setTimeout(watch,2500)}
+/* the plan already knows the player: fill the game's start screen with their name and target handicap and hide those boxes.
+   Games that ask nothing else (no level, lava side, tees, carry, band or entry mode to pick) skip the start screen. */
+function fillGate(tries){var nm=document.getElementById('gName'),g=document.getElementById('gate');
+  if(!nm||!g){if(tries<25)setTimeout(function(){fillGate(tries+1)},200);return}
+  if(!ret||(!ret.name&&!ret.hc)||g.hidden)return;
+  if(ret.name){nm.value=ret.name;nm.dispatchEvent(new Event('input',{bubbles:true}));var f=nm.closest('.fld,label');if(f)f.style.display='none'}
+  var hc=document.getElementById('gHc');
+  if(hc&&ret.hc&&[].some.call(hc.options,function(o){return o.value===ret.hc})){hc.value=ret.hc;hc.dispatchEvent(new Event('change',{bubbles:true}));var h=hc.closest('.fld,label');if(h)h.style.display='none'}
+  var more=['gLvl','gLava','gBand','gCarry','gTees','gMode'].some(function(id){var e=document.getElementById(id);return e&&e.offsetParent!==null});
+  var go=document.getElementById('gGo');if(!more&&go&&!go.disabled&&nm.value.trim()&&(!hc||hc.value))setTimeout(function(){go.click()},50)}
+function start(){fillGate(0);backBtn();setTimeout(watch,2500)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
