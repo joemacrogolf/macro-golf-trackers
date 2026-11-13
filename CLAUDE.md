@@ -155,6 +155,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | My Practice front door (`pages/my-practice.html`, opens Practice Plan p-274816; uses `mg_whoami`; live in app) | my-practice | 2168256020 | plan / mg_loader |
 | Warm Up front door (`pages/warm-up.html`, no sign-in, Warm Up and Recovery videos + short mobility) | warm-up | 2168256625 | plan / mg_loader |
 | Coaching app view (`pages/coaching-app.html`: live /coaching content, no header/menu, Back bar) | coaching-app | 2168257984 | plan / mg_loader |
+| The App (website page: `pages/app.html`, own header + site nav, web images in `assets/web/`) | the-app | 2168270657 | plan / mg_loader |
 
 
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)
