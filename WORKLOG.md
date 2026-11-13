@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-13 09:14 · Jack's Claude · VidApp THUMBNAIL REPLACED on Home group 'Train' 4182260 (Home sub-tab) → assets/thumbs/tile-train-gym.png ('03 · GOLF FITNESS / TRAIN / Gym & home workouts for golf', barbell + kettlebell + dumbbell) so it reads as physical training. Published to preview; live waits on Jack's OK · preview
 2026-11-13 09:09 · Jack's Claude · VidApp THUMBNAIL REPLACED on Kajabi module 'Golf Drills' 2156869483 (parent Games & Drills 4183704) → assets/thumbs/v2/inner-drill-library.png ('PRACTICE · SWING / DRILL LIBRARY / Swing drills and feels'). Published preview then LIVE 09:14 · live
 2026-11-13 09:05 · Jack's Claude · VidApp PUBLISHED TO LIVE APPS (Jack's go-ahead, preview built first): tab reorder + Practice rename + 19 new thumbnails. OUT OF VIDAPP · live
 2026-11-13 09:00 · Jack's Claude · VidApp PUBLISHED TO PREVIEW: tab reorder + Practice rename + 19 new thumbnails · preview
