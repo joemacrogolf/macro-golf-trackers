@@ -38,6 +38,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 .strip>div{display:flex;flex-direction:column;gap:2px;min-width:0;padding:0 10px;border-left:1px solid rgba(244,241,234,.18)}
 .strip>div:first-child{padding-left:0;border-left:0}
 .strip .k{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold)}
+.strip .lk{display:flex;flex-direction:column;gap:2px;color:var(--gold);text-decoration:none;font-size:15px}.strip .lk svg{display:inline;vertical-align:-1px;margin-right:4px}.strip .lk small{font-family:Inter,system-ui,sans-serif;font-size:10.5px;line-height:1.3;text-transform:none;color:#9C988C;letter-spacing:0}
 .strip .v{font-family:var(--display);font-size:16px;line-height:1.15;text-transform:uppercase;color:var(--on-ink);overflow-wrap:anywhere}
 
 /* section heads and cards */
@@ -298,7 +299,11 @@ function go(em,pin,fresh){if(!fresh)app.innerHTML='<div class="loading">Loading 
   .catch(function(){if(fresh)$('err').textContent='Could not connect. Check your signal and try again.';else app.innerHTML='<div class="loading">Could not load your numbers. Check your signal and pull to refresh.</div>'})}
 function paint(d){greet(d.name);var H=d.history,last=function(k){var h=H[k];return h&&h.length?h[h.length-1].hc:(d.tests[k]?d.tests[k].hc:null)};
   var t=function(v){return v==null||!isFinite(v)?'–':(Math.round(v*10)/10<0?'+'+Math.abs(Math.round(v*10)/10):String(Math.round(v*10)/10))+' hc'};
-  $('sLong').textContent=t(last('long'));$('sShort').textContent=t(last('short'));$('sPutt').textContent=t(last('putting'));
+  /* each area of the overall numbers unlocks with its test; until then the cell says which test unlocks it */
+  var LK='<svg width="10" height="10" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11V8a6 6 0 0 1 12 0v3h1v11H5V11zm3 0h6V8a3 3 0 0 0-6 0z" fill="currentColor"/></svg>';
+  [['sLong','long','p-524617','Long Game Test','Driving + approach'],['sShort','short','p-791364','Short Game Test','Short game'],['sPutt','putting','p-350829','Putting Test','Putting']].forEach(function(x){var v=last(x[1]),el=$(x[0]);
+    if(v!=null&&isFinite(v)){el.textContent=t(v);return}
+    el.innerHTML='<a class="lk" href="https://www.macro.golf/'+x[2]+'">'+LK+' Locked<small>Unlocks with the '+x[3]+'</small></a>'});
   var per='3m';try{per=localStorage.getItem('mgn-period')||'3m'}catch(e){}
   var st=N.streak(d);
   app.innerHTML=N.streakCard(st)+N.sgCard(d.tests,{live:N.live?N.live(d.tests,d.records,d.practice):null})+'<div id="trendWrap">'+N.trendsCard(d,per)+'</div>'+N.planCard(d.practice)+N.testsCard(H)+N.gamesCard(d.games)+
