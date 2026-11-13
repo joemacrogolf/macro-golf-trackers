@@ -67,7 +67,7 @@ function weeklyReminder(){
   function show(){if(document.getElementById('cp-wr'))return;ls(seen,'1');css();
     var d=document.createElement('div');d.id='cp-wr';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');
     d.innerHTML='<div class="cp-wr-in"><div class="cp-wr-k">'+(late?'Reminder · week '+wk:'Sunday · week '+wk)+'</div><h3>'+(late?'Your weekly report is still to do':'Time for your weekly report')+'</h3>'+
-      '<p>'+(late?'Last week’s report hasn’t been sent yet. It only takes a few minutes, and your coach uses it to plan your next week.':'Take a few minutes to tell your coach how the week went. They use it to plan your next week.')+'</p>'+
+      '<p>'+(late?'Your report for week '+wk+' hasn’t been sent yet. It only takes a few minutes, and your coach uses it to plan your next week.':'Take a few minutes to tell your coach how the week went. They use it to plan your next week.')+'</p>'+
       '<button type="button" class="cp-wr-go">Do my weekly report <span aria-hidden="true">›</span></button><button type="button" class="cp-wr-later">Later</button></div>';
     document.body.appendChild(d);
     d.querySelector('.cp-wr-later').onclick=function(){d.remove()};
