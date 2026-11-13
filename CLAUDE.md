@@ -194,7 +194,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | Pre Match-Up Questionnaire (`pages/form-match-up.html`; landing page 2152404882; published 13 Nov, hidden from search) | match-up-questionnaire | 2168274063 | plan / mg_loader |
 | Client Onboarding form (`pages/form-onboarding.html`; landing page 2152404883; published 13 Nov, hidden from search) | onboarding | 2168274066 | plan / mg_loader |
 | Plan Builder, coaches (`pages/plan-builder.html`; landing page 2152404884; published 13 Nov, hidden from search) | plan-builder-529481 | 2168274068 | plan / mg_loader |
-| Coach-built plans in the app (`pages/coach-plan.html`, GENERATED; opened by My Plan for every `path = coach-plan` client) | coach-plan | (see worklog) | plan / mg_loader |
+| Coach-built plans in the app (`pages/coach-plan.html`, GENERATED; landing page 2152405286, hidden from search; opened by My Plan for every `path = coach-plan` client) | coach-plan | 2168278327 | plan / mg_loader |
 
 
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)
