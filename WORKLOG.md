@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-13 20:15 · Jack's Claude · App homepage quick buttons: '⛳ Golf · Practice plan' and '🏋 Gym · Training plan'. An MG Athlete signed in on My Plan (localStorage mgplan:me) gets 'MG Athlete · My coach's plan' (→ /my-plan) in place of the practice plan button, until they log out there. Pinned app-home · done
 2026-11-13 20:10 · Jack's Claude · App homepage header now reads 'Macro Golf Performance' (was 'Macro Golf Coaching'; assets/web/home/header-performance.png). Pinned app-home · done
 2026-11-13 19:55 · Joe's Claude · NEW intake forms + Plan Builder (Joe): pages/form-match-up.html (Pre Match-Up Questionnaire) and pages/form-onboarding.html (Client Onboarding) on new shared src/intake-form.js, replacing the two Google Forms; pages/plan-builder.html (coach password) builds six-week plans and fills them from the forms and pasted TPI results. New supabase/012-intake-plans.sql (mg_intake, mg_coach_plans; not run yet). TPI fetch steps in CLAUDE.md. No shared files changed · in progress
 2026-11-13 20:05 · Jack's Claude · App homepage (Jack): MG Athletes tile now shows the MG mark only (not 'Macro Golf') and moved to the bottom; two quick yellow buttons at the top: Your Practice Plan (/my-practice) and Your Training Plan (/my-training). Pinning app-home · in progress

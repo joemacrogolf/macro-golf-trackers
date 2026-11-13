@@ -5,7 +5,7 @@
 /* App homepage (VidApp first bottom tab, a website tab). Built to look like the original VidApp Home:
    big picture tiles, and tiles that open sub-categories (Testing Centre › the 3 tests; Practice › My Practice Plan and
    Games & Drills › Short Game / Long Game / Putting › the games; Train › My Training Plan). Sub-screens use #hash so the
-   phone's back works. Two quick buttons at the top open the Practice Plan and the Training Plan; MG Athletes (MG logo tile, opens /my-plan) is the last tile. First-time players see a short
+   phone's back works. Two quick buttons at the top: Golf › Practice plan and Gym › Training plan (a signed-in MG Athlete gets 'My coach's plan' instead of the practice button); MG Athletes (MG logo tile, opens /my-plan) is the last tile. First-time players see a short
    "Start here" list that ticks itself off. The videos (drills, Training Library) stay in VidApp's Library tab. */
 .ah{min-height:100vh;background:#0B0B0B;color:#F4F1EA;font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
   padding:14px max(12px,env(safe-area-inset-right,0px)) calc(110px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));box-sizing:border-box}
@@ -21,7 +21,8 @@
 /* quick buttons to the two plans, right at the top */
 .ah-quick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ah-quick a{display:flex;flex-direction:column;justify-content:center;min-height:64px;padding:10px 14px;background:#FFD900;color:#0B0B0B!important;font:400 21px/1.02 Anton,Impact,sans-serif;text-transform:uppercase}
-.ah-quick a small{font:700 10.5px Inter,system-ui,sans-serif;letter-spacing:2px;color:#3a3200}
+.ah-quick a small{font:700 11px Inter,system-ui,sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:#3a3200}
+.ah-quick a.ath{background:#F4F1EA}
 .ah-top{display:flex;align-items:center;gap:10px;min-height:44px}
 .ah-back{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px 0 8px;border:1px solid rgba(244,241,234,.22);background:#141310;color:#F4F1EA;font:600 15px Inter,system-ui,sans-serif;cursor:pointer}
 .ah .ah-h{font-family:'Anton',Impact,sans-serif!important;font-weight:400!important;text-transform:uppercase;font-size:30px!important;line-height:1!important;margin:0!important;color:#F4F1EA!important}
@@ -54,10 +55,15 @@ function state(){var R=js("macroResults",{})||{},rec=js("mgPracticePlan",null),P
 function start(){var s=state();if(js("mg-home-start-hide",false)||(s.test&&s.numbers&&s.plan))return "";
   var rows=[[s.test,"Take your first test","#testing","Start"],[s.numbers,"See your numbers",W+"my-numbers","Open"],[s.plan,"Get your practice plan",W+"my-practice","Build"]];
   return '<div class="ah-start"><span class="ah-k">New here? Start here</span>'+rows.map(function(r,i){return '<a class="row'+(r[0]?" done":"")+'" href="'+r[2]+'"'+(i===1?' data-numbers="1"':'')+'><span class="n">'+(r[0]?"✓":i+1)+'</span><b>'+r[1]+'</b><span class="go">'+(r[0]?"Done":r[3])+'</span></a>'}).join("")+'<button type="button" class="ah-hide" data-hide="1">Hide this</button></div>'}
+/* quick buttons: golf practice plan + gym training plan. An MG Athlete who has signed in on My Plan (localStorage mgplan:me,
+   cleared when they log out there) gets their coach's plan in place of the practice plan button. */
+function quick(){var m=js("mgplan:me",null),ath=m&&/^\d{6}$/.test(String(m.code||""));
+  return '<div class="ah-quick">'+(ath?'<a class="ath" href="'+W+'my-plan"><small>MG Athlete</small>My coach\'s plan</a>':'<a href="'+W+'my-practice"><small>⛳ Golf</small>Practice plan</a>')+
+    '<a href="'+W+'my-training"><small>🏋 Gym</small>Training plan</a></div>'}
 function head(title,back){return '<div class="ah-top"><a class="ah-back" href="#'+(back||"")+'">‹ Back</a><h1 class="ah-h">'+title+'</h1></div>'}
 var V={
  "":function(){return '<div class="ah-logo"><img src="{{BASE}}assets/web/home/header-performance.png" alt="Macro Golf Performance"></div>'+start()+
-   '<div class="ah-quick"><a href="'+W+'my-practice"><small>Your</small>Practice plan</a><a href="'+W+'my-training"><small>Your</small>Training plan</a></div>'+
+   quick()+
    tile("tile-numbers","My Numbers: your game in strokes gained",W+"my-numbers")+
    tile("tile-testing","Testing Centre: find where you lose shots",null,"testing")+
    tile("tile-practice","Practice: your practice plan and games",null,"practice")+
