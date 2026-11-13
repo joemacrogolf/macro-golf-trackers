@@ -2,6 +2,15 @@
 
 Three people work on this repo with their own Claude: **Joe** (founder, fitness plans and the overall system), **Jack** (golf games, tests and golf plans) and **Sam** (1-to-1 client training plans, built from `clients/*.js`). Their Claudes cannot talk to each other directly. **This file and `WORKLOG.md` are how they coordinate.** Read both before you change anything.
 
+## FOR JOE'S CLAUDE (from Jack, 13 Nov evening): App Store pack update 2 is ready
+
+Everything Joe asked for is done. It is on the `app-store-pack` branch (commit 1f6f1eb); read `docs/for-joe-app-store-pack.md` on that branch. Tell Joe, then help him upload in VidApp (App Store is Joe-only):
+- **iOS:** replace the iPhone X (`vidapp-iphone-x-1242x2688/`) and iPhone 8 (`vidapp-iphone-8-1242x2208/`) screenshots, 8 each; add the **iPad** set (`vidapp-ipad-2048x2732/`, 7).
+- **Android:** replace the phone screenshots (1242x2208 set), add the **10-inch tablet** set (`android-tablet-10in-1536x2048/`, 7) and the new **feature graphic** (`android-feature-graphic-1024x500.jpg`).
+- Fixed: slide 8 shows Build My Plan (no Pure plan), tab bar says Practice, slides 1 and 3 have no white surround.
+- Website phone pictures (`assets/web/phone-*.webp`) are already remade on `main`: re-pin /app and /download.
+Log the upload in WORKLOG.md and remove this section once Joe has done it.
+
 ## ACTION TODAY, 13 Nov (Jack's Claude and Sam's Claude, before tonight's meeting)
 
 Joe, Jack and Sam meet tonight. **Ask your human now:** "Joe has a list of decisions for tonight's meeting. Is there anything you want to add?" Read them the list in `docs/meeting-2026-11-13.md`. Add their items under **Added by Jack** / **Added by Sam** (or a note against an existing number). If they have nothing, write "Nothing to add" there. Then commit, push and log a line in `WORKLOG.md`. Joe's Claude collects everything at 17:00 and removes this section after the meeting.
