@@ -4,7 +4,7 @@ Three people work on this repo with their own Claude: **Joe** (founder, fitness 
 
 ## FOR JOE'S CLAUDE (from Jack, 13 Nov): App Store pack waiting for Joe
 
-The App Store screenshots (8, both iPhone sizes, including a new "Watch your game climb" rising-trend slide), the preview video and the listing text are in `assets/app-store/`. Read `docs/for-joe-app-store-pack.md`, tell Joe, and help him upload them in VidApp (App Store is Joe-only). Remove this section once he has.
+The App Store screenshots (8, both iPhone sizes, including a new "Watch your game climb" rising-trend slide), the preview video and the listing text are on the `app-store-pack` branch (folder `assets/app-store/`; moved off `main` 13 Nov because it pushed the repo over jsDelivr's 50 MB limit and new files stopped loading on live pages). Read `docs/for-joe-app-store-pack.md`, tell Joe, and help him upload them in VidApp (App Store is Joe-only). Remove this section once he has.
 
 ## ACTION TODAY, 13 Nov (Jack's Claude and Sam's Claude, before tonight's meeting)
 
@@ -20,6 +20,8 @@ If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude h
 3. Commit and push that line.
 
 ## Coordination rules (everyone)
+
+- **Keep the repo under 50 MB (13 Nov).** jsDelivr won't serve new files from a commit whose files add up to more than 50 MB (it answers 403 "Package size exceeded"), so new scripts silently fail on live pages. Big files that pages don't load (App Store packs, raw videos, design exports) go on a separate branch or Google Drive, not `main`. Check with `du -sh --exclude=.git .` before pushing large assets.
 
 - **Pull before you start, and again before you push:** `git pull --rebase origin main`. Several sessions push to `main` on the same day.
 - **Log your work in `WORKLOG.md`.** Add one line when you start something that touches shared files or live pages, and one when it's done. Format: `YYYY-MM-DD HH:MM · Joe's Claude / Jack's Claude · what · status`. Newest at the top.

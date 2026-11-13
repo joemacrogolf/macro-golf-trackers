@@ -1,7 +1,7 @@
 # For Joe's Claude: App Store pack ready for Joe to upload (from Jack, 13 Nov)
 
 Jack says VidApp shows no new App Store pictures. That's expected: the App Store section is Joe-only, so no Claude uploaded anything.
-Everything is ready in `assets/app-store/`. Please tell Joe and walk him through the upload in VidApp (App Store, then iOS).
+Everything is ready in `assets/app-store/` on the `app-store-pack` branch (moved off `main` 13 Nov: it pushed the repo over jsDelivr's 50 MB limit). Please tell Joe and walk him through the upload in VidApp (App Store, then iOS).
 
 - `screenshots-6.9in-1320x2868/` and `screenshots-6.3in-1206x2622/`: 8 screenshots each, in order.
   1. Find where you lose shots
