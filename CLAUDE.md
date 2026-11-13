@@ -100,7 +100,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | `src/videos.js` | ▶ Demo button on exercises (Wistia videos from the Team Macro Golf Exercise Library). `MGVideo.open(title, wistiaId)` opens any video. |
 | `src/golfwarm.js` | Golf pages: Express 5-minute warm-up card. Also "How to play" for games with a video. |
 | `src/golf-sg.js` | Golf pages: strokes gained. |
-| `src/workout-selfie.js` | Every training page: "Post a selfie" on the Session done screen (total kg lifted + a fun equivalent; reps / time / metres / minutes when there are no weights). Load after the tracker. |
+| `src/workout-selfie.js` | Personalised 1-to-1 plans and Build My Plan (not the parked Pure plans): "Post a selfie" on the Session done screen (total kg lifted + a fun equivalent; reps / time / metres / minutes when there are no weights). Load after the tracker. |
 | `src/swap.js` | Training plans built from templates/: "Swap" button on each exercise (2 suggestions or type your own; just today or rest of the plan). Saves `S.swaps`; the coach dashboard flags 1-to-1 swaps. |
 
 **Exercise library (the planning database).** Google Drive file `Macro_Golf_VidApp_Library_Audited_v5.xlsm` (id `1EQjn4IPZn2Lz-Qeb-LpIS7wRAPoUNnzk`). One row per Kajabi exercise lesson with its Wistia video ID, the other names plans use for it, setting, default dose, rest, each side, easier and harder options, golf purpose and filming status. The suggested columns are rule-based drafts for coaches to check. Use it when choosing exercises and video IDs for any plan.
