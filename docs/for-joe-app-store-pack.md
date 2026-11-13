@@ -2,6 +2,13 @@
 
 Everything is in `assets/app-store/` on this branch (`app-store-pack`). Please upload in VidApp (Joe only), then log it and delete this file.
 
+## Update 3 (13 Nov, 22:50): slides 4, 5 and 8 now dark
+Joe asked for slides 4, 5 and 8 to have the dark look like the rest. They are replaced in **every** folder: iPhone X, iPhone 8 (also the Android phone set), iPad, Android 10-inch tablet, and the 6.9in / 6.3in PNGs. The other slides are unchanged.
+- **Slide 4 'Practice games that keep score'**: the dark Hole Out game-done screen (20 of 24 holed, practice handicap, strokes gained, #1 on the leaderboard, Share my score). The line no longer says 'Nine scored games' (meeting: drop the fixed nine-games claim): "Scored games from putting to driving. Every round becomes a handicap and strokes gained, and counts towards your week."
+- **Slide 5 'Climb the leaderboard'**: the leaderboard on a solid dark background (no light game page showing through).
+- **Slide 8 'Move better. Swing faster.'**: Build My Plan, 'What is your goal?' question (dark). The game and training pages themselves are light in the app, so these are real dark screens from the app, not recoloured.
+To upload: replace slides 4, 5 and 8 in the iPhone X, iPhone 8 and Android phone sets; upload the full iPad set (7) and Android 10-inch tablet set (7), which already include the new 4, 5 and 8.
+
 ## What changed
 - **Slide 8 'Move better, swing faster'** now shows **Build My Plan** (My Training, Week 1 · Day 1 'Arm chop + upper body', with Demo and Swap). No more Pure Power. New line: "Build your own golf training plan for the gym or at home, with demo videos and easy swaps."
 - **Bottom tab bar on every slide** now reads **Home · MG Athletes · Practice · My Training · Playlists** (the live order). The plan screen's header is 'Your Practice Plan'.
