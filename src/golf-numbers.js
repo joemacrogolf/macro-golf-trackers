@@ -61,14 +61,15 @@ function live(tests,records,practice){tests=tests||{};var A=byArea(tests),rows=[
     rows.forEach(function(e){if(e.a!==g||!(e.n>0)||!e.d||!isFinite(e.sum))return;if(td&&e.d<td)return;var age=(now-Date.parse(e.d+'T12:00:00'))/864e5;if(!(age<=60))return;
       var w=Math.pow(0.5,Math.max(0,age)/14);nW+=e.n*w;sW+=e.sum*w;n+=e.n;games++});
     var test=A.rows[g],prac=nW>0?sW/nW*FREQ[g]:null,wt=nW>0?Math.min(0.6,nW/(nW+60)):0;
-    var lv=test!=null?(prac!=null?test*(1-wt)+prac*wt:test):(prac!=null&&n>=10?prac:null);
+    /* an area only shows once its test is done (Long Game Test: Driving and Approach; Short Game Test: Short game; Putting Test: Putting) */
+    var lv=test!=null?(prac!=null?test*(1-wt)+prac*wt:test):null;
     out[g]={test:test,live:lv,prac:prac,n:n,games:games,w:wt}});
   return out}
 function sgCard(tests,opts){opts=opts||{};var A=byArea(tests),T=target(tests),LV=opts.live||null,shots=0;
   if(LV)GROUPS.forEach(function(g){var L=LV[g];if(!L||L.live==null)return;if(L.n)shots+=L.n;A.rows[g]=L.live;A.keys[g]=A.keys[g]||[]});
   var delta=function(g){var L=LV&&LV[g],d=L&&L.n&&L.test!=null&&L.live!=null?(Math.round(L.live*10)-Math.round(L.test*10))/10:null;return d?'<small class="mgn-d '+(d>0?'up':'down')+'">'+(d>0?'\u25b2':'\u25bc')+Math.abs(d).toFixed(1)+'</small>':''};
   var have=GROUPS.filter(function(g){return A.rows[g]!=null});
-  if(!have.length)return opts.empty===false?'':'<div class="mgn-card"><div class="mgn-k">Strokes gained</div><p class="mgn-p">Take your tests and this fills in: where you gain and lose shots against your target, area by area.</p>'+testLinks()+'</div>';
+  if(!have.length)return opts.empty===false?'':'<div class="mgn-card"><div class="mgn-k">Strokes gained</div><p class="mgn-p">Your strokes gained unlocks with your tests. Each test opens its areas, and from then on every game you play moves the numbers.</p>'+unlocks()+'</div>';
   var mx=Math.max(0.5,Math.max.apply(null,have.map(function(g){return Math.abs(A.rows[g])}))),tot=have.reduce(function(a,g){return a+A.rows[g]},0);
   /* callouts are by AREA (the same totals as the bars), with the biggest single shot type inside that area underneath */
   var ord=have.slice().sort(function(a,b){return A.rows[a]-A.rows[b]}),wa=ord[0],ba=ord[ord.length-1];
@@ -79,12 +80,14 @@ function sgCard(tests,opts){opts=opts||{};var A=byArea(tests),T=target(tests),LV
   return '<div class="mgn-card"><div class="mgn-top"><div><div class="mgn-k">Strokes gained a round</div><div class="mgn-sub">vs a '+esc(hcName(T))+' player'+(dates.length?' \u00b7 tests '+day(dates[0])+(dates.length>1&&day(dates[dates.length-1])!==day(dates[0])?'\u2013'+day(dates[dates.length-1]):''):'')+'</div></div>'+
    '<div class="mgn-tot '+(tot>=0?'up':'down')+'"><b>'+sg(tot)+'</b><small>total a round</small></div></div>'+
    (LV&&shots?'<div class="mgn-live"><i></i>Live: your tests plus '+shots+' practice shot'+(shots===1?'':'s')+' since</div>':'')+
-   '<div class="mgn-bars">'+GROUPS.map(function(g){var v=A.rows[g];if(v==null)return '<div class="mgn-row off"><span>'+g+'</span><div class="mgn-track"><i class="mid"></i></div><em>not tested</em></div>';
+   '<div class="mgn-bars">'+GROUPS.map(function(g){var v=A.rows[g];if(v==null){var t=TESTS[GTEST[g]];return '<a class="mgn-row lock" href="https://www.macro.golf/'+t[2]+'"><span>'+g+'</span><b><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11V8a6 6 0 0 1 12 0v3h1v11H5V11zm3 0h6V8a3 3 0 0 0-6 0z" fill="currentColor"/></svg> Unlock with the '+t[1]+' \u2192</b></a>'}
      var w=Math.min(50,Math.abs(v)/mx*50);return '<div class="mgn-row"><span>'+g+'</span><div class="mgn-track"><i class="mid"></i><i class="bar '+(v>=0?'up':'down')+'" style="'+(v>=0?'left:50%':'right:50%')+';width:'+w.toFixed(1)+'%"></i></div><em class="'+(v>=0?'up':'down')+'">'+sg(v)+delta(g)+'</em></div>'}).join('')+'</div>'+
    (worst?'<div class="mgn-call down"><small>Biggest leak</small><b>'+esc(worst.name)+'</b><em>'+sg(worst.pr)+' a round</em>'+part(worst,true)+'</div>':'')+
    (best?'<div class="mgn-call up"><small>Biggest strength</small><b>'+esc(best.name)+'</b><em>'+sg(best.pr)+' a round</em>'+part(best,false)+'</div>':'')+
    (opts.note!==false?'<p class="mgn-note">Plus means you gain shots on a '+esc(hcName(T))+' player, minus means you lose them.'+(LV?' Every game and plan session you play moves these numbers. Recent sessions count most, and your tests always count for at least 40%.':' Retest to update.')+'</p>':'')+
    (LV&&Object.keys(tests||{}).length?'<details class="mgn-last"><summary>Last test results</summary>'+sgCard(tests,{note:false,empty:false})+'</details>':'')+'</div>'}
+/* which test unlocks which areas */
+function unlocks(){return '<div class="mgn-unlock">'+[['long','Driving and Approach'],['short','Short game'],['putting','Putting']].map(function(x){var t=TESTS[x[0]];return '<a href="https://www.macro.golf/'+t[2]+'"><i><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11V8a6 6 0 0 1 12 0v3h1v11H5V11zm3 0h6V8a3 3 0 0 0-6 0z" fill="currentColor"/></svg></i><span><b>'+x[1]+'</b><small>Unlocks with the '+t[1]+'</small></span><em>\u2192</em></a>'}).join('')+'</div>'}
 function testLinks(){return '<div class="mgn-links">'+Object.keys(TESTS).map(function(k){return '<a href="https://www.macro.golf/'+TESTS[k][2]+'">'+TESTS[k][1]+' \u2192</a>'}).join('')+'</div>'}
 
 
@@ -205,6 +208,7 @@ function css(){if(document.getElementById('mgn-css'))return;var s=document.creat
  '.mgn-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.mgn-tot{text-align:right;flex:0 0 auto}.mgn-tot b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;font-size:40px;line-height:1}.mgn-tot small{font-size:11px;color:#9C988C}',
  '.mgn-tot.up b{color:#3ad37a}.mgn-tot.down b{color:#ff6b5e}.mgn-tot.gold b{color:#FFD900}',
  '.mgn-bars{display:flex;flex-direction:column;gap:10px}.mgn-row{display:grid;grid-template-columns:86px 1fr 46px;gap:10px;align-items:center;font-size:13px}.mgn-row span{font-weight:600}.mgn-row em{font-style:normal;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}',
+ '.mgn-row.lock{grid-template-columns:86px 1fr;text-decoration:none;color:inherit}.mgn-row.lock b{font-weight:600;font-size:12.5px;color:#FFD900;display:flex;align-items:center;gap:6px}.mgn-unlock{display:flex;flex-direction:column;gap:8px}.mgn-unlock a{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(244,241,234,.06);color:#F4F1EA;text-decoration:none;border-left:4px solid #FFD900}.mgn-unlock i{color:#FFD900;display:flex}.mgn-unlock span{flex:1;display:flex;flex-direction:column;gap:2px}.mgn-unlock b{font:400 18px Anton,Impact,sans-serif;text-transform:uppercase}.mgn-unlock small{font-size:12.5px;color:#9C988C}.mgn-unlock em{font-style:normal;color:#FFD900;font-weight:700}'+
  '.mgn-row.off{opacity:.45}.mgn-row.off em{font-weight:400;font-size:11px}.mgn-track{position:relative;height:14px;background:rgba(244,241,234,.08)}.mgn-track .mid{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:rgba(244,241,234,.45)}',
  '.mgn-track .bar{position:absolute;top:0;bottom:0}.mgn-track .bar.up{background:#3ad37a}.mgn-track .bar.down{background:#ff6b5e}em.up{color:#3ad37a}em.down{color:#ff6b5e}',
  '.mgn-call{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;background:rgba(244,241,234,.06);border-left:3px solid #ff6b5e}.mgn-call.up{border-left-color:#3ad37a}',
