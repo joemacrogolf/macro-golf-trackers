@@ -25,19 +25,23 @@ function css(){if(document.getElementById('mgsi-css'))return;var s=document.crea
  '#mgsi .go{background:#FFD900;color:#0B0B0B}#mgsi .again{background:transparent;color:#F4F1EA;border:1px solid rgba(244,241,234,.35)!important;flex:0 0 auto!important;padding:0 16px}',
  '#mgsi .x{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:12px;width:44px;height:44px;border:0;background:transparent;color:#F4F1EA;font-size:30px;cursor:pointer}',
  '#mgsi .note{font-size:12.5px;color:#9C988C;min-height:18px;text-align:center}',
+ '#mgsi .snd{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);min-height:44px;padding:0 18px;border:0;background:#FFD900;color:#0B0B0B;font:400 18px Anton,Impact,sans-serif;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.4)}',
  'body.mgsi-on{overflow:hidden}'].join('');document.head.appendChild(s)}
 function open(again){if(document.getElementById('mgsi'))return;css();
   var w=document.createElement('div');w.id='mgsi';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');w.setAttribute('aria-label','What is strokes gained?');
   w.innerHTML=(again?'<button type="button" class="x" aria-label="Close">\u00d7</button>':'')+
    '<div class="k">'+(again?'Strokes gained in 30 seconds':'Before you start \u00b7 30 seconds')+'</div>'+
-   '<div class="v"><video playsinline webkit-playsinline preload="auto" poster="'+POSTER+'" src="'+VID+'"></video><button type="button" class="play"><i></i>Watch: what is strokes gained?</button></div>'+
+   '<div class="v"><video playsinline webkit-playsinline preload="auto" poster="'+POSTER+'" src="'+VID+'"></video><button type="button" class="play"><i></i>Watch: what is strokes gained?</button><button type="button" class="snd" hidden>Tap for sound</button></div>'+
    '<div class="bar"><b></b></div><div class="btns"><button type="button" class="go" hidden>Got it</button><button type="button" class="again" hidden>Watch again</button></div><div class="note"></div>';
   document.body.appendChild(w);document.body.classList.add('mgsi-on');
   var v=w.querySelector('video'),pl=w.querySelector('.play'),go=w.querySelector('.go'),ag=w.querySelector('.again'),bar=w.querySelector('.bar b'),note=w.querySelector('.note'),far=0;
   function close(){try{v.pause()}catch(e){}w.remove();document.body.classList.remove('mgsi-on')}
   function finish(){mark();go.hidden=false;ag.hidden=false;note.textContent='You can watch it again any time at the bottom of My Numbers.'}
-  function start(){pl.hidden=true;var p=v.play();if(p&&p.catch)p.catch(function(){v.muted=true;v.play().catch(function(){pl.hidden=false})})}
+  function start(){pl.hidden=true;v.muted=false;snd.hidden=true;var p=v.play();if(p&&p.catch)p.catch(function(){v.muted=true;snd.hidden=false;v.play().catch(function(){snd.hidden=true;pl.hidden=false})})}
+  var snd=w.querySelector('.snd');snd.addEventListener('click',function(){v.muted=false;snd.hidden=true;v.play().catch(function(){})});
   pl.addEventListener('click',start);
+  /* first time: it starts on its own straight away (with sound where the phone allows it, otherwise muted with a 'Tap for sound' button) */
+  if(!again)setTimeout(start,250);
   v.addEventListener('timeupdate',function(){if(v.duration)bar.style.width=(v.currentTime/v.duration*100)+'%';
     /* no skipping ahead the first time: jumping forward goes back to the furthest point watched */
     if(!again&&v.currentTime>far+1.5)v.currentTime=far;else far=Math.max(far,v.currentTime)});
