@@ -56,7 +56,7 @@ function start(){var s=state();if(js("mg-home-start-hide",false)||(s.test&&s.num
   return '<div class="ah-start"><span class="ah-k">New here? Start here</span>'+rows.map(function(r,i){return '<a class="row'+(r[0]?" done":"")+'" href="'+r[2]+'"'+(i===1?' data-numbers="1"':'')+'><span class="n">'+(r[0]?"✓":i+1)+'</span><b>'+r[1]+'</b><span class="go">'+(r[0]?"Done":r[3])+'</span></a>'}).join("")+'<button type="button" class="ah-hide" data-hide="1">Hide this</button></div>'}
 function head(title,back){return '<div class="ah-top"><a class="ah-back" href="#'+(back||"")+'">‹ Back</a><h1 class="ah-h">'+title+'</h1></div>'}
 var V={
- "":function(){return '<div class="ah-logo"><img src="{{BASE}}assets/icons/macro-golf-coaching.png" alt="Macro Golf"></div>'+start()+
+ "":function(){return '<div class="ah-logo"><img src="{{BASE}}assets/web/home/header-performance.png" alt="Macro Golf Performance"></div>'+start()+
    '<div class="ah-quick"><a href="'+W+'my-practice"><small>Your</small>Practice plan</a><a href="'+W+'my-training"><small>Your</small>Training plan</a></div>'+
    tile("tile-numbers","My Numbers: your game in strokes gained",W+"my-numbers")+
    tile("tile-testing","Testing Centre: find where you lose shots",null,"testing")+
