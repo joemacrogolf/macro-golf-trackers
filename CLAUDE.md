@@ -183,9 +183,9 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | Coaching app view (`pages/coaching-app.html`: live /coaching content, no header/menu, Back bar) | coaching-app | 2168257984 | plan / mg_loader |
 | The App (website page: `pages/app.html`, own header + site nav, web images in `assets/web/`; not in the site menu until the app goes live) | app | 2168270657 | plan / mg_loader |
 | App download page (`pages/download.html`: App Store + Google Play buttons; old Kajabi page 2149415389) | download | 2154094064 | plan / mg_loader |
-| Pre Match-Up Questionnaire (`pages/form-match-up.html`; landing page 2152404882; draft until 012 is run) | match-up-questionnaire | 2168274063 | plan / mg_loader |
-| Client Onboarding form (`pages/form-onboarding.html`; landing page 2152404883; draft until 012 is run) | onboarding | 2168274066 | plan / mg_loader |
-| Plan Builder, coaches (`pages/plan-builder.html`; landing page 2152404884; hide from search) | plan-builder-529481 | 2168274068 | plan / mg_loader |
+| Pre Match-Up Questionnaire (`pages/form-match-up.html`; landing page 2152404882; published 13 Nov, hidden from search) | match-up-questionnaire | 2168274063 | plan / mg_loader |
+| Client Onboarding form (`pages/form-onboarding.html`; landing page 2152404883; published 13 Nov, hidden from search) | onboarding | 2168274066 | plan / mg_loader |
+| Plan Builder, coaches (`pages/plan-builder.html`; landing page 2152404884; published 13 Nov, hidden from search) | plan-builder-529481 | 2168274068 | plan / mg_loader |
 
 
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)
