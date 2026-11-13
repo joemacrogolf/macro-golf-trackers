@@ -23,6 +23,7 @@ var MS=[3,7,14,21,30,50,75,100,150,200,365];
 var FLAME='<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 2c1 3.5 5 6 5 11a5 5 0 0 1-10 0c0-2.2 1-3.8 2.4-5 .1 1.6.8 2.8 2 3.4C11 8.6 11.2 5 12 2z" fill="#FFD900"/><path d="M12 13c.6 1.4 2 2.2 2 4a2 2 0 0 1-4 0c0-1.3.9-2.2 2-4z" fill="#0B0B0B"/></svg>';
 function css(){if(document.getElementById('mgd-css'))return;var s=document.createElement('style');s.id='mgd-css';s.textContent=[
  '.mgd{display:flex;align-items:center;gap:10px;padding:10px max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px));background:#0B0B0B;color:#F4F1EA;border-bottom:3px solid #FFD900;font-family:Inter,system-ui,sans-serif;box-sizing:border-box;width:100%}',
+ '.mgd-home{flex:0 0 auto;display:inline-flex;align-items:center;min-height:40px;padding:0 12px 0 8px;margin-right:2px;background:#FFD900;color:#0B0B0B!important;font:400 17px/1 Anton,Impact,sans-serif;text-transform:uppercase;text-decoration:none;letter-spacing:.3px}.mgd-home:focus-visible{outline:3px solid #F4F1EA;outline-offset:2px}',
  '.mgd svg{flex:0 0 auto}.mgd.on svg{animation:mgdFlick 1.8s ease-in-out infinite}',
  '.mgd-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}',
  '.mgd-t b{font:400 20px/1.05 Anton,Impact,sans-serif;text-transform:uppercase;color:#FFD900;letter-spacing:.2px}',
@@ -40,8 +41,15 @@ function week(a){var set={};a.forEach(function(x){set[x]=1});var t=today(),p=t.s
   for(var i=0;i<7;i++){var x=shift(mon,i);h+='<i class="'+(set[x]?'y':'')+(x===t?' t':'')+'">'+L[i]+'</i>'}return h}
 function line(n,b){if(n<=1)return b>1?'Back again. Best: '+b+' days':'Come back tomorrow';
   return n>=b?'Your best ever. See you tomorrow':'Best: '+b+' days'}
+/* '‹ Home' on the left of the bar (13 Nov, Jack): the app's Home tab is a web page (www.macro.golf/app-home), so anything opened
+   from it stays in the same in-app browser. Once a player has been on the homepage this session, every page that loads this
+   script shows a Home button that takes them straight back. */
+var HOME='https://www.macro.golf/app-home';
+function fromHome(){try{if(/^\/app-home\/?$/.test(location.pathname)){sessionStorage.setItem('mg-from-home','1');return false}
+  if(/app-home/.test(document.referrer||''))sessionStorage.setItem('mg-from-home','1');return sessionStorage.getItem('mg-from-home')==='1'}catch(e){return /app-home/.test(document.referrer||'')}}
+var HOMEBTN=fromHome();
 function paint(){var a=days(),n=streak(a),b=best(a),bar=document.querySelector('.mgd');if(!bar)return;
-  bar.classList.toggle('on',n>1);bar.innerHTML=FLAME+'<div class="mgd-t"><b>'+n+'-day streak</b><span>'+line(n,b)+'</span></div><div class="mgd-w" aria-label="Days opened this week">'+week(a)+'</div>'}
+  bar.classList.toggle('on',n>1);bar.innerHTML=(HOMEBTN?'<a class="mgd-home" href="'+HOME+'" aria-label="Back to the Home screen">\u2039 Home</a>':'')+FLAME+'<div class="mgd-t"><b>'+n+'-day streak</b><span>'+line(n,b)+'</span></div><div class="mgd-w" aria-label="Days opened this week">'+week(a)+'</div>'}
 function bar(tries){var root=document.getElementById('mg-root');
   if(!root||!root.firstElementChild){if(tries<30)setTimeout(function(){bar(tries+1)},200);return}
   if(document.querySelector('.mgd')||document.documentElement.hasAttribute('data-mgd-off'))return;css();
