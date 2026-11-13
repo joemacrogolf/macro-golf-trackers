@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-13 14:45 · Jack's Claude · Meeting list: added Jack's items J1–J4 to docs/meeting-2026-11-13.md (weekly leaderboard SQL, VidApp browser bar, advert, website update) · done
 2026-11-13 14:40 · Jack's Claude · FOR JOE'S CLAUDE (from Jack): please make the website (www.macro.golf) fully show the app system, with My Numbers as the main highlight (positive charts, a player improving over time) and head-to-head, personalised planning and all three tests clearly in it. Full brief + story order + assets in docs/for-joe-website-brief.md; the 25 s advert is now at assets/video/macro-golf-ad.mp4. Check the layout with Joe before publishing · waiting on Joe's Claude
 2026-11-13 14:25 · Jack's Claude · Strokes gained explainer slowed ~30% (31 s → 40 s) after player feedback that it was too quick to read; same scenes, music slowed to match. assets/video/sg-explainer.mp4 + '40 seconds' labels (src/sg-intro.js, My Numbers). Pinned golf pages via Kajabi editor in Jack's Chrome · live
 2026-11-13 14:35 · Jack's Claude · LIVE (Jack's go-ahead): 16 golf pages (12 games/tests, On-Course, Practice Plan, My Numbers, Paul Goddard) pinned to 594522b via the Kajabi theme editor in Jack's Chrome (Kajabi connector down). Each was on 01f2d94, which 594522b contains. Brings live: one per-footage putting table, Par 18 chip/putt split, My Numbers areas unlock by test · done
