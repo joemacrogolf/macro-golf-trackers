@@ -1,4 +1,5 @@
-/* Strokes gained explainer: a 40-second video every player watches once, the first time they open a golf page
+/* Strokes gained explainer: a 40-second video. Since the 13 Nov meeting it never plays on its own; MGSGIntro.open() plays it
+   (My Numbers' 'What is strokes gained?' button). Originally it played once, the first time a player opened a golf page
    (My Numbers, the Practice Plan, any golf game or test, coach-built golf plans). It can't be skipped the first time:
    "Got it" appears when the video ends. Afterwards MGSGIntro.open() plays it again from the "What is strokes gained?"
    link at the bottom of My Numbers, with a close button.
@@ -53,5 +54,5 @@ function open(again){if(document.getElementById('mgsi'))return;css();
 function auto(tries){if(seen())return;/* wait briefly for the cloud record, which may say it was watched on another phone */
   if(tries<8&&window.MGSync&&!(window.S&&typeof window.S==='object')){setTimeout(function(){auto(tries+1)},400);return}setTimeout(function(){if(!seen())open(false)},window.MGSync?1200:300)}
 window.MGSGIntro={open:function(){open(true)},seen:seen,url:VID};
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){auto(0)});else auto(0);
+/* 13 Nov meeting (Joe, Jack, Sam): no more auto-play. The video only opens when a player taps 'What is strokes gained?' (My Numbers). */
 })();
