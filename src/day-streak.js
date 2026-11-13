@@ -45,7 +45,11 @@ function paint(){var a=days(),n=streak(a),b=best(a),bar=document.querySelector('
 function bar(tries){var root=document.getElementById('mg-root');
   if(!root||!root.firstElementChild){if(tries<30)setTimeout(function(){bar(tries+1)},200);return}
   if(document.querySelector('.mgd')||document.documentElement.hasAttribute('data-mgd-off'))return;css();
-  var b=document.createElement('div');b.className='mgd';b.setAttribute('role','status');root.insertBefore(b,root.firstChild);paint();cele()}
+  var b=document.createElement('div');b.className='mgd';b.setAttribute('role','status');root.insertBefore(b,root.firstChild);paint();cele();watch(root)}
+/* front doors (My Plan, My Training, My Practice) replace the page with the plan they open: put the bar back on top */
+var obs=null;function watch(root){if(obs||!window.MutationObserver)return;obs=new MutationObserver(function(){if(document.querySelector('.mgd'))return;var r=document.getElementById('mg-root');
+  if(r&&r.firstElementChild){var b=document.createElement('div');b.className='mgd';b.setAttribute('role','status');r.insertBefore(b,r.firstChild);paint()}});
+  obs.observe(root,{childList:true})}
 function cele(){var a=days(),n=streak(a);if(MS.indexOf(n)<0||ls('mg-days-cele')===today()+':'+n)return;ls('mg-days-cele',today()+':'+n);
   setTimeout(function(){if(document.getElementById('mgsi'))return;css();var d=document.createElement('div');d.className='mgd-pop';d.setAttribute('role','status');
     d.innerHTML='<div class="n">'+n+'</div><div><b>'+n+'-day streak!</b><span>'+(n>=30?'That is serious commitment. Keep it alive.':'You have opened Macro Golf '+n+' days in a row. Keep it going.')+'</span></div>';
