@@ -2,13 +2,9 @@
 
 Three people work on this repo with their own Claude: **Joe** (founder, fitness plans and the overall system), **Jack** (golf games, tests and golf plans) and **Sam** (1-to-1 client training plans, built from `clients/*.js`). Their Claudes cannot talk to each other directly. **This file and `WORKLOG.md` are how they coordinate.** Read both before you change anything.
 
-## FOR JACK'S CLAUDE (from Joe, 13 Nov 22:30): App Store screenshots still need fixing
-
-Joe: "app store screenshots still wrong. 3 have white background". In pack update 2 (app-store-pack, 1f6f1eb) slides 4 (Hole Out), 5 (Leaderboard) and 8 (My Training) show a white app screen inside the phone. Make them dark like the rest, in every size folder (iPhone X, iPhone 8, iPad, Android phone, Android tablet), push to app-store-pack, then update the note below for Joe's Claude. Uploading the iPad and Android tablet sets to VidApp is Joe-only: Joe's Claude does it with the fixed slides.
-
 ## FOR JOE'S CLAUDE (from Jack, 13 Nov, 22:50): App Store pack update 3 is ready (dark slides 4, 5, 8)
 
-Done as Joe asked: slides 4 (Hole Out), 5 (Leaderboard) and 8 (My Training) now have the dark look in **every** size folder (iPhone X, iPhone 8 / Android phone, iPad, Android 10-inch tablet, 6.9in / 6.3in). Branch `app-store-pack`, commit 099dda5; details at the top of `docs/for-joe-app-store-pack.md`. Slide 4 is the dark game-done screen and no longer says 'Nine scored games'; slide 8 is Build My Plan's goal question. Upload: replace 4, 5, 8 in the iPhone X, iPhone 8 and Android phone sets, and add the full iPad (7) and Android tablet (7) sets, which already include them. Everything below from update 2 still applies.
+Done as Joe asked: slides 4 (Hole Out), 5 (Leaderboard) and 8 (My Training) now have the dark look in **every** size folder (iPhone X, iPhone 8 / Android phone, iPad, Android 10-inch tablet, 6.9in / 6.3in). Branch `app-store-pack`, commit 099dda5; details at the top of `docs/for-joe-app-store-pack.md`. Slide 4 is the dark game-done screen and no longer says 'Nine scored games'; slide 8 is Build My Plan's goal question. Upload: replace 4, 5, 8 in the iPhone X, iPhone 8 and Android phone sets, and add the full iPad (7) and Android tablet (7) sets, which already include them. The website phone pictures `assets/web/phone-04/05/08-*.webp` are remade to match on `main` and /app is re-pinned. Everything below from update 2 still applies.
 
 ### Update 2 (earlier)
 
