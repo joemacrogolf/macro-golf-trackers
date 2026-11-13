@@ -337,7 +337,11 @@ body{padding:0!important;background:#FFFFFF}
 body.gated{overflow:hidden}
 .board[hidden]{display:none!important}
 
-#entry [hidden],#gate [hidden]{display:none!important}
+#entry [hidden],#gate [hidden],.key [hidden],#howto [hidden]{display:none!important}
+.gate .opts.lava4{grid-template-columns:1fr 1fr}
+.grec{margin-top:10px;background:#1a1916;border-left:6px solid #FFD900;padding:12px 14px;display:flex;flex-direction:column;gap:6px;color:#d9d5cb;font:500 14px/1.5 Inter,system-ui,sans-serif}
+.grec b{color:#FFD900;font:700 12px Inter,system-ui,sans-serif;letter-spacing:1.4px;text-transform:uppercase}
+.grec button{align-self:flex-start;min-height:40px;padding:0 16px;border:0;background:#FFD900;color:#0B0B0B;font:400 17px Anton,Impact,sans-serif;text-transform:uppercase;cursor:pointer}
 </style>
 
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Set up Lava"><div class="gate-in">
@@ -345,6 +349,10 @@ body.gated{overflow:hidden}
   <div class="bar"></div>
   <h2>Lava<span>Before you start</span></h2>
   <span class="gtag">Stopping the miss</span>
+  <div class="fld" id="gLavaWrap"><span>Which side is lava?</span>
+    <div class="opts lava4" id="gLava"><button type="button" data-v="L" aria-pressed="false"><b>Left</b><small>A big miss left costs 2</small></button><button type="button" data-v="R" aria-pressed="false"><b>Right</b><small>A big miss right costs 2</small></button><button type="button" data-v="S" aria-pressed="false"><b>Short</b><small>Coming up short costs 2</small></button><button type="button" data-v="G" aria-pressed="false"><b>Long</b><small>Flying it long costs 2</small></button></div>
+    <div class="grec" id="gRec" role="status"><b>Our suggestion</b><span id="gRecTxt">Looking at your shots from your other games…</span><button type="button" id="gRecUse" hidden>Use this</button></div>
+  </div>
   <label class="fld"><span>Your name</span><input id="gName" autocomplete="name" placeholder="First and last name"></label>
   <label class="fld"><span>Target handicap</span><select id="gHc"><option value="">Choose a target</option><option value="Tour">Tour</option><option value="0">Scratch</option><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option></select></label>
   <div class="fld" id="gModeWrap"><span>What does your launch monitor give you?</span><div class="opts" id="gMode"><button type="button" data-v="lm" aria-pressed="true"><b>Carry + offline</b><small>Two numbers and the side it finished</small></button><button type="button" data-v="pin" aria-pressed="false"><b>Distance from pin</b><small>One number, then tap safe, short or in the lava</small></button></div></div>
@@ -365,7 +373,7 @@ body.gated{overflow:hidden}
         </select></div>
       <div><span class="k">Lava side</span>
         <select id="lavaSide" aria-label="Lava side">
-          <option value="L">Left</option><option value="R">Right</option>
+          <option value="L">Left</option><option value="R">Right</option><option value="S">Short</option><option value="G">Long</option>
         </select></div>
     </div>
   </header>
@@ -377,7 +385,7 @@ body.gated{overflow:hidden}
       <div><h3>Setup</h3><ol>
         <li>Set the three distances in Settings (the player's weakest approach yardages). Default is 115, 135 and 165 yds.</li>
         <li>Set a green with a pin at each distance on the sim.</li>
-        <li>Enter the player's name, pick a target handicap and choose the lava side (left by default).</li>
+        <li>Choose the lava side first: left, right, short or long. The start screen suggests one from your other games and says why. Then enter the player's name and a target handicap.</li>
       </ol></div>
       <div><h3>The game</h3><ol>
         <li>18 balls: 6 at each distance, called in a random order on screen.</li>
@@ -388,9 +396,9 @@ body.gated{overflow:hidden}
         <table><thead><tr><th>Result</th><th>Points</th></tr></thead><tbody>
           <tr><td>Inside 15 ft</td><td><b>+3</b></td></tr>
           <tr><td>Within 10% of the distance (on the green)</td><td><b>+1</b></td></tr>
-          <tr><td>Safe-side miss, outside 10%</td><td><b>0</b></td></tr>
-          <tr><td>Short by more than 10% of the distance</td><td><b>−1</b></td></tr>
-          <tr><td>More than 10 yds offline on the lava side</td><td><b>−2</b></td></tr>
+          <tr><td id="hSafe">Safe-side miss, outside 10%</td><td><b>0</b></td></tr>
+          <tr id="hShortRow"><td>Short by more than 10% of the distance</td><td><b>−1</b></td></tr>
+          <tr><td id="hLava">More than 10 yds offline on the lava side</td><td><b>−2</b></td></tr>
         </tbody></table>
         <ul style="margin-top:8px"><li>If two apply, take the lower score. Maximum 54.</li></ul></div>
       <div><h3>Shifts, handicap and report</h3><ul>
@@ -487,7 +495,7 @@ body.gated{overflow:hidden}
       <span class="chip s3">+3</span><span>Inside 15 ft</span>
       <span class="chip s1">+1</span><span>Within 10% of the distance (on the green)</span>
       <span class="chip s0">0</span><span id="safeTxt">Miss right, outside 10%: the safe miss</span>
-      <span class="chip sm1">−1</span><span>Short by more than 10% of the distance</span>
+      <span class="chip sm1" id="kShortC">−1</span><span id="kShortT">Short by more than 10% of the distance</span>
       <span class="chip sm2">−2</span><span id="lavaTxt">Miss left by more than 10 yds</span>
     </div>
     <p class="muted" style="margin:0">If two apply, take the lower score. Maximum 54.</p>
@@ -543,7 +551,7 @@ body.gated{overflow:hidden}
         <li>Enter carry and offline from the sim, and which side of the pin line the ball finished.</li>
         <li>Proximity is worked out from the carry miss and the offline miss together.</li>
         <li>Choose a target handicap at the top. Beat its par twice to unlock shifts: the last 6 balls are called as hold it straight or lower flight, scored the same way.</li>
-        <li>Lava side is left by default. Switch it to right for a player whose big miss goes right.</li>
+        <li>Lava can be left, right, short or long. Put it on the side of your big miss: a slicer sets it right, so the right miss costs 2 and you learn to finish left. Short lava: more than 10% short costs 2. Long lava: more than 10% long costs 2, and short misses cost nothing.</li>
       </ul>
     </details>
     <div class="confirm" id="newWrap"><button class="ghost" id="newBtn">New game</button></div>
@@ -569,8 +577,8 @@ function expPts(hc,d){
   function run(sl,doScore){const sc=RATIO*sl;let m=0,e=0,w=0;
     for(let i=-N;i<=N;i++)for(let j=-N;j<=N;j++){const x=i/N*4,y=j/N*4,p=Math.exp(-(x*x+y*y)/2);w+=p;
       if(!doScore){m+=p*Math.hypot(x*sc,y*sl);continue}
-      const dc=bias+x*sc,off=y*sl,prox=Math.hypot(dc,off);
-      let pos=prox*3<=15?3:prox<=d*0.1?1:0;const o=[pos];if(off>10)o.push(-2);if(dc<-d*0.1)o.push(-1);e+=p*Math.min(...o)}
+      const dc=bias+x*sc,off=y*sl,prox=Math.hypot(dc,off),lv=S?S.lava:"L";
+      let pos=prox*3<=15?3:prox<=d*0.1?1:0;const o=[pos];if(lv==="S"){if(dc<-d*0.1)o.push(-2)}else if(lv==="G"){if(dc>d*0.1)o.push(-2)}else{if(off>10)o.push(-2);if(dc<-d*0.1)o.push(-1)}e+=p*Math.min(...o)}
     return doScore?e/w:m/w}
   const sl=meanY/run(1,false), v=run(sl,true);
   EXP_CACHE[key]=v; return v;
@@ -605,7 +613,7 @@ function buildReport(){
     return {d,pts:ss.reduce((a,s)=>a+s.pts,0),med:Math.round(median(ss.map(s=>s.ft)))}}).filter(Boolean);
   const byPts=D.slice().sort((a,b)=>b.pts-a.pts||a.med-b.med), best=byPts[0], worst=byPts[byPts.length-1];
   const bias=sh.reduce((a,s)=>a+(s.carry-s.target),0)/n;
-  const lavaSide=sh.filter(s=>lavaOff(s.off,s.side)>0).length;
+  const lavaSide=sh.filter(onLavaSide).length;
   const shortN=sh.filter(s=>s.short).length;
   const trends=[];
   if(lavaSide/n>0.4)trends.push(`Miss is going ${side}: ${lavaSide} of ${n} balls finished on the lava side.`);
@@ -616,7 +624,7 @@ function buildReport(){
   L.push("MACRO GOLF · LAVA");
   L.push(`${S.player||"Player"} · ${new Date().toLocaleDateString("en-GB")}`);
   L.push("");
-  L.push(`Score: ${pf(t)} / 54 · playing like ${pl||"–"}`);
+  L.push(`Lava: ${side} · Score: ${pf(t)} / 54 · playing like ${pl||"–"}`);
   L.push(`${t>=par?"Beat":"Missed"} ${hcName(S.target)} par of ${fmt(par)}`);
   L.push(`Greens: ${greens}/${n} · in the lava: ${inLava} · median ${med} ft`);
   L.push("");
@@ -654,26 +662,28 @@ function load(){try{const v=JSON.parse(localStorage.getItem("leftIsLava"));if(v&
 function lavaOff(off,side){if(side==="C"||!off)return 0;return side===S.lava?off:-off}
 function score(target,carry,off,side){
   const dc=carry-target, prox=Math.sqrt(dc*dc+off*off), ft=prox*3;
-  const lo=lavaOff(off,side), short=carry<target*0.9;
+  const lo=lavaOff(off,side), short=carry<target*0.9, long=carry>target*1.1, depth=S.lava==="S"||S.lava==="G";
   let pos=0;
   if(ft<=15)pos=3; else if(prox<=target*0.1)pos=1;
   const opts=[pos];
-  if(lo>10)opts.push(-2);
-  if(short)opts.push(-1);
-  const pts=Math.min(...opts);
+  if(S.lava==="S"){if(short)opts.push(-2)}
+  else if(S.lava==="G"){if(long)opts.push(-2)}
+  else{if(lo>10)opts.push(-2);if(short)opts.push(-1)}
+  const pts=Math.min(...opts), onLava=depth?(S.lava==="S"?carry<target:carry>target):lo>0;
   let why;
   if(pts===-2)why="In the lava"; else if(pts===-1)why="Short"; else if(pts===3)why="Inside 15 ft";
-  else if(pts===1)why="On the green"; else why=lo<0?"Safe miss":"Missed the green";
-  return {prox,ft,lava:lo>0,short,pts,why};
+  else if(pts===1)why="On the green"; else why=!onLava?"Safe miss":"Missed the green";
+  return {prox,ft,lava:onLava,short,pts,why};
 }
 function idx(){return S.shots.length}
 function isShift(i){return S.mode==="shift"&&i>=12}
 function flightCall(i){return isShift(i)?S.shifts[i-12]:"Stock flight"}
 function total(){return S.shots.reduce((a,s)=>a+s.pts,0)}
 function median(a){if(!a.length)return null;const b=a.slice().sort((x,y)=>x-y),m=Math.floor(b.length/2);return b.length%2?b[m]:(b[m-1]+b[m])/2}
-function pctLava(arr){if(!arr.length)return null;return Math.round(arr.filter(s=>s.lava||lavaOff(s.off,s.side)>0).length/arr.length*100)}
-function sideWord(){return S.lava==="L"?"left":"right"}
-function safeWord(){return S.lava==="L"?"right":"left"}
+function onLavaSide(s){if(S.lava==="S")return s.carry<s.target;if(S.lava==="G")return s.carry>s.target;return lavaOff(s.off,s.side)>0}
+function pctLava(arr){if(!arr.length)return null;return Math.round(arr.filter(onLavaSide).length/arr.length*100)}
+function sideWord(){return {L:"left",R:"right",S:"short",G:"long"}[S.lava]||"left"}
+function safeWord(){return {L:"right",R:"left",S:"long",G:"short"}[S.lava]||"right"}
 function chipCls(p){return p===3?"s3":p===1?"s1":p===0?"s0":p===-1?"sm1":"sm2"}
 
 /* distance-from-pin entry: the result is turned into the carry/offline it implies, so scoring and strokes gained use one model.
@@ -681,6 +691,8 @@ function chipCls(p){return p===3?"s3":p===1?"s1":p===0?"s0":p===-1?"sm1":"sm2"}
 var pres=null,pinMode=()=>S.inMode==="pin";
 function readInputs(){
   if(pinMode()){const p=parseFloat($("carry").value)/3,t=S.order[idx()];if(isNaN(p)||p<0||!pres)return {c:isNaN(p)?NaN:t,off:0,side:"C",ok:false,pin:p};
+    if(S.lava==="S"){if(pres==="lava")return {c:Math.max(0,t-Math.max(p,t*0.1+0.5)),off:0,side:"C",ok:true,pin:p};return {c:t+p,off:0,side:"C",ok:true,pin:p}}
+    if(S.lava==="G"){if(pres==="lava")return {c:t+Math.max(p,t*0.1+0.5),off:0,side:"C",ok:true,pin:p};return {c:Math.max(0,t-p),off:0,side:"C",ok:true,pin:p}}
     if(pres==="short")return {c:Math.max(0,t-p),off:0,side:"C",ok:true,pin:p};
     if(pres==="lava")return {c:t,off:Math.max(p,10.5),side:S.lava,ok:true,pin:p};
     return {c:t,off:p,side:p===0?"C":(S.lava==="L"?"R":"L"),ok:true,pin:p}}
@@ -706,7 +718,7 @@ function enter(){
   const i=idx(), t=S.order[i], s=score(t,c,off,side);
   const shot={target:t,carry:c,off,side,flight:flightCall(i),...s};
   S.shots.push(shot);
-  if(idx()===BALLS&&!S.saved){S.history.unshift({date:new Date().toISOString().slice(0,10),pts:total(),goal:Math.round(goal()*10)/10,hc:S.target,left:pctLava(S.shots),prox:median(S.shots.map(x=>x.ft)),mode:S.mode});S.history=S.history.slice(0,12);S.saved=true}
+  if(idx()===BALLS&&!S.saved){S.history.unshift({date:new Date().toISOString().slice(0,10),pts:total(),goal:Math.round(goal()*10)/10,hc:S.target,lava:S.lava,left:pctLava(S.shots),prox:median(S.shots.map(x=>x.ft)),mode:S.mode});S.history=S.history.slice(0,12);S.saved=true}
   save();
   $("carry").value="";$("off").value="";pres=null;setDir(null);
   flash(shot); renderAll();
@@ -725,8 +737,15 @@ function flash(s){
 function renderHeader(){
   $("h1Side").textContent="Lava"; 
   $("lavaLbl").textContent="Finished "+sideWord();
-  $("lavaTxt").textContent=`Miss ${sideWord()} by more than 10 yds`;
-  $("safeTxt").textContent=`Miss ${safeWord()}, outside 10%: the safe miss`;
+  const dp=S.lava==="S"||S.lava==="G";
+  $("lavaTxt").textContent=dp?`${S.lava==="S"?"Short":"Long"} by more than 10% of the distance`:`Miss ${sideWord()} by more than 10 yds`;
+  $("safeTxt").textContent=dp?`Miss ${safeWord()} or offline, outside 10%: the safe miss`:`Miss ${safeWord()}, outside 10%: the safe miss`;
+  ["kShortC","kShortT","hShortRow"].forEach(id=>{const e=$(id);if(e)e.hidden=dp});
+  if($("hSafe"))$("hSafe").textContent=dp?`${safeWord()[0].toUpperCase()+safeWord().slice(1)} or offline miss, outside 10%`:"Safe-side miss, outside 10%";
+  if($("hLava"))$("hLava").textContent=dp?`${S.lava==="S"?"Short":"Long"} by more than 10% of the distance (the lava)`:"More than 10 yds offline on the lava side";
+  if($("resShort"))$("resShort").hidden=dp;
+  if($("resSafe"))$("resSafe").textContent=dp?"Safe ("+safeWord()+")":"Safe";
+  if($("resLava"))$("resLava").textContent=dp?"In the lava ("+sideWord()+")":"In the lava";
 }
 function renderBoard(){
   const t=total(), n=idx();
@@ -904,11 +923,27 @@ bindNew(); renderAll();
   let lvl=saved.lvl||"";
   const locked=()=>{try{return false}catch(e){return false}};
   nm.value=saved.name||"";if(hc)hc.value=saved.hc||"";
+  /* lava side comes first: picked by the player, with a suggestion from the shots saved in their other games */
+  let lava=saved.lava||"",rec=null;var paintLava;const SIDE={L:"Left",R:"Right",S:"Short",G:"Long"};
+  paintLava=function(){document.querySelectorAll("#gLava button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===lava)));
+    const u=$("gRecUse");if(u){u.hidden=!(rec&&rec.side&&rec.side!==lava);if(rec&&rec.side)u.textContent="Use "+SIDE[rec.side].toLowerCase()}}
+  document.querySelectorAll("#gLava button").forEach(b=>b.addEventListener("click",()=>{lava=b.dataset.v;paintLava();paint()}));
+  $("gRecUse").addEventListener("click",()=>{if(rec&&rec.side){lava=rec.side;paintLava();paint()}});
+  function showRec(r){rec=r;const t=$("gRecTxt");
+    if(!r){t.textContent="Sign in to your golf games with your email and PIN, and we'll suggest a side from your shots in the other games.";paintLava();return}
+    t.innerHTML=(r.side?"<b style=\"display:block;color:#F4F1EA;font-size:15px;letter-spacing:0;text-transform:none;margin-bottom:4px\">Set the lava "+SIDE[r.side].toLowerCase()+"</b>":"")+r.why.replace(/[<>&]/g,"");
+    if(r.side&&!lava)lava=r.side;paintLava();paint()}
+  (function getRec(tries){if(!window.MGNumbers||!MGNumbers.missPattern){if(tries<40)setTimeout(()=>getRec(tries+1),150);else showRec(null);return}
+    let gg=null;try{gg=JSON.parse(localStorage.getItem("mgsync-group:golf")||"null")}catch(e){}
+    const mine=()=>{const R={};try{R["golf-left-is-lava"]=S}catch(e){}return R};
+    if(!gg||!gg.em||!gg.pin){const r=MGNumbers.missPattern(mine());showRec(r.side?r:null);return}
+    MGNumbers.load(gg.em,gg.pin).then(d=>{const R=Object.assign({},d&&d.records||{});if(!R["golf-left-is-lava"])R["golf-left-is-lava"]=S;showRec(MGNumbers.missPattern(R))}).catch(()=>showRec(MGNumbers.missPattern(mine())))})(0);
+  paintLava();
   function paint(){
     if(hasL){const lk=locked();if(lk){try{lvl=''}catch(e){}}
       document.querySelectorAll("#gLvl button").forEach(b=>{b.setAttribute("aria-pressed",String(b.dataset.v===lvl));b.disabled=lk});
       $("gLvlNote").hidden=!lk}
-    go.disabled=!(nm.value.trim()&&(!hasT||hc.value)&&(!hasL||lvl||locked()));
+    go.disabled=!(lava&&nm.value.trim()&&(!hasT||hc.value)&&(!hasL||lvl||locked()));
   }
   nm.addEventListener("input",paint);if(hc)hc.addEventListener("change",paint);
   if(hasL)document.querySelectorAll("#gLvl button").forEach(b=>b.addEventListener("click",()=>{if(locked())return;lvl=b.dataset.v;paint()}));
@@ -916,7 +951,8 @@ bindNew(); renderAll();
     const p=$("player");p.value=nm.value.trim();p.dispatchEvent(new Event("input",{bubbles:true}));
     if(hasT){const t=$("targetHc");t.value=hc.value;t.dispatchEvent(new Event("change",{bubbles:true}))}
     if(hasL&&!locked()&&LV[lvl])$(LV[lvl]).click();
-    try{localStorage.setItem(KEY,JSON.stringify({name:nm.value.trim(),hc:hc?hc.value:"",lvl}))}catch(e){}
+    {const ls=$("lavaSide");if(ls.value!==lava){ls.value=lava;ls.dispatchEvent(new Event("change",{bubbles:true}))}}
+    try{localStorage.setItem(KEY,JSON.stringify({name:nm.value.trim(),hc:hc?hc.value:"",lvl,lava}))}catch(e){}
     g.hidden=true;document.body.classList.remove("gated");window.scrollTo(0,0);
   });
   document.body.classList.add("gated");paint();setTimeout(()=>nm.focus(),50);
@@ -1448,6 +1484,7 @@ UX.init({family:'golf',home:false});
 </script>
 <script>var KEY="leftIsLava";</script>
 <script src="{{BASE}}src/golf-sg.js"></script>
+<script src="{{BASE}}src/golf-numbers.js"></script>
 <script>/* strokes gained alongside the game score */
 S.shots.forEach(s=>{if(s.why==="Short. Club up")s.why="Short"});
 GSG.init({target:()=>S.target,colLabel:"Shot",

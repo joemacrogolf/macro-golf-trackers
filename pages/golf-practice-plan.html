@@ -783,7 +783,8 @@ function drill(c,m){
   }
   if(c.area==="app"){
     if(f==="strike")return {type:"strike",id:"drill",title:"Strike focus",mins:m,balls:Math.max(10,r5(m)),hits:[],lines:["Same club, same target. Tap where each ball came off the face."]};
-    if(f==="misses")return {type:"count",id:"drill",title:"Safe side",mins:m,total:r5(m),res:[],viz:"safe",side:c.lavaSide,cap:"Miss it on the safe side",lines:["Pick a flag in your zone. Your "+(c.lavaSide==="L"?"left":"right")+" side is trouble.","Tick if the ball finishes on the green or on the safe side."]};
+    if(f==="misses"){const sd=c.lavaSide;if(sd==="S"||sd==="G")return {type:"count",id:"drill",title:"Safe side",mins:m,total:r5(m),res:[],viz:"safe",side:sd,cap:sd==="S"?"Never short":"Never long",lines:sd==="S"?["Pick a flag in your zone. Short of the flag is lava: take enough club.","Tick if the ball finishes on the green or past the flag."]:["Pick a flag in your zone. Long is lava: favour the front of the green.","Tick if the ball finishes on the green or short of the flag."]};
+      return {type:"count",id:"drill",title:"Safe side",mins:m,total:r5(m),res:[],viz:"safe",side:sd,cap:"Miss it on the safe side",lines:["Pick a flag in your zone. Your "+(sd==="L"?"left":"right")+" side is trouble.","Tick if the ball finishes on the green or on the safe side."]}}
     const tg=[];const z=c.zones;for(let i=0;i<Math.max(6,Math.round(m));i++){const zz=z[i%z.length];tg.push(Math.round(ri(zz[0],zz[1])))}
     return {type:"carry",id:"drill",title:"Carry the number",mins:m,targets:shuffle(tg),res:[]};
   }
@@ -817,7 +818,7 @@ function warmDown(c,m){
 
 /* shot generators */
 function hazard(chance,side){if(Math.random()>chance)return null;side=side||pick(["L","R"]);const t=pick(["Water","Out of bounds"]);return {type:t==="Water"?"water":"ob",side,line:12,name:t+" "+(side==="L"?"left":"right")}}
-function appShot(d,c){const lava=has(c,"misses");return {kind:"app",d,haz:lava?{type:"water",side:c.lavaSide,line:12,name:"Water "+(c.lavaSide==="L"?"left":"right")}:hazard(0.3)}}
+function appShot(d,c){const lava=has(c,"misses")&&(c.lavaSide==="L"||c.lavaSide==="R");return {kind:"app",d,haz:lava?{type:"water",side:c.lavaSide,line:12,name:"Water "+(c.lavaSide==="L"?"left":"right")}:hazard(0.3)}}
 function teeShot(c,i){const club=c.drvCarry;const L=Math.round((club*1.06+ri(110,175))/5)*5,par=L>470?5:4,fwHalf=pick([13,14,15,16]);
   const r=Math.random(),side=pick(["L","R"]),sd=side==="L"?"left":"right";let haz=null;
   if(r<0.25){const from=Math.round((club*1.06-20+ri(-10,10))/5)*5;haz={type:"bunker",side,from,to:from+25,inner:fwHalf-6,outer:fwHalf+8,line:999,name:"Bunker "+sd}}
@@ -956,7 +957,7 @@ function vizSVG(v,b){const W=300,H=170;let g="";
   else if(v==="flights"){g=`<rect width="${W}" height="${H}" fill="${C.rough}"/><rect x="200" y="120" width="100" height="50" fill="${C.green}"/>`+flag(255,138)+ballDot(30,150)+
     [[40,"LOW"],[90,"MID"],[10,"HIGH"]].map(([k,l],i)=>`<path d="M34 146 Q 140 ${k+(i===1?0:0)} 250 136" fill="none" stroke="${i===0?C.white:i===1?C.gold:"#9ec3e6"}" stroke-width="2" stroke-dasharray="5 5"/>`).join("")}
   else if(v==="corridor"){g=`<rect width="${W}" height="${H}" fill="${C.rough}"/><path d="M150 160 L110 10 L190 10 Z" fill="${C.fw}" opacity=".9"/><circle cx="110" cy="14" r="5" fill="${C.gold}"/><circle cx="190" cy="14" r="5" fill="${C.gold}"/>`+ballDot(150,155)+`<line x1="150" y1="150" x2="150" y2="20" stroke="${C.white}" stroke-width="2" stroke-dasharray="5 5"/>`}
-  else if(v==="safe"){const L=b&&b.side==="L";g=`<rect width="${W}" height="${H}" fill="${C.rough}"/><rect x="${L?0:200}" y="0" width="100" height="${H}" fill="${C.water}"/><ellipse cx="150" cy="80" rx="46" ry="38" fill="${C.green}"/>`+flag(150,82)+
+  else if(v==="safe"){const L=b&&b.side==="L",sd=b&&b.side,dp=sd==="S"||sd==="G";g=`<rect width="${W}" height="${H}" fill="${C.rough}"/>${dp?`<rect x="0" y="${sd==="S"?128:0}" width="${W}" height="${H-128}" fill="${C.water}"/>`:`<rect x="${L?0:200}" y="0" width="100" height="${H}" fill="${C.water}"/>`}<ellipse cx="150" cy="80" rx="46" ry="38" fill="${C.green}"/>`+flag(150,82)+
     `<path d="M150 82 m ${L?30:-30} 0 a 60 50 0 0 ${L?1:0} ${L?40:-40} 40" fill="none" stroke="${C.gold}" stroke-width="3" stroke-dasharray="5 5"/>`+T(L?50:250,90,"TROUBLE")+T(L?230:70,40,"SAFE",{c:C.ink})}
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Drill picture">${g}</svg>`}
 
@@ -1357,6 +1358,19 @@ function makePlan(){const P=PG(),pr=P.profile,ents=testEntries(),used=TEST_ORDER
       t.full=n});
     pack(mine,G.n,G.cap).forEach(x=>{x.kind=G.kind;week.push(x)});T.push(...L)});
   T.sort((a,b)=>b.loss-a.loss);
+  /* every range session keeps a little iron play and a little driving, so neither gets neglected.
+     The minutes come from the biggest focused block in that session, so the biggest leak still gets the main chunk. */
+  const KEEP={app:["lg.mid","Iron play: keep it sharp","lava"],drive:["lg.drv","Driving: keep it sharp","corridor"]},KM=8;
+  week.forEach(s=>{const k=s.kind;if(k!=="range"&&k!=="mixed")return;const has=a=>s.items.some(i=>i.area===a);if(k==="mixed"&&!has("app")&&!has("drive"))return;
+    ["app","drive"].forEach(a=>{if(has(a))return;const d=s.items.filter(i=>!i.full&&i.mins>=KM+MIN_SLOT).sort((x,y)=>y.mins-x.mins)[0];if(!d)return;
+      d.mins-=KM;s.items.push({key:KEEP[a][0],area:a,name:KEEP[a][1],mins:KM,full:false,game:KEEP[a][2],keep:true})})});
+  /* Lava ideas: when the player's shots in the other games miss clearly one way, and approach or driving is costing them shots,
+     the main approach (and driving) blocks practise keeping the ball off that side. Not the full game, just the idea. */
+  let lavaIdea=null;
+  try{const recs=streakData&&streakData.records;const mp=recs&&window.MGNumbers&&MGNumbers.missPattern?MGNumbers.missPattern(recs):null;
+    if(mp&&mp.side){const lat=mp.side==="L"||mp.side==="R",hurts=T.some(t=>!t.maintain&&t.loss>=0.1&&(t.area==="app"||(lat&&t.area==="drive")));
+      if(hurts){lavaIdea={side:mp.side,why:mp.why};
+        week.forEach(s=>{["app"].concat(lat?["drive"]:[]).forEach(a=>{const d=s.items.filter(i=>i.area===a&&!i.full).sort((x,y)=>y.mins-x.mins)[0];if(d)d.lava=mp.side})})}}}catch(e){}
   /* keep the results each 6-week plan was built from, so retests can be compared like for like */
   const basis={};used.forEach(k=>{const e=ents[k];basis[k]={t:e.t,hc:e.hc,target:e.target,raw:e.raw}});
   if(P.plan&&P.plan.basis){P.cycles=(P.cycles||[]).concat([{start:P.plan.start,end:weekKey(),basis:P.plan.basis,goals:P.plan.goals||null}]).slice(-12)}
@@ -1364,7 +1378,7 @@ function makePlan(){const P=PG(),pr=P.profile,ents=testEntries(),used=TEST_ORDER
   P.plan={v:2,basis,t:Date.now(),from:used,missing:TEST_ORDER.filter(k=>!used.includes(k)),target:pr.target,sessions,mins:pr.mins,maintain:!!maintain,
     week,targets:T.map(t=>({key:t.key,name:t.name,group:t.group,area:t.area,loss:t.loss,mins:t.mins,full:t.full,game:t.game,games:t.games,maintain:!!t.maintain})),
     strengths:leaks.filter(l=>l.perRound>=0.05).sort((a,b)=>b.perRound-a.perRound).slice(0,3).map(l=>({name:l.name,perRound:l.perRound})),
-    totalLoss:sum(T.filter(t=>!t.maintain).map(t=>t.loss)),start:weekKey(),retestWeeks:6};
+    totalLoss:sum(T.filter(t=>!t.maintain).map(t=>t.loss)),start:weekKey(),retestWeeks:6,lava:lavaIdea,keepSharp:true};
   P.plan.goals=goalsFor(P.plan);
   P.weeks=P.weeks||{};window.save()}
 /* fill the sessions: full games first into the emptiest session they fit, then pour each area's focused minutes into the sessions
@@ -1416,14 +1430,19 @@ function planBlocks(s,mins,cfg,idx){const B=[],it=itemsOf(s),areas=sessAreas(s),
     if(i.full){B.push({type:"play",id:id("play"),game:i.game,title:MacroPlan.GAMES[i.game].name+(MacroPlan.GAMES[i.game].set?" · "+MacroPlan.GAMES[i.game].set:""),mins:i.mins,opened:false,why:i.name});return}
     const a=i.area,base=cfg?JSON.parse(JSON.stringify(cfg)):defaultCfg();
     if(a==="app"){const z=recZones({area:"app",sub:i.key});if(z)base.zones=z}
+    if(i.lava)base.lavaSide=i.lava;
     const REL={"lg.drv":["accuracy"],"lg.fwt":["accuracy"],"lg.speed":["speed"],"putt.s":["short","break"],"putt.m":["mid","break"],"putt.mid":["mid","pace","break"],"putt.l":["pace","break"],"putt.lag":["pace"]};
     let opts=(REL[i.key]||FOCUS[a].map(x=>x[0])).filter(f=>!(f==="speed"&&base.lm===false));const first=focusFor(i.key,a);if(!opts.length)opts=[first];
     opts=[first].concat(opts.filter(f=>f!==first));const r=(idx||0)%opts.length;opts=opts.slice(r).concat(opts.slice(0,r));
+    if(i.lava&&a==="app")opts=["misses"].concat(opts.filter(f=>f!=="misses"));
     const mk=f=>{const c=JSON.parse(JSON.stringify(base));c.focus={};c.focus[a]=[f];return c};
     let c=null,dm0=i.mins>=14&&!gameDone.has(a)?Math.max(5,Math.round(i.mins*0.4)):i.mins,d=null;
     for(const f of opts){const cc=mk(f),dd=drill(view(cc,a),dm0);if(!usedT.has(dd.title)){c=cc;d=dd;break}}
     if(!d){c=mk(opts[0]);d=drill(view(c,a),dm0)}
-    usedT.add(d.title);d.id=id("drill");d.title=i.name+": "+d.title;d.area=a;d.focusOf=i.key;B.push(d);
+    usedT.add(d.title);d.id=id("drill");d.title=i.name+": "+d.title;d.area=a;d.focusOf=i.key;
+    if(i.lava){const LW={L:"left",R:"right",S:"short",G:"long"},SW={L:"right",R:"left",S:"long",G:"short"};d.title=i.name+" · lava idea, "+LW[i.lava]+" is lava";
+      if(a==="drive"&&d.type==="count")d.lines=d.lines.concat(["Lava idea: "+LW[i.lava]+" is lava. Aim so your miss goes "+SW[i.lava]+". A ball that starts in the gate but finishes "+LW[i.lava]+" doesn't count."])}
+    B.push(d);
     if(dm0<i.mins){const g=game(view(c,a),i.mins-dm0);g.id=id("game");g.title=i.name+": strokes gained game";g.area=a;B.push(g);gameDone.add(a)}});
   const left=mins-sum(B.map(b=>b.mins));
   if(left>=5)B.push({type:"tick",id:"tech",title:"Your own technical work",mins:left,timer:true,lines:["Whatever you're working on with your coach. Rehearse it, then bring it into a few balls.","Focus on the movement, not where the ball goes."]});
@@ -1525,7 +1544,7 @@ function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,ne
   p.week.forEach((s,i)=>{const isDone=done.includes(i),it=itemsOf(s),k=kindOfS(s),nm=KN[k]||KN.mixed;cnt[k]=(cnt[k]||0)+1;
     h+=`<div class="sess ${isDone?"done":""}"><div class="sh"><span class="sn" ${k==="green"&&!isDone?'style="font-size:13px"':""}>${isDone?"✓":{range:"R",short:"S",putt:"P",green:"S+P",mixed:"M"}[k]||i+1}</span><div class="st"><b>${nm[0]}${tot[k]>1?" "+cnt[k]:""}</b><small>${nm[1]} · ${p.mins} min · ${isDone?"done this week":"to do"}</small></div></div>
      ${it.some(x=>x.game==="strikes"&&x.full||x.key==="lg.speed")?`<p class="muted" style="margin:0;font-size:13px"><b style="color:var(--fg)">Includes speed training.</b> Take care, and speak to a Macro Golf coach if you're unsure about pushing your speed.</p>`:""}
-     <ul class="sg">${it.map(x=>`<li><b>${x.full?esc(MacroPlan.GAMES[x.game].name)+(MacroPlan.GAMES[x.game].set?` <small>${MacroPlan.GAMES[x.game].set}</small>`:""):esc(x.name)}</b> <small class="tag ${x.full?"g":""}">${x.full?"Full game":"Focused"}</small>${x.full&&GAME_VID[x.game]?`<button class="vlink" data-act="gvid" data-v="${x.game}" aria-label="Watch how to play ${esc(MacroPlan.GAMES[x.game].name)}">▶ Video</button>`:""}<span>${x.mins} min</span></li>`).join("")}</ul>
+     <ul class="sg">${it.map(x=>`<li><b>${x.full?esc(MacroPlan.GAMES[x.game].name)+(MacroPlan.GAMES[x.game].set?` <small>${MacroPlan.GAMES[x.game].set}</small>`:""):esc(x.name)}</b> <small class="tag ${x.full?"g":""}">${x.full?"Full game":x.keep?"Keep sharp":"Focused"}</small>${x.lava?` <small class="tag g">Lava idea</small>`:""}${x.full&&GAME_VID[x.game]?`<button class="vlink" data-act="gvid" data-v="${x.game}" aria-label="Watch how to play ${esc(MacroPlan.GAMES[x.game].name)}">▶ Video</button>`:""}<span>${x.mins} min</span></li>`).join("")}</ul>
      ${isDone?`<button class="linky" data-act="startPlan" data-v="${i}">Do it again</button>`:`<button class="primary" data-act="startPlan" data-v="${i}">Do this one today</button>`}</div>`});
   h+=progressCard();
   h+=whyCard();
@@ -1539,9 +1558,11 @@ function whyCard(){const P=PG(),p=P.plan,T=hcName(p.target||"10");
    <p style="margin:0">Built from your ${p.from.map(k=>TEST_PLAN[k][1]).join(", ")} on ${niceDay(p.t)}, compared with a ${T} player. The same sessions run for ${p.retestWeeks} weeks, with the drills changing week to week, then you retest. Every area that's costing you shots gets practice time, and the biggest leaks get the most.</p>
    ${p.targets.map(t=>`<div class="why"><div class="wh"><b>${esc(t.name)}</b><span>${t.mins} min a week</span></div><div class="wbar"><i style="width:${Math.round(t.mins/mx*100)}%"></i></div>
       <small>${t.maintain?"Nothing big to fix, this keeps it sharp.":`Losing ${t.loss.toFixed(1)} shot${t.loss>=1.05?"s":""} a round against a ${T} player.`} ${t.full?`${t.full>1?"Full games":"A full game"}: ${(t.games||[t.game]).map(g=>esc(MacroPlan.GAMES[g].name)).join(", ")}${t.mins>sum((t.games||[t.game]).map(g=>MacroPlan.GAMES[g].mins))+2?", plus focused work":""}.`:"Focused drills and short strokes gained games. Better use of the time than a full game."}</small></div>`).join("")}
+   ${p.keepSharp?`<p class="muted" style="margin:0">Every range session also has a few minutes of iron play and driving, so neither gets neglected. The biggest leak still gets the main chunk of time.</p>`:""}
+   ${p.lava?`<div class="recnote"><b>Lava ideas, ${({L:"left",R:"right",S:"short",G:"long"})[p.lava.side]} is lava.</b> ${esc(p.lava.why)} Your approach${p.lava.side==="L"||p.lava.side==="R"?" and driving":""} drills practise keeping the ball off that side.</div>`:""}
    ${p.strengths.length?`<p class="muted" style="margin:0">Already strong: ${p.strengths.map(s=>esc(s.name).toLowerCase()).join(", ")}.</p>`:""}
    ${p.totalLoss>0.1?`<div class="recnote">These areas cost you about <b>${p.totalLoss.toFixed(1)} shots a round</b> against a ${T} player. Halve that and you're ${(p.totalLoss/2).toFixed(1)} shots better.</div>`:""}</details>`}
-function renderHome(){const P=PG();stripHome();hiLine();fetchTests();
+function renderHome(){const P=PG();stripHome();hiLine();fetchTests();try{loadStreak()}catch(e){}
   let h="";const ip=rd(KEY);
   if(ip&&ip.step==="run"&&ip.blocks){const b=ip.blocks[ip.bi]||{};h+=`<div class="resume"><b>${ip.plan?"Session "+(ip.plan.idx+1)+" is in progress":"You have a session in progress"}</b><span class="muted">${b.type==="play"&&b.opened?"Back from "+esc(b.title)+"? Carry on to tick it off.":"Block "+(ip.bi+1)+" of "+ip.blocks.length+": "+esc(b.title||"")}</span><div class="btns"><button class="dark" data-act="resume">Carry on</button><button class="ghost" data-act="discard">Start again</button></div></div>`}
   if(!P.profile||ui.editProf)h+=profileCard();

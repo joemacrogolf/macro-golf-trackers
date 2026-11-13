@@ -31,7 +31,7 @@ function load(em,pin){em=String(em||'').trim().toLowerCase();
     return Promise.all(have.map(function(plan){return rpc('mg_load',{p_code:'pure:'+plan+':'+em,p_pin:String(pin),p_name:null,p_plan:null}).then(function(r){return [plan,r&&r.data||null]}).catch(function(){return [plan,null]})}))
       .then(function(rows){var d={name:w.name||'',records:{}};rows.forEach(function(r){if(r[1])d.records[r[0]]=r[1]});return shape(d)})})}
 /* turn raw records into what the cards need */
-function shape(d){var R=d.records,pn=function(){var n='';Object.keys(R).forEach(function(k){var r=R[k];if(!n&&r)n=r.player||(r.practice&&r.practice.profile&&r.practice.profile.name)||''});return n},out={name:d.name||pn(),tests:{},history:{},games:{},practice:null};
+function shape(d){var R=d.records,pn=function(){var n='';Object.keys(R).forEach(function(k){var r=R[k];if(!n&&r)n=r.player||(r.practice&&r.practice.profile&&r.practice.profile.name)||''});return n},out={name:d.name||pn(),tests:{},history:{},games:{},practice:null,records:R};
   Object.keys(TESTS).forEach(function(k){var r=R[TESTS[k][0]];if(!r)return;if(r.planEntry&&r.planEntry.raw)out.tests[k]=r.planEntry;
     if(Array.isArray(r.history))out.history[k]=r.history.filter(function(h){return h&&h.hc!=null}).slice().reverse()});
   var pp=R['golf-practice-plan'];if(pp&&pp.practice){out.practice=pp.practice;var T=pp.practice.tests||{};Object.keys(T).forEach(function(k){if(T[k]&&T[k].raw&&(!out.tests[k]||(T[k].t||0)>(out.tests[k].t||0)))out.tests[k]=T[k]})}
@@ -206,5 +206,33 @@ function css(){if(document.getElementById('mgn-css'))return;var s=document.creat
  '.mgn-game small{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#9C988C;font-weight:700}.mgn-game b{font-size:14px}.mgn-best{font-family:Anton,Impact,sans-serif;font-size:30px;line-height:1.1;color:#FFD900}.mgn-game em{font-style:normal;font-size:11px;color:#9C988C}.mgn-game .mgn-spark{height:30px}'
  ].join('');document.head.appendChild(s)}
 
-window.MGNumbers={streak:streak,streakCard:streakCard,celebrate:celebrate,load:load,shape:shape,byArea:byArea,sgCard:sgCard,planCard:planCard,testsCard:testsCard,trendsCard:trendsCard,PERIODS:PERIODS,gamesCard:gamesCard,planStats:planStats,css:css,TESTS:TESTS,GAMES:GAMES,esc:esc};
+
+/* ---------- miss pattern: which way the player's misses go, from the shots saved in the other games ----------
+   Used by Lava (to suggest the lava side) and the Practice Plan (to add Lava ideas). Reads only what each game
+   already saves: Long Game Test (shots + res), Driver Corridor and Lava (signed offline), Wedge Darts (carry).
+   Returns {side:'L'|'R'|'S'|'G'|null, lat:{L,R,n,share}, dep:{S,G,n,share}, n, src:[names], why}. */
+function missPattern(R){R=R||{};var lat={L:0,R:0,big:{L:0,R:0}},dep={S:0,G:0},n=0,src={};
+  function addLat(o,d,tee,name){if(o==null||isNaN(o))return;n++;src[name]=1;var lim=tee?12:Math.max(4,0.05*d);if(Math.abs(o)<lim)return;var k=o<0?'L':'R';lat[k]++;if(Math.abs(o)>=(tee?20:10))lat.big[k]++}
+  function addDep(c,t,name){if(c==null||t==null||isNaN(c))return;src[name]=1;var e=c-t,lim=Math.max(4,0.05*t);if(Math.abs(e)<lim)return;dep[e<0?'S':'G']++}
+  var lg=R['golf-long-game-test'];if(lg&&Array.isArray(lg.shots)&&Array.isArray(lg.res))lg.res.forEach(function(r,i){var s=lg.shots[i];if(!s||!r||r.pin!=null)return;
+    if(s.kind==='app'){addLat(r.o,s.d,false,'Long Game Test');addDep(r.c,s.d,'Long Game Test')}else addLat(r.o,0,true,'Long Game Test')});
+  var dc=R['golf-driver-corridor'];if(dc&&Array.isArray(dc.shots))dc.shots.forEach(function(s){if(s&&s.carry>0)addLat(s.off,0,true,'Driver Corridor')});
+  var lv=R['golf-left-is-lava'];if(lv&&lv.inMode!=='pin'&&Array.isArray(lv.shots))lv.shots.forEach(function(s){if(!s||s.target==null)return;
+    var o=!s.off||s.side==='C'?0:(s.side==='L'?-1:1)*Math.abs(s.off);addLat(o,s.target,false,'Lava');addDep(s.carry,s.target,'Lava')});
+  var wd=R['golf-wedge-darts'];if(wd&&Array.isArray(wd.shots))wd.shots.forEach(function(s){if(s&&s.pin==null&&s.target!=null)addDep(s.carry,s.target,'Wedge Darts')});
+  var ln=lat.L+lat.R,dn=dep.S+dep.G,ls=ln?Math.max(lat.L,lat.R)/ln:0,dsh=dn?Math.max(dep.S,dep.G)/dn:0;
+  var latOK=ln>=6&&ls>=0.65&&Math.abs(lat.L-lat.R)>=3,depOK=dn>=6&&dsh>=0.65&&Math.abs(dep.S-dep.G)>=3;
+  var names=Object.keys(src),from=names.length?(names.length>1?names.slice(0,-1).join(', ')+' and '+names[names.length-1]:names[0]):'';
+  var out={side:null,lat:{L:lat.L,R:lat.R,n:ln,share:ls,big:lat.big},dep:{S:dep.S,G:dep.G,n:dn,share:dsh},n:n,src:names,why:''};
+  if(latOK&&(!depOK||ls>=dsh)){var k=lat.L>lat.R?'L':'R',w=k==='L'?'left':'right',o=k==='L'?'right':'left',hi=Math.max(lat.L,lat.R);
+    out.side=k;out.why='In your last '+from+', '+hi+' of your '+ln+' offline misses went '+w+' ('+Math.round(ls*100)+'%). '+
+      'Setting the lava '+w+' makes that miss cost 2 points, so you practise aiming and shaping the ball to finish '+o+' of the flag, where a miss is safe.'+
+      (k==='R'?' If you slice or push the ball, this is the side to protect.':' If you hook or pull the ball, this is the side to protect.')}
+  else if(depOK){var d=dep.S>dep.G?'S':'G',hd=Math.max(dep.S,dep.G);out.side=d;
+    out.why=d==='S'?'In your last '+from+', '+hd+' of your '+dn+' approach misses on distance came up short of the number ('+Math.round(dsh*100)+'%). With short as the lava, anything more than 10% short costs 2 points, so you learn to take enough club and carry it to the flag.'
+      :'In your last '+from+', '+hd+' of your '+dn+' approach misses on distance flew past the number ('+Math.round(dsh*100)+'%). With long as the lava, anything more than 10% long costs 2 points, so you learn to control your distance and favour the front of the green.'}
+  else if(ln+dn>=6)out.why='Your misses in your last '+from+' are fairly even (left '+lat.L+', right '+lat.R+', short '+dep.S+', long '+dep.G+'), so no side stands out. Pick the side where the trouble is on the holes you play, or the side your worst shot goes.';
+  else out.why='We need a few more shots from your other games to spot a pattern. Play the Long Game Test or Driver Corridor, then come back for a suggestion.';
+  return out}
+window.MGNumbers={missPattern:missPattern,streak:streak,streakCard:streakCard,celebrate:celebrate,load:load,shape:shape,byArea:byArea,sgCard:sgCard,planCard:planCard,testsCard:testsCard,trendsCard:trendsCard,PERIODS:PERIODS,gamesCard:gamesCard,planStats:planStats,css:css,TESTS:TESTS,GAMES:GAMES,esc:esc};
 })();
