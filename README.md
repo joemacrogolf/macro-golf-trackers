@@ -126,3 +126,9 @@ How a plan is built:
 Edit `EX` (exercise library), `SLOT` (options per movement), `PAIRS` / `DAYS` / `SPLIT` (session design), `LEVELS`, `TRACKERS` and `MOBILITY` (10 Minute Mobility Routines from VidApp, tagged by body part) in `src/plan-builder.js`. `NEW_IDS` lists exercises that need a demo video in the app. "Speak to a coach" goes to `MGB_COACH` in `clients/build-my-plan.js`.
 
 Retaking the questions starts a new plan at week 1. Old sessions are kept in `S.archive`; habits, check-ins and weigh-ins carry on.
+
+## Intake forms and Plan Builder (`src/intake-form.js`, `pages/form-*.html`, `pages/plan-builder.html`)
+
+- `form-match-up` (www.macro.golf/match-up-questionnaire) and `form-onboarding` (www.macro.golf/onboarding) are step-by-step player forms built on `MGForm.mount(config)`. Answers are kept on the phone until sent, then go to `mg_intake_submit` (public, insert only, 6 sends per email per form per hour). `?email=…&name=…` fills those fields.
+- `plan-builder` (www.macro.golf/plan-builder-529481) is for coaches: same password as the coach dashboard. It saves six-week plans with `mg_coach_plan_save`, lists forms with `mg_coach_intake`, fills a plan from the forms (`applyIntake`), takes pasted TPI results (`parseTPI`, saved as an intake row with `mg_coach_intake_add`) and suggests mobility from TPI results (`TPI_MOB`). Download, print to PDF or copy the plan data at the end.
+- Database: `supabase/012-intake-plans.sql`.
