@@ -62,7 +62,7 @@ function noBlur(b){['mousedown','pointerdown'].forEach(function(t){b.addEventLis
 function allEx(){var out=[];try{if(typeof SESSIONS!=='undefined')SESSIONS.forEach(function(d){d.blocks.forEach(function(b){out=out.concat(b.ex)})})}catch(e){}
   try{if(typeof PLAN!=='undefined')PLAN.phases.forEach(function(p){(p.days||[]).forEach(function(d){d.blocks.forEach(function(b){out=out.concat(b.ex)})})})}catch(e){}
   try{if(typeof WORKOUTS!=='undefined')WORKOUTS.forEach(function(w){out=out.concat(w.ex)})}catch(e){}return out}
-function exById(id){var a=allEx();for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null}
+function exById(id){var a=allEx();for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];if(String(id).indexOf('~')>0)return exById(String(id).split('~')[0]);return null}
 function stepOf(id){var e=exById(id);return e&&typeof e.inc==='number'?e.inc:2.5}
 /* ---------- 1. faster logging: RPE taps, same as last, -/+ ---------- */
 var box=null,obs=null;
@@ -114,7 +114,8 @@ function done(sp){var mins=sp.start?Math.max(1,Math.round((Date.now()-sp.start)/
   document.body.appendChild(o);o.addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(!b&&e.target!==o)return;o.remove();if(b&&b.dataset.x==='bests')bests()});window.scrollTo(0,0)}
 /* ---------- 3. my bests ---------- */
 function points(){var P=[];function push(e,date,w,r){if(w==null||r==null||!date)return;P.push({id:e.id,name:e.name,u:(typeof wtInfo==='function'?wtInfo(e).u:'kg'),date:date,w:w,r:r})}
-  try{if(CFG.family==='dan'){Object.keys(S.finished).forEach(function(k){var m=k.match(/^w(\d+)-s(\d+)$/);if(!m)return;var d=SESSIONS[+m[2]];if(!d)return;d.blocks.forEach(function(b){b.ex.forEach(function(e){if(!e.inc||e.max)return;((S.logs[k]||{})[e.id]||[]).forEach(function(s){if(isDone(e,s))push(e,S.finished[k],n(s.w),n(s.r))})})})})}
+  try{if(CFG.family==='dan'){Object.keys(S.finished).forEach(function(k){var m=k.match(/^w(\d+)-s(\d+)$/);if(!m)return;var d=SESSIONS[+m[2]];if(!d)return;d.blocks.forEach(function(b){b.ex.forEach(function(e){if(!e.inc||e.max)return;((S.logs[k]||{})[e.id]||[]).forEach(function(s){if(isDone(e,s))push(e,S.finished[k],n(s.w),n(s.r))});
+    Object.keys(S.logs[k]||{}).forEach(function(id){if(id.indexOf(e.id+'~')!==0)return;var nm=(S.swaps&&S.swaps.names&&S.swaps.names[id])||e.name,e2={};for(var q in e)e2[q]=e[q];e2.id=id;e2.name=nm;(S.logs[k][id]||[]).forEach(function(s){if(isDone(e2,s))push(e2,S.finished[k],n(s.w),n(s.r))})})})})})}
   else if(CFG.family==='pure'){Object.keys(S.finished).forEach(function(k){var m=k.match(/^p(\d+)-w(\d+)-d(\d+)$/);if(!m)return;var ph=PLAN.phases.find(function(p){return p.id===+m[1]});var d=ph&&ph.days&&ph.days[+m[3]];if(!d)return;
       d.blocks.forEach(function(b){b.ex.forEach(function(e){if(!e.inc||e.max||e.band||e.secs)return;((S.logs[k]||{})[e.id]||[]).forEach(function(s){var ok=typeof isDone==='function'?isDone(e,s):setDone(s);if(ok)push(e,S.finished[k],n(s.w),n(s.r))})})})})}
   else if(CFG.family==='harry'){S.history.forEach(function(h){WORKOUTS[h.workout].ex.forEach(function(x0){var e=ex(x0,h);if(!e.inc)return;((h.logs||{})[e.id]||[]).forEach(function(s){if(s&&n(s.r)!=null&&n(s.rpe)!=null)push(e,h.date,n(s.w),n(s.r))})})})}

@@ -18,7 +18,7 @@
 #mgc input:focus-visible,#mgc button:focus-visible,#mgc select:focus-visible{outline:3px solid var(--y);outline-offset:2px}
 #mgc .btn{min-height:52px;border:0;background:var(--y);color:var(--ink);font-family:Anton,Impact,sans-serif;text-transform:uppercase;font-size:19px;padding:0 20px;cursor:pointer}
 #mgc .err{color:#ffb27a;margin:10px 0 0;min-height:1.2em;font-size:14px}
-#mgc .stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:22px 0 18px}
+#mgc .stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:22px 0 18px}
 #mgc .stats div{background:#fff;border:1px solid var(--line);padding:14px}
 #mgc .stats span,#mgc .lab{display:block;font-weight:700;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--mute)}
 #mgc .stats b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;font-size:34px;line-height:1;margin-top:8px}
@@ -42,6 +42,7 @@
 #mgc .tag{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:2px 6px;background:var(--cream);color:var(--ink)}
 #mgc .tag.one{background:var(--ink);color:var(--y)}
 #mgc .tag.golf{background:var(--y)}
+#mgc .tag.swap{background:var(--warn);color:#fff}
 #mgc .v{font-family:Anton,Impact,sans-serif;font-size:22px;line-height:1}
 #mgc .v small{display:block;font-family:Inter,system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--mute);margin-bottom:5px}
 #mgc .row.quiet .v.last{color:var(--warn)}
@@ -113,7 +114,7 @@
   <div class="stats" id="stats"></div>
   <div class="tools">
     <div class="seg" id="seg" role="group" aria-label="Show">
-      <button type="button" data-f="all" aria-pressed="true">Everyone</button><button type="button" data-f="one" aria-pressed="false">1-to-1</button><button type="button" data-f="app" aria-pressed="false">App members</button><button type="button" data-f="golf" aria-pressed="false">Golf</button><button type="button" data-f="nudge" aria-pressed="false">Need a nudge</button></div>
+      <button type="button" data-f="all" aria-pressed="true">Everyone</button><button type="button" data-f="one" aria-pressed="false">1-to-1</button><button type="button" data-f="app" aria-pressed="false">App members</button><button type="button" data-f="golf" aria-pressed="false">Golf</button><button type="button" data-f="nudge" aria-pressed="false">Need a nudge</button><button type="button" data-f="swap" aria-pressed="false">Swapped exercises</button></div>
     <span class="sp"></span>
     <label class="lab" for="q" style="position:absolute;left:-9999px">Search</label><input type="search" id="q" placeholder="Search name or email">
     <label class="lab" for="sort" style="position:absolute;left:-9999px">Sort</label><select id="sort"><option value="last">Last active</option><option value="busy">Most active (28 days)</option><option value="name">Name</option><option value="quiet">Quietest first</option></select>
@@ -170,7 +171,7 @@ function recInfo(r){var code=String(r.code||''),pure=code.indexOf('pure:')===0,p
   var plan=[];/* Practice Plan sessions: kept by week (Monday) */
   if(golf&&d.practice&&d.practice.weeks)Object.keys(d.practice.weeks).forEach(function(w){(d.practice.weeks[w]||[]).forEach(function(i){plan.push({w:w,i:i})})});
   return {r:r,code:code,pure:pure,id:id,golf:golf,one:!pure,email:pure?parts.slice(2).join(':').toLowerCase():String(r.email||'').toLowerCase(),
-    name:r.name||s.player||(d.practice&&d.practice.profile&&d.practice.profile.name)||'',data:d,sum:s,dates:dates,plan:plan,updated:r.updated_at,hasData:!!r.updated_at}}
+    name:r.name||s.player||(d.practice&&d.practice.profile&&d.practice.profile.name)||'',data:d,swaps:(d.swaps&&Array.isArray(d.swaps.log))?d.swaps.log:[],sum:s,dates:dates,plan:plan,updated:r.updated_at,hasData:!!r.updated_at}}
 
 function group(rows){var by={},out=[];
   rows.forEach(function(r){var code=String(r.code||'');
@@ -193,12 +194,14 @@ function finish(p){var t=[],g=[],pl=[],last=null,upd=null;
   var c=function(a,n){return a.filter(function(e){return daysAgo(e.d)<n&&daysAgo(e.d)>=0}).length};
   p.t7=c(t,7);p.g7=c(g,7);p.a28=c(t,28)+c(g,28)+pl.filter(function(e){return daysAgo(e.w)<28}).length;
   var wk=[];for(var i=7;i>=0;i--){var m=addDays(monday(today()),-7*i),e=addDays(m,6),inW=function(e2){return e2.d>=m&&e2.d<=e};wk.push({t:t.filter(inW).length,g:g.filter(inW).length+pl.filter(function(x){return x.w===m}).length})}
-  p.wk=wk}
+  p.wk=wk;
+  p.swaps=[];p.recs.forEach(function(x){(x.swaps||[]).forEach(function(w){if(w&&w.d)p.swaps.push({w:w,x:x})})});p.swaps.sort(function(a,b){return a.w.t<b.w.t?1:-1});
+  p.swap14=p.swaps.filter(function(o){return o.w.scope!=='back'&&daysAgo(o.w.d)<14}).length}
 
 /* ---------- list ---------- */
 function tags(p){var a=[];p.recs.forEach(function(x){if(x.one)a.push('<span class="tag one">1-to-1'+(x.r.plan?': '+esc(x.r.plan):'')+'</span>')});
   var seen={};p.recs.forEach(function(x){if(x.pure&&!x.golf&&!seen[x.id]){seen[x.id]=1;a.push('<span class="tag">'+esc(planName(x.id))+'</span>')}});
-  var gs=p.recs.filter(function(x){return x.golf});if(gs.length)a.push('<span class="tag golf">Golf: '+gs.length+' game'+(gs.length>1?'s':'')+'/plan</span>');return a.join('')}
+  if(p.swap14)a.push('<span class="tag swap">Swapped '+p.swap14+'</span>');var gs=p.recs.filter(function(x){return x.golf});if(gs.length)a.push('<span class="tag golf">Golf: '+gs.length+' game'+(gs.length>1?'s':'')+'/plan</span>');return a.join('')}
 function bars(wk){var mx=Math.max.apply(null,wk.map(function(w){return w.t+w.g}).concat([1]));
   return '<div class="wk" aria-label="Last 8 weeks, training / golf: '+wk.map(function(w){return w.t+'/'+w.g}).join(', ')+'">'+wk.map(function(w){
     if(!w.t&&!w.g)return '<span><i class="z"></i></span>';return '<span>'+(w.t?'<i style="height:'+(w.t/mx*100)+'%"></i>':'')+(w.g?'<i class="g" style="height:'+(w.g/mx*100)+'%"></i>':'')+'</span>'}).join('')+'</div>'}
@@ -206,8 +209,8 @@ function render(){var q=$('q').value.trim().toLowerCase(),srt=$('sort').value;
   var all=people,act=all.filter(function(p){return p.t7+p.g7>0});
   $('stats').innerHTML=[['People',all.length,all.filter(function(p){return p.one}).length+' on 1-to-1'],['Active this week',act.length,'logged in the last 7 days'],
     ['Training this week',all.reduce(function(a,p){return a+p.t7},0),'sessions'],['Golf this week',all.reduce(function(a,p){return a+p.g7},0),'rounds and tests'],
-    ['Need a nudge',all.filter(function(p){return p.quiet}).length,'nothing for 7+ days']].map(function(x){return '<div><span>'+x[0]+'</span><b>'+x[1]+'</b><em>'+x[2]+'</em></div>'}).join('');
-  var list=all.filter(function(p){return filter==='all'||(filter==='one'&&p.one)||(filter==='app'&&!p.one)||(filter==='golf'&&p.isGolf)||(filter==='nudge'&&p.quiet)})
+    ['Need a nudge',all.filter(function(p){return p.quiet}).length,'nothing for 7+ days'],['Swaps',all.filter(function(p){return p.one&&p.swap14}).length,'1-to-1 clients, last 14 days']].map(function(x){return '<div><span>'+x[0]+'</span><b>'+x[1]+'</b><em>'+x[2]+'</em></div>'}).join('');
+  var list=all.filter(function(p){return filter==='all'||(filter==='one'&&p.one)||(filter==='app'&&!p.one)||(filter==='golf'&&p.isGolf)||(filter==='nudge'&&p.quiet)||(filter==='swap'&&p.swap14>0)})
     .filter(function(p){return !q||(p.name+' '+p.email+' '+p.recs.map(function(x){return x.id+' '+x.code}).join(' ')).toLowerCase().indexOf(q)>=0});
   list.sort(function(a,b){if(srt==='name')return a.name.localeCompare(b.name);if(srt==='busy')return b.a28-a.a28||(b.last||'').localeCompare(a.last||'');
     if(srt==='quiet')return (a.never-b.never)||(a.last||'').localeCompare(b.last||'');return (b.last||'').localeCompare(a.last||'')||(b.updated||'').localeCompare(a.updated||'')});
@@ -252,7 +255,7 @@ function drawPerson(){var p=current,R=range(),f=inR(R),T=p.train.filter(f),G=p.g
    (period==='custom'?'<label class="lab" for="from">From</label><input type="date" id="from" value="'+R.from+'"><label class="lab" for="to">To</label><input type="date" id="to" value="'+R.to+'">':'')+
    '<span class="rng">'+esc(R.lab)+': '+nice(R.from)+' – '+nice(R.to)+'</span></div>';
   var ndays=Object.keys(days).length,span=Math.round((day(R.to)-day(R.from))/864e5)+1;
-  h+='<div class="tiles">'+[['Active days',ndays,'of '+span+' days'],['Training sessions',T.length,'workouts finished'],['Golf rounds',G.length,'games and tests'],['Practice Plan',PL.length,'plan sessions'],
+  h+='<div class="tiles">'+[['Active days',ndays,'of '+span+' days'],['Training sessions',T.length,'workouts finished'],['Golf rounds',G.length,'games and tests'],['Practice Plan',PL.length,'plan sessions'],['Exercise swaps',p.swaps.filter(function(o){return o.w.scope!=='back'&&o.w.d>=R.from&&o.w.d<=R.to}).length,'in this period'],
      ['Training streak',ts.now,'week'+(ts.now===1?'':'s')+' in a row · best '+ts.best],['Any activity streak',allS.now,'week'+(allS.now===1?'':'s')+' in a row · best '+allS.best]].concat(gst?[['Golf streak',gst.streak,'Jack’s practice rule · best '+gst.best]]:[]).map(function(x){return '<div><span class="lab">'+x[0]+'</span><b>'+x[1]+'</b><em>'+x[2]+'</em></div>'}).join('')+'</div>';
   h+=calendar(R,days,PL);
   h+=trainingHtml(p,R,f);
@@ -301,6 +304,11 @@ function trainingHtml(p,R,f){var recs=p.recs.filter(function(x){return !x.golf})
     if(d.alcohol){var af=Object.keys(d.alcohol).filter(function(s){return inDay(s)&&d.alcohol[s]==='no'}).length,ay=Object.keys(d.alcohol).filter(function(s){return inDay(s)&&d.alcohol[s]==='yes'}).length;if(af||ay)kv.push(['Alcohol-free days',af,ay?ay+' drinking day'+(ay>1?'s':''):''])}
     if(d.start)kv.push(['Plan started',nice(d.start,true),d.week?'on week '+d.week:'']);
     if(kv.length)h+='<div class="kv">'+kv.map(function(k){return '<div><span>'+esc(k[0])+'</span><b>'+esc(k[1])+'</b>'+(k[2]?'<small>'+esc(k[2])+'</small>':'')+'</div>'}).join('')+'</div>';
+    var SW=(x.swaps||[]).filter(function(w){return w&&w.d&&w.d>=R.from&&w.d<=R.to}).sort(function(a,b){return a.t<b.t?1:-1}),act=d.swaps&&d.swaps.plan?Object.keys(d.swaps.plan).filter(function(id){return d.swaps.plan[id]&&d.swaps.plan[id].n}):[];
+    if(SW.length||act.length){h+='<div class="lab" style="margin-top:14px;color:var(--warn)">Exercise swaps</div>';
+      if(act.length)h+='<p style="margin:4px 0 8px;font-size:14px"><b>Swapped for the rest of the plan:</b> '+act.map(function(id){var o=d.swaps.plan[id];return esc(o.from)+' → '+esc(o.n)}).join(' · ')+'</p>';
+      if(SW.length)h+='<table class="t"><thead><tr><th>Date</th><th>Swap</th><th>For</th></tr></thead><tbody>'+SW.map(function(w){var m=String(w.k||'').match(/^w(\d+)-s(\d+)/);
+        return '<tr><td>'+nice(w.d)+(m?'<br><small style="color:var(--mute)">Week '+m[1]+' · Session '+(+m[2]+1)+'</small>':'')+'</td><td>'+(w.scope==='back'?'Back to '+esc(w.to):esc(w.from)+' → <b>'+esc(w.to)+'</b>')+'</td><td>'+(w.scope==='plan'?'Rest of the plan':w.scope==='day'?'That session only':'Undo')+'</td></tr>'}).join('')+'</tbody></table>'}
     var B=(x.sum&&x.sum.bests)||[];if(B.length)h+='<div class="lab" style="margin-top:14px">Best lifts (all time)</div><div class="bests">'+B.map(function(b){return '<div><b>'+esc(b.n)+'</b><span>'+esc(b.w)+(b.u?' '+esc(b.u):'')+' × '+esc(b.r)+(b.d?' · '+esc(nice(b.d)):'')+(b.gain>0?'<em>+'+esc(b.gain)+'</em>':'')+'</span></div>'}).join('')+'</div>';
     if(d.notes&&typeof d.notes==='object'){var nt=Object.keys(d.notes).filter(function(k){return d.notes[k]&&String(d.notes[k]).trim()});if(nt.length)h+='<div class="lab" style="margin-top:14px">Their notes</div><table class="t"><tbody>'+nt.slice(-12).map(function(k){return '<tr><td>'+esc(k)+'</td><td>'+esc(d.notes[k])+'</td></tr>'}).join('')+'</tbody></table>'}
     h+='<p class="meta">Last saved '+esc(fmtTs(x.updated))+' · record '+esc(x.code)+'</p></div>'});

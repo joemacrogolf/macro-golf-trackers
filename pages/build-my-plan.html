@@ -863,7 +863,8 @@ function curKey(){return sessKey(S.week,S.day)}
 function ord(k){var m=String(k).match(/^w(\d+)-s(\d+)$/);return m?(+m[1])*100+(+m[2]):-1}
 function groups(b){var out=[],by={};b.ex.forEach(function(e){if(e.slot){if(!by[e.slot]){by[e.slot]={slot:e.slot,variants:[]};out.push(by[e.slot])}by[e.slot].variants.push(e)}else out.push({slot:null,variants:[e]})});return out}
 function hasLogs(k,id){return ((S.logs[k]||{})[id]||[]).some(function(s){return s&&(s.w||s.r||s.rpe)})}
-function activeEx(g,k){
+function activeEx(g,k){var e=activeEx0(g,k);return window.MGSwap&&MGSwap.apply?MGSwap.apply(e,k):e} /* src/swap.js: an exercise the client swapped */
+function activeEx0(g,k){
   if(g.variants.length===1)return g.variants[0];
   var ch=(S.choice[k]||{})[g.slot],f=g.variants.filter(function(v){return v.id===ch})[0];if(f)return f;
   f=g.variants.filter(function(v){return hasLogs(k,v.id)})[0];if(f)return f;
@@ -945,6 +946,7 @@ function renderEx(b,g,e,tag,logged){
   }
   var head=g.variants.length>1?'<div class="choice"><label class="lbl" for="ch-'+esc(g.slot)+'">Pick one · '+g.variants.length+' options</label><select id="ch-'+esc(g.slot)+'" data-slot="'+esc(g.slot)+'">'+g.variants.map(function(v){return '<option value="'+esc(v.id)+'"'+(v.id===e.id?' selected':'')+'>'+esc(v.name)+'</option>'}).join('')+'</select></div>':'<div class="disp">'+esc(e.name)+'</div>';
   var type=e.kind?'<div class="type'+(e.max?' power':'')+'">'+esc(e.kind)+'</div>':'';
+  if(window.MGSwap)type+='<button type="button" class="swapbtn" data-swap="'+esc(e.id)+'" aria-label="Swap '+esc(e.name)+'"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>'+(e.swappedFrom?'Swapped · change':'Swap')+'</button>';
   var note=(e.focus||e.note)?'<p class="ex-note">'+esc(e.focus)+(e.focus&&e.note?' ':'')+esc(e.note)+'</p>':'';
   return '<div class="ex"><div class="ex-top"><div class="tag">'+esc(tag)+'</div><div class="ex-name">'+head+type+'</div><div class="targets">'+tiles+'</div></div>'+note+
     (e.inc?'<p class="wt">'+esc(wtInfo(e).t)+'</p>':'')+'<table class="sets"><thead><tr><th>Set</th><th>'+(e.inc?wtInfo(e).h:'Load')+'</th><th>'+(e.unit==='m'?'Metres':e.unit==='s'?'Secs':'Reps')+'</th><th>'+(e.max?'Speed':e.free?'RPE (opt.)':'RPE')+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
@@ -959,7 +961,9 @@ function renderLive(){
   $('liveSets').textContent=r.done+'/'+r.total;$('liveOn').textContent=r.done?r.on+'/'+r.done:'–';$('liveRpe').textContent=r.rn?fmt(r.rs/r.rn):'–';
   $('liveBar').style.width=(r.total?r.done/r.total*100:0)+'%';return r;
 }
-function exById(id){var f=null;SESSIONS.forEach(function(d){d.blocks.forEach(function(b){b.ex.forEach(function(e){if(e.id===id)f=e})})});return f}
+function exById(id){var f=null;SESSIONS.forEach(function(d){d.blocks.forEach(function(b){b.ex.forEach(function(e){if(e.id===id)f=e})})});
+  if(!f&&String(id).indexOf('~')>0){var b0=exById(String(id).split('~')[0]);if(b0){f={};for(var q in b0)f[q]=b0[q];f.id=id}} /* swapped exercise: same sets / reps / effort as the one it replaced */
+  return f}
 function setVal(exId,i,field,val){var k=curKey();S.logs[k]=S.logs[k]||{};var a=S.logs[k][exId]=S.logs[k][exId]||[];a[i]=a[i]||{};a[i][field]=val;save()}
 function keepFocus(fn){var a=document.activeElement,id=a&&a.tagName!=='SELECT'&&a.id;fn();if(id){var n=$(id);if(n)n.focus()}}
 function maybeRest(exId,i,wasDone){
@@ -1321,7 +1325,7 @@ function noBlur(b){['mousedown','pointerdown'].forEach(function(t){b.addEventLis
 function allEx(){var out=[];try{if(typeof SESSIONS!=='undefined')SESSIONS.forEach(function(d){d.blocks.forEach(function(b){out=out.concat(b.ex)})})}catch(e){}
   try{if(typeof PLAN!=='undefined')PLAN.phases.forEach(function(p){(p.days||[]).forEach(function(d){d.blocks.forEach(function(b){out=out.concat(b.ex)})})})}catch(e){}
   try{if(typeof WORKOUTS!=='undefined')WORKOUTS.forEach(function(w){out=out.concat(w.ex)})}catch(e){}return out}
-function exById(id){var a=allEx();for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null}
+function exById(id){var a=allEx();for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];if(String(id).indexOf('~')>0)return exById(String(id).split('~')[0]);return null}
 function stepOf(id){var e=exById(id);return e&&typeof e.inc==='number'?e.inc:2.5}
 /* ---------- 1. faster logging: RPE taps, same as last, -/+ ---------- */
 var box=null,obs=null;
@@ -1373,7 +1377,8 @@ function done(sp){var mins=sp.start?Math.max(1,Math.round((Date.now()-sp.start)/
   document.body.appendChild(o);o.addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(!b&&e.target!==o)return;o.remove();if(b&&b.dataset.x==='bests')bests()});window.scrollTo(0,0)}
 /* ---------- 3. my bests ---------- */
 function points(){var P=[];function push(e,date,w,r){if(w==null||r==null||!date)return;P.push({id:e.id,name:e.name,u:(typeof wtInfo==='function'?wtInfo(e).u:'kg'),date:date,w:w,r:r})}
-  try{if(CFG.family==='dan'){Object.keys(S.finished).forEach(function(k){var m=k.match(/^w(\d+)-s(\d+)$/);if(!m)return;var d=SESSIONS[+m[2]];if(!d)return;d.blocks.forEach(function(b){b.ex.forEach(function(e){if(!e.inc||e.max)return;((S.logs[k]||{})[e.id]||[]).forEach(function(s){if(isDone(e,s))push(e,S.finished[k],n(s.w),n(s.r))})})})})}
+  try{if(CFG.family==='dan'){Object.keys(S.finished).forEach(function(k){var m=k.match(/^w(\d+)-s(\d+)$/);if(!m)return;var d=SESSIONS[+m[2]];if(!d)return;d.blocks.forEach(function(b){b.ex.forEach(function(e){if(!e.inc||e.max)return;((S.logs[k]||{})[e.id]||[]).forEach(function(s){if(isDone(e,s))push(e,S.finished[k],n(s.w),n(s.r))});
+    Object.keys(S.logs[k]||{}).forEach(function(id){if(id.indexOf(e.id+'~')!==0)return;var nm=(S.swaps&&S.swaps.names&&S.swaps.names[id])||e.name,e2={};for(var q in e)e2[q]=e[q];e2.id=id;e2.name=nm;(S.logs[k][id]||[]).forEach(function(s){if(isDone(e2,s))push(e2,S.finished[k],n(s.w),n(s.r))})})})})})}
   else if(CFG.family==='pure'){Object.keys(S.finished).forEach(function(k){var m=k.match(/^p(\d+)-w(\d+)-d(\d+)$/);if(!m)return;var ph=PLAN.phases.find(function(p){return p.id===+m[1]});var d=ph&&ph.days&&ph.days[+m[3]];if(!d)return;
       d.blocks.forEach(function(b){b.ex.forEach(function(e){if(!e.inc||e.max||e.band||e.secs)return;((S.logs[k]||{})[e.id]||[]).forEach(function(s){var ok=typeof isDone==='function'?isDone(e,s):setDone(s);if(ok)push(e,S.finished[k],n(s.w),n(s.r))})})})})}
   else if(CFG.family==='harry'){S.history.forEach(function(h){WORKOUTS[h.workout].ex.forEach(function(x0){var e=ex(x0,h);if(!e.inc)return;((h.logs||{})[e.id]||[]).forEach(function(s){if(s&&n(s.r)!=null&&n(s.rpe)!=null)push(e,h.date,n(s.w),n(s.r))})})})}
@@ -1416,4 +1421,5 @@ UX.init({family:'dan',home:true});
 <script src="{{BASE}}src/sync.js"></script>
 <script src="{{BASE}}src/review.js"></script>
 <script src="{{BASE}}src/videos.js"></script>
+<script src="{{BASE}}src/swap.js"></script>
 <script>MGSync.init({plan:"build-my-plan",planName:"Build My Plan"})</script>
