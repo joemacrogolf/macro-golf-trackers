@@ -125,6 +125,20 @@ Golf personal plans use exactly the same message and the same My Plan button.
 
 **Golf leaderboards (live).** Each golf page exposes `window.MG_SCORE()`; `summary()` sends it as `_mgSummary.golf` plus `lbHide`. `src/leaderboard.js` (loaded by `golfwarm.js`) shows a Leaders tab with This month / All time boards, read from the public read-only `mg_leaderboard` function (`supabase/004-leaderboard.sql`). `MGSync.init({…, fixedName:'Name'})` skips the name box on one-person plans.
 
+## Intake forms, Plan Builder and TPI (13 Nov, Joe)
+
+- **Player forms** replace the two Google Forms: Pre Match-Up Questionnaire (`pages/form-match-up.html`, www.macro.golf/match-up-questionnaire; `/match-up` is the Match Up Audit page) and Client Onboarding (`pages/form-onboarding.html`, www.macro.golf/onboarding). Shared engine `src/intake-form.js`. Answers go to `mg_intake` through the public `mg_intake_submit` (insert only). Add `?email=…&name=…` to a form link to fill those in. Keep each question's `k` value: the Plan Builder reads them.
+- **Plan Builder** (`pages/plan-builder.html`, coach password, www.macro.golf/plan-builder-529481): six-week performance plans (initial or follow-up phase), saved in `mg_coach_plans`. "Fill plan from answers" maps the forms into the plan (`applyIntake`); "Forms received, no plan yet" in All plans starts a plan from a form. Database: `supabase/012-intake-plans.sql`.
+- **TPI results (no API).** When a coach asks for a player's TPI results, open pro.mytpi.com in their Chrome (Joe's account is signed in) → Clients → search the name (TPI records often have no email) → Screen History → newest Level 1 Screen. On the SCREEN tab each `.accordion-group-item` has an `.indicator` with class `passed`, `caution` or `failed`; clicking a row shows the criterion. The SWING tab lists likely swing characteristics with % and High / Moderate / Low. Give the coach this block to paste into the Plan Builder's TPI box (it parses it and saves a copy as an `mg_intake` 'tpi' row):
+  ```
+  TPI · Paul Bruce · Level 1 · 13 May 2026 · Fitness handicap 9
+  Lower Quarter Rotation: Fail
+  Pelvic Tilt: Caution - can't pelvic tilt both ways
+  Setup Posture: Pass
+  Swing: Loss of Posture 67% High; Early Extension 67% High; Sway 66% Moderate
+  ```
+  Read only: never create, edit, email or delete anything in TPI Pro.
+
 ## Live Kajabi pages (site 2147673115)
 
 | Page | Path | Theme | Section / block |

@@ -1,0 +1,969 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+<!-- Plan Builder (coach-only, www.macro.golf/plan-builder-529481). Coaches build six-week performance plans: initial (Phase 1) or
+     follow-up (week 6, 12, 18...). Coach dashboard password; plans in mg_coach_plans, player forms and TPI in mg_intake
+     (supabase/012-intake-plans.sql). "Fill plan from answers" maps form answers into the plan (applyIntake). -->
+<style>
+#pb{
+  /* Macro Golf brand world: black, off-white, yellow. Single dark theme by choice. */
+  --ink:#0c0c0b; --panel:#161614; --panel2:#1d1d1a; --line:#2c2b27; --paper:#f3f1ea; --muted:#9b988d; --gold:#FFD900; --gold-dim:#5c5000;
+  --ok:#5fd38d; --warn:#ffb347; --bad:#ff6b5e;
+  --display:"Anton", Impact, "Arial Narrow", sans-serif;
+  --body:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"Space Mono", ui-monospace, Menlo, monospace;
+  /* Layout: fixed header, left rail of plan sections, one section in the editor at a time */
+  color-scheme:dark;
+}
+#pb *{box-sizing:border-box}
+#pb button,#pb input,#pb select,#pb textarea{font:inherit;color:inherit}
+#pb :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){#pb *{transition:none!important;animation:none!important}
+}
+#pb .app{display:grid;grid-template-rows:auto 1fr;height:100%}
+#pb header{display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--line);background:#000;flex-wrap:wrap}
+#pb .brand{display:flex;align-items:baseline;gap:10px}
+#pb .brand b{font:28px/1 var(--display);letter-spacing:.02em}
+#pb .brand b i{font-style:normal;color:var(--gold)}
+#pb .brand span{font:11px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+#pb .who{display:flex;align-items:center;gap:10px;margin-left:8px;min-width:0}
+#pb .who strong{font:18px/1 var(--display);letter-spacing:.03em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+#pb .chip{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);white-space:nowrap}
+#pb .chip.gold{background:var(--gold);border-color:var(--gold);color:#000;font-weight:700}
+#pb .chip.ok{border-color:var(--ok);color:var(--ok)}
+#pb .spacer{flex:1}
+#pb .status{font:12px var(--mono);color:var(--muted)}
+#pb .status.err{color:var(--bad)}
+#pb .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;font-weight:600;font-size:13px;white-space:nowrap}
+#pb .btn:hover{border-color:var(--muted)}
+#pb .btn.gold{background:var(--gold);color:#000;border-color:var(--gold)}
+#pb .btn.gold:hover{filter:brightness(1.05)}
+#pb .btn.ghost{background:transparent}
+#pb .btn.sm{padding:5px 10px;font-size:12px}
+#pb .btn.danger{color:var(--bad)}
+#pb .btn:disabled{opacity:.45;cursor:not-allowed}
+#pb .iconbtn{background:none;border:1px solid transparent;color:var(--muted);cursor:pointer;padding:4px 7px;border-radius:5px;font-size:13px;line-height:1}
+#pb .iconbtn:hover{color:var(--paper);border-color:var(--line)}
+#pb .body{display:grid;grid-template-columns:240px 1fr;min-height:0}
+#pb nav.rail{border-right:1px solid var(--line);overflow:auto;padding:16px 10px;background:var(--panel)}
+#pb .rail h6{font:10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:4px 10px 10px}
+#pb .rail button{display:flex;width:100%;text-align:left;gap:10px;align-items:flex-start;padding:9px 10px;border:0;background:none;border-radius:6px;cursor:pointer;color:var(--paper)}
+#pb .rail button:hover{background:var(--panel2)}
+#pb .rail button.on{background:var(--panel2);box-shadow:inset 3px 0 0 var(--gold)}
+#pb .rail .n{font:11px var(--mono);color:var(--gold);min-width:20px;padding-top:2px}
+#pb .rail .l{display:flex;flex-direction:column;min-width:0}
+#pb .rail .l small{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pb main{overflow:auto;padding:28px clamp(16px,4vw,48px) 80px}
+#pb .wrap{max-width:980px;margin:0 auto}
+#pb .eyebrow{font:11px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+#pb h1,#pb h2{font-family:var(--display);font-weight:400;letter-spacing:.02em;text-transform:uppercase;margin:4px 0 6px;text-wrap:balance}
+#pb h1{font-size:40px;line-height:1}
+#pb h3{font:600 15px var(--body);margin:0}
+#pb .lede{color:var(--muted);max-width:68ch;margin:0 0 22px}
+#pb .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin:0 0 16px}
+#pb .card.hl{border-color:var(--gold-dim)}
+#pb .card-h{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+#pb .card-h .num{font:22px/1 var(--display);color:var(--gold)}
+#pb .grid{display:grid;gap:12px}
+#pb .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+#pb .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+#pb .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+#pb .span2{grid-column:span 2}
+#pb .full{grid-column:1/-1}
+#pb .f{display:flex;flex-direction:column;gap:5px;min-width:0}
+#pb .f>span{font:10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+#pb .f>span em{font-style:normal;color:var(--gold)}
+#pb input[type=text],#pb input[type=email],#pb input[type=number],#pb input[type=date],#pb input:not([type]),#pb select,#pb textarea{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:0}
+#pb textarea{resize:vertical;min-height:64px;line-height:1.45}
+#pb input:focus,#pb select:focus,#pb textarea:focus{border-color:var(--gold);outline:none}
+#pb ::placeholder{color:#5f5d55}
+#pb .hint{font-size:12px;color:var(--muted);margin:4px 0 0}
+#pb .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#pb .toggles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+#pb .tog{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--ink)}
+#pb .tog:has(input:checked){border-color:var(--gold-dim);background:#1a1806}
+#pb .tog input{accent-color:var(--gold);margin-top:3px}
+#pb .tog b{display:block;font-size:13px}
+#pb .tog small{color:var(--muted);font-size:11.5px}
+#pb .seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+#pb .seg button{background:var(--ink);border:0;padding:8px 14px;cursor:pointer;color:var(--muted);font-weight:600;font-size:13px}
+#pb .seg button.on{background:var(--gold);color:#000}
+#pb .computed{font:12px var(--mono);color:var(--paper);background:var(--ink);border:1px dashed var(--line);border-radius:6px;padding:9px 12px;letter-spacing:.04em}
+#pb .ie{display:flex;align-items:center;gap:6px}
+#pb .ie>span{font:9.5px var(--mono);letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+#pb .ie .dots{display:flex;gap:4px}
+#pb .ie button{width:26px;height:22px;border-radius:4px;border:1px solid var(--line);background:var(--ink);cursor:pointer;font:10px var(--mono);color:var(--muted)}
+#pb .ie button.on{background:var(--gold);border-color:var(--gold);color:#000;font-weight:700}
+#pb .drill{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--ink);display:grid;gap:10px;position:relative}
+#pb .drill[data-env=Technical]{box-shadow:inset 3px 0 0 #8fa7ff}
+#pb .drill[data-env=Random]{box-shadow:inset 3px 0 0 #5fd38d}
+#pb .drill[data-env=Competitive]{box-shadow:inset 3px 0 0 #ff8a5e}
+#pb .drill .top{display:grid;grid-template-columns:130px 1fr 170px 70px 86px auto;gap:8px;align-items:end}
+#pb .drill .mid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#pb .drill .bot{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+#pb .envlegend{display:flex;gap:14px;flex-wrap:wrap;font:11px var(--mono);color:var(--muted)}
+#pb .envlegend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+#pb .stack{display:grid;gap:10px}
+#pb .pair{display:grid;grid-template-columns:34px 1fr 120px 110px 92px auto;gap:8px;align-items:center}
+#pb .pair .lab{font:13px var(--mono);color:var(--gold);font-weight:700}
+#pb .pairhead{font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+#pb .check{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted);white-space:nowrap}
+#pb .check input{accent-color:var(--gold)}
+#pb .listrow{display:grid;gap:8px;align-items:start}
+#pb .lr-habit{grid-template-columns:200px 1fr 140px auto}
+#pb .lr-mob{grid-template-columns:1.3fr 150px 150px 1.4fr auto}
+#pb .lr-stat{grid-template-columns:1.4fr 1fr 1fr 1.3fr auto}
+#pb .lr-tpi{grid-template-columns:1.3fr 130px 1.6fr auto}
+#pb .lr-q{grid-template-columns:1fr 160px auto}
+#pb .chips{display:flex;flex-wrap:wrap;gap:6px}
+#pb .chips button{border:1px solid var(--line);background:var(--ink);border-radius:999px;padding:5px 11px;font-size:12px;cursor:pointer;color:var(--muted)}
+#pb .chips button.on{background:var(--gold);color:#000;border-color:var(--gold);font-weight:600}
+#pb .drop{border:1.5px dashed var(--line);border-radius:10px;padding:22px;text-align:center;background:var(--ink);cursor:pointer}
+#pb .drop.over{border-color:var(--gold);background:#1a1806}
+#pb .drop b{font:20px var(--display);letter-spacing:.03em;text-transform:uppercase;display:block}
+#pb .drop p{margin:6px 0 0;color:var(--muted);font-size:12.5px}
+#pb .ai{border:1px solid var(--gold-dim);background:#15140a;border-radius:10px;padding:16px;margin-top:14px}
+#pb .ai h4{margin:0 0 8px;font:11px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+#pb .ai ul{margin:6px 0 0;padding-left:18px}
+#pb .ai li{margin:2px 0}
+#pb .spin{display:inline-block;width:12px;height:12px;border:2px solid var(--gold);border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px}
+
+@keyframes sp{to{transform:rotate(360deg)}}#pb .banner{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);font-size:13px;margin-bottom:14px}
+#pb .banner.warn{border-color:#6b4d1a;background:#1f180b;color:#ffd59a}
+#pb .pager{display:flex;justify-content:space-between;margin-top:24px;gap:10px}
+#pb .checklist{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+#pb .checklist li{display:flex;gap:10px;align-items:center;font-size:13px}
+#pb .checklist .d{width:9px;height:9px;border-radius:50%;flex:none}
+#pb .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:none}
+#pb .scrim.open{display:block}
+#pb .drawer{position:fixed;top:0;left:0;bottom:0;width:min(440px,100%);background:var(--panel);border-right:1px solid var(--line);z-index:21;transform:translateX(-102%);transition:transform .2s;display:flex;flex-direction:column}
+#pb .drawer.open{transform:none}
+#pb .drawer header{background:var(--panel);border-bottom:1px solid var(--line)}
+#pb .drawer .list{overflow:auto;padding:12px;display:grid;gap:10px;align-content:start}
+#pb .pl{border:1px solid var(--line);border-radius:9px;padding:12px;background:var(--ink)}
+#pb .pl h3{font:18px/1.1 var(--display);letter-spacing:.03em;text-transform:uppercase;font-weight:400}
+#pb .pl .em{font-size:12px;color:var(--muted);margin:2px 0 10px;word-break:break-all}
+#pb .phases{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+#pb .phases button{border:1px solid var(--line);background:var(--panel2);border-radius:6px;padding:6px 10px;cursor:pointer;text-align:left;font-size:12px}
+#pb .phases button:hover{border-color:var(--gold)}
+#pb .phases button b{font-family:var(--mono);color:var(--gold);margin-right:4px}
+#pb .phases button.cur{border-color:var(--gold)}
+#pb .empty{color:var(--muted);text-align:center;padding:30px 10px;font-size:13px}
+@media (max-width:860px){#pb .body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+#pb nav.rail{display:flex;overflow-x:auto;padding:8px;border-right:0;border-bottom:1px solid var(--line)}
+#pb .rail h6{display:none}
+#pb .rail button{width:auto;flex:none}
+#pb .rail .l small{display:none}
+#pb .g3,#pb .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+#pb .drill .top{grid-template-columns:1fr 1fr}
+#pb .drill .mid{grid-template-columns:1fr}
+#pb .pair{grid-template-columns:30px 1fr 1fr}
+#pb .lr-habit,#pb .lr-mob,#pb .lr-stat,#pb .lr-tpi,#pb .lr-q{grid-template-columns:1fr}
+
+}
+@media (max-width:480px){#pb .g2,#pb .g3,#pb .g4{grid-template-columns:1fr}
+#pb .span2{grid-column:auto}
+}
+#pb .mgdoc{--d-ink:#0c0c0b;--d-paper:#faf9f5;--d-line:#dedbd0;--d-muted:#6d6a60;--d-gold:#FFD900;background:var(--d-paper);color:var(--d-ink);font:13.5px/1.55 "Inter",system-ui,sans-serif;border-radius:8px;overflow:hidden}
+#pb .mgdoc *{box-sizing:border-box}
+#pb .mgdoc .pg{padding:44px 48px;border-bottom:1px solid var(--d-line);break-after:page}
+#pb .mgdoc .runner{display:flex;justify-content:space-between;font:9.5px "Space Mono",monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--d-muted);margin-bottom:26px}
+#pb .mgdoc .cover{background:#0c0c0b;color:#f3f1ea;padding:56px 48px 48px}
+#pb .mgdoc .cover .wm{font:22px "Anton",Impact,sans-serif;letter-spacing:.04em;text-align:right}
+#pb .mgdoc .cover .wm i{font-style:normal;color:var(--d-gold)}
+#pb .mgdoc .cover h1{font:84px/0.92 "Anton",Impact,sans-serif;text-transform:uppercase;margin:90px 0 18px;letter-spacing:.01em;color:#f3f1ea}
+#pb .mgdoc .cover .name{font:30px "Anton",Impact,sans-serif;color:var(--d-gold);letter-spacing:.04em;text-transform:uppercase}
+#pb .mgdoc .cover .meta{display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:8px 56px;margin-top:70px}
+#pb .mgdoc .cover .meta span{font:10px "Space Mono",monospace;letter-spacing:.2em;color:#9b988d;text-transform:uppercase}
+#pb .mgdoc .cover .meta b{font:22px "Anton",Impact,sans-serif;letter-spacing:.03em;font-weight:400;text-transform:uppercase}
+#pb .mgdoc .sec{font:10px "Space Mono",monospace;letter-spacing:.2em;color:var(--d-muted);text-transform:uppercase}
+#pb .mgdoc h2{font:40px/1 "Anton",Impact,sans-serif;text-transform:uppercase;margin:6px 0 20px;letter-spacing:.01em;color:var(--d-ink)}
+#pb .mgdoc h3{font:20px/1.1 "Anton",Impact,sans-serif;text-transform:uppercase;letter-spacing:.02em;margin:0 0 6px;font-weight:400}
+#pb .mgdoc h4{font:10px "Space Mono",monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--d-muted);margin:18px 0 6px;font-weight:700}
+#pb .mgdoc p{margin:0 0 8px;max-width:72ch}
+#pb .mgdoc .box{border:1px solid var(--d-line);border-radius:6px;padding:18px 20px;margin-bottom:14px;background:#fff}
+#pb .mgdoc .box.dark{background:#0c0c0b;color:#f3f1ea;border-color:#0c0c0b}
+#pb .mgdoc .box.gold{border-left:5px solid var(--d-gold)}
+#pb .mgdoc .big{font:22px/1.15 "Anton",Impact,sans-serif;text-transform:uppercase;letter-spacing:.02em;margin:4px 0 10px}
+#pb .mgdoc .cols{display:grid;gap:14px}
+#pb .mgdoc .c2{grid-template-columns:1fr 1fr}
+#pb .mgdoc .c3{grid-template-columns:repeat(3,1fr)}
+#pb .mgdoc .c4{grid-template-columns:repeat(4,1fr)}
+#pb .mgdoc .stat b{display:block;font:40px/1 "Anton",Impact,sans-serif}
+#pb .mgdoc .stat span{font:10px "Space Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--d-muted)}
+#pb .mgdoc .prio{display:grid;grid-template-columns:56px 1fr;gap:6px 14px;padding:16px 0;border-top:1px solid var(--d-line)}
+#pb .mgdoc .prio .pn{font:32px/1 "Anton",Impact,sans-serif;color:var(--d-ink)}
+#pb .mgdoc .prio .pc{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;grid-column:2}
+#pb .mgdoc .habit{display:grid;grid-template-columns:40px 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--d-line)}
+#pb .mgdoc .habit .hn{font:26px/1 "Anton",Impact,sans-serif}
+#pb .mgdoc table{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0 10px}
+#pb .mgdoc th{font:9.5px "Space Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--d-muted);text-align:left;padding:7px 8px;border-bottom:2px solid var(--d-ink)}
+#pb .mgdoc td{padding:9px 8px;border-bottom:1px solid var(--d-line);vertical-align:top}
+#pb .mgdoc td.k{font:12px "Space Mono",monospace;font-weight:700}
+#pb .mgdoc .env{font:10px "Space Mono",monospace;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin:16px 0 4px;padding-bottom:4px;border-bottom:1px solid var(--d-ink)}
+#pb .mgdoc .scale{display:inline-flex;align-items:center;gap:4px;font:8.5px "Space Mono",monospace;letter-spacing:.1em;color:var(--d-muted)}
+#pb .mgdoc .scale i{width:14px;height:10px;border:1px solid #bdb9ad;border-radius:2px;display:inline-block}
+#pb .mgdoc .scale i.on{background:var(--d-ink);border-color:var(--d-ink)}
+#pb .mgdoc .rpe{display:inline-block;font:10px "Space Mono",monospace;font-weight:700;background:var(--d-gold);padding:2px 6px;border-radius:3px}
+#pb .mgdoc .blank{display:inline-block;min-width:60px;border-bottom:1px solid #bdb9ad;height:14px}
+#pb .mgdoc .grid6 td,#pb .mgdoc .grid6 th{text-align:center}
+#pb .mgdoc .grid6 td:first-child,#pb .mgdoc .grid6 th:first-child{text-align:left}
+#pb .mgdoc .note{font-size:12px;color:var(--d-muted)}
+#pb .mgdoc ul{margin:4px 0 8px;padding-left:18px}
+#pb .mgdoc .end{background:#0c0c0b;color:#f3f1ea;padding:80px 48px;text-align:left}
+#pb .mgdoc .end b{font:72px/0.95 "Anton",Impact,sans-serif;text-transform:uppercase;display:block}
+#pb .mgdoc .end b i{font-style:normal;color:var(--d-gold)}
+#pb .mgdoc .foot{font:9px "Space Mono",monospace;letter-spacing:.16em;color:var(--d-muted);margin-top:26px;text-transform:uppercase}
+@media (max-width:700px){#pb .mgdoc .pg,#pb .mgdoc .cover{padding:28px 20px}
+#pb .mgdoc .c2,#pb .mgdoc .c3,#pb .mgdoc .c4,#pb .mgdoc .prio .pc{grid-template-columns:1fr}
+#pb .mgdoc .cover h1{font-size:52px}
+}
+
+
+#pb{background:var(--ink);color:var(--paper);font:14px/1.5 var(--body);min-height:100vh;text-align:left}
+#pb [hidden]{display:none!important}
+#pb .app{height:auto;min-height:100vh}
+#pb>.app>header{position:sticky;top:0;z-index:30}
+#pb nav.rail{position:sticky;top:61px;align-self:start;max-height:calc(100vh - 61px)}
+#pb main{overflow:visible}
+#pb .scrim{z-index:1000}#pb .drawer{z-index:1001}
+#pb h1,#pb h2{font-family:var(--display)!important;font-weight:400!important;color:var(--paper)!important}
+#pb h3{color:var(--paper)!important}
+#pb p{color:inherit}
+#pb .gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+#pb .gatebox{width:100%;max-width:420px;display:grid;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:28px}
+#pb .gatebox h1{font-size:34px;line-height:1;margin:6px 0 0}
+#pb input[type=password]{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px 12px;color:var(--paper)}
+#pb .ansbox{border:1px solid var(--line);border-radius:8px;background:var(--ink);margin-top:10px}
+#pb .ansbox summary{cursor:pointer;padding:10px 12px;font-weight:600;font-size:13px}
+#pb .anslist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;padding:4px 12px 14px}
+#pb .ans span{font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+#pb .ans p{margin:2px 0 0;font-size:13px;color:var(--paper)}
+@media (max-width:700px){#pb .anslist{grid-template-columns:1fr}#pb nav.rail{position:static;max-height:none}}
+</style>
+<div id="pb">
+<div class="gate" id="pb-gate"><form class="gatebox" id="pb-login">
+  <div class="brand"><b>MACRO <i>GOLF</i></b><span>Plan builder</span></div>
+  <h1>Build a six-week plan</h1>
+  <p class="lede" style="margin:0">For Macro Golf coaches. Use the coach dashboard password.</p>
+  <label class="f" for="pb-pw"><span>Coach password</span><input type="password" id="pb-pw" autocomplete="current-password" required></label>
+  <button class="btn gold" id="pb-loginbtn" type="submit" style="justify-content:center;min-height:46px;font-size:15px">Open</button>
+  <p class="status err" id="pb-loginerr" role="alert"></p>
+</form></div>
+
+<div class="app" id="pb-app" hidden>
+  <header>
+    <div class="brand"><b>MACRO <i>GOLF</i></b><span>Plan builder</span></div>
+    <div class="who" id="pb-who"></div>
+    <div class="spacer"></div>
+    <span class="status" id="pb-status" aria-live="polite"></span>
+    <button class="btn" id="pb-openPlans" type="button">All plans</button>
+    <button class="btn gold" id="pb-newPlan" type="button">+ New plan</button>
+  </header>
+  <div class="body">
+    <nav class="rail" id="pb-rail" aria-label="Plan sections"></nav>
+    <main id="pb-main"><div class="wrap" id="pb-view"></div></main>
+  </div>
+</div>
+
+<div class="scrim" id="pb-scrim"></div>
+<aside class="drawer" id="pb-drawer" aria-label="All plans">
+  <header>
+    <div class="brand"><b style="font-size:22px">PLAYERS</b><span id="pb-plCount"></span></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="pb-closePlans" type="button" aria-label="Close">✕</button>
+  </header>
+  <div style="padding:12px 12px 0"><input id="pb-plSearch" type="text" placeholder="Search by name or email"></div>
+  <div class="list" id="pb-plList"></div>
+</aside>
+
+<datalist id="dl-coach"><option>Joe</option><option>Jack</option><option>Sam</option><option>James</option></datalist>
+<datalist id="dl-drills"></datalist>
+<datalist id="dl-ex"></datalist>
+<datalist id="dl-mob"></datalist>
+<datalist id="dl-habit"></datalist>
+<datalist id="dl-stat"></datalist>
+<datalist id="dl-tpi"></datalist>
+
+</div>
+<script>
+"use strict";
+(function(){
+/* ---------- reference data ---------- */
+const DRILLS=["Drill supplied by Jack through CoachNow","Approach Boss","Reducing Height","Random Number Generator","Par 5 Game","Par 18 Game","Worst Lies","High, Medium and Low Flight Chips","Ladder Drill","Up and Down Challenge","9 Ball Flight Game","Pressure Putts (3-6-9 ft)","Front Tee Scramble","Mulligan"];
+const EXERCISES=["Pull up","High hands slam","Cable lat pull down","Med ball slam","Dumbbell incline bench press","Cable power row","Cable woodchop","Low to high cable cross chop","Dumbbell goblet squat","Counter movement jump","Dumbbell RDL","Power jumps","Dumbbell split squat","Single leg deficit hop","Laying leg curl","Explosive step downs","Dumbbell flat bench press","Supine chest throws","Dumbbell single arm row","Power press up","Kneeling landmine single shoulder press","Jump back overhead slams","Dumbbell bicep curl","Tricep push down","Dumbbell side lunge","Skater jumps","Cable full rotation","Med ball discus throw","Dumbbell reverse lunge","Heiden to vertical jump","Cable straight arm pull downs","Overhead throw","Trap bar deadlift","Hip thrust","Pallof press","Copenhagen plank","Dead bug","Farmer carry","Med ball scoop toss","Overspeed swings"];
+const MOBILITY=["90/90 hip switches","Open books","Quadruped thoracic rotation","Cat cow","World's greatest stretch","Half kneeling hip flexor stretch","Pigeon stretch","Bench lat stretch","Deep squat hold","Wrist flexor and extensor stretch","Ankle rocks","Pelvic tilts","Pelvic rotations with club","Seated trunk rotations","Cossack squat","Banded shoulder dislocates","Couch stretch","Golf Warm Up (Macro Golf App)"];
+const AREAS=["Hips","Thoracic spine","Shoulders","Lats","Ankles","Wrists / forearms","Neck","Pelvic control","Hamstrings","Full body"];
+const HABITS=["Meditation","Gratitude","Breath work","Visualisation","Performance Log entry","Journalling","Daily steps","Hydration","Screen-free wind down"];
+const STATS=["Scoring average","Handicap index","Fairways hit %","Greens in regulation","Up and down %","Putts per round","3-putts per round","Penalty shots per round","Strokes gained: approach","Driver clubhead speed (mph)","Driver ball speed (mph)","7 iron carry (yds)"];
+const TPI=["Pelvic tilt","Pelvic rotation","Torso rotation","Overhead deep squat","Toe touch","90/90","Single leg balance","Lat test","Lower quarter rotation","Seated trunk rotation","Bridge with leg extension","Cervical rotation","Forearm rotation","Wrist hinge","Wrist flexion / extension"];
+const SWING=["S-posture","C-posture","Loss of posture","Flat shoulder plane","Early extension","Over the top","Sway","Slide","Late buckling","Reverse spine angle","Forward lunge","Hanging back","Casting / early release","Scooping","Chicken winging"];
+const ENVS=["Technical","Random","Competitive"];
+const RPE_LABEL={1:"No consequence",2:"Relaxed",3:"Light focus",4:"Some challenge",5:"Stretching",6:"Demanding",7:"Consequence",8:"Pressure",9:"Tournament feel",10:"One ball, everything on it"};
+const PHYS_TEMPLATE=[
+ ["Arm chop + upper body",[["Pull up","High hands slam"],["Cable lat pull down","Med ball slam"],["Dumbbell incline bench press","Cable power row"],["Cable woodchop","Low to high cable cross chop*"]]],
+ ["Vertical + lower body",[["Dumbbell goblet squat","Counter movement jump"],["Dumbbell RDL","Power jumps"],["Dumbbell split squat","Single leg deficit hop*"],["Laying leg curl","Explosive step downs*"]]],
+ ["Wrist release + upper body",[["Dumbbell flat bench press","Supine chest throws"],["Dumbbell single arm row","Power press up"],["Kneeling landmine single shoulder press","Jump back overhead slams*"],["Dumbbell bicep curl","!Tricep push down"]]],
+ ["Rotation + lateral + second power exposure",[["Dumbbell side lunge","Skater jumps*"],["Cable full rotation","Med ball discus throw*"],["Dumbbell reverse lunge","Heiden to vertical jump*"],["Cable straight arm pull downs","Overhead throw"]]]
+];
+function fillDatalists(){
+  const put=(id,arr)=>{document.getElementById(id).innerHTML=arr.map(v=>`<option value="${esc(v)}"></option>`).join("")};
+  put("dl-drills",DRILLS);put("dl-ex",EXERCISES);put("dl-mob",MOBILITY);put("dl-habit",HABITS);put("dl-stat",STATS);put("dl-tpi",TPI);
+}
+
+/* ---------- utils ---------- */
+const $=(s,el=document)=>el.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nl2br=s=>esc(s).replace(/\n/g,"<br>");
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-5);
+const clone=o=>JSON.parse(JSON.stringify(o));
+function getPath(obj,path){return path.split(".").reduce((o,k)=>o==null?undefined:o[k],obj)}
+function setPath(obj,path,val){const ks=path.split(".");let o=obj;for(let i=0;i<ks.length-1;i++){if(o[ks[i]]==null)o[ks[i]]={};o=o[ks[i]]}o[ks[ks.length-1]]=val}
+function deepFill(target,defaults){for(const k in defaults){if(target[k]===undefined)target[k]=clone(defaults[k]);else if(defaults[k]&&typeof defaults[k]==="object"&&!Array.isArray(defaults[k])&&typeof target[k]==="object"&&!Array.isArray(target[k]))deepFill(target[k],defaults[k])}return target}
+function addDays(iso,n){const d=iso?new Date(iso+"T12:00:00"):new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
+function nextMonday(){const d=new Date();const add=(8-d.getDay())%7||7;d.setDate(d.getDate()+add);return d.toISOString().slice(0,10)}
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+function fmtDate(iso){if(!iso)return"";const d=new Date(iso+"T12:00:00");return d.getDate()+" "+MONTHS[d.getMonth()].slice(0,3)+" "+d.getFullYear()}
+function blockLabel(p){if(!p.startDate)return"";const s=new Date(p.startDate+"T12:00:00"),e=new Date(addDays(p.startDate,(p.weeks||6)*7-1)+"T12:00:00");const a=MONTHS[s.getMonth()],b=MONTHS[e.getMonth()];return (a===b?a:a+" – "+b)+" "+e.getFullYear()}
+const reviewWeek=p=>(p.phase||1)*(p.weeks||6);
+
+/* ---------- plan model ---------- */
+function blankDrill(env="Technical",name="",o={}){return Object.assign({id:uid(),env,name,source:name.includes("CoachNow")?"CoachNow":"Macro Golf App",detail:"",volume:env==="Technical"?15:9,unit:"balls",intention:"",thought:"",attention:env==="Technical"?2:env==="Random"?4:5,rpe:env==="Technical"?3:env==="Random"?5:8},o)}
+function newPlan(){
+  return {
+    id:uid(),playerName:"",playerEmail:"",coach:"",phase:1,isFirst:true,startDate:nextMonday(),weeks:6,status:"draft",createdAt:Date.now(),
+    include:{habits:true,practice:true,oncourse:true,physical:true,mobility:true,weight:true,stats:true,recovery:false,checkin:true},
+    intake:{source:"Match Up Session",fileName:"",summary:"",handicap:"",homeClub:"",goals:"",history:"",injuries:"",equipment:"",tpi:[],swing:[],notes:""},
+    review:{progress:"",learned:"",nextStep:"",nextStepDetail:"",adherence:{practice:"",physical:"",habits:""},priorityReview:[],notes:""},
+    focus:{outcome:"",outcomeDetail:"",whyNow:"",evidence:"",progressByReview:""},
+    priorities:[{id:uid(),title:"",start:"",why:"",change:""}],
+    habits:[{id:uid(),name:"Meditation",detail:"",dose:"10 min minimum"},{id:uid(),name:"Gratitude",detail:"",dose:"Daily"},{id:uid(),name:"Breath work",detail:"",dose:"Through the day"}],
+    weekly:{practice:2,physical:4,oncourse:1,connected:""},
+    practice:{intro:"",sessions:[]},
+    oncourse:{games:[],technical:"",intention:"",strategy:"",preround:"",postround:"Complete statistics for full rounds. Send the reflection and relevant statistics to the coaching team. Rather than diagnosing poor shots, look for patterns: what performed well, what became more difficult, what changed when performance changed, which parts of practice transferred.",balance:4},
+    physical:{days:4,structure:"Supersets · A1 / A2 pairs",rest:"45–60s between rounds",strength:"3 sets: 12 / 10 / 8 reps @ RPE 7 / 8 / 9",power:"3 x 5 @ RPE 10 (maximal intent, not failure)",progression:"Keep exercises, sets and reps consistent through the block. Progress through load using the prescribed RPE. Do not add fatigue for the sake of progression.",note:"This plan should assist your golf performance. If at any time your training is limiting your ability to practise or play, notify your coach immediately.",dayList:[]},
+    mobility:{frequency:"Daily",when:"Morning or before practice",items:[]},
+    weight:{unit:"kg",start:"",target:"",direction:"Maintain",frequency:"Weekly",day:"Monday",conditions:"First thing in the morning, before food",waist:false,notes:""},
+    stats:[{id:uid(),name:"Scoring average",baseline:"",target:"",how:""},{id:uid(),name:"Greens in regulation",baseline:"",target:"",how:""},{id:uid(),name:"Up and down %",baseline:"",target:"",how:""},{id:uid(),name:"Putts per round",baseline:"",target:"",how:""}],
+    recovery:{sleep:"8",routine:"",notes:""},
+    checkin:{day:"Sunday",questions:[
+      {id:uid(),q:"On course, how internal or external was your attention? (1 internal – 10 external)",type:"1–10"},
+      {id:uid(),q:"How easily could you access your golf this week?",type:"1–10"},
+      {id:uid(),q:"Hardest practice session: how much pressure did it carry? (Golf RPE)",type:"1–10"},
+      {id:uid(),q:"Practice sessions completed",type:"Number"},
+      {id:uid(),q:"Physical sessions completed",type:"Number"},
+      {id:uid(),q:"Days daily habits were completed",type:"Number"},
+      {id:uid(),q:"One thing that transferred, one thing that got harder",type:"Text"}
+    ]}
+  };
+}
+function normalise(p){return deepFill(p,newPlan())}
+
+/* ---------- state ---------- */
+let plan=null, section="player", pass="", INTAKE=[], loggedIn=false;
+const plans=new Map();
+let saving=false, pendingSave=false, saveTimer=null, dirty=false;
+const ui={confirmDel:false,fillMsg:"",tpiMsg:"",tpiText:"",mobMsg:""};
+
+/* ---------- field helpers ---------- */
+const V=path=>{const v=getPath(plan,path);return v==null?"":v};
+const T=(path,label,ph="",cls="",list="")=>`<label class="f ${cls}"><span>${label}</span><input type="text" data-b="${path}" value="${esc(V(path))}" placeholder="${esc(ph)}"${list?` list="${list}"`:""}></label>`;
+const N=(path,label,cls="",step="1")=>`<label class="f ${cls}"><span>${label}</span><input type="number" step="${step}" data-b="${path}" data-t="num" value="${esc(V(path))}"></label>`;
+const A=(path,label,ph="",rows=3,cls="")=>`<label class="f ${cls}"><span>${label}</span><textarea rows="${rows}" data-b="${path}" placeholder="${esc(ph)}">${esc(V(path))}</textarea></label>`;
+const S=(path,label,opts,cls="")=>`<label class="f ${cls}"><span>${label}</span><select data-b="${path}">${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}"${String(V(path))===String(v)?" selected":""}>${esc(l)}</option>`}).join("")}</select></label>`;
+const IE=(path)=>{const v=+V(path)||3;return `<div class="ie" role="group" aria-label="Attention: internal to external"><span>Internal</span><div class="dots">${[1,2,3,4,5].map(n=>`<button type="button" data-act="ie" data-path="${path}" data-v="${n}" class="${v===n?"on":""}" aria-pressed="${v===n}">${n}</button>`).join("")}</div><span>External</span></div>`};
+const RPE=(path)=>`<label class="f" style="min-width:210px"><span>Pressure · Golf RPE</span><select data-b="${path}" data-t="num">${Array.from({length:10},(_,i)=>i+1).map(n=>`<option value="${n}"${+V(path)===n?" selected":""}>${n} · ${RPE_LABEL[n]}</option>`).join("")}</select></label>`;
+const del=(path,label="Remove")=>`<button type="button" class="iconbtn" data-act="del" data-path="${path}" aria-label="${label}" title="${label}">✕</button>`;
+const mv=(path,dir)=>`<button type="button" class="iconbtn" data-act="mv" data-path="${path}" data-dir="${dir}" aria-label="Move ${dir<0?"up":"down"}">${dir<0?"↑":"↓"}</button>`;
+
+/* ---------- sections ---------- */
+const SECTIONS=[
+ {k:"player",l:"Player & phase",show:()=>true,meta:()=>plan.playerName?`Phase ${plan.phase} · ${plan.isFirst?"Initial":"Follow-up"}`:"Start here"},
+ {k:"intake",l:()=>plan.isFirst?"Intake: forms & TPI":"Previous six weeks",show:()=>true,meta:()=>{const n=Object.keys(latestIntake(plan)).length;return plan.isFirst?(n?n+" form"+(n>1?"s":"")+" on file":"No forms yet"):(plan.review.progress?"Review written":"Review the last block")}},
+ {k:"focus",l:"Focus & priorities",show:()=>true,meta:()=>`${plan.priorities.filter(p=>p.title).length} priorities`},
+ {k:"habits",l:"Daily habits & weekly actions",show:()=>plan.include.habits,meta:()=>`${plan.habits.length} habits · ${plan.weekly.practice}/${plan.weekly.physical}/${plan.weekly.oncourse} per week`},
+ {k:"practice",l:"Practice plan",show:()=>plan.include.practice,meta:()=>{const d=plan.practice.sessions.reduce((a,s)=>a+s.drills.length,0);return `${plan.practice.sessions.length} sessions · ${d} drills`}},
+ {k:"oncourse",l:"On-course plan",show:()=>plan.include.oncourse,meta:()=>`${plan.oncourse.games.length} games`},
+ {k:"physical",l:"Physical plan",show:()=>plan.include.physical,meta:()=>`${plan.physical.dayList.length} days built`},
+ {k:"mobility",l:"Mobility",show:()=>plan.include.mobility,meta:()=>`${plan.mobility.items.length} exercises`},
+ {k:"weight",l:"Weight tracking",show:()=>plan.include.weight,meta:()=>plan.weight.start?`${plan.weight.start} → ${plan.weight.target||"?"} ${plan.weight.unit}`:"Set baseline"},
+ {k:"stats",l:"Performance stats",show:()=>plan.include.stats,meta:()=>`${plan.stats.length} KPIs`},
+ {k:"recovery",l:"Sleep & recovery",show:()=>plan.include.recovery,meta:()=>`${plan.recovery.sleep||"?"}h target`},
+ {k:"checkin",l:"Weekly check-in",show:()=>plan.include.checkin,meta:()=>`${plan.checkin.questions.length} questions · ${plan.checkin.day}`},
+ {k:"export",l:"Review & export",show:()=>true,meta:()=>plan.status==="ready"?"Ready to send":"Draft"}
+];
+const visible=()=>SECTIONS.filter(s=>s.show());
+const lab=s=>typeof s.l==="function"?s.l():s.l;
+
+function renderRail(){
+  const vs=visible();
+  $("#pb-rail").innerHTML=`<h6>Build the plan</h6>`+vs.map((s,i)=>`<button type="button" data-sec="${s.k}" class="${s.k===section?"on":""}"><span class="n">${String(i+1).padStart(2,"0")}</span><span class="l">${esc(lab(s))}<small>${esc(s.meta())}</small></span></button>`).join("");
+}
+function renderWho(){
+  $("#pb-who").innerHTML=plan?`<strong>${esc(plan.playerName||"New player")}</strong><span class="chip gold">Phase ${plan.phase}</span><span class="chip">${plan.isFirst?"Initial plan":"Follow-up · week "+reviewWeek(plan)+" review"}</span>${plan.status==="ready"?'<span class="chip ok">Ready</span>':""}`:"";
+}
+function go(k){section=k;render();PBMAIN.scrollTop=0}
+function render(){renderWho();renderRail();const s=SECTIONS.find(x=>x.k===section);if(!s||!s.show())section="player";$("#pb-view").innerHTML=VIEWS[section]()+pager()}
+function pager(){const vs=visible();const i=vs.findIndex(s=>s.k===section);const p=vs[i-1],n=vs[i+1];return `<div class="pager">${p?`<button class="btn ghost" type="button" data-sec="${p.k}">← ${esc(lab(p))}</button>`:"<span></span>"}${n?`<button class="btn gold" type="button" data-sec="${n.k}">${esc(lab(n))} →</button>`:""}</div>`}
+function head(eyebrow,title,lede){const i=visible().findIndex(x=>x.k===section);eyebrow=String(i+1).padStart(2,"0")+" / "+eyebrow.replace(/^\d+ \/ /,"");return `<div class="eyebrow">${esc(eyebrow)}</div><h1>${title}</h1>${lede?`<p class="lede">${lede}</p>`:""}`}
+
+const VIEWS={
+player(){
+  const p=plan;const end=addDays(p.startDate,p.weeks*7);
+  const tog=(k,t,d)=>`<label class="tog"><input type="checkbox" data-b="include.${k}" data-t="bool"${p.include[k]?" checked":""}><span><b>${t}</b><small>${d}</small></span></label>`;
+  return head("01 / Set up","Player & phase","Who the plan is for, which block it is, and what goes in it. Plans save automatically once there is a player name.")+
+  `<div class="card"><div class="grid g2">
+    ${T("playerName","Player name <em>*</em>","e.g. Paul Bruce")}
+    <label class="f"><span>Player email <em>*</em></span><input type="email" data-b="playerEmail" value="${esc(p.playerEmail)}" placeholder="player@email.com"></label>
+    <div class="full" id="pb-intakechip">${intakeChip()}</div>
+    ${T("coach","Lead coach","Who is building this plan","","dl-coach")}
+    <div class="f"><span>Is this their first six-week plan?</span><div class="seg"><button type="button" data-act="first" data-v="1" class="${p.isFirst?"on":""}">Yes · initial plan</button><button type="button" data-act="first" data-v="0" class="${!p.isFirst?"on":""}">No · follow-up</button></div></div>
+  </div></div>
+  <div class="card"><div class="grid g4">
+    ${N("phase","Phase")}
+    <label class="f"><span>Block starts</span><input type="date" data-b="startDate" value="${esc(p.startDate)}"></label>
+    ${N("weeks","Weeks")}
+    <div class="f"><span>Review</span><div class="computed">Week ${reviewWeek(p)} · ${fmtDate(end)}</div></div>
+  </div><p class="hint">Block runs ${esc(blockLabel(p))}. Phase ${p.phase} covers weeks ${(p.phase-1)*p.weeks}–${reviewWeek(p)} of their coaching.</p></div>
+  <div class="card"><div class="card-h"><h3>What should this plan include?</h3><span class="hint" style="margin:0">Focus and priorities are always in.</span></div>
+  <div class="toggles">
+    ${tog("habits","Daily habits","Meditation, gratitude, breath work, weekly action targets")}
+    ${tog("practice","Practice plan","Sessions by environment with intention, cues and internal/external targets")}
+    ${tog("oncourse","On-course plan","Games, strategy, pre-round and post-round reflection")}
+    ${tog("physical","Physical plan","Training days built as A1/A2 supersets with RPE loading")}
+    ${tog("mobility","Mobility","Routine linked to TPI limitations")}
+    ${tog("weight","Weight tracking","Baseline, target and weigh-in routine")}
+    ${tog("stats","Performance stats","Scoring KPIs with baseline and target")}
+    ${tog("recovery","Sleep & recovery","Sleep target and wind-down routine")}
+    ${tog("checkin","Weekly check-in","Golf RPE and attention questions the player answers each week")}
+  </div></div>`;
+},
+intake(){return plan.isFirst?intakeInitial():intakeFollow()},
+focus(){
+  const pr=plan.priorities.map((x,i)=>`<div class="card"><div class="card-h"><span class="num">${String(i+1).padStart(2,"0")}</span><input type="text" data-b="priorities.${i}.title" value="${esc(x.title)}" placeholder="Priority title, e.g. Transfer to performance" style="flex:1;font-weight:600"> ${mv("priorities."+i,-1)}${mv("priorities."+i,1)}${del("priorities."+i)}</div>
+    <div class="grid g3">${A(`priorities.${i}.start`,"Starting point","Where they are now",3)}${A(`priorities.${i}.why`,"Why it matters","Why this, why now",3)}${A(`priorities.${i}.change`,"Desired change","What will be different by the review",3)}</div></div>`).join("");
+  return head("03 / Direction","Focus & priorities","The overall outcome for the block and the three to five priorities that serve it.")+
+  `<div class="card hl"><div class="card-h"><h3>Overall outcome</h3></div>
+  <div class="grid g2">${A("focus.outcome","Overall outcome (headline)","e.g. Continue developing the improvements from Phase 1 while seeing more of them in your scoring.",3,"full")}
+  ${A("focus.outcomeDetail","Supporting line","e.g. This block is not about starting again...",2,"full")}
+  ${A("focus.whyNow","Why this matters now","",4)}${A("focus.evidence","Evidence so far (one per line)","Strike is better\nIron play is improving",4)}
+  ${A("focus.progressByReview","Meaningful progress by the review","e.g. Your improved golf begins to show more clearly in your on-course performance and scoring.",2,"full")}</div></div>
+  <div class="row" style="margin:22px 0 10px"><h2 style="margin:0">Main priorities</h2><span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="priorities">+ Add priority</button></div>${pr||'<p class="hint">No priorities yet.</p>'}`;
+},
+habits(){
+  const rows=plan.habits.map((h,i)=>`<div class="listrow lr-habit">${T(`habits.${i}.name`,i?"":"Habit","","","dl-habit")}${A(`habits.${i}.detail`,i?"":"How to do it","What good looks like",2)}${T(`habits.${i}.dose`,i?"":"Minimum dose","e.g. 10 min")}<div style="padding-top:${i?0:20}px">${mv("habits."+i,-1)}${mv("habits."+i,1)}${del("habits."+i)}</div></div>`).join("");
+  return head("04 / Actions","Daily habits & weekly actions","The non-negotiables each day, and how many sessions of each kind per week.")+
+  `<div class="card"><div class="card-h"><h3>Daily habits</h3><span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="habits">+ Add habit</button></div><div class="stack">${rows||'<p class="hint">No habits yet.</p>'}</div></div>
+  <div class="card"><div class="card-h"><h3>Weekly actions</h3></div><div class="grid g3">${N("weekly.practice","Practice sessions / week")}${N("weekly.physical","Physical sessions / week")}${N("weekly.oncourse","On-course practice / week (min)")}</div>
+  <div style="margin-top:12px">${A("weekly.connected","How it's connected","How technical work, practice, on-course play and habits link together this block.",3)}</div></div>`;
+},
+practice(){
+  const ss=plan.practice.sessions.map((s,si)=>`<div class="card"><div class="card-h"><span class="num">S${si+1}</span><input type="text" data-b="practice.sessions.${si}.name" value="${esc(s.name)}" placeholder="Session name" style="flex:1;font-weight:600">${mv("practice.sessions."+si,-1)}${mv("practice.sessions."+si,1)}${del("practice.sessions."+si,"Remove session")}</div>
+    ${T(`practice.sessions.${si}.warmup`,"Warm-up","")}
+    <div class="stack" style="margin-top:12px">${s.drills.map((d,di)=>drillRow(si,di,d)).join("")||'<p class="hint">No drills yet.</p>'}</div>
+    <div class="row" style="margin-top:12px">${ENVS.map(e=>`<button class="btn sm" type="button" data-act="adddrill" data-s="${si}" data-env="${e}">+ ${e}</button>`).join("")}</div>
+    <div style="margin-top:12px">${A(`practice.sessions.${si}.close`,"Session note for the player","e.g. Across the session, attention moves progressively away from the movement and towards solving the golfing task.",2)}</div></div>`).join("");
+  return head("05 / Practice","Practice plan","Build each session in environments. Every drill gets an intention, a thought or cue, an attention target on the internal–external scale, and a pressure level (Golf RPE).")+
+  `<div class="card"><div class="grid g3" style="font-size:12.5px;color:var(--muted)">
+   <div><b style="color:var(--paper)">Attention scale</b><br>1 = fully internal: body, feels, technical change. 5 = fully external: strike, ball flight, target, task.</div>
+   <div><b style="color:var(--paper)">Golf RPE</b><br>How much consequence the drill carries. 1 = free reps, no outcome. 10 = one ball, score attached, tournament feel.</div>
+   <div><b style="color:var(--paper)">Intention vs thought</b><br>Intention is the shot or outcome they commit to. Thought is the single cue or feel they hold, if any.</div></div>
+   <div class="envlegend" style="margin-top:12px"><span><i style="background:#8fa7ff"></i>Technical</span><span><i style="background:#5fd38d"></i>Random</span><span><i style="background:#ff8a5e"></i>Competitive</span></div></div>
+   ${A("practice.intro","Intro note for this player (optional)","Anything specific about how they should approach practice this block",2)}
+   <div style="height:14px"></div>${ss}
+   <div class="row"><button class="btn" type="button" data-act="tpl-session" data-v="full">+ Full swing session (template)</button><button class="btn" type="button" data-act="tpl-session" data-v="short">+ Short game session (template)</button><button class="btn ghost" type="button" data-act="tpl-session" data-v="blank">+ Blank session</button></div>`;
+},
+oncourse(){
+  const g=plan.oncourse.games.map((x,i)=>`<div class="card"><div class="card-h"><span class="num">G${i+1}</span><input type="text" data-b="oncourse.games.${i}.name" value="${esc(x.name)}" list="dl-drills" placeholder="Game name" style="flex:1;font-weight:600">${del("oncourse.games."+i)}</div>
+    <div class="grid g3">${A(`oncourse.games.${i}.detail`,"How to play","",3,"span2")}<div class="stack">${T(`oncourse.games.${i}.holes`,"Holes","9 or 18")}${T(`oncourse.games.${i}.target`,"Scoring challenge","What can you shoot?")}</div>
+    ${A(`oncourse.games.${i}.intention`,"Intention","What they are testing",2)}${A(`oncourse.games.${i}.thought`,"Thought / cue","",2)}<div class="f"><span>Attention target</span>${IE(`oncourse.games.${i}.attention`)}</div></div></div>`).join("");
+  return head("06 / Transfer","On-course plan","On-course games and how the player gives themselves the best chance to access their golf.")+
+  `<div class="row" style="margin-bottom:12px"><h2 style="margin:0">On-course games</h2><span class="spacer"></span><button class="btn sm" type="button" data-act="tpl-game" data-v="scramble">+ Front tee scramble</button><button class="btn sm" type="button" data-act="tpl-game" data-v="mulligan">+ Mulligan</button><button class="btn sm" type="button" data-act="tpl-game" data-v="blank">+ Blank game</button></div>${g||'<p class="hint">No games yet.</p>'}
+  <div class="card"><div class="card-h"><h3>How they play on the course</h3></div><div class="grid g2">
+   ${A("oncourse.technical","Technical work","Where technical work belongs during this block",3)}${A("oncourse.intention","Intention","How they commit to the shot before stepping in",3)}
+   ${A("oncourse.strategy","Strategy","Decision-making and course management",3)}${A("oncourse.preround","Pre-round preparation","Body and golf readiness",3)}
+   ${A("oncourse.postround","Post-round reflection","",4,"full")}
+   <div class="f full"><span>Overall on-course balance</span>${IE("oncourse.balance")}</div></div></div>`;
+},
+physical(){
+  const ph=plan.physical;
+  const days=ph.dayList.map((d,di)=>`<div class="card"><div class="card-h"><span class="num">D${di+1}</span><input type="text" data-b="physical.dayList.${di}.title" value="${esc(d.title)}" placeholder="Day focus, e.g. Arm chop + upper body" style="flex:1;font-weight:600">${mv("physical.dayList."+di,-1)}${mv("physical.dayList."+di,1)}${del("physical.dayList."+di,"Remove day")}</div>
+    <div class="pair pairhead"><span></span><span>Exercise</span><span>Type</span><span>Reps (blank = scheme)</span><span>Each side</span><span></span></div>
+    <div class="stack" style="margin-top:6px">${d.pairs.map((pr,pi)=>{const L=String.fromCharCode(65+pi);return ["a","b"].map((s,j)=>`<div class="pair"><span class="lab">${L}${j+1}</span><input type="text" list="dl-ex" data-b="physical.dayList.${di}.pairs.${pi}.${s}.name" value="${esc(pr[s].name)}" placeholder="Exercise"><select data-b="physical.dayList.${di}.pairs.${pi}.${s}.type">${["Strength","Power","Accessory","Core","Mobility"].map(o=>`<option${pr[s].type===o?" selected":""}>${o}</option>`).join("")}</select><input type="text" data-b="physical.dayList.${di}.pairs.${pi}.${s}.reps" value="${esc(pr[s].reps)}" placeholder="${pr[s].type==="Power"?"3 x 5 @ 10":"12/10/8"}"><label class="check"><input type="checkbox" data-t="bool" data-b="physical.dayList.${di}.pairs.${pi}.${s}.each"${pr[s].each?" checked":""}> Each side</label>${j===1?del(`physical.dayList.${di}.pairs.${pi}`,"Remove superset"):"<span></span>"}</div>`).join("")}).join('<div style="height:4px"></div>')}</div>
+    <div class="row" style="margin-top:10px"><button class="btn sm" type="button" data-act="addpair" data-d="${di}">+ Superset</button></div></div>`).join("");
+  const mismatch=ph.dayList.length&&+ph.days!==ph.dayList.length;
+  return head("07 / Physical","Physical plan","Training days built as A1/A2 supersets. Strength work uses the pyramid, power work uses maximal intent.")+
+  `<div class="card"><div class="grid g3">${N("physical.days","Days per week")}${T("physical.structure","Structure")}${T("physical.rest","Rest")}
+   ${T("physical.strength","Strength / hypertrophy loading","","span2")}${T("physical.power","Power / speed loading")}
+   ${A("physical.progression","Progression","",3,"span2")}${A("physical.note","Note to the player","",3)}</div></div>
+   ${mismatch?`<div class="banner warn">You have ${ph.dayList.length} days built but ${ph.days} days per week set.</div>`:""}
+   <div class="row" style="margin-bottom:12px"><h2 style="margin:0">Training days</h2><span class="spacer"></span>${ph.dayList.length?"":`<button class="btn" type="button" data-act="tpl-phys">Load 4-day superset template</button>`}<button class="btn sm" type="button" data-act="addday">+ Add day</button></div>${days||'<p class="hint">No days yet. Load the template to start from the standard four-day structure and swap exercises.</p>'}`;
+},
+mobility(){
+  const fails=plan.intake.tpi.filter(t=>t.result&&t.result!=="Pass");
+  const rows=plan.mobility.items.map((m,i)=>`<div class="listrow lr-mob">${T(`mobility.items.${i}.name`,i?"":"Exercise","","","dl-mob")}${S(`mobility.items.${i}.area`,i?"":"Area",["",...AREAS])}${T(`mobility.items.${i}.dose`,i?"":"Dose","e.g. 2 x 8 each side")}${T(`mobility.items.${i}.cue`,i?"":"Why / linked finding","e.g. Torso rotation limited")}<div style="padding-top:${i?0:20}px">${del("mobility.items."+i)}</div></div>`).join("");
+  return head("08 / Mobility","Mobility","A short routine aimed at what is limiting their golf movement.")+
+  (fails.length?`<div class="card hl"><div class="card-h"><h3>TPI limitations on file</h3><span class="spacer"></span><button class="btn sm gold" type="button" data-act="mobsuggest">Suggest mobility for these</button></div><div class="chips">${fails.map(f=>`<button type="button" class="on" tabindex="-1">${esc(f.test)} · ${esc(f.result)}</button>`).join("")}</div>${ui.mobMsg?`<p class="hint">${esc(ui.mobMsg)}</p>`:""}</div>`:"")+
+  `<div class="card"><div class="grid g2">${S("mobility.frequency","Frequency",["Daily","5x per week","3x per week","Before every session","Before practice and training"])}${T("mobility.when","When")}</div></div>
+  <div class="card"><div class="card-h"><h3>Routine</h3><span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="mobility.items">+ Add exercise</button></div><div class="stack">${rows||'<p class="hint">No mobility work yet.</p>'}</div></div>`;
+},
+weight(){
+  const w=plan.weight,s=parseFloat(w.start),t=parseFloat(w.target);let calc="";
+  if(s&&t){const per=(t-s)/plan.weeks,pct=Math.abs(per)/s*100;calc=`<div class="computed">${per>0?"+":""}${per.toFixed(2)} ${w.unit} per week over ${plan.weeks} weeks · ${pct.toFixed(1)}% of bodyweight per week${pct>1?' <span style="color:var(--warn)">· faster than 1% a week, check this is realistic</span>':""}</div>`}
+  return head("09 / Body","Weight tracking","Baseline, target and a consistent weigh-in routine so the trend is reliable.")+
+  `<div class="card"><div class="grid g4">${S("weight.unit","Unit",["kg","lbs","st"])}${T("weight.start","Starting weight","")}${T("weight.target","Target by review","")}${S("weight.direction","Direction",["Lose","Maintain","Gain"])}
+  ${S("weight.frequency","Weigh-in frequency",["Daily (use weekly average)","Weekly","Twice weekly"])}${S("weight.day","Weigh-in day",["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday","Every day"])}${T("weight.conditions","Conditions","","span2")}
+  ${calc?`<div class="full">${calc}</div>`:""}
+  <label class="check full"><input type="checkbox" data-t="bool" data-b="weight.waist"${w.waist?" checked":""}> Also track waist measurement</label>
+  ${A("weight.notes","Notes for the player","",2,"full")}</div></div>`;
+},
+stats(){
+  const rows=plan.stats.map((s,i)=>`<div class="listrow lr-stat">${T(`stats.${i}.name`,i?"":"Metric","","","dl-stat")}${T(`stats.${i}.baseline`,i?"":"Baseline","")}${T(`stats.${i}.target`,i?"":"Target by review","")}${T(`stats.${i}.how`,i?"":"How it's measured","e.g. Last 5 full rounds")}<div style="padding-top:${i?0:20}px">${del("stats."+i)}</div></div>`).join("");
+  return head("10 / Measure","Performance stats","The numbers that tell you whether practice is transferring to scoring.")+
+  `<div class="card"><div class="card-h"><h3>KPIs</h3><span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="stats">+ Add metric</button></div><div class="stack">${rows||'<p class="hint">No KPIs yet.</p>'}</div></div>`;
+},
+recovery(){
+  return head("11 / Recovery","Sleep & recovery","")+`<div class="card"><div class="grid g3">${T("recovery.sleep","Sleep target (hours)","")}${A("recovery.routine","Wind-down routine","",3,"span2")}${A("recovery.notes","Recovery notes","Rest days, travel, tournament weeks",3,"full")}</div></div>`;
+},
+checkin(){
+  const rows=plan.checkin.questions.map((q,i)=>`<div class="listrow lr-q">${T(`checkin.questions.${i}.q`,i?"":"Question","")}${S(`checkin.questions.${i}.type`,i?"":"Answer type",["1–10","Number","Yes / No","Text"])}<div style="padding-top:${i?0:20}px">${mv("checkin.questions."+i,-1)}${mv("checkin.questions."+i,1)}${del("checkin.questions."+i)}</div></div>`).join("");
+  return head("12 / Check-in","Weekly check-in","What the player reports back each week. The golf RPE and attention questions show whether the plan's targets are landing.")+
+  `<div class="card"><div class="grid g3">${S("checkin.day","Check-in day",["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"])}</div></div>
+  <div class="card"><div class="card-h"><h3>Questions</h3><span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="checkin.questions">+ Add question</button></div><div class="stack">${rows}</div></div>`;
+},
+export(){
+  const issues=checks();
+  return head("13 / Finish","Review & export","Check what's missing, mark it ready, then download the player's plan.")+
+  `<div class="card"><div class="card-h"><h3>Checklist</h3></div><ul class="checklist">${issues.map(([ok,t])=>`<li><span class="d" style="background:${ok?"var(--ok)":"var(--warn)"}"></span>${esc(t)}</li>`).join("")}</ul></div>
+  <div class="card"><div class="row">
+    <div class="seg"><button type="button" data-act="status" data-v="draft" class="${plan.status!=="ready"?"on":""}">Draft</button><button type="button" data-act="status" data-v="ready" class="${plan.status==="ready"?"on":""}">Ready to send</button></div>
+    <span class="spacer"></span>
+    <button class="btn" type="button" data-act="copyjson">Copy plan data</button>
+    <button class="btn" type="button" data-act="print">Print / save as PDF</button><button class="btn gold" type="button" data-act="download" id="dlBtn">Download plan (HTML)</button>
+  </div><p class="hint" id="exportMsg">Print opens the plan in a new tab ready to save as PDF. The download is a web page that opens in any browser. "Copy plan data" gives you the full plan to paste into Claude for the designed PDF.</p>
+  <div class="row" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><button class="btn sm" type="button" data-act="startnext">Start Phase ${plan.phase+1} from this plan</button><span class="spacer"></span>${ui.confirmDel?`<span class="hint" style="margin:0">Delete this plan for everyone?</span><button class="btn sm danger" type="button" data-act="delplan">Yes, delete</button><button class="btn sm ghost" type="button" data-act="canceldel">Cancel</button>`:`<button class="btn sm ghost danger" type="button" data-act="askdel">Delete plan</button>`}</div></div>
+  <h2 style="margin:26px 0 12px">Preview</h2><div class="mgdoc">${docBody(plan)}</div>`;
+}
+};
+
+function drillRow(si,di,d){
+  const b=`practice.sessions.${si}.drills.${di}`;
+  return `<div class="drill" data-env="${esc(d.env)}">
+   <div class="top">${S(b+".env","Environment",ENVS)}${T(b+".name","Drill / game","","","dl-drills")}${S(b+".source","Source",["Macro Golf App","CoachNow","Custom"])}${T(b+".volume","Volume","")}${S(b+".unit","Unit",["balls","shots","mins","holes","reps"])}<div class="row" style="gap:0">${mv(b,-1)}${mv(b,1)}${del(b,"Remove drill")}</div></div>
+   ${T(b+".detail","How to do it","e.g. Find video in the Macro Golf App")}
+   <div class="mid">${T(b+".intention","Intention","The shot or outcome they commit to")}${T(b+".thought","Thought / cue","Single feel or cue, or 'none'")}</div>
+   <div class="bot"><div class="f"><span>Attention target</span>${IE(b+".attention")}</div>${RPE(b+".rpe")}</div></div>`;
+}
+
+/* ---------- intake views ---------- */
+function intakeInitial(){
+  const ik=plan.intake;
+  const tpi=ik.tpi.map((t,i)=>`<div class="listrow lr-tpi">${T(`intake.tpi.${i}.test`,i?"":"Test","","","dl-tpi")}${S(`intake.tpi.${i}.result`,i?"":"Result",["","Pass","Limited","Fail","Pain"])}${T(`intake.tpi.${i}.note`,i?"":"Note","e.g. Left side restricted")}<div style="padding-top:${i?0:20}px">${del("intake.tpi."+i)}</div></div>`).join("");
+  return head("02 / Starting point","Intake: forms & TPI","Their Pre Match-Up and Onboarding answers, and TPI results. Fill the plan from them in one click, then edit anything.")+
+  `${answersCard()}${tpiCard()}
+  <div class="card"><div class="card-h"><h3>Player background</h3></div><div class="grid g3">
+   ${T("intake.handicap","Handicap / scoring","")}${T("intake.homeClub","Home club","")}${T("intake.equipment","Launch monitor / tech","")}
+   ${A("intake.goals","Goals","What they want from coaching",3,"span2")}${A("intake.injuries","Injuries & limitations","",3)}
+   ${A("intake.history","Golf history & current game","Strengths, weaknesses, typical miss",3,"span2")}${A("intake.summary","Coach summary","Your read on where they are",3)}</div></div>
+  <div class="card"><div class="card-h"><h3>TPI screen</h3><span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="intake.tpi">+ Add test</button><button class="btn sm ghost" type="button" data-act="tpi-all">Add full TPI list</button></div><div class="stack">${tpi||'<p class="hint">No TPI results recorded.</p>'}</div>
+  <h4 class="f" style="margin:16px 0 8px"><span>Swing characteristics observed</span></h4><div class="chips">${SWING.map(s=>`<button type="button" data-act="swing" data-v="${esc(s)}" class="${ik.swing.includes(s)?"on":""}" aria-pressed="${ik.swing.includes(s)}">${esc(s)}</button>`).join("")}</div></div>
+  <div class="card">${A("intake.notes","Other notes","",3)}</div>`;
+}
+function intakeFollow(){
+  const r=plan.review;
+  const pr=r.priorityReview.map((x,i)=>`<div class="listrow" style="grid-template-columns:1.2fr 190px 1.6fr auto">${T(`review.priorityReview.${i}.title`,i?"":"Last block's priority","")}${S(`review.priorityReview.${i}.rating`,i?"":"Progress",[["0","Not rated"],["1","1 · No change"],["2","2 · Slight"],["3","3 · Clear progress"],["4","4 · Strong progress"],["5","5 · Achieved"]])}${T(`review.priorityReview.${i}.note`,i?"":"Evidence","")}<div style="padding-top:${i?0:20}px">${del("review.priorityReview."+i)}</div></div>`).join("");
+  return head("02 / Review","Your previous six weeks",`How Phase ${plan.phase-1} went. This becomes the opening section of the player's plan.`)+
+  `${tpiCard()}
+  <div class="card"><div class="card-h"><h3>Last block's priorities</h3><span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="review.priorityReview">+ Add</button></div><div class="stack">${pr||'<p class="hint">Start this plan from the previous phase (All plans → Start next phase) to pull its priorities in here.</p>'}</div>
+  <div class="grid g3" style="margin-top:14px">${T("review.adherence.practice","Practice adherence","e.g. 80%")}${T("review.adherence.physical","Physical adherence","")}${T("review.adherence.habits","Habit adherence","")}</div></div>
+  <div class="card"><div class="card-h"><h3>Written review</h3></div>
+  ${A("review.notes","Coach notes (not shown to player)","Rough notes from the review call.",3)}
+  <div class="grid g2" style="margin-top:12px">${A("review.progress","Progress","What changed",4)}${A("review.learned","What we learned","What worked, what got in the way",4)}
+  ${A("review.nextStep","Next step (headline)","e.g. The improvement in your golf is not yet fully reflected in your scoring.",2)}${A("review.nextStepDetail","Next step (detail)","",2)}</div></div>${answersCard(true)}`;
+}
+
+/* ---------- checks ---------- */
+function checks(){
+  const p=plan,out=[];
+  out.push([!!p.playerName.trim(),"Player name"]);
+  out.push([/\S+@\S+\.\S+/.test(p.playerEmail),"Valid player email"]);
+  out.push([!!p.focus.outcome.trim(),"Overall outcome written"]);
+  out.push([p.priorities.some(x=>x.title.trim()),"At least one priority"]);
+  if(!p.isFirst)out.push([!!p.review.progress.trim(),"Previous six weeks review written"]);
+  if(p.include.practice){const d=p.practice.sessions.flatMap(s=>s.drills);out.push([d.length>0,"Practice sessions have drills"]);out.push([d.length>0&&d.every(x=>x.name.trim()),"Every drill has a name"]);out.push([d.length>0&&d.every(x=>x.intention.trim()),"Every drill has an intention"])}
+  if(p.include.physical)out.push([p.physical.dayList.length>0&&p.physical.dayList.every(d=>d.pairs.every(pr=>pr.a.name&&pr.b.name)),"Physical days complete"]);
+  if(p.include.mobility)out.push([p.mobility.items.length>0,"Mobility routine added"]);
+  if(p.include.weight)out.push([!!p.weight.start,"Starting weight recorded"]);
+  return out;
+}
+
+/* ---------- document (preview + export) ---------- */
+function docBody(p){
+  const name=p.playerName||"Player";let n=0;const sec=()=>String(++n).padStart(2,"0");
+  const runner=`<div class="runner"><span>${esc(name)} · Six-week performance plan · Phase ${p.phase}</span><span>Macro Golf</span></div>`;
+  const page=(title,inner)=>`<section class="pg">${runner}<div class="sec">${sec()} / ${esc(title)}</div>${inner}</section>`;
+  const scale=v=>`<span class="scale">INT ${[1,2,3,4,5].map(i=>`<i class="${i===+v?"on":""}"></i>`).join("")} EXT</span>`;
+  const lines=s=>String(s||"").split("\n").filter(x=>x.trim());
+  let h=`<section class="cover"><div class="wm">MACRO <i>GOLF</i></div><h1>Six-week<br>performance<br>plan</h1><div class="name">${esc(name)}</div>
+   <div class="meta"><span>Phase</span><span>Block</span><span>Duration</span><b>${p.phase}</b><b>${esc(blockLabel(p))}</b><b>${p.weeks} weeks</b></div></section>`;
+  if(!p.isFirst){const r=p.review;h+=page("Your previous six weeks",`<h2>Your previous six weeks</h2>
+    ${r.progress?`<div class="box"><h4>Progress</h4>${lines(r.progress).map(l=>`<p>${esc(l)}</p>`).join("")}</div>`:""}
+    ${r.learned?`<div class="box"><h4>What we learned</h4>${lines(r.learned).map(l=>`<p>${esc(l)}</p>`).join("")}</div>`:""}
+    ${r.priorityReview.some(x=>x.title)?`<table><tr><th>Phase ${p.phase-1} priority</th><th>Progress</th><th>Evidence</th></tr>${r.priorityReview.filter(x=>x.title).map(x=>`<tr><td class="k">${esc(x.title)}</td><td>${+x.rating?"●".repeat(+x.rating)+"○".repeat(5-x.rating):"–"}</td><td>${esc(x.note)}</td></tr>`).join("")}</table>`:""}
+    ${r.nextStep?`<div class="box dark"><h4 style="color:#9b988d">Next step</h4><div class="big">${esc(r.nextStep)}</div><p>${nl2br(r.nextStepDetail)}</p></div>`:""}`)}
+  else if(p.intake.summary||p.intake.goals){const ik=p.intake;h+=page("Your starting point",`<h2>Your starting point</h2><div class="cols c2">
+    ${ik.goals?`<div class="box gold"><h4>What you want from coaching</h4><p>${nl2br(ik.goals)}</p></div>`:""}${ik.summary?`<div class="box"><h4>Where you are now</h4><p>${nl2br(ik.summary)}</p></div>`:""}</div>
+    ${ik.tpi.filter(t=>t.result&&t.result!=="Pass").length?`<h4>Movement areas to develop</h4><table><tr><th>Screen</th><th>Result</th><th>Note</th></tr>${ik.tpi.filter(t=>t.result&&t.result!=="Pass").map(t=>`<tr><td class="k">${esc(t.test)}</td><td>${esc(t.result)}</td><td>${esc(t.note)}</td></tr>`).join("")}</table>`:""}`)}
+  const f=p.focus;
+  h+=page("Your six-week focus",`<h2>Your six-week focus</h2><div class="box dark"><h4 style="color:#9b988d">Overall outcome</h4><div class="big">${esc(f.outcome||"–")}</div><p>${nl2br(f.outcomeDetail)}</p></div>
+   <div class="cols c2"><div class="box"><h4>Why this matters now</h4><p>${nl2br(f.whyNow)}</p>${lines(f.evidence).length?`<ul>${lines(f.evidence).map(l=>`<li>${esc(l)}</li>`).join("")}</ul>`:""}</div><div class="box gold"><h4>Meaningful progress by the review</h4><div class="big">${esc(f.progressByReview)}</div></div></div>`);
+  const pr=p.priorities.filter(x=>x.title);
+  if(pr.length)h+=page("Your priorities",`<h2>Your main priorities</h2>${pr.map((x,i)=>`<div class="prio"><div class="pn">${String(i+1).padStart(2,"0")}</div><h3>${esc(x.title)}</h3><div class="pc"><div><h4>Starting point</h4><p>${nl2br(x.start)}</p></div><div><h4>Why it matters</h4><p>${nl2br(x.why)}</p></div><div><h4>Desired change</h4><p>${nl2br(x.change)}</p></div></div></div>`).join("")}`);
+  if(p.include.habits)h+=page("Your actions",`<h2>How you will get there</h2><h4>Daily habits</h4>${p.habits.filter(x=>x.name).map((x,i)=>`<div class="habit"><div class="hn">${i+1}</div><div><h3>${esc(x.name)}</h3><p>${nl2br(x.detail)}${x.dose?` <b>${esc(x.dose)}.</b>`:""}</p></div></div>`).join("")}
+   <h4>Weekly actions</h4><div class="cols c3"><div class="box stat"><span>Practice</span><b>${esc(p.weekly.practice)}X</b><span>per week</span></div><div class="box stat"><span>Physical training</span><b>${esc(p.weekly.physical)}X</b><span>per week</span></div><div class="box stat"><span>On-course practice</span><b>MIN ${esc(p.weekly.oncourse)}X</b><span>per week</span></div></div>
+   ${p.weekly.connected?`<div class="box gold"><h4>How it's connected</h4><p>${nl2br(p.weekly.connected)}</p></div>`:""}`);
+  if(p.include.practice&&p.practice.sessions.length){
+    h+=page("Your practice plan",`<h2>Your practice plan</h2>${p.practice.intro?`<p>${nl2br(p.practice.intro)}</p>`:""}<div class="cols c2">
+     <div class="box"><h3>01 Technical</h3><p>Deliberate movement change and exploration. Take time between shots and use feedback. Ball flight is information, not the only measure.</p></div>
+     <div class="box"><h3>02 Random</h3><p>Change the problem regularly: clubs, targets, shots. Full preparation for each ball. Attention moves towards producing the shot.</p></div>
+     <div class="box"><h3>03 Competitive</h3><p>One attempt matters. Games create consequence and test whether your golf stays accessible without repeated attempts.</p></div>
+     <div class="box"><h3>04 On-course</h3><p>The transfer environment. Games and constraints test whether practice skills are available on the course.</p></div></div>
+     <div class="box"><h4>Reading your plan</h4><p><b>Attention:</b> ${scale(1)} Internal is attention on body movement, feels or technical change. External is attention on strike, ball flight, target or task. <b>Golf RPE</b> <span class="rpe">1–10</span> is how much pressure and consequence the drill should carry. After each block, note how internal you actually felt.</p></div>`);
+    p.practice.sessions.forEach((s,si)=>{h+=`<section class="pg">${runner}<div class="sec">${String(n).padStart(2,"0")} / Your practice plan</div><h2>${esc(s.name||"Session "+(si+1))}</h2>${s.warmup?`<div class="box gold"><p>${nl2br(s.warmup)}</p></div>`:""}
+      ${ENVS.filter(e=>s.drills.some(d=>d.env===e)).map(e=>`<div class="env">${e}</div><table><tr><th>Drill</th><th>Volume</th><th>Intention · Thought</th><th>Target</th><th>You felt</th></tr>${s.drills.filter(d=>d.env===e).map(d=>`<tr><td><b>${esc(d.name)}</b><div class="note">${esc(d.detail||(d.source==="CoachNow"?"Supplied through CoachNow":d.source==="Macro Golf App"?"Find video in the Macro Golf App":""))}</div></td><td class="k">${esc(d.volume)} ${esc(d.unit)}</td><td>${d.intention?`<b>Intention:</b> ${esc(d.intention)}<br>`:""}${d.thought?`<b>Thought:</b> ${esc(d.thought)}`:""}</td><td>${scale(d.attention)}<br><span class="rpe">RPE ${esc(d.rpe)}</span></td><td><span class="blank"></span></td></tr>`).join("")}</table>`).join("")}
+      ${s.close?`<p class="note">${nl2br(s.close)}</p>`:""}</section>`});
+  }
+  if(p.include.oncourse){const o=p.oncourse;h+=page("Your on-course plan",`<h2>Your on-course plan</h2>
+    ${o.games.map((g,i)=>`<div class="box"><h4>Game ${i+1}${g.holes?" · "+esc(g.holes)+" holes":""}</h4><h3>${esc(g.name)}</h3><p>${nl2br(g.detail)}</p>${g.intention?`<p><b>Intention:</b> ${esc(g.intention)}</p>`:""}${g.thought?`<p><b>Thought:</b> ${esc(g.thought)}</p>`:""}<p>${scale(g.attention)} &nbsp; <b>${esc(g.target||"What can you shoot?")}</b> <span class="blank"></span></p></div>`).join("")}
+    <div class="cols c2">${[["Technical work",o.technical],["Intention",o.intention],["Strategy",o.strategy],["Pre-round preparation",o.preround]].filter(x=>x[1]).map(x=>`<div class="box"><h4>${x[0]}</h4><p>${nl2br(x[1])}</p></div>`).join("")}</div>
+    ${o.postround?`<div class="box gold"><h4>Post-round reflection</h4><p>${nl2br(o.postround)}</p></div>`:""}<p><b>On-course balance</b> ${scale(o.balance)}</p>`)}
+  if(p.include.physical&&p.physical.dayList.length){const ph=p.physical;h+=page("Your physical plan",`<h2>Your physical plan</h2>${ph.note?`<div class="box dark"><p>${nl2br(ph.note)}</p></div>`:""}
+    <div class="cols c3"><div class="box stat"><span>Frequency</span><b>${esc(ph.days)} days</b><span>per week</span></div><div class="box stat"><span>Structure</span><b style="font-size:22px;margin:8px 0">${esc(ph.structure)}</b></div><div class="box stat"><span>Rest</span><b style="font-size:22px;margin:8px 0">${esc(ph.rest)}</b></div></div>
+    <div class="cols c2"><div class="box"><h4>Strength / hypertrophy</h4><p>${esc(ph.strength)}</p></div><div class="box"><h4>Power / speed</h4><p>${esc(ph.power)}</p></div></div>
+    ${ph.progression?`<div class="box gold"><h4>Progression</h4><p>${nl2br(ph.progression)}</p></div>`:""}`);
+    ph.dayList.forEach((d,di)=>{h+=`<section class="pg">${runner}<div class="sec">${String(n).padStart(2,"0")} / Your physical plan</div><h2>Day ${di+1}</h2><h3>${esc(d.title)}</h3><table><tr><th></th><th>Exercise</th><th>Type</th><th>Prescription</th></tr>${d.pairs.map((pr,pi)=>["a","b"].map((s,j)=>{const e=pr[s];const rx=e.reps||(e.type==="Power"?ph.power:ph.strength);return `<tr><td class="k">${String.fromCharCode(65+pi)}${j+1}</td><td><b>${esc(e.name)}</b></td><td>${esc(e.type)}</td><td>${esc(rx)}${e.each?" · each side":""}</td></tr>`}).join("")).join("")}</table></section>`});
+  }
+  if(p.include.mobility&&p.mobility.items.length)h+=page("Your mobility",`<h2>Your mobility</h2><p><b>${esc(p.mobility.frequency)}</b>${p.mobility.when?" · "+esc(p.mobility.when):""}</p><table><tr><th>Exercise</th><th>Area</th><th>Dose</th><th>Why</th></tr>${p.mobility.items.map(m=>`<tr><td><b>${esc(m.name)}</b></td><td>${esc(m.area)}</td><td class="k">${esc(m.dose)}</td><td>${esc(m.cue)}</td></tr>`).join("")}</table>`);
+  if(p.include.weight){const w=p.weight;h+=page("Your weight tracking",`<h2>Weight tracking</h2><div class="cols c3"><div class="box stat"><span>Starting</span><b>${esc(w.start||"–")}</b><span>${esc(w.unit)}</span></div><div class="box stat"><span>Target by review</span><b>${esc(w.target||"–")}</b><span>${esc(w.unit)} · ${esc(w.direction)}</span></div><div class="box stat"><span>Weigh-in</span><b style="font-size:22px;margin:8px 0">${esc(w.frequency)}</b><span>${esc(w.day)}</span></div></div>
+    <p>${esc(w.conditions)}</p>${w.notes?`<p>${nl2br(w.notes)}</p>`:""}<table class="grid6"><tr><th></th>${Array.from({length:p.weeks},(_,i)=>`<th>Week ${i+1}</th>`).join("")}</tr><tr><td class="k">Weight</td>${"<td></td>".repeat(p.weeks)}</tr>${w.waist?`<tr><td class="k">Waist</td>${"<td></td>".repeat(p.weeks)}</tr>`:""}</table>`)}
+  if(p.include.stats&&p.stats.length)h+=page("Your numbers",`<h2>Your numbers</h2><table><tr><th>Metric</th><th>Baseline</th><th>Target by review</th><th>Measured by</th></tr>${p.stats.map(s=>`<tr><td><b>${esc(s.name)}</b></td><td class="k">${esc(s.baseline||"–")}</td><td class="k">${esc(s.target||"–")}</td><td>${esc(s.how)}</td></tr>`).join("")}</table>`);
+  if(p.include.recovery)h+=page("Sleep & recovery",`<h2>Sleep & recovery</h2><div class="cols c2"><div class="box stat"><span>Sleep target</span><b>${esc(p.recovery.sleep)}h</b><span>per night</span></div><div class="box"><h4>Wind-down</h4><p>${nl2br(p.recovery.routine)}</p></div></div>${p.recovery.notes?`<p>${nl2br(p.recovery.notes)}</p>`:""}`);
+  if(p.include.checkin)h+=page("Your weekly check-in",`<h2>Your weekly check-in</h2><p>Send this to the coaching team every <b>${esc(p.checkin.day)}</b>.</p><table class="grid6"><tr><th>Question</th>${Array.from({length:p.weeks},(_,i)=>`<th>W${i+1}</th>`).join("")}</tr>${p.checkin.questions.filter(q=>q.q).map(q=>`<tr><td>${esc(q.q)} <span class="note">(${esc(q.type)})</span></td>${"<td></td>".repeat(p.weeks)}</tr>`).join("")}</table>`);
+  h+=`<section class="end"><b>Let's get<br>to <i>work</i></b><div class="foot">Copyright Macro Golf Studios Ltd · macro.golf</div></section>`;
+  return h;
+}
+function exportHTML(p){
+  const css=[...document.styleSheets].flatMap(s=>{try{return[...s.cssRules].map(r=>r.cssText)}catch{return[]}}).filter(t=>t.includes(".mgdoc")).join("\n").replace(/#pb /g,"");
+  return `<!DOCTYPE html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(p.playerName)} · Six-Week Performance Plan · Phase ${p.phase}</title><link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"><style>body{margin:0;background:#e9e7e0}.mgdoc{max-width:900px;margin:24px auto;border-radius:0}@media print{body{background:#fff}.mgdoc{margin:0;max-width:none}.mgdoc .pg,.mgdoc .cover{break-after:page}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}\n${css}</style></head><body><div class="mgdoc">${docBody(p)}</div></body></html>`;
+}
+
+/* ---------- templates ---------- */
+function tplSession(kind){
+  const S=plan.practice.sessions,n=S.length+1;
+  if(kind==="full")S.push({id:uid(),name:"Session "+n,warmup:"Use the Golf Warm Up in the Macro Golf App for a body warm-up, then hit 10–15 balls gradually increasing speed.",close:"Across the session, attention moves progressively away from consciously working on movement and towards solving the golfing task.",drills:[
+    blankDrill("Technical","Drill supplied by Jack through CoachNow",{source:"CoachNow",volume:15}),blankDrill("Technical","Drill supplied by Jack through CoachNow",{source:"CoachNow",volume:15}),
+    blankDrill("Random","Approach Boss",{detail:"Find video in the Macro Golf App."}),blankDrill("Random","Reducing Height",{detail:"Find video in the Macro Golf App."}),
+    blankDrill("Competitive","Par 5 Game",{volume:12,detail:"Find video in the Macro Golf App."})]});
+  else if(kind==="short")S.push({id:uid(),name:"Short game session",warmup:"",close:"",drills:[
+    blankDrill("Technical","Worst Lies",{volume:"5–10",unit:"shots",detail:"Hit from the worst lies you can find."}),
+    blankDrill("Random","High, Medium and Low Flight Chips",{volume:9,unit:"shots",detail:"Film them and send to your coach for review."}),
+    blankDrill("Competitive","Par 18 Game",{volume:"",unit:"shots",detail:"Rotate between easy, medium and hard."})]});
+  else S.push({id:uid(),name:"Session "+n,warmup:"",close:"",drills:[blankDrill("Technical")]});
+}
+function tplGame(kind){
+  const g={id:uid(),name:"",detail:"",holes:"9",target:"What can you shoot?",intention:"",thought:"",attention:5};
+  if(kind==="scramble")Object.assign(g,{name:"Front Tee Scramble",holes:"9 or 18",detail:"Play from the forward tee. Play a one-man, three-ball scramble. You do not have to hit all three shots. If you hit a shot you are happy with, take it and move on."});
+  if(kind==="mulligan")Object.assign(g,{name:"Mulligan",holes:"9",detail:"Play 9 holes with one mulligan per hole. Keep track of where you use it and see how low you can go.",attention:4});
+  plan.oncourse.games.push(g);
+}
+const ex=(raw,def)=>{let name=raw,type=def,each=false;if(name.startsWith("!")){name=name.slice(1);type="Strength"}if(name.endsWith("*")){name=name.slice(0,-1);each=true}return{name,type,reps:"",each}};
+function tplPhys(){plan.physical.dayList=PHYS_TEMPLATE.map(([title,pairs])=>({id:uid(),title,pairs:pairs.map(([a,b])=>({id:uid(),a:ex(a,"Strength"),b:ex(b,"Power")}))}));plan.physical.days=4}
+const BLANK={priorities:()=>({id:uid(),title:"",start:"",why:"",change:""}),habits:()=>({id:uid(),name:"",detail:"",dose:""}),"mobility.items":()=>({id:uid(),name:"",area:"",dose:"",cue:""}),stats:()=>({id:uid(),name:"",baseline:"",target:"",how:""}),"intake.tpi":()=>({id:uid(),test:"",result:"",note:""}),"checkin.questions":()=>({id:uid(),q:"",type:"1–10"}),"review.priorityReview":()=>({id:uid(),title:"",rating:"0",note:""})};
+
+/* ---------- next phase ---------- */
+function startNext(src){
+  const p=normalise(clone(src));
+  p.id=uid();p.previousPlanId=src.id;p.phase=(+src.phase||1)+1;p.isFirst=false;p.status="draft";p.createdAt=Date.now();delete p.updatedAt;delete p.updatedBy;
+  p.startDate=addDays(src.startDate,(+src.weeks||6)*7);
+  p.review={progress:"",learned:"",nextStep:"",nextStepDetail:"",adherence:{practice:"",physical:"",habits:""},notes:"",priorityReview:(src.priorities||[]).filter(x=>x.title).map(x=>({id:uid(),title:x.title,rating:"0",note:""}))};
+  p.focus={outcome:"",outcomeDetail:"",whyNow:"",evidence:"",progressByReview:""};
+  return p;
+}
+
+/* ---------- events ---------- */
+function changed(rerender){dirty=true;setStatus("Unsaved changes");try{localStorage.setItem("mg-planbuilder-draft",JSON.stringify(plan))}catch(e){}clearTimeout(saveTimer);saveTimer=setTimeout(save,1200);if(rerender)render();else{renderRail();renderWho()}}
+function isStructural(path){return path.startsWith("include.")||path==="phase"||path==="weeks"||path==="startDate"||/\.env$/.test(path)||path==="weight.start"||path==="weight.target"||path==="weight.unit"||path==="physical.days"}
+function onField(e){
+  const el=e.target.closest("[data-b]");if(!el)return;
+  const path=el.dataset.b,t=el.dataset.t;let v=el.type==="checkbox"?el.checked:el.value;
+  if(t==="num")v=v===""?"":+v;
+  setPath(plan,path,v);
+  if(isStructural(path)&&e.type==="change"){const y=PBMAIN.scrollTop;changed(true);PBMAIN.scrollTop=y}else changed(false);
+}
+$("#pb-main").addEventListener("input",e=>{if(e.target.matches("input[type=text],input[type=email],input:not([type]),textarea"))onField(e)});
+$("#pb-main").addEventListener("change",e=>{if(e.target.id==="pb-tpitext")return;const p=e.target.dataset.b||"";if(!e.target.matches("input[type=text],input[type=email],input:not([type]),textarea")||isStructural(p))onField(e)});
+function arrAt(path){const ks=path.split(".");const idx=+ks.pop();return [getPath(plan,ks.join(".")),idx]}
+document.addEventListener("click",async e=>{
+  const sb=e.target.closest("[data-sec]");if(sb){go(sb.dataset.sec);return}
+  const b=e.target.closest("[data-act]");if(!b)return;
+  const a=b.dataset.act,y=PBMAIN.scrollTop,keep=()=>{PBMAIN.scrollTop=y};
+  switch(a){
+    case"ie":{setPath(plan,b.dataset.path,+b.dataset.v);b.parentElement.querySelectorAll("button").forEach(x=>{const on=x===b;x.classList.toggle("on",on);x.setAttribute("aria-pressed",on)});changed(false);return}
+    case"first":{plan.isFirst=b.dataset.v==="1";if(plan.isFirst)plan.phase=1;else if(plan.phase<2)plan.phase=2;break}
+    case"add":{const arr=getPath(plan,b.dataset.list);arr.push(BLANK[b.dataset.list]());break}
+    case"del":{const [arr,i]=arrAt(b.dataset.path);arr.splice(i,1);break}
+    case"mv":{const [arr,i]=arrAt(b.dataset.path),j=i+ +b.dataset.dir;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];break}
+    case"adddrill":plan.practice.sessions[+b.dataset.s].drills.push(blankDrill(b.dataset.env));break;
+    case"tpl-session":tplSession(b.dataset.v);break;
+    case"tpl-game":tplGame(b.dataset.v);break;
+    case"tpl-phys":tplPhys();break;
+    case"addday":plan.physical.dayList.push({id:uid(),title:"",pairs:[{id:uid(),a:{name:"",type:"Strength",reps:"",each:false},b:{name:"",type:"Power",reps:"",each:false}}]});break;
+    case"addpair":plan.physical.dayList[+b.dataset.d].pairs.push({id:uid(),a:{name:"",type:"Strength",reps:"",each:false},b:{name:"",type:"Power",reps:"",each:false}});break;
+    case"swing":{const s=plan.intake.swing,v=b.dataset.v,i=s.indexOf(v);i>=0?s.splice(i,1):s.push(v);b.classList.toggle("on",i<0);b.setAttribute("aria-pressed",i<0);changed(false);return}
+    case"tpi-all":{TPI.forEach(t=>{if(!plan.intake.tpi.some(x=>x.test===t))plan.intake.tpi.push({id:uid(),test:t,result:"",note:""})});break}
+    case"fillintake":ui.fillMsg=applyIntake();break;
+    case"tpiadd":addTPI();return;
+    case"mobsuggest":ui.mobMsg=suggestMobility();break;
+    case"copylink":copyLink(b.dataset.v,b);return;
+    case"print":printPlan();return;
+    case"status":plan.status=b.dataset.v;break;
+    case"copyjson":{try{await navigator.clipboard.writeText(JSON.stringify(plan,null,2));$("#exportMsg").textContent="Plan data copied. Paste it into Claude and ask for the branded PDF."}catch(err){$("#exportMsg").textContent="Your browser blocked copying here. Use Download instead."}return}
+    case"download":downloadPlan();return;
+    case"startnext":await flush();plan=startNext(plan);section="intake";changed(true);go("intake");return;
+    case"askdel":ui.confirmDel=true;render();keep();return;
+    case"canceldel":ui.confirmDel=false;render();keep();return;
+    case"delplan":{ui.confirmDel=false;clearTimeout(saveTimer);const id=plan.id;try{await rpc("mg_coach_plan_delete",{p_id:id})}catch(err){setStatus("Couldn't delete: "+(err.message||"try again"),true);return}plans.delete(id);openPlan(null);openDrawer();return}
+    default:return;
+  }
+  changed(true);keep();
+});
+/* ---------- persistence ---------- */
+function setStatus(t,err){const s=$("#pb-status");s.textContent=t;s.classList.toggle("err",!!err)}
+async function flush(){clearTimeout(saveTimer);if(dirty)await save()}
+function openPlan(id){
+  if(id&&plans.has(id))plan=normalise(clone(plans.get(id)));else plan=newPlan();
+  section="player";ui.confirmDel=false;ui.fillMsg="";ui.tpiMsg="";ui.mobMsg="";dirty=false;render();
+}
+
+/* ---------- drawer ---------- */
+function openDrawer(){renderPlans();$("#pb-drawer").classList.add("open");$("#pb-scrim").classList.add("open");setTimeout(()=>$("#pb-plSearch").focus(),50)}
+function closeDrawer(){$("#pb-drawer").classList.remove("open");$("#pb-scrim").classList.remove("open")}
+function renderPlans(){
+  const q=$("#pb-plSearch").value.trim().toLowerCase();
+  const groups=new Map();
+  for(const [id,p] of plans){const key=(p.playerEmail||p.playerName||id).toLowerCase();if(!groups.has(key))groups.set(key,[]);groups.get(key).push({id,...p})}
+  let list=[...groups.values()].map(g=>g.sort((a,b)=>(a.phase||1)-(b.phase||1)));
+  list=list.filter(g=>!q||g.some(p=>(p.playerName||"").toLowerCase().includes(q)||(p.playerEmail||"").toLowerCase().includes(q)));
+  list.sort((a,b)=>Math.max(...b.map(p=>p.updatedAt||0))-Math.max(...a.map(p=>p.updatedAt||0)));
+  $("#pb-plCount").textContent=groups.size+" player"+(groups.size===1?"":"s");
+  const withPlan=new Set([...plans.values()].map(p=>(p.playerEmail||"").toLowerCase()).filter(Boolean));
+  const fresh=intakePeople().filter(x=>!withPlan.has(x.email)&&(!q||x.email.includes(q)||(x.name||"").toLowerCase().includes(q)));
+  $("#pb-plList").innerHTML=list.length?list.map(g=>{const last=g[g.length-1];return `<div class="pl"><h3>${esc(last.playerName||"Unnamed")}</h3><div class="em">${esc(last.playerEmail||"No email")}${last.coach?" · "+esc(last.coach):""}</div>
+    <div class="phases">${g.map(p=>`<button type="button" data-open="${esc(p.id)}" class="${plan&&plan.id===p.id?"cur":""}"><b>P${esc(p.phase)}</b>${p.status==="ready"?"Ready":"Draft"} · ${esc(fmtDate(p.startDate))}</button>`).join("")}</div>
+    <button class="btn sm gold" type="button" data-next="${esc(last.id)}">Start Phase ${(+last.phase||1)+1} (week ${(+last.phase||1)*(+last.weeks||6)} review)</button></div>`}).join("")+freshHTML(fresh):freshHTML(fresh)+`<div class="empty">${plans.size?"No players match that search.":"No plans yet. Build the first one with + New plan, or from a form below."}</div>`;
+}
+$("#pb-plList").addEventListener("click",async e=>{
+  const o=e.target.closest("[data-open]"),n=e.target.closest("[data-next]");
+  if(o){await flush();openPlan(o.dataset.open);closeDrawer()}
+  if(n){await flush();plan=startNext(plans.get(n.dataset.next));section="intake";closeDrawer();changed(true)}
+  const f=e.target.closest("[data-fromform]");if(f){await flush();startFromForm(f.dataset.fromform);closeDrawer()}
+});
+$("#pb-plSearch").addEventListener("input",renderPlans);
+$("#pb-openPlans").addEventListener("click",()=>{openDrawer();refreshData()});
+$("#pb-closePlans").addEventListener("click",closeDrawer);
+$("#pb-scrim").addEventListener("click",closeDrawer);
+$("#pb-newPlan").addEventListener("click",async()=>{await flush();openPlan(null)});
+
+
+/* ---------- scrolling (the page scrolls, not a panel) ---------- */
+const PBMAIN={get scrollTop(){return window.scrollY},set scrollTop(v){window.scrollTo(0,v)}};
+
+/* ---------- Supabase (coach password, same as the coach dashboard; never stored) ---------- */
+const API="https://zhcgwtlyqriwlhbzkxcl.supabase.co/rest/v1/rpc/",KEY="sb_publishable__IBhmrVHOXsLHruU7XJB-g_OSN9Ljne";
+function rpc(fn,body){
+  return fetch(API+fn,{method:"POST",headers:{apikey:KEY,"Content-Type":"application/json"},body:JSON.stringify(Object.assign({p_pass:pass},body||{}))})
+    .then(r=>r.json().catch(()=>({})).then(j=>{if(!r.ok)throw new Error((j&&j.message)||("Error "+r.status));if(j&&j.error)throw new Error(j.error);return j}));
+}
+async function save(){
+  if(!plan||!loggedIn)return;
+  if(!plan.playerName.trim()){setStatus("Add a player name to save");return}
+  if(saving){pendingSave=true;return}
+  saving=true;setStatus("Saving");
+  const body=clone(plan);delete body.updatedAt;
+  try{
+    await rpc("mg_coach_plan_save",{p_id:plan.id,p_data:body});
+    body.updatedAt=Date.now();plans.set(plan.id,body);dirty=false;
+    try{localStorage.removeItem("mg-planbuilder-draft")}catch(e){}
+    setStatus("Saved "+new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}));
+  }catch(e){
+    if(/Wrong password|Too many/.test(e.message)){setStatus(e.message,true)}
+    else setStatus("Couldn't save ("+e.message+"). Your changes are kept on this computer.",true);
+  }
+  saving=false;if(pendingSave){pendingSave=false;save()}
+}
+async function refreshData(){
+  try{
+    const [pl,ik]=await Promise.all([rpc("mg_coach_plans_list"),rpc("mg_coach_intake")]);
+    plans.clear();(pl.rows||[]).forEach(p=>plans.set(p.id,p));INTAKE=ik.rows||[];
+    if($("#pb-drawer").classList.contains("open"))renderPlans();
+    if(plan){renderRail();const c=document.getElementById("pb-intakechip");if(c)c.innerHTML=intakeChip()}
+    return true;
+  }catch(e){setStatus("Couldn't load: "+e.message,true);return false}
+}
+
+/* ---------- intake (forms + TPI) ---------- */
+const FORM_LABEL={matchup:"Pre Match-Up",onboarding:"Onboarding",tpi:"TPI screen"};
+const FORM_PATH={matchup:"match-up-questionnaire",onboarding:"onboarding"};
+const norm=s=>String(s||"").toLowerCase().replace(/[^a-z]/g,"");
+function intakeFor(p){
+  const e=(p.playerEmail||"").trim().toLowerCase(),n=norm(p.playerName);
+  if(!e&&!n)return [];
+  return INTAKE.filter(r=>(e&&r.email===e)||(n&&n.length>4&&norm(r.name)===n));
+}
+function latestIntake(p){const out={};intakeFor(p).forEach(r=>{if(!out[r.form]||r.created_at>out[r.form].created_at)out[r.form]=r});return out}
+function intakePeople(){const m=new Map();INTAKE.forEach(r=>{if(r.form==="tpi")return;const k=r.email;if(!m.has(k))m.set(k,{email:k,name:r.name,forms:new Set(),last:r.created_at});const x=m.get(k);x.forms.add(r.form);if(r.created_at>x.last)x.last=r.created_at;if(!x.name)x.name=r.name});return [...m.values()].sort((a,b)=>a.last<b.last?1:-1)}
+const fmtTS=ts=>{if(!ts)return"";const d=new Date(ts);return d.getDate()+" "+MONTHS[d.getMonth()].slice(0,3)+" "+d.getFullYear()};
+function formLink(form){const base="https://www.macro.golf/"+FORM_PATH[form];const q=new URLSearchParams();if(plan.playerEmail)q.set("email",plan.playerEmail.trim());if(plan.playerName)q.set("name",plan.playerName.trim());const s=q.toString();return base+(s?"?"+s:"")}
+function intakeChip(){
+  if(!plan)return"";
+  const L=latestIntake(plan),forms=Object.keys(L);
+  const links=["matchup","onboarding"].filter(f=>!L[f]).map(f=>`<button class="btn sm ghost" type="button" data-act="copylink" data-v="${f}">Copy ${FORM_LABEL[f]} link</button>`).join("");
+  if(!plan.playerEmail&&!plan.playerName)return `<p class="hint">Forms players have sent appear here once you add their name or email.</p>`;
+  return `<div class="row">${forms.length?forms.map(f=>`<span class="chip ok">${FORM_LABEL[f]} · ${fmtTS(L[f].created_at)}</span>`).join(""):'<span class="chip">No forms found for this player yet</span>'}<span class="spacer"></span>${links}</div>`+
+    (forms.length&&plan.isFirst?`<p class="hint">Use <b>Fill plan from answers</b> in the next section to bring these in.</p>`:"");
+}
+async function copyLink(form,btn){const url=formLink(form);try{await navigator.clipboard.writeText(url);btn.textContent="Link copied"}catch(e){btn.textContent=url}}
+function fmtAns(v){return Array.isArray(v)?v.join(", "):String(v==null?"":v)}
+const Q_LABEL={handicap:"Current handicap",lowest:"Lowest handicap",golf_week:"Golf per week",improve:"Most wants to improve",why_now:"Why now",life_change:"If it improved",best_period:"Best golf recently",best_feel:"Swing feel at best",best_focus:"Focus when playing well",hard_period:"When it got difficult",first_change:"What changes first",access_struggle:"Struggles to access golf",shot_shape:"Natural shot shape",poor_shot:"Common poor shot",poor_pattern:"Poor play pattern",problem_clubs:"Problem clubs",miss_situations:"Miss more likely when",miss_cause:"Believes the cause is",miss_fix:"Tries to fix it by",tech_changes:"Current technical changes",swing_needs:"Swing needs to",swing_thoughts:"Swing thoughts",thoughts_help:"Thoughts that help",thoughts_worse:"Thoughts that made it worse",past_wins:"Past changes that worked",past_faded:"Changes that faded",cant_produce:"Understands but can't produce",learn_best:"Learns best through",learn_best_other:"Learns best (other)",pain:"Pain or limitation",fatigue:"Fatigue / stiffness in rounds",health_other:"Other health",weight_kg:"Body weight (kg)",height:"Height",physical_goals:"Physical goals",meditate:"Meditates",journal:"Journals",breathwork:"Breathwork",morning:"Morning routine",mental_health:"Mental health",stats:"Stats available",stats_link:"Stats link",
+  time_commit:"Time each week",commitments:"Commitments",normal_week:"Normal week",busy_week:"Busy week",facilities:"Facilities",facilities_other:"Facilities (other)",tech:"Tech and equipment",video:"Can film swing",gym:"Training location and kit",phys_sessions:"Physical sessions",rounds:"Rounds in block",events:"Events",stats_record:"Stats recorded",other_programmes:"Other programmes",other_coaching:"Other coaching / treatment",existing_work:"Existing work to consider",barriers:"Barriers",feedback_pref:"Feedback preference",consistency:"Could affect consistency",confirm:"Confirmed"};
+function answersCard(collapsed){
+  const L=latestIntake(plan),forms=Object.keys(L).filter(f=>f!=="tpi");
+  if(!forms.length)return `<div class="card hl"><div class="card-h"><h3>Player's forms</h3></div><p class="hint" style="margin:0">Nothing on file for this name or email yet. Send them the forms: ${["matchup","onboarding"].map(f=>`<button class="btn sm ghost" type="button" data-act="copylink" data-v="${f}">Copy ${FORM_LABEL[f]} link</button>`).join(" ")}</p></div>`;
+  const block=f=>{const a=L[f].answers||{};const rows=Object.keys(a).filter(k=>fmtAns(a[k]).trim()).map(k=>`<div class="ans"><span>${esc(Q_LABEL[k]||k)}</span><p>${nl2br(fmtAns(a[k]))}</p></div>`).join("");
+    return `<details class="ansbox"${collapsed?"":" open"}><summary>${FORM_LABEL[f]} · ${esc(L[f].name||"")} · ${fmtTS(L[f].created_at)}${L[f].source==="google-form"?" · from the old Google Form":""}</summary><div class="anslist">${rows||'<p class="hint">No answers.</p>'}</div></details>`};
+  return `<div class="card hl"><div class="card-h"><h3>Player's forms</h3><span class="spacer"></span>${plan.isFirst?`<button class="btn sm gold" type="button" data-act="fillintake">Fill plan from answers</button>`:""}</div>
+    ${ui.fillMsg?`<div class="banner">${ui.fillMsg}</div>`:""}${forms.map(block).join("")}</div>`;
+}
+function tpiCard(){
+  const t=latestIntake(plan).tpi;
+  return `<div class="card"><div class="card-h"><h3>TPI results</h3>${t?`<span class="chip ok">On file · ${esc((t.answers||{}).date||fmtTS(t.created_at))}</span>`:""}</div>
+   <p class="hint" style="margin:0 0 10px">Ask Claude: <i>"Get ${esc(plan.playerName||"the player")}'s latest TPI screen for the Plan Builder."</i> Paste what Claude gives you here. It fills the TPI tests and swing characteristics and keeps a copy on the player's record.</p>
+   <textarea id="pb-tpitext" rows="5" placeholder="TPI · Player Name · Level 1 · 13 May 2026 · Fitness handicap 9&#10;Lower Quarter Rotation: Fail&#10;Pelvic Tilt: Caution - can't tilt both ways&#10;Swing: Loss of Posture 67% High; Early Extension 67% High">${esc(ui.tpiText)}</textarea>
+   <div class="row" style="margin-top:10px"><button class="btn sm gold" type="button" data-act="tpiadd">Add TPI results</button>${t&&!ui.tpiText?`<button class="btn sm ghost" type="button" data-act="tpireuse">Use the results on file</button>`:""}<span class="hint" style="margin:0">${esc(ui.tpiMsg)}</span></div></div>`;
+}
+function parseTPI(txt){
+  const out={tests:[],swing:[],date:"",handicap:"",level:""};const RES={pass:"Pass",passed:"Pass",green:"Pass",caution:"Limited",limited:"Limited",amber:"Limited",yellow:"Limited",fail:"Fail",failed:"Fail",red:"Fail",pain:"Pain"};
+  String(txt||"").split(/\n+/).forEach(line=>{const l=line.trim();if(!l)return;
+    if(/^tpi\b/i.test(l)){const d=l.match(/(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}|\d{2}-\d{2}-\d{4}|\d{4}-\d{2}-\d{2})/);if(d)out.date=d[1];const h=l.match(/handicap\s*:?\s*(\d+)/i);if(h)out.handicap=h[1];const lv=l.match(/level\s*\d/i);if(lv)out.level=lv[0];return}
+    if(/^swing\s*:/i.test(l)){l.replace(/^swing\s*:/i,"").split(/[;\n]/).forEach(x=>{const m=x.trim().match(/^(.+?)\s+(\d+)%\s*(high|moderate|low)?/i);if(m)out.swing.push({name:m[1].trim(),pct:+m[2],level:(m[3]||"").replace(/^./,c=>c.toUpperCase())})});return}
+    const m=l.match(/^[-•*]?\s*(.+?)\s*[:–-]\s*(pass(?:ed)?|caution|limited|fail(?:ed)?|pain|green|amber|yellow|red)\b\s*(?:[-–:(]\s*(.*?)\)?)?$/i);
+    if(m)out.tests.push({test:m[1].trim(),result:RES[m[2].toLowerCase()],note:(m[3]||"").trim()});
+  });
+  return out;
+}
+const SWING_MAP={"loss of posture":"Loss of posture","early extension":"Early extension","sway":"Sway","slide":"Slide","c-posture":"C-posture","s-posture":"S-posture","flat shoulder plane":"Flat shoulder plane","reverse spine angle":"Reverse spine angle","over the top":"Over the top","casting/scooping":"Casting / early release","casting":"Casting / early release","scooping":"Scooping","chicken winging":"Chicken winging","hanging back":"Hanging back","late buckling":"Late buckling","forward lunge":"Forward lunge"};
+function applyTPI(t,saveCopy){
+  const ik=plan.intake;let n=0;
+  t.tests.forEach(x=>{const ex=ik.tpi.find(y=>norm(y.test)===norm(x.test));if(ex){ex.result=x.result;if(x.note)ex.note=x.note}else ik.tpi.push({id:uid(),test:x.test,result:x.result,note:x.note||""});n++});
+  t.swing.filter(s=>s.level==="High"||s.pct>=60).forEach(s=>{const m=SWING_MAP[s.name.toLowerCase()];if(m&&!ik.swing.includes(m))ik.swing.push(m)});
+  const line=`TPI ${t.level||"screen"}${t.date?" ("+t.date+")":""}${t.handicap?": fitness handicap "+t.handicap:""}.`+(t.swing.length?" Likely swing characteristics: "+t.swing.filter(s=>s.level!=="Low").map(s=>s.name+" "+s.pct+"%").join(", ")+".":"");
+  if(!ik.summary.includes("TPI "))ik.summary=(ik.summary?ik.summary+"\n":"")+line;
+  return n;
+}
+async function addTPI(){
+  const ta=document.getElementById("pb-tpitext");ui.tpiText=ta?ta.value:ui.tpiText;
+  const t=parseTPI(ui.tpiText);
+  if(!t.tests.length){ui.tpiMsg="Couldn't find any test results. Each test needs its own line, like 'Pelvic Tilt: Caution'.";render();return}
+  const n=applyTPI(t);ui.tpiMsg=`Added ${n} TPI tests${t.swing.length?" and swing characteristics":""}.`;
+  try{if(plan.playerEmail){await rpc("mg_coach_intake_add",{p_form:"tpi",p_email:plan.playerEmail,p_name:plan.playerName,p_answers:Object.assign({raw:ui.tpiText},t)});await refreshData();ui.tpiMsg+=" Saved on the player's record."}else ui.tpiMsg+=" Add their email to keep a copy on their record."}
+  catch(e){ui.tpiMsg+=" Couldn't keep a copy: "+e.message}
+  ui.tpiText="";changed(true);
+}
+function joinL(pairs){return pairs.filter(([,v])=>fmtAns(v).trim()).map(([l,v])=>l+": "+fmtAns(v).trim()).join("\n")}
+function applyIntake(){
+  const L=latestIntake(plan),a=(L.matchup||{}).answers||{},o=(L.onboarding||{}).answers||{},ik=plan.intake,done=[],kept=[];
+  const put=(path,val,label)=>{if(!String(val||"").trim())return;const cur=getPath(plan,path);if(String(cur||"").trim()){kept.push(label);return}setPath(plan,path,val);done.push(label)};
+  if(!plan.playerName&&(L.matchup||L.onboarding))plan.playerName=(L.matchup||L.onboarding).name||"";
+  if(!plan.playerEmail&&(L.matchup||L.onboarding))plan.playerEmail=(L.matchup||L.onboarding).email||"";
+  put("intake.handicap",[a.handicap,a.lowest?"lowest "+a.lowest:""].filter(Boolean).join(" · "),"handicap");
+  put("intake.goals",joinL([["Wants to improve",a.improve],["Why now",a.why_now],["If it improved",a.life_change],["Physical goals",a.physical_goals]]),"goals");
+  put("intake.history",joinL([["Plays",a.golf_week],["Best golf",a.best_period],["Feels at best",a.best_feel],["Focus when good",a.best_focus],["When it goes wrong",a.hard_period],["Changes first",a.first_change],["Struggles to access",a.access_struggle],["Natural shape",a.shot_shape],["Common miss",a.poor_shot],["Poor pattern",a.poor_pattern],["Problem clubs",a.problem_clubs],["Miss more likely",a.miss_situations],["Thinks the cause is",a.miss_cause],["Tries to fix by",a.miss_fix]]),"golf history");
+  put("intake.injuries",joinL([["Pain / limitation",a.pain],["Fatigue in rounds",a.fatigue],["Other health",a.health_other],["Other coaching / treatment",o.other_coaching]]),"injuries");
+  put("intake.equipment",joinL([["Kit",o.tech],["Facilities",[].concat(o.facilities||[],o.facilities_other?[o.facilities_other]:[])],["Films swing",o.video],["Stats",a.stats||o.stats_record]]).replace(/\n/g," · "),"tech & facilities");
+  put("intake.notes",joinL([["Technical work now",a.tech_changes],["Thinks swing needs",a.swing_needs],["Swing thoughts",a.swing_thoughts],["What helps",a.thoughts_help],["What made it worse",a.thoughts_worse],["Past wins",a.past_wins],["Changes that faded",a.past_faded],["Can't produce yet",a.cant_produce],["Learns best",[].concat(a.learn_best||[],a.learn_best_other?[a.learn_best_other]:[])],
+    ["Habits now",[a.meditate&&"meditates: "+a.meditate,a.journal&&"journals: "+a.journal,a.breathwork&&"breathwork: "+a.breathwork].filter(Boolean).join(", ")],["Morning routine",a.morning],["Mind",a.mental_health],
+    ["Time each week",o.time_commit],["Normal week",o.normal_week],["Busy week",o.busy_week],["Commitments",o.commitments],["Training location",o.gym],["Physical sessions",o.phys_sessions],["Rounds this block",o.rounds],["Events",o.events],["Other programmes",o.other_programmes],["Existing work",o.existing_work],["Barriers",o.barriers],["Feedback",o.feedback_pref],["Consistency risks",o.consistency],["Stats link",a.stats_link]]),"coach notes");
+  if(a.weight_kg&&!plan.weight.start){plan.weight.start=String(a.weight_kg);plan.weight.unit="kg";done.push("starting weight")}
+  const hc=parseFloat(a.handicap);if(!isNaN(hc)){let s=plan.stats.find(x=>/handicap/i.test(x.name));if(!s){s={id:uid(),name:"Handicap index",baseline:"",target:"",how:"England Golf record"};plan.stats.unshift(s)}if(!s.baseline){s.baseline=String(hc);done.push("handicap baseline")}}
+  const ps=String(o.phys_sessions||"").match(/\b([1-7])\b/);if(ps){plan.weekly.physical=+ps[1];if(!plan.physical.dayList.length)plan.physical.days=+ps[1];done.push(ps[1]+" physical sessions a week")}
+  if(L.tpi){applyTPI(L.tpi.answers||{tests:[],swing:[]});done.push("TPI results")}
+  return (done.length?"Filled: "+done.join(", ")+".":"Nothing new to fill.")+(kept.length?" Kept what you had already written for: "+kept.join(", ")+".":"");
+}
+function startFromForm(email){
+  const r=INTAKE.filter(x=>x.email===email).sort((a,b)=>a.created_at<b.created_at?1:-1)[0];
+  plan=newPlan();plan.playerEmail=email;plan.playerName=(r&&r.name)||"";
+  section="intake";ui.fillMsg=applyIntake();ui.tpiMsg="";ui.mobMsg="";changed(true);
+}
+function freshHTML(list){
+  if(!list.length)return"";
+  return `<h6 style="font:10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:14px 2px 2px">Forms received, no plan yet</h6>`+list.map(x=>`<div class="pl"><h3>${esc(x.name||x.email)}</h3><div class="em">${esc(x.email)}</div><div class="phases">${[...x.forms].map(f=>`<span class="chip ok">${FORM_LABEL[f]}</span>`).join("")}<span class="chip">${fmtTS(x.last)}</span></div><button class="btn sm gold" type="button" data-fromform="${esc(x.email)}">Build their first plan</button></div>`).join("");
+}
+
+/* ---------- mobility from TPI (rule-based starting point; coach edits) ---------- */
+const TPI_MOB={
+  "pelvictilt":[["Pelvic tilts","Pelvic control","2 x 10"],["Cat cow","Thoracic spine","2 x 8"]],
+  "pelvicrotation":[["Pelvic rotations with club","Pelvic control","2 x 10 each way"]],
+  "torsorotation":[["Open books","Thoracic spine","2 x 8 each side"],["Quadruped thoracic rotation","Thoracic spine","2 x 8 each side"]],
+  "overheaddeepsquat":[["Deep squat hold","Hips","3 x 30s"],["Ankle rocks","Ankles","2 x 10 each side"]],
+  "toetouch":[["Toe touch progression","Hamstrings","2 x 8"]],
+  "9090":[["Banded shoulder external rotation","Shoulders","2 x 12 each side"],["Banded shoulder dislocates","Shoulders","2 x 10"]],
+  "singlelegbalance":[["Single leg balance holds","Pelvic control","3 x 30s each side"]],
+  "lattest":[["Bench lat stretch","Lats","3 x 30s"]],
+  "lowerquarterrotation":[["90/90 hip switches","Hips","2 x 8 each side"],["Pigeon stretch","Hips","2 x 45s each side"]],
+  "seatedtrunkrotation":[["Seated trunk rotations","Thoracic spine","2 x 10 each side"],["Open books","Thoracic spine","2 x 8 each side"]],
+  "bridgewithlegextension":[["Glute bridge march","Pelvic control","2 x 10 each side"]],
+  "cervicalrotation":[["Neck rotations","Neck","2 x 8 each side"]],
+  "forearmrotation":[["Forearm rotations with club","Wrists / forearms","2 x 12"]],
+  "wristhinge":[["Wrist flexor and extensor stretch","Wrists / forearms","2 x 30s each"]],
+  "wristflexionextension":[["Wrist flexor and extensor stretch","Wrists / forearms","2 x 30s each"]],
+  "setupposture":[["Half kneeling hip flexor stretch","Hips","2 x 45s each side"],["Cat cow","Thoracic spine","2 x 8"]]
+};
+function suggestMobility(){
+  const fails=plan.intake.tpi.filter(t=>t.result&&t.result!=="Pass").sort((a,b)=>(a.result==="Fail"||a.result==="Pain"?0:1)-(b.result==="Fail"||b.result==="Pain"?0:1));
+  let added=0;const have=new Set(plan.mobility.items.map(m=>norm(m.name)));
+  fails.forEach(f=>{(TPI_MOB[norm(f.test)]||[]).forEach(([name,area,dose])=>{if(have.has(norm(name))||plan.mobility.items.length>=8)return;have.add(norm(name));plan.mobility.items.push({id:uid(),name,area,dose,cue:f.test+" "+f.result.toLowerCase()});added++})});
+  return added?`Added ${added} exercises, worst results first. Check doses and swap anything that doesn't suit them.`:"No new suggestions: these are already covered, or the routine is full (8).";
+}
+
+/* ---------- export ---------- */
+function planFileName(){return `${(plan.playerName||"Player").replace(/[^\w]+/g,"_")}_Performance_Plan_Phase_${plan.phase}.html`}
+function downloadPlan(){
+  const msg=$("#exportMsg"),a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([exportHTML(plan)],{type:"text/html"}));a.download=planFileName();document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);if(msg)msg.textContent="Downloaded "+planFileName()+".";
+}
+function printPlan(){
+  const msg=$("#exportMsg"),w=window.open("","_blank");
+  if(!w){if(msg)msg.textContent="Your browser blocked the new tab. Allow pop-ups for macro.golf, or use Download.";return}
+  w.document.open();w.document.write(exportHTML(plan).replace("</body>","<script>setTimeout(function(){window.print()},700)<\/script></body>"));w.document.close();
+}
+
+/* ---------- log in + boot ---------- */
+fillDatalists();
+document.addEventListener("click",e=>{if(e.target.closest('[data-act="tpireuse"]')){const t=latestIntake(plan).tpi;if(t){applyTPI(t.answers||{tests:[],swing:[]});ui.tpiMsg="Used the TPI results on file.";changed(true)}}});
+$("#pb-login").addEventListener("submit",async e=>{
+  e.preventDefault();const err=$("#pb-loginerr"),btn=$("#pb-loginbtn");pass=$("#pb-pw").value;$("#pb-pw").value="";err.textContent="";btn.disabled=true;btn.textContent="Opening";
+  try{
+    const [pl,ik]=await Promise.all([rpc("mg_coach_plans_list"),rpc("mg_coach_intake")]);
+    plans.clear();(pl.rows||[]).forEach(p=>plans.set(p.id,p));INTAKE=ik.rows||[];loggedIn=true;
+    $("#pb-gate").hidden=true;$("#pb-app").hidden=false;
+    let draft=null;try{draft=JSON.parse(localStorage.getItem("mg-planbuilder-draft")||"null")}catch(x){}
+    if(draft&&draft.playerName){plan=normalise(draft);dirty=true;render();setStatus("Restored unsaved changes");save()}
+    else{plan=newPlan();render();setStatus(plans.size+" plans · "+intakePeople().length+" players with forms");openDrawer()}
+  }catch(x){pass="";err.textContent=/Wrong password/.test(x.message)?"Wrong password.":/Too many/.test(x.message)?x.message:"Couldn't open: "+x.message}
+  btn.disabled=false;btn.textContent="Open";
+});
+window.addEventListener("beforeunload",e=>{if(dirty&&loggedIn){e.preventDefault();e.returnValue=""}});
+
+})();
+</script>

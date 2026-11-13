@@ -1,0 +1,47 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap">
+<!-- Client Onboarding (www.macro.golf/onboarding). Replaces the Google Form "Client Onboarding - Macro Golf" (13 Nov 2026).
+     Answers go to mg_intake (form 'onboarding') and fill the Plan Builder. Keep the k values; labels can change. -->
+<div id="mgf"></div>
+<script charset="utf-8" src="{{BASE}}src/intake-form.js"></script>
+<script>
+MGForm.mount({
+  form:'onboarding',
+  kicker:'Client onboarding',
+  title:'Let’s build your plan',
+  intro:'Your first six-week plan is built around your real week. Tell us how much time you have, what you can get to and what might get in the way, so the plan fits your life rather than an ideal one.',
+  minutes:10,
+  done:{title:'Thanks, we’re building your plan',text:'Your coach now has what they need to build your first six weeks. If your availability, health or injury status changes, let them know.'},
+  sections:[
+    {title:'About you',q:[
+      {k:'name',label:'Full name',type:'text',req:true},
+      {k:'email',label:'Email address',type:'email',req:true,hint:'Use the same email you use for the Macro Golf app.'}]},
+    {title:'Your time',q:[
+      {k:'time_commit',label:'How much time can you realistically commit each week to golf practice, physical training, home-based drills and playing on the course?',type:'long',req:true,hint:'Give as much detail as you can for each one.'},
+      {k:'commitments',label:'Do you have any upcoming competitions, holidays, work periods or personal commitments that could affect the next six weeks?',type:'long'},
+      {k:'normal_week',label:'What would a realistic normal week look like?',type:'long'},
+      {k:'busy_week',label:'What would still be achievable during a particularly busy week?',type:'long'}]},
+    {title:'Facilities and kit',q:[
+      {k:'facilities',label:'Which facilities can you access regularly?',type:'multi',other:true,
+        opts:['Driving range (mats)','Grass driving range','Indoor simulator','Putting green','Short-game area','Practice bunker','Golf course','Home net']},
+      {k:'tech',label:'What technology or practice equipment can you access?',type:'long',hint:'Launch monitor, simulator, training aids, tripod and so on.'},
+      {k:'video',label:'Are you able to record and upload swing videos regularly?',type:'choice',opts:['Yes','Sometimes','No']},
+      {k:'gym',label:'Where will you complete any physical training, and what equipment will you have?',type:'long'}]},
+    {title:'Training and rounds',q:[
+      {k:'phys_sessions',label:'How many physical-training sessions can you realistically complete each week, and how long can each one last?',type:'long'},
+      {k:'rounds',label:'How many rounds do you expect to play during this six-week block?',type:'text'},
+      {k:'events',label:'Please list any competitions, events or target rounds.',type:'long'},
+      {k:'stats_record',label:'Do you currently record any statistics after playing? If yes, which ones and using what system?',type:'long'}]},
+    {title:'Other support',q:[
+      {k:'other_programmes',label:'Are you currently following any other golf, fitness, rehabilitation or mental-performance programme?',type:'long'},
+      {k:'other_coaching',label:'Are you currently receiving coaching or treatment from another coach, trainer, physiotherapist or medical professional?',type:'long'},
+      {k:'existing_work',label:'Is there any existing work you want the Macro Golf team to consider when building your plan?',type:'long'}]},
+    {title:'How you work best',q:[
+      {k:'barriers',label:'Is there anything that makes written plans, forms, videos or online coaching difficult for you?',type:'long'},
+      {k:'feedback_pref',label:'Is there anything the coaching team should understand about how you prefer to receive feedback?',type:'long'},
+      {k:'consistency',label:'Is there anything else that could affect your ability to follow the plan consistently?',type:'long'},
+      {k:'confirm',label:'I confirm this information is accurate, and I will tell the coaching team if my circumstances, availability, health or injury status change.',type:'confirm',req:true}]}
+  ]
+});
+</script>

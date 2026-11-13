@@ -1,0 +1,73 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap">
+<!-- Pre Match-Up Questionnaire (www.macro.golf/match-up-questionnaire). Replaces the Google Form of the same name (13 Nov 2026).
+     Answers go to mg_intake (form 'matchup') and fill the Plan Builder. Keys below are what the Plan Builder reads:
+     change a label freely, but keep the k values. -->
+<div id="mgf"></div>
+<script charset="utf-8" src="{{BASE}}src/intake-form.js"></script>
+<script>
+MGForm.mount({
+  form:'matchup',
+  kicker:'Pre Match-Up questionnaire',
+  title:'Before your Match Up session',
+  intro:'This helps your coach understand your golf before you speak, so the session goes straight to what matters. There are no right answers. Write the way you would explain it to a playing partner.',
+  minutes:15,
+  done:{title:'Thanks, that’s with your coach',text:'Your coach will read this before your Match Up session. If anything changes before then, just tell them on the call.'},
+  sections:[
+    {title:'About you',q:[
+      {k:'name',label:'Full name',type:'text',req:true},
+      {k:'email',label:'Email address',type:'email',req:true,hint:'Use the same email you use for the Macro Golf app.'},
+      {k:'handicap',label:'What is your current handicap?',type:'text',req:true,ph:'e.g. 12.4'},
+      {k:'lowest',label:'What is the lowest handicap you have reached, and when?',type:'text'},
+      {k:'golf_week',label:'How much golf do you currently play in a normal week?',type:'text',ph:'e.g. Two rounds and one range session'}]},
+    {title:'What you want',q:[
+      {k:'improve',label:'What would you most like to improve about your golf?',type:'long',req:true},
+      {k:'why_now',label:'Why does this matter to you now?',type:'long'},
+      {k:'life_change',label:'If your golf improved significantly over the next six months, how would your life change?',type:'long'}]},
+    {title:'Your best golf',intro:'Think about when your golf feels like yours.',q:[
+      {k:'best_period',label:'Think about a recent period, round or stretch of holes when you played particularly well. What was happening?',type:'long'},
+      {k:'best_feel',label:'During your best golf, what does your swing feel like?',type:'long'},
+      {k:'best_focus',label:'What are you normally thinking about or focusing on when you play well?',type:'long'}]},
+    {title:'When it gets difficult',q:[
+      {k:'hard_period',label:'Think about a recent period when your golf became difficult or unpredictable. What happened?',type:'long'},
+      {k:'first_change',label:'What tends to change first when your golf begins to deteriorate?',type:'long'},
+      {k:'access_struggle',label:'Are there particular situations in which you struggle to access your normal golf?',type:'long',hint:'For example: competitions, important shots, certain clubs, particular lies, difficult holes.'}]},
+    {title:'Your ball flight',q:[
+      {k:'shot_shape',label:'Describe your preferred or most natural shot shape.',type:'text'},
+      {k:'poor_shot',label:'Describe your most common poor shot, and any other common misses.',type:'long'},
+      {k:'poor_pattern',label:'What normally happens to the starting direction, curvature, strike and trajectory when you are playing poorly?',type:'long'},
+      {k:'problem_clubs',label:'Which clubs create the biggest problems?',type:'text'},
+      {k:'miss_situations',label:'Are there any situations, lies or conditions that make your usual miss more likely?',type:'long'},
+      {k:'miss_cause',label:'What do you currently believe causes your poor shots?',type:'long'},
+      {k:'miss_fix',label:'What do you normally try to change when that miss appears?',type:'long'}]},
+    {title:'Technique and learning',q:[
+      {k:'tech_changes',label:'What technical changes are you currently trying to make?',type:'long'},
+      {k:'swing_needs',label:'What do you currently believe your swing needs to do better?',type:'long'},
+      {k:'swing_thoughts',label:'What swing thoughts, feels or movement intentions do you currently use?',type:'long'},
+      {k:'thoughts_help',label:'Which of these seem to help?',type:'long'},
+      {k:'thoughts_worse',label:'Which thoughts or instructions have made your golf worse, more complicated or less natural?',type:'long'},
+      {k:'past_wins',label:'What previous coaching changes have produced a meaningful improvement?',type:'long'},
+      {k:'past_faded',label:'Have any previous changes worked at first but then disappeared? If so, what happened?',type:'long'},
+      {k:'cant_produce',label:'Are there movements you understand but struggle to produce physically?',type:'long'},
+      {k:'learn_best',label:'When learning a movement, what normally helps you most?',type:'multi',hint:'Pick as many as you like.',other:true,
+        opts:['Verbal explanation','Demonstration','Physical guidance','A movement feel','A constraint or drill','Understanding why it matters','Video of my own swing']}]},
+    {title:'Your body',q:[
+      {k:'pain',label:'Do you currently experience any pain, discomfort or physical limitation when playing golf or exercising?',type:'long'},
+      {k:'fatigue',label:'Do fatigue, stiffness or physical discomfort noticeably change your golf during a round?',type:'long'},
+      {k:'health_other',label:'Is there anything else about your health or physical history the coaching team should know before assessing you?',type:'long'},
+      {k:'weight_kg',label:'Body weight (kg)',type:'num'},
+      {k:'height',label:'Height (feet and inches)',type:'text',ph:'e.g. 5ft 11in'},
+      {k:'physical_goals',label:'Do you have any specific physical or health goals?',type:'long'}]},
+    {title:'Habits and mind',q:[
+      {k:'meditate',label:'Do you currently meditate?',type:'choice',opts:['Yes, regularly','Sometimes','No']},
+      {k:'journal',label:'Do you currently journal?',type:'choice',opts:['Yes, regularly','Sometimes','No']},
+      {k:'breathwork',label:'Do you practise breathwork?',type:'choice',opts:['Yes, regularly','Sometimes','No']},
+      {k:'morning',label:'Do you have a morning routine? If so, what does it look like?',type:'long'},
+      {k:'mental_health',label:'Is there anything about your mental health your coaches should know about? (for example anxiety, ADHD or autism)',type:'long',hint:'Optional. Only your coaching team sees this, and it helps them coach you in the way that suits you.'}]},
+    {title:'Your numbers',q:[
+      {k:'stats',label:'What golf statistics or performance-tracking information do you currently have?',type:'long',hint:'For example Shot Scope, Arccos, Garmin, England Golf scores or a launch monitor.'},
+      {k:'stats_link',label:'Link to any stats you can share',type:'text',hint:'A shared Google Drive or Dropbox folder, or an app share link. Leave blank if you have none.'}]}
+  ]
+});
+</script>
