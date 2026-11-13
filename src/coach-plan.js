@@ -57,7 +57,48 @@ function runDeferred(){
     if(src){s.src=src;s.charset='utf-8';s.onload=s.onerror=function(){next(i+1)};document.body.appendChild(s)}
     else{s.text=old.textContent;document.body.appendChild(s);next(i+1)}})(0);
 }
-function after(){returned();try{weeklyReminder()}catch(e){}}
+function after(){returned();try{weeklyReminder()}catch(e){}try{dashSetup()}catch(e){}}
+
+/* ---------- colour + 'Your week' dashboard (Joe, 13 Nov: less white, more graphs) ---------- */
+function dashCss(){if(document.getElementById('cp-dash-css'))return;var s=document.createElement('style');s.id='cp-dash-css';s.textContent=[
+ 'body{background:#ECE8DC!important}.tabs,body::before{background:#ECE8DC!important}',
+ '.cp-dash{background:#0B0B0B;color:#F4F1EA;padding:16px;border-left:6px solid #FFD900;display:flex;flex-direction:column;gap:12px}',
+ '.cp-dash h3{margin:0;font:400 22px/1 Anton,Impact,sans-serif;text-transform:uppercase;color:#F4F1EA}',
+ '.cp-dash .k{font:700 11px Inter,sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:#FFD900}',
+ '.cp-rings{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.cp-rings div{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}',
+ '.cp-rings svg{width:100%;max-width:92px;height:auto}.cp-rings span{font:700 11px Inter,sans-serif;letter-spacing:.6px;text-transform:uppercase;color:#c9c4b4}',
+ '.cp-spark{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cp-spark>div{background:#1a1916;padding:10px}.cp-spark svg{display:block;width:100%;height:auto}',
+ '.cp-spark b{font:400 20px Anton,Impact,sans-serif;color:#FFD900;margin-left:6px}',
+ '.cp-att{background:#0B0B0B;padding:10px 10px 6px;margin:4px 0 2px}.cp-att svg{display:block;width:100%;height:auto;max-height:150px}',
+ '@media(max-width:420px){.cp-rings{grid-template-columns:repeat(2,1fr)}}'].join('');document.head.appendChild(s)}
+function ring(v,max,label,col,pct){var p=pct?Math.min(1,v/100):max?Math.min(1,v/max):0,R=34,C=2*Math.PI*R;
+  return '<div><svg viewBox="0 0 84 84"><circle cx="42" cy="42" r="'+R+'" fill="none" stroke="#2a2925" stroke-width="9"/>'+(p>0?'<circle cx="42" cy="42" r="'+R+'" fill="none" stroke="'+col+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+(C*p)+' '+C+'" transform="rotate(-90 42 42)"/>':'')+
+    '<text x="42" y="47" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="20" fill="#F4F1EA">'+v+(pct?'<tspan font-size="12" fill="#8f8a7c">%</tspan>':max?'<tspan font-size="12" fill="#8f8a7c">/'+max+'</tspan>':'')+'</text></svg><span>'+esc(label)+'</span></div>'}
+function spark(vals,col){var W=160,H=44,n=vals.length,pts=[];vals.forEach(function(v,i){if(v!=null)pts.push([6+i*(W-12)/(n-1),H-6-(v-1)/9*(H-12)])});
+  var g='<line x1="0" y1="'+(H-6)+'" x2="'+W+'" y2="'+(H-6)+'" stroke="#2a2925"/>';if(pts.length>1)g+='<polyline points="'+pts.map(function(p){return p.join(',')}).join(' ')+'" fill="none" stroke="'+col+'" stroke-width="2.5"/>';
+  pts.forEach(function(p){g+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3" fill="'+col+'"/>'});return '<svg viewBox="0 0 '+W+' '+H+'">'+g+'</svg>'}
+function practiceDone(){var p=window.MGCP_DATA||{},sessions=((p.practice||{}).sessions||[]),d=wk(),n=0;sessions.forEach(function(s){var dr=s.drills||[];if(dr.length&&dr.every(function(x){return d[x.id]}))n++});return n}
+function dashHTML(){var S=window.S,p=window.MGCP_DATA||{},w=S.week||1,c=typeof weekCounts==='function'?weekCounts(w):{gym:0,habits:0},gT=(window.CLIENT&&CLIENT.weekly&&CLIENT.weekly.gym)||0,
+    pT=+((p.weekly||{}).practice)||0,hl=typeof habitList==='function'?habitList().length:0,days=typeof weekDays==='function'?weekDays(w):[],t=todayIso(),dn=days.filter(function(d){return d<=t}).length||1;
+  var h='<div class="cp-dash" id="cp-dash"><div><span class="k">Week '+w+' of '+((window.CLIENT&&CLIENT.weeks)||6)+'</span><h3>Your week so far</h3></div><div class="cp-rings">'+
+    ring(c.gym||0,gT,'Gym','#e2574c')+(pT?ring(practiceDone(),pT,'Practice','#FFD900'):'')+(hl?ring(Math.min(100,Math.round((c.habits||0)/(hl*dn)*100)),0,'Habits','#7fb2e5',true):'')+
+    ring(days.filter(function(d){return S.checkin&&S.checkin[d]}).length,7,'Check-ins','#5fbf7a')+'</div>';
+  var last=[];for(var i=6;i>=0;i--)last.push(addDays(t,-i));var en=last.map(function(d){var x=S.checkin&&S.checkin[d];return x&&x.energy?+x.energy:null}),mo=last.map(function(d){var x=S.checkin&&S.checkin[d];return x&&x.motivation?+x.motivation:null});
+  var avg=function(a){var v=a.filter(function(x){return x!=null});return v.length?(v.reduce(function(s,x){return s+x},0)/v.length).toFixed(1):'\u2013'};
+  if(en.some(function(x){return x!=null}))h+='<div class="cp-spark"><div><span class="k">Energy \u00b7 7 days</span><b>'+avg(en)+'</b>'+spark(en,'#FFD900')+'</div><div><span class="k">Motivation \u00b7 7 days</span><b>'+avg(mo)+'</b>'+spark(mo,'#5fbf7a')+'</div></div>';
+  return h+'</div>'}
+function dashSetup(){dashCss();var lastH='',put=function(){var el=document.getElementById('p-today');if(!el||el.hidden)return;var old=document.getElementById('cp-dash'),html=dashHTML();
+    if(old&&old.parentNode===el&&html===lastH)return;lastH=html;if(old)old.remove();var d=document.createElement('div');d.innerHTML=html;el.insertBefore(d.firstChild,el.firstChild)};
+  put();var tm=null;new MutationObserver(function(){clearTimeout(tm);tm=setTimeout(put,60)}).observe(document.getElementById('p-today')||document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','class','aria-pressed']});
+  var o=window.save;if(typeof o==='function'&&!o._cp){window.save=function(){var r=o.apply(this,arguments);clearTimeout(tm);tm=setTimeout(put,60);return r};window.save._cp=1}}
+/* attention through a session, small chart for the Practice tab */
+function attSvg(dr){var n=dr.length;if(n<2)return '';var W=640,H=120,L=70,R=20,T=14,B=14,X=function(i){return L+i*(W-L-R)/(n-1)},Y=function(v){return T+(1-att(v)/100)*(H-T-B)};
+  var tx=function(x,y,t,c,sz,a){return '<text x="'+x+'" y="'+y+'" text-anchor="'+(a||'start')+'" font-family="Inter,sans-serif" font-size="'+(sz||11)+'" font-weight="800" fill="'+c+'">'+t+'</text>'};
+  var g='<rect x="'+L+'" y="'+T+'" width="'+(W-L-R)+'" height="'+(H-T-B)/2+'" fill="#16241a"/><rect x="'+L+'" y="'+(T+(H-T-B)/2)+'" width="'+(W-L-R)+'" height="'+(H-T-B)/2+'" fill="#241e10"/>'+
+    tx(L-8,T+12,'EXTERNAL','#5fbf7a',10,'end')+tx(L-8,H-B,'INTERNAL','#FFD900',10,'end');
+  var pts=dr.map(function(d,i){return [X(i),Y(d.attention)]});g+='<polyline points="'+pts.map(function(p){return p.join(',')}).join(' ')+'" fill="none" stroke="#F4F1EA" stroke-width="2.5" stroke-dasharray="6 5"/>';
+  dr.forEach(function(d,i){var t=d.env==='Technical';g+='<circle cx="'+pts[i][0]+'" cy="'+pts[i][1]+'" r="11" fill="'+(t?'#FFD900':'#5fbf7a')+'" stroke="#0B0B0B" stroke-width="2"/>'+tx(pts[i][0],pts[i][1]+4,i+1,'#0B0B0B',12,'middle')});
+  return '<div class="cp-att"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Attention through the session: each number is a drill below">'+g+'</svg></div>'}
 
 /* ---------- weekly report reminders (Joe, 13 Nov) ----------
    Sunday: "complete your weekly report" for this plan week. Monday to Wednesday: if the week that ended on Sunday still has no
@@ -153,6 +194,11 @@ function css(){if(document.getElementById('cp-css'))return;var s=document.create
  '.cp-card{background:var(--paper,#fff);border:1px solid var(--hair,rgba(11,11,11,.13));border-left:6px solid var(--yellow,#FFD900);padding:16px;display:flex;flex-direction:column;gap:10px}',
  '.cp-card h3{margin:0;font:400 22px/1.05 var(--display,Anton,Impact,sans-serif);text-transform:uppercase;color:var(--ink,#0B0B0B)}',
  '.cp-note{margin:0;color:var(--body,#3B3830);font-size:14px;line-height:1.5}',
+ '.cp-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.cp-hd label{flex:1}',
+ '.cp-vol{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:72px;padding:6px 10px;background:#FFD900;color:#0B0B0B;font:700 11px Inter,sans-serif;letter-spacing:1px;text-transform:uppercase;line-height:1.1}',
+ '.cp-vol b{font:400 30px/1 Anton,Impact,sans-serif!important;letter-spacing:0!important;display:block}',
+ '.cp-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#0B0B0B;color:#FFD900;font:800 12px Inter,sans-serif;margin-right:6px;vertical-align:middle}',
+ '.cp-att text{letter-spacing:0!important;text-transform:none!important}',
  '.cp-row{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--hair,rgba(11,11,11,.13))}',
  '.cp-row input{width:22px;height:22px;accent-color:#0B0B0B;margin:2px 0 0}',
  '.cp-row b{font:600 15px var(--sans,Inter,sans-serif);color:var(--ink,#0B0B0B)}',
@@ -186,10 +232,10 @@ function renderPractice(el){
     (pr.length?'<ol class="cp-note" style="padding-left:20px;margin:8px 0 0">'+pr.map(function(x){return '<li><b>'+esc(x.title)+'</b>'+(x.change?' · '+esc(x.change):'')+'</li>'}).join('')+'</ol>':'')+'</details></div>';
   if(sessions.length){
     h+=sec('This week','Practice sessions')+'<p class="cp-prog">'+full+' of '+(target||sessions.length)+' sessions done this week'+(p.practice.intro?' · '+esc(p.practice.intro):'')+'</p>';
-    h+=sessions.map(function(s,si){var dr=s.drills||[];return '<div class="cp-card" style="margin-top:10px"><h3>'+esc(s.name||('Session '+(si+1)))+'</h3>'+(s.warmup?'<p class="cp-note">'+esc(s.warmup)+'</p>':'')+
-      dr.map(function(d){var isG=d.env!=='Technical',g=gameFor(d),on=!!done[d.id],id='cp-'+esc(d.id);
-        return '<div class="cp-row"><input type="checkbox" id="'+id+'" data-cpd="'+esc(d.id)+'"'+(on?' checked':'')+'><div><label for="'+id+'"><span class="cp-tag'+(isG?' g':'')+'">'+(isG?'Game':'Technical')+'</span><b>'+esc(d.name||'Drill')+'</b></label>'+
-          (d.volume?'<div class="cp-meta">'+esc(d.volume)+' '+esc(String(d.volume).trim()==='1'?String(d.unit||'').replace(/s$/,''):(d.unit||''))+'</div>':'')+(d.detail?'<p class="cp-note" style="margin-top:4px">'+esc(d.detail)+'</p>':'')+attHtml(d.attention)+
+    h+=sessions.map(function(s,si){var dr=s.drills||[];return '<div class="cp-card" style="margin-top:10px"><h3>'+esc(s.name||('Session '+(si+1)))+'</h3>'+(s.warmup?'<p class="cp-note">'+esc(s.warmup)+'</p>':'')+attSvg(dr)+
+      dr.map(function(d,di){var isG=d.env!=='Technical',g=gameFor(d),on=!!done[d.id],id='cp-'+esc(d.id);
+        return '<div class="cp-row"><input type="checkbox" id="'+id+'" data-cpd="'+esc(d.id)+'"'+(on?' checked':'')+'><div><div class="cp-hd"><label for="'+id+'"><span class="cp-num">'+(di+1)+'</span><span class="cp-tag'+(isG?' g':'')+'">'+(isG?'Game':'Technical')+'</span><b>'+esc(d.name||'Drill')+'</b></label>'+
+          (d.volume?'<span class="cp-vol"><b>'+esc(d.volume)+'</b>'+esc(String(d.volume).trim()==='1'?String(d.unit||'').replace(/s$/,''):(d.unit||''))+'</span>':'')+'</div>'+(d.detail?'<p class="cp-note" style="margin-top:4px">'+esc(d.detail)+'</p>':'')+attHtml(d.attention)+
           (g?'<button type="button" class="cp-go'+(on?' done':'')+'" data-cpg="'+esc(d.game)+'" data-cpid="'+esc(d.id)+'">'+(on?'Play '+esc(g[0])+' again':'Start '+esc(g[0]))+' <span aria-hidden="true">›</span></button>':'')+
           (window.MGDrills&&MGDrills.has(d.game)?drillBtn(d,on):'')+'</div></div>'}).join('')+
       (s.close?'<p class="cp-note" style="margin-top:6px">'+esc(s.close)+'</p>':'')+'</div>'}).join('');
