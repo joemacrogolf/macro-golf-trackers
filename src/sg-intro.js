@@ -1,4 +1,4 @@
-/* Strokes gained explainer: a 30-second video every player watches once, the first time they open a golf page
+/* Strokes gained explainer: a 40-second video every player watches once, the first time they open a golf page
    (My Numbers, the Practice Plan, any golf game or test, coach-built golf plans). It can't be skipped the first time:
    "Got it" appears when the video ends. Afterwards MGSGIntro.open() plays it again from the "What is strokes gained?"
    link at the bottom of My Numbers, with a close button.
@@ -30,7 +30,7 @@ function css(){if(document.getElementById('mgsi-css'))return;var s=document.crea
 function open(again){if(document.getElementById('mgsi'))return;css();
   var w=document.createElement('div');w.id='mgsi';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');w.setAttribute('aria-label','What is strokes gained?');
   w.innerHTML=(again?'<button type="button" class="x" aria-label="Close">\u00d7</button>':'')+
-   '<div class="k">'+(again?'Strokes gained in 30 seconds':'Before you start \u00b7 30 seconds')+'</div>'+
+   '<div class="k">'+(again?'Strokes gained in 40 seconds':'Before you start \u00b7 40 seconds')+'</div>'+
    '<div class="v"><video playsinline webkit-playsinline preload="auto" poster="'+POSTER+'" src="'+VID+'"></video><button type="button" class="play"><i></i>Watch: what is strokes gained?</button><button type="button" class="snd" hidden>Tap for sound</button></div>'+
    '<div class="bar"><b></b></div><div class="btns"><button type="button" class="go" hidden>Got it</button><button type="button" class="again" hidden>Watch again</button></div><div class="note"></div>';
   document.body.appendChild(w);document.body.classList.add('mgsi-on');
