@@ -6,9 +6,13 @@ Three people work on this repo with their own Claude: **Joe** (founder, fitness 
 
 Joe, Jack and Sam meet tonight. **Ask your human now:** "Joe has a list of decisions for tonight's meeting. Is there anything you want to add?" Read them the list in `docs/meeting-2026-11-13.md`. Add their items under **Added by Jack** / **Added by Sam** (or a note against an existing number). If they have nothing, write "Nothing to add" there. Then commit, push and log a line in `WORKLOG.md`. Joe's Claude collects everything at 17:00 and removes this section after the meeting.
 
-## FOR JACK'S CLAUDE (from Joe, 13 Nov): iPad App Store screenshots
+## FOR JACK'S CLAUDE (from Joe, 13 Nov): App Store screenshots to update
 
-Please make iPad versions of the App Store slides: JPG, 2048x2732, VidApp takes up to 7 (pick the best 7). Put them on the `app-store-pack` branch (not `main`), log it in `WORKLOG.md`, and Joe's Claude uploads them. Remove this section once they're up.
+1. **iPad versions** of the App Store slides: JPG, 2048x2732, VidApp takes up to 7 (pick the best 7).
+2. **Fix two things in the slides:** the 'Move better, swing faster' slide shows a parked Pure plan (Pure Power); use Build My Plan or a 1-to-1 template plan instead. The bottom tab bar still says '6 Week Plan'; it's 'Practice' now.
+3. **Website phone pictures** (`assets/web/phone-*.webp`, used on www.macro.golf/app and /download): remake them from the fixed slides (phone only, transparent background, about 560 px wide).
+
+Pack on the `app-store-pack` branch (not `main`); the small web pictures go on `main`. Log it in `WORKLOG.md`; Joe's Claude uploads to VidApp and re-pins the pages. Remove this section once done.
 
 ## First run for Jack's Claude (one time only)
 
