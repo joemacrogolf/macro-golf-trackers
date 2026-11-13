@@ -239,7 +239,7 @@ button,input,select{font:inherit;color:inherit}
 .grid7 tr.sep td{border-top:2px solid var(--ink)}
 .tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;background:var(--paper);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-bottom:2px solid var(--ink);margin-inline:calc(-1 * max(16px, env(safe-area-inset-left, 0px)));padding-inline:max(16px, env(safe-area-inset-left, 0px))}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:16;background:var(--paper)}
-.tabs button{background:transparent;border:0;padding:14px 2px 12px;font-family:var(--display);text-transform:uppercase;font-size:15px;color:var(--muted);cursor:pointer;min-height:48px;border-bottom:4px solid transparent;margin-bottom:-2px}
+.tabs button{background:transparent;border:0;padding:14px 2px 12px;font-family:var(--display);text-transform:uppercase;font-size:18px;color:var(--muted);cursor:pointer;min-height:52px;border-bottom:4px solid transparent;margin-bottom:-2px}
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--yellow)}
 .panel{display:flex;flex-direction:column;gap:18px}
 .sec{display:flex;flex-direction:column;gap:0}
@@ -331,7 +331,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .straight{background:var(--cream);padding:10px 16px;font-size:13px;color:var(--body);border-top:1px solid var(--hair)}
 .straight b{font-weight:700;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin-right:8px}
 @media (max-width:480px){
-  .tabs button{font-size:13px}
+  .tabs button{font-size:16px;letter-spacing:.2px}
   .mob{grid-template-columns:repeat(3,minmax(0,1fr))}
   .stage{grid-template-columns:repeat(3,minmax(0,1fr))}
   .phase3{grid-template-columns:1fr}
@@ -378,7 +378,7 @@ body{padding-top:0}
 .wrap{max-width:1040px}
 .hero{margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding:44px calc(50vw - 50%) 0}
 .tabs{margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding-inline:calc(50vw - 50%)}
-.tabs button{font-size:18px;padding:18px 4px 16px}
+.tabs button{font-size:22px;padding:18px 4px 16px}
 .timer-in{max-width:1040px}
 .hero h1#greet{font-size:72px}
 .hero .strip .val,.hero .strip select{font-size:24px}
@@ -1441,4 +1441,5 @@ UX.init({family:'dan',home:true});
 <script src="{{BASE}}src/videos.js"></script>
 <script src="{{BASE}}src/workout-selfie.js"></script>
 <script src="{{BASE}}src/swap.js"></script>
+<script src="{{BASE}}src/plan-stats.js"></script>
 <script>MGSync.init({code:"741365",name:"Rob Seeley"})</script>

@@ -107,6 +107,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | `src/golf-sg.js` | Golf pages: strokes gained. |
 | `src/workout-selfie.js` | Personalised 1-to-1 plans and Build My Plan (not the parked Pure plans): "Post a selfie" on the Session done screen (total kg lifted + a fun equivalent; reps / time / metres / minutes when there are no weights). Load after the tracker. |
 | `src/swap.js` | Training plans built from templates/: "Swap" button on each exercise (2 suggestions or type your own; just today or rest of the plan). Saves `S.swaps`; the coach dashboard flags 1-to-1 swaps. |
+| `src/plan-stats.js` | Training plans built from templates/: predicted 1RM (Epley + RPE, 1-12 reps) under the main loaded lifts and a 'Predicted 1RM up' toast; 'Your progress' card on the Today page (sessions, kg, charts, 1RM trends). Reads S.logs / S.finished, stores nothing. |
 
 **Exercise library (the planning database).** Google Drive file `Macro_Golf_VidApp_Library_Audited_v5.xlsm` (id `1EQjn4IPZn2Lz-Qeb-LpIS7wRAPoUNnzk`). One row per Kajabi exercise lesson with its Wistia video ID, the other names plans use for it, setting, default dose, rest, each side, easier and harder options, golf purpose and filming status. The suggested columns are rule-based drafts for coaches to check. Use it when choosing exercises and video IDs for any plan.
 
