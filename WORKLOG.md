@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-13 20:20 · Jack's Claude · VidApp PUBLISHED LIVE (Jack: 'go live'). Live bottom tabs now: Home (website 4183875 → www.macro.golf/app-home) · Practice · My Training · Playlists · Library (old Home content tab 312348, renamed). MG Athletes tab 4183648 in 'Not Active' (its log-in is on the homepage). Players get it next time they open the app. To undo: docs/vidapp-snapshot-2026-11-13.md. OUT OF VIDAPP · done
 2026-11-13 20:30 · Jack's Claude · App homepage Train tile now uses the gym version (barbell, dumbbell, kettlebell; 'Gym & home workouts for golf'; assets/web/home/tile-train-gym.jpg). Pinned app-home · done
 2026-11-13 20:25 · Jack's Claude · App homepage: Gym · Training plan button background now a barbell + dumbbell (assets/web/home/quick-train.jpg). Pinned app-home · done
 2026-11-13 20:20 · Jack's Claude · App homepage quick buttons: emojis removed (Jack); plain text 'Golf · Practice plan' / 'Gym · Training plan' / 'MG Athlete · My coach's plan' on picture backgrounds (assets/web/home/quick-*.jpg). Pinned app-home · done
