@@ -8,6 +8,8 @@ window.MGV_NOAUTO=true;
 (function(){var me=document.currentScript;if(!me||!me.src||window.MGSGIntro)return;var s=document.createElement('script');s.src=me.src.replace(/golfwarm\.js(\?.*)?$/,'sg-intro.js');document.head.appendChild(s)})();
 /* day streak bar at the top of the page (src/day-streak.js) */
 (function(){var me=document.currentScript;if(!me||!me.src||window.MGDays)return;var s=document.createElement('script');s.src=me.src.replace(/golfwarm\.js(\?.*)?$/,'day-streak.js');document.head.appendChild(s)})();
+/* H2H / Leaders / My PBs in one row near the top of the page instead of floating over the bottom-right corner (src/tool-row.js) */
+(function(){var me=document.currentScript;if(!me||!me.src||window.MGToolRow)return;var s=document.createElement('script');s.src=me.src.replace(/golfwarm\.js(\?.*)?$/,'tool-row.js');document.head.appendChild(s)})();
 /* personal best celebration and the PB border on share pictures (src/pb-party.js) */
 (function(){var me=document.currentScript;if(!me||!me.src||window.MGPB)return;var s=document.createElement('script');s.src=me.src.replace(/golfwarm\.js(\?.*)?$/,'pb-party.js');document.head.appendChild(s)})();
 /* opened from the Practice Plan: "Back to plan", and straight back to the plan when the round is done (src/plan-return.js) */
