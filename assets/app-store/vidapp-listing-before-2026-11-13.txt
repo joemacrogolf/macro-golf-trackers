@@ -1,0 +1,50 @@
+VidApp App Store > iOS listing as it was before the 13 Nov update (for rollback)
+
+App Name: Macro Golf
+Subtitle: Golf Performance Coaching
+iPhone/iPad Display Name: Macro Golf
+Promotional Text: Understand your game. Improve your performance. Train, practise and play with purpose using the Macro Golf App.
+Keywords: golf coaching,golf performance,golf swing,golf fitness,golf practice,mobility,golf drills,swing spee
+
+Old screenshots (VidApp S3, https://vidapp-bucket.s3.amazonaws.com/MacroGolfStudios/images/):
+ iPhone 8: image_20251001_214251_1.jpg … image_20251001_214315_10.jpg (slots 1-10)
+ iPhone X: image_20251001_215014_1.jpg … image_20251001_215043_10.jpg (slots 1-10)
+
+App Store Description:
+Macro Golf — Understand Your Game. Play Better Golf.
+
+The Macro Golf App brings together the tools, training and resources we use to help golfers improve their performance.
+
+Golf performance isn't determined by one thing. Your technique, physical capabilities, practice, strategy and mental performance all interact to influence the golf you produce.
+
+Macro Golf helps you understand those different parts of your game and gives you practical ways to develop them.
+
+Inside the Macro Golf App:
+
+Golf Practice
+Structured practice sessions and drills designed to help you develop your game and transfer improvements to the golf course.
+
+Golf Fitness
+Golf-specific strength, power, mobility and conditioning programmes, with exercise demonstrations and follow-along sessions.
+
+Mobility & Physical Screening
+Assess your movement and identify physical restrictions that may influence the movement solutions available to you.
+
+Golf Swing & Technical Development
+Drills and resources covering different areas of golf technique and movement.
+
+Swing Speed Training
+Structured training and exercises designed to help golfers develop clubhead speed and physical power.
+
+Warm-Ups & Recovery
+Golf-specific routines to prepare for practice and play, alongside mobility and recovery sessions.
+
+Mental Performance
+Resources designed to help you better understand the relationship between your thoughts, intentions, state and performance.
+
+Education
+Learn more about golf performance, practice, physical development and the principles behind the Macro Golf approach.
+
+Whether you're working with the Macro Golf coaching team or using the app independently, the goal is the same: to help you better understand your game, develop your ability and access more of the golf you already possess.
+
+Your swing. Your Blueprint. Your Match Up.
