@@ -111,6 +111,7 @@ Exercises use `x(id, name, {sets, reps, rpe, side, kind, inc, note, slot})`. `re
 | Luis Vega | `luis-vega` | 694218 |
 | Rob Seeley | `rob-seeley` | 741365 |
 | Colin Howard | `colin-howard` | 576900 |
+| Ross King | `ross-king` | 538206 |
 
 ## Build My Plan (`src/plan-builder.js` + `clients/build-my-plan.js`)
 

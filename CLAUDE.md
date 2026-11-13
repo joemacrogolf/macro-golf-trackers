@@ -170,6 +170,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | Luis Vega (template build) | p-694218 | 2168241902 | plan / mg_loader |
 | Rob Seeley (template build) | p-741365 | 2168241904 | plan / mg_loader |
 | Colin Howard (template build) | p-576900 | 2168250329 | plan / mg_loader |
+| Ross King (template build) | p-538206 | (to create) | plan / mg_loader |
 | Paul Goddard golf plan | p-482615 | 2168242786 | game / loader |
 | On-Course Games (Worst Ball, PGA Tour Average; `pages/golf-on-course.html`) | p-631482 | 2168255012 | game / loader |
 | Practice Plan (weekly plan from the three tests + one-off sessions; `pages/golf-practice-plan.html`) | p-274816 | 2168255841 | game / loader |
