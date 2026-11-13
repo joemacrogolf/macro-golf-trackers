@@ -1,0 +1,277 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+<!-- Coach home + Player dashboard (coach-only, www.macro.golf/coach-home). Joe, 14 Nov 2026.
+     Home: tiles to the 6-week Plan Builder, the Player dashboard and the classic training dashboard.
+     Player dashboard: every 1-to-1 player, a player view (this week, check-in trends, gym, practice, weight, weekly reviews,
+     drill PBs), 1-to-1 meeting notes and an accountability tracker. Players see shared notes and their tasks in their plan
+     (www.macro.golf/coach-plan, Coach tab). Data: mg_coach_people (010), mg_coach_plans_list (014),
+     notes + tasks supabase/016-player-notes-tasks.sql. Same coach password as the Plan Builder; one sign-in per browser tab
+     (sessionStorage 'mg-coach-s', cleared when the tab closes) carries over to the Plan Builder. -->
+<style>
+#ch{--ink:#0c0c0b;--panel:#161614;--panel2:#1d1d1a;--line:#2c2b27;--paper:#f3f1ea;--muted:#9b988d;--gold:#FFD900;--ok:#5fd38d;--warn:#ffb347;--bad:#ff6b5e;--blue:#7fb2e5;--red:#e2574c;
+  --display:"Anton",Impact,"Arial Narrow",sans-serif;--body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"Space Mono",ui-monospace,Menlo,monospace;
+  background:var(--ink);color:var(--paper);font:15px/1.5 var(--body);min-height:100vh;text-align:left;color-scheme:dark}
+#ch *{box-sizing:border-box}#ch button,#ch input,#ch select,#ch textarea{font:inherit;color:inherit}
+#ch :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#ch h1,#ch h2,#ch h3{font-family:var(--display)!important;font-weight:400!important;color:var(--paper)!important;text-transform:uppercase;letter-spacing:.02em;margin:0}
+#ch h1{font-size:44px;line-height:1}#ch h2{font-size:28px;line-height:1.05}#ch h3{font-size:20px;line-height:1.1}
+#ch header{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);background:#000;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+#ch .brand b{font:26px/1 var(--display);letter-spacing:.02em}#ch .brand b i{font-style:normal;color:var(--gold)}
+#ch .brand span{font:11px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-left:10px}
+#ch .crumbs{display:flex;gap:6px;align-items:center;font:12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+#ch .crumbs button{background:none;border:0;color:var(--gold);cursor:pointer;padding:4px 2px;text-transform:uppercase;letter-spacing:.12em;font:12px var(--mono)}
+#ch .spacer{flex:1}
+#ch main{max-width:1180px;margin:0 auto;padding:26px 20px 80px;display:flex;flex-direction:column;gap:18px}
+#ch .kick{font:11px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+#ch .hint{color:var(--muted);font-size:13px;margin:0}
+#ch .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:8px 16px;border:1px solid var(--line);background:var(--panel2);border-radius:8px;cursor:pointer;font-weight:600;text-decoration:none;color:var(--paper)}
+#ch .btn:hover{border-color:#4a4840}#ch .btn.gold{background:var(--gold);color:#000;border-color:var(--gold)}#ch .btn.sm{min-height:32px;padding:4px 10px;font-size:13px}
+#ch .btn.ghost{background:transparent}#ch .btn.danger{border-color:var(--bad);color:var(--bad);background:transparent}
+#ch .gate{min-height:80vh;display:flex;align-items:center;justify-content:center;padding:20px}
+#ch .gatebox{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--gold);padding:28px;max-width:420px;width:100%;display:flex;flex-direction:column;gap:14px}
+#ch .gatebox input{min-height:52px;padding:0 14px;border:1px solid var(--line);background:#0f0f0e;border-radius:8px;font-size:18px}
+#ch .err{color:var(--bad);font-size:14px;min-height:20px}
+/* home tiles */
+#ch .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+#ch .tile{position:relative;display:flex;flex-direction:column;gap:10px;min-height:220px;padding:24px;background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--gold);border-radius:10px;cursor:pointer;text-align:left;text-decoration:none;color:var(--paper);overflow:hidden}
+#ch .tile:hover{background:var(--panel2);border-color:#4a4840;border-left-color:var(--gold)}
+#ch .tile h2{font-size:34px}#ch .tile p{margin:0;color:#c9c4b4;max-width:40ch}
+#ch .tile .go{margin-top:auto;font:400 18px var(--display);text-transform:uppercase;color:var(--gold)}
+#ch .tile svg.deco{position:absolute;right:-14px;top:-14px;width:120px;height:120px;opacity:.12}
+#ch .tile.alt{border-left-color:var(--blue)}#ch .tile.alt .go{color:var(--blue)}
+#ch .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+#ch .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+#ch .stat span{display:block;font:10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+#ch .stat b{display:block;font:400 34px/1.05 var(--display);color:var(--gold);margin-top:4px}#ch .stat small{color:var(--muted);font-size:12px}
+/* player list */
+#ch .tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#ch .tools input[type=search]{flex:1 1 260px;min-height:44px;padding:0 14px;border:1px solid var(--line);background:#0f0f0e;border-radius:8px}
+#ch .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}#ch .seg button{background:transparent;border:0;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--muted)}
+#ch .seg button.on{background:var(--gold);color:#000;font-weight:700}
+#ch .plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+#ch .pcard{display:flex;flex-direction:column;gap:8px;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:10px;cursor:pointer;text-align:left}
+#ch .pcard:hover{border-color:var(--gold)}
+#ch .pcard .top{display:flex;align-items:center;gap:12px}
+#ch .av{flex:none;width:44px;height:44px;border-radius:50%;background:var(--gold);color:#000;display:flex;align-items:center;justify-content:center;font:400 18px var(--display)}
+#ch .pcard b{font:400 20px/1.1 var(--display);text-transform:uppercase;letter-spacing:.02em}
+#ch .chips{display:flex;flex-wrap:wrap;gap:6px}
+#ch .chip{display:inline-flex;align-items:center;gap:5px;font:11px var(--mono);letter-spacing:.06em;padding:3px 8px;border:1px solid var(--line);border-radius:20px;color:#c9c4b4;text-transform:uppercase}
+#ch .chip.ok{border-color:#2f6b45;color:var(--ok)}#ch .chip.warn{border-color:#7a5a20;color:var(--warn)}#ch .chip.bad{border-color:#7a2a24;color:var(--bad)}#ch .chip.gold{border-color:#5c5000;color:var(--gold)}
+#ch .mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:2px}
+#ch .mini div{background:#0f0f0e;border-radius:6px;padding:6px 8px}#ch .mini span{display:block;font:9px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+#ch .mini b{font:400 18px var(--display);color:var(--paper);letter-spacing:0;text-transform:none}
+/* player view */
+#ch .phead{display:flex;gap:18px;align-items:center;flex-wrap:wrap;padding:22px;background:linear-gradient(120deg,#000 0%,#1a1810 100%);border:1px solid var(--line);border-left:8px solid var(--gold);border-radius:12px}
+#ch .phead .av{width:72px;height:72px;font-size:30px}
+#ch .phead .meta{display:flex;flex-direction:column;gap:6px;min-width:0}
+#ch .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}#ch .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){#ch .grid2,#ch .grid3{grid-template-columns:1fr}}
+#ch .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+#ch .card-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#ch .card svg{display:block;width:100%;height:auto}
+#ch .empty{color:var(--muted);font-size:14px;padding:6px 0}
+#ch .rv{display:flex;flex-direction:column;gap:2px;padding:8px 0;border-top:1px solid var(--line)}#ch .rv span{font-size:12px;color:var(--muted)}#ch .rv p{margin:0;white-space:pre-wrap}
+/* notes + tasks */
+#ch .form{display:grid;gap:10px;background:#0f0f0e;border:1px solid var(--line);border-radius:10px;padding:14px}
+#ch .form .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#ch .form input[type=text],#ch .form input[type=date],#ch .form select,#ch .form textarea{min-height:42px;padding:8px 12px;border:1px solid var(--line);background:var(--panel);border-radius:8px}
+#ch .form textarea{min-height:150px;resize:vertical;line-height:1.5}
+#ch .form label.ck{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#c9c4b4}
+#ch .note{border-left:4px solid var(--gold);background:#0f0f0e;border-radius:0 10px 10px 0;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+#ch .note.private{border-left-color:var(--muted)}
+#ch .note .nh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}#ch .note .nh b{font:400 18px var(--display);text-transform:uppercase}
+#ch .note .body{white-space:pre-wrap;color:#e3dfd3;font-size:14px}
+#ch .task{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
+#ch .task input[type=checkbox]{width:22px;height:22px;accent-color:var(--gold);margin-top:2px}
+#ch .task.done .tt{text-decoration:line-through;color:var(--muted)}
+#ch .task .tt{font-weight:600}#ch .task .td{font-size:13px;color:#c9c4b4;white-space:pre-wrap}
+#ch .bar{height:10px;background:#0f0f0e;border-radius:6px;overflow:hidden}#ch .bar i{display:block;height:100%;background:var(--gold)}
+#ch [hidden]{display:none!important}
+</style>
+
+<div id="ch">
+  <div class="gate" id="ch-gate"><form class="gatebox" id="ch-login">
+    <div class="brand"><b>MACRO <i>GOLF</i></b></div>
+    <h2>Coach home</h2>
+    <p class="hint">Plan Builder, player dashboard, 1-to-1 notes and accountability. Coaches only.</p>
+    <label for="ch-pw" class="kick">Coach password</label>
+    <input type="password" id="ch-pw" autocomplete="current-password" required>
+    <button class="btn gold" id="ch-loginbtn" type="submit">Open</button>
+    <div class="err" id="ch-err" role="alert"></div>
+  </form></div>
+  <div id="ch-app" hidden>
+    <header><div class="brand"><b>MACRO <i>GOLF</i></b><span>Coach</span></div><nav class="crumbs" id="ch-crumbs" aria-label="Where you are"></nav><span class="spacer"></span>
+      <label class="hint" for="ch-coach" style="margin:0">Coach</label><select id="ch-coach" class="btn sm" style="min-height:34px"><option>Joe</option><option>Jack</option><option>Sam</option><option>James</option></select>
+      <button class="btn sm ghost" type="button" data-act="signout">Sign out</button></header>
+    <main id="ch-main"></main>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var API="https://zhcgwtlyqriwlhbzkxcl.supabase.co/rest/v1/rpc/",KEY="sb_publishable__IBhmrVHOXsLHruU7XJB-g_OSN9Ljne",SITE="https://www.macro.golf/";
+var $=function(s){return document.querySelector(s)};
+var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+var pass="",PEOPLE=[],PLANS=[],SUM={},view="home",cur=null,BOARD=null,filter="all",q="",ui={editNote:null,msg:""};
+function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);if(v===null)sessionStorage.removeItem(k);else sessionStorage.setItem(k,v)}catch(e){return null}}
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+function rpc(fn,body){return fetch(API+fn,{method:"POST",headers:{apikey:KEY,"Content-Type":"application/json"},body:JSON.stringify(Object.assign({p_pass:pass},body||{}))})
+  .then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(!r.ok)throw new Error((j&&j.message)||("Error "+r.status));if(j&&j.error)throw new Error(j.error);return j})})}
+function coach(){return $("#ch-coach").value}
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function today(){return iso(new Date())}
+function addDays(s,n){var d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return iso(d)}
+function nice(s){if(!s)return "";var d=new Date(String(s).slice(0,10)+"T12:00:00");return d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})}
+function ago(t){if(!t)return "never";var d=Math.floor((Date.now()-new Date(t).getTime())/864e5);return d<=0?"today":d===1?"yesterday":d<7?d+" days ago":d<30?Math.floor(d/7)+" wk ago":Math.floor(d/30)+" mo ago"}
+function initials(n){return String(n||"?").trim().split(/\s+/).map(function(w){return w[0]}).slice(0,2).join("").toUpperCase()}
+
+/* ---------- data ---------- */
+function load(){return Promise.all([rpc("mg_coach_people"),rpc("mg_coach_plans_list"),rpc("mg_coach_board_summary").catch(function(){return {}})]).then(function(r){
+  var rows=(r[0]&&r[0].rows)||[],plans=(r[1]&&r[1].rows)||[];PLANS=plans;SUM=r[2]||{};
+  var byEmail={};rows.forEach(function(x){if(x.email)(byEmail[String(x.email).toLowerCase()]=byEmail[String(x.email).toLowerCase()]||[]).push(x);var m=/^pure:[^:]+:(.+)$/.exec(x.code||"");if(m)(byEmail[m[1].toLowerCase()]=byEmail[m[1].toLowerCase()]||[]).push(x)});
+  PEOPLE=rows.filter(function(x){return /^\d{6}$/.test(x.code||"")}).map(function(x){var plan=plans.filter(function(p){return String(p.appCode||"")===String(x.code)})[0]||null;
+    var type=x.path==="coach-plan"||plan?"coach":x.kind==="golf"?"golf":"training";var other=x.email?(byEmail[String(x.email).toLowerCase()]||[]).filter(function(o){return o.code!==x.code}):[];
+    return {code:x.code,name:x.name||(plan&&plan.playerName)||"Player",email:x.email||(plan&&plan.playerEmail)||"",type:type,plan:plan,planName:x.plan,S:x.data||null,updated:x.updated_at,other:other}});
+  PEOPLE.sort(function(a,b){return String(b.updated||"").localeCompare(String(a.updated||""))||a.name.localeCompare(b.name)})})}
+function weekOf(S){if(!S||!S.start)return null;var d=Math.floor((new Date(today()+"T12:00:00")-new Date(S.start+"T12:00:00"))/864e5);return Math.floor(d/7)+1}
+function weekDays(S,w){var out=[];for(var i=0;i<7;i++)out.push(addDays(S.start,(w-1)*7+i));return out}
+function stats(p){var S=p.S||{},w=weekOf(S)||1,fin=S.finished||{},gym=Object.keys(fin).filter(function(k){return k.indexOf("w"+w+"-")===0}).length,
+    allGym=Object.keys(fin).length,ci=S.checkin||{},last7=[],t=today();for(var i=6;i>=0;i--)last7.push(addDays(t,-i));
+  var c7=last7.filter(function(d){return ci[d]}).length,en=last7.map(function(d){return ci[d]&&+ci[d].energy}).filter(Boolean),
+    pr=(S.practice||{})["w"+w]||{},drills=Object.keys(pr).filter(function(k){return k!=="drills"&&pr[k]===true}).length,
+    rev=Object.keys(S.reviews||{}).filter(function(k){return S.reviews[k]&&S.reviews[k].at}).length;
+  var gT=p.plan?(+((p.plan.weekly||{}).physical)||0):0;
+  return {week:w,gym:gym,gymT:gT,allGym:allGym,checkins7:c7,energy:en.length?(en.reduce(function(a,b){return a+b},0)/en.length):null,drills:drills,reviews:rev}}
+function planData(p){return p.plan||null}
+
+/* ---------- charts ---------- */
+var C={gold:"#FFD900",cream:"#f3f1ea",mute:"#8f8a7c",grid:"#2c2b27",green:"#5fd38d",red:"#e2574c",blue:"#7fb2e5"};
+function tx(x,y,t,o){o=o||{};return '<text x="'+x+'" y="'+y+'" font-family="'+(o.f||"Inter,sans-serif")+'" font-size="'+(o.s||11)+'" font-weight="'+(o.w||600)+'" text-anchor="'+(o.a||"start")+'" fill="'+(o.c||C.cream)+'">'+esc(t)+'</text>'}
+function lineChart(series,days,max){var W=640,H=200,L=30,R=12,T=14,B=26,n=days.length,X=function(i){return L+i*(W-L-R)/Math.max(1,n-1)},Y=function(v){return T+(1-v/max)*(H-T-B)},g="";
+  [0,max/2,max].forEach(function(v){g+='<line x1="'+L+'" y1="'+Y(v)+'" x2="'+(W-R)+'" y2="'+Y(v)+'" stroke="'+C.grid+'"/>'+tx(L-6,Y(v)+4,String(Math.round(v)),{a:"end",s:9,c:C.mute})});
+  days.forEach(function(d,i){if(i%Math.ceil(n/7)===0||i===n-1)g+=tx(X(i),H-8,nice(d),{a:"middle",s:9,c:C.mute})});
+  series.forEach(function(s){var pts=[];s.v.forEach(function(v,i){if(v!=null)pts.push([X(i),Y(v)])});if(pts.length>1)g+='<polyline points="'+pts.map(function(p){return p.join(",")}).join(" ")+'" fill="none" stroke="'+s.c+'" stroke-width="2.5"/>';
+    pts.forEach(function(p){g+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3" fill="'+s.c+'"/>'})});
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+g+'</svg>'}
+function barChart(vals,labels,target,col){var W=640,H=190,L=26,R=12,T=16,B=26,n=vals.length,mx=Math.max(target||0,Math.max.apply(null,vals.concat([1]))),bw=(W-L-R)/n,g="";
+  if(target){var ty=T+(1-target/mx)*(H-T-B);g+='<line x1="'+L+'" y1="'+ty+'" x2="'+(W-R)+'" y2="'+ty+'" stroke="'+C.gold+'" stroke-dasharray="6 5"/>'+tx(W-R,ty-5,"target "+target,{a:"end",s:9,c:C.gold})}
+  vals.forEach(function(v,i){var h=v/mx*(H-T-B),x=L+i*bw+bw*.18;g+='<rect x="'+x+'" y="'+(H-B-h)+'" width="'+bw*.64+'" height="'+Math.max(h,1)+'" rx="4" fill="'+(col||C.red)+'"/>'+tx(x+bw*.32,H-B-h-5,String(v),{a:"middle",s:10,w:800})+tx(x+bw*.32,H-8,labels[i],{a:"middle",s:9,c:C.mute})});
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+g+'</svg>'}
+function weightChart(ws,target){if(!ws||ws.length<1)return "";ws=ws.slice().sort(function(a,b){return a.date<b.date?-1:1}).slice(-20);var vals=ws.map(function(w){return +w.kg});if(target)vals.push(+target);
+  var lo=Math.min.apply(null,vals)-1,hi=Math.max.apply(null,vals)+1,W=640,H=190,L=40,R=14,T=14,B=26,n=ws.length,X=function(i){return L+i*(W-L-R)/Math.max(1,n-1)},Y=function(v){return T+(hi-v)/(hi-lo)*(H-T-B)},g="";
+  [hi-0.5,(hi+lo)/2,lo+0.5].forEach(function(v){g+='<line x1="'+L+'" y1="'+Y(v)+'" x2="'+(W-R)+'" y2="'+Y(v)+'" stroke="'+C.grid+'"/>'+tx(L-6,Y(v)+4,v.toFixed(1),{a:"end",s:9,c:C.mute})});
+  if(target)g+='<line x1="'+L+'" y1="'+Y(+target)+'" x2="'+(W-R)+'" y2="'+Y(+target)+'" stroke="'+C.gold+'" stroke-dasharray="6 5"/>'+tx(W-R,Y(+target)-5,"target "+target,{a:"end",s:9,c:C.gold});
+  g+='<polyline points="'+ws.map(function(w,i){return X(i)+","+Y(+w.kg)}).join(" ")+'" fill="none" stroke="'+C.blue+'" stroke-width="2.5"/>';
+  ws.forEach(function(w,i){g+='<circle cx="'+X(i)+'" cy="'+Y(+w.kg)+'" r="3.5" fill="'+C.blue+'"/>';if(i===0||i===n-1)g+=tx(X(i),H-8,nice(w.date),{a:i?"end":"start",s:9,c:C.mute})});
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img">'+g+'</svg>'}
+function ring(v,max,col,label,pct){var p=pct?Math.min(1,v/100):max?Math.min(1,v/max):0,R=30,Cc=2*Math.PI*R;return '<div style="text-align:center"><svg viewBox="0 0 76 76" style="max-width:96px;margin:0 auto"><circle cx="38" cy="38" r="'+R+'" fill="none" stroke="#2c2b27" stroke-width="8"/>'+(p>0?'<circle cx="38" cy="38" r="'+R+'" fill="none" stroke="'+col+'" stroke-width="8" stroke-linecap="round" stroke-dasharray="'+(Cc*p)+' '+Cc+'" transform="rotate(-90 38 38)"/>':'')+
+  '<text x="38" y="43" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="18" fill="#f3f1ea">'+v+(pct?'%':max?'/'+max:'')+'</text></svg><div class="hint" style="font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase">'+esc(label)+'</div></div>'}
+
+/* ---------- views ---------- */
+function crumbs(){var c=[['home','Home']];if(view==='players'||view==='player')c.push(['players','Players']);if(view==='player'&&cur)c.push(['player',cur.name]);
+  $("#ch-crumbs").innerHTML=c.map(function(x,i){return i===c.length-1?'<span>'+esc(x[1])+'</span>':'<button type="button" data-go="'+x[0]+'">'+esc(x[1])+'</button><span>/</span>'}).join("")}
+function render(){crumbs();var m=$("#ch-main");m.innerHTML=view==="home"?homeV():view==="players"?playersV():playerV();if(view==="players"){var s=$("#ch-q");if(s){s.value=q;}}}
+var DECO={plan:'<svg class="deco" viewBox="0 0 100 100"><rect x="10" y="14" width="80" height="76" rx="6" fill="none" stroke="#FFD900" stroke-width="6"/><path d="M10 34h80M30 6v16M70 6v16" stroke="#FFD900" stroke-width="6"/><path d="M24 52h20M24 68h40" stroke="#FFD900" stroke-width="6"/></svg>',
+  players:'<svg class="deco" viewBox="0 0 100 100"><circle cx="36" cy="34" r="16" fill="none" stroke="#FFD900" stroke-width="6"/><path d="M8 88c4-20 16-30 28-30s24 10 28 30" fill="none" stroke="#FFD900" stroke-width="6"/><circle cx="72" cy="40" r="12" fill="none" stroke="#FFD900" stroke-width="6"/><path d="M64 62c14 0 24 8 28 24" fill="none" stroke="#FFD900" stroke-width="6"/></svg>',
+  dash:'<svg class="deco" viewBox="0 0 100 100"><path d="M10 90V50M35 90V30M60 90V60M85 90V16" stroke="#7fb2e5" stroke-width="12" stroke-linecap="round"/></svg>'};
+function homeV(){var active=PEOPLE.filter(function(p){return p.updated&&(Date.now()-new Date(p.updated).getTime())<7*864e5}).length,open=0,over=0;Object.keys(SUM).forEach(function(k){open+=+SUM[k].open||0;over+=+SUM[k].overdue||0});
+  var coachPlans=PEOPLE.filter(function(p){return p.type==="coach"}).length,drafts=PLANS.filter(function(p){return !p.appCode}).length;
+  return '<div><div class="kick">'+new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})+'</div><h1>Good '+(new Date().getHours()<12?"morning":new Date().getHours()<18?"afternoon":"evening")+', '+esc(coach())+'</h1></div>'+
+   '<div class="stats"><div class="stat"><span>Players</span><b>'+PEOPLE.length+'</b><small>1-to-1 and golf plans</small></div><div class="stat"><span>Active this week</span><b>'+active+'</b><small>opened their plan</small></div><div class="stat"><span>Coach-built plans</span><b>'+coachPlans+'</b><small>'+drafts+' draft'+(drafts===1?'':'s')+' in the builder</small></div><div class="stat"><span>Open tasks</span><b>'+open+'</b><small>'+(over?'<span style="color:var(--bad)">'+over+' overdue</span>':'none overdue')+'</small></div></div>'+
+   '<div class="tiles"><a class="tile" href="'+SITE+'plan-builder-529481" data-act="builder">'+DECO.plan+'<span class="kick">Build</span><h2>6-week plan builder</h2><p>Build a player’s initial plan or their next phase, preview it and put it in their app.</p><span class="go">Open the builder ›</span></a>'+
+   '<button class="tile" type="button" data-go="players">'+DECO.players+'<span class="kick">Coach</span><h2>Player dashboard</h2><p>See each player’s week, trends and reviews. Write up 1-to-1 notes and set accountability tasks they see in their plan.</p><span class="go">Open players ›</span></button>'+
+   '<a class="tile alt" href="'+SITE+'coach-713580">'+DECO.dash+'<span class="kick">Training data</span><h2>Training dashboard</h2><p>The full training log for every member: sessions, kg lifted, Pure plans and golf games.</p><span class="go">Open the training dashboard ›</span></a></div>'+
+   attention()}
+function attention(){var due=[];PEOPLE.forEach(function(p){var s=SUM[p.code];if(s&&+s.overdue)due.push('<button class="chip bad" type="button" data-player="'+esc(p.code)+'">'+esc(p.name)+' · '+s.overdue+' overdue</button>')});
+  var quiet=PEOPLE.filter(function(p){return p.type!=="golf"&&p.S&&p.updated&&(Date.now()-new Date(p.updated).getTime())>7*864e5}).slice(0,12).map(function(p){return '<button class="chip warn" type="button" data-player="'+esc(p.code)+'">'+esc(p.name)+' · '+ago(p.updated)+'</button>'});
+  if(!due.length&&!quiet.length)return "";
+  return '<div class="card"><div class="card-h"><h3>Needs a nudge</h3></div>'+(due.length?'<div class="hint">Overdue tasks</div><div class="chips">'+due.join("")+'</div>':'')+(quiet.length?'<div class="hint">Haven’t opened their plan for a week</div><div class="chips">'+quiet.join("")+'</div>':'')+'</div>'}
+function playersV(){var list=PEOPLE.filter(function(p){return (filter==="all"||p.type===filter)&&(!q||(p.name+" "+p.email+" "+p.code).toLowerCase().indexOf(q.toLowerCase())>=0)});
+  return '<div class="card-h"><div><div class="kick">Coach</div><h1>Players</h1></div></div>'+
+   '<div class="tools"><input type="search" id="ch-q" placeholder="Search by name, email or plan code" aria-label="Search players"><div class="seg" role="group" aria-label="Show">'+[["all","All"],["coach","Coach-built"],["training","Training"],["golf","Golf"]].map(function(x){return '<button type="button" data-filter="'+x[0]+'" class="'+(filter===x[0]?"on":"")+'">'+x[1]+'</button>'}).join("")+'</div></div>'+
+   (list.length?'<div class="plist">'+list.map(pcard).join("")+'</div>':'<p class="empty">No players match.</p>')}
+function pcard(p){var st=stats(p),s=SUM[p.code]||{};
+  return '<button class="pcard" type="button" data-player="'+esc(p.code)+'"><div class="top"><span class="av">'+esc(initials(p.name))+'</span><div style="min-width:0"><b>'+esc(p.name)+'</b><div class="hint">'+esc(p.type==="coach"?"Coach-built plan":p.type==="golf"?"Golf plan":"Training plan")+' · '+esc(p.code)+'</div></div></div>'+
+   '<div class="chips"><span class="chip '+(p.updated&&(Date.now()-new Date(p.updated).getTime())<7*864e5?"ok":"warn")+'">Active '+esc(ago(p.updated))+'</span>'+(+s.open?'<span class="chip gold">'+s.open+' task'+(+s.open===1?'':'s')+'</span>':'')+(+s.overdue?'<span class="chip bad">'+s.overdue+' overdue</span>':'')+(s.lastNote?'<span class="chip">1-to-1 '+esc(nice(s.lastNote))+'</span>':'')+'</div>'+
+   (p.S&&p.type!=="golf"?'<div class="mini"><div><span>Week</span><b>'+st.week+'</b></div><div><span>Gym wk</span><b>'+st.gym+(st.gymT?'/'+st.gymT:'')+'</b></div><div><span>Check-ins</span><b>'+st.checkins7+'/7</b></div><div><span>Energy</span><b>'+(st.energy?st.energy.toFixed(1):'–')+'</b></div></div>':'')+'</button>'}
+function playerV(){var p=cur;if(!p)return "";var S=p.S||{},st=stats(p),pd=planData(p),b=BOARD||{notes:[],tasks:[]};
+  var h='<div class="phead"><span class="av">'+esc(initials(p.name))+'</span><div class="meta"><span class="kick">'+esc(p.type==="coach"?"Coach-built plan":p.type==="golf"?"Golf plan":"Training plan")+(pd?' · Phase '+esc(pd.phase||1):'')+(S.start?' · Week '+st.week+' of '+((pd&&pd.weeks)||6):'')+'</span><h1>'+esc(p.name)+'</h1>'+
+    '<div class="chips"><span class="chip">Plan code '+esc(p.code)+'</span>'+(p.email?'<span class="chip">'+esc(p.email)+'</span>':'')+'<span class="chip '+(p.updated&&(Date.now()-new Date(p.updated).getTime())<7*864e5?"ok":"warn")+'">Last active '+esc(ago(p.updated))+'</span>'+(pd&&pd.coach?'<span class="chip gold">Coach '+esc(pd.coach)+'</span>':'')+'</div></div><span class="spacer"></span>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">'+(p.plan?'<a class="btn" href="'+SITE+'plan-builder-529481#plan='+encodeURIComponent(p.plan.id)+'" data-act="builder">Open in the Plan Builder</a>':'')+'<a class="btn gold" href="#ch-notes">+ 1-to-1 notes</a></div></div>';
+  if(p.S&&p.type!=="golf"){
+    var gw=[],labels=[],weeks=Math.max(st.week,(pd&&pd.weeks)||6),fin=S.finished||{};for(var w=1;w<=Math.min(weeks,12);w++){gw.push(Object.keys(fin).filter(function(k){return k.indexOf("w"+w+"-")===0}).length);labels.push("W"+w)}
+    var days=[];for(var i=27;i>=0;i--)days.push(addDays(today(),-i));var ci=S.checkin||{};
+    var hTot=(pd&&pd.habits||[]).filter(function(x){return x.name}).length,hDone=0,wd=S.start?weekDays(S,st.week):[];wd.forEach(function(d){var o=(S.habits||{})[d]||{};hDone+=Object.keys(o).filter(function(k){return o[k]}).length});
+    var dn=wd.filter(function(d){return d<=today()}).length||1;
+    h+='<div class="card"><div class="card-h"><h3>This week</h3><span class="hint">Week '+st.week+(wd.length?' · '+nice(wd[0])+' – '+nice(wd[6]):'')+'</span></div><div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr))">'+
+      ring(st.gym,st.gymT||0,C.red,"Gym sessions")+ring(st.drills,0,C.gold,"Practice drills")+(hTot?ring(Math.min(100,Math.round(hDone/(hTot*dn)*100)),0,C.blue,"Habits this week",true):"")+ring(st.checkins7,7,C.green,"Check-ins (7 days)")+ring(st.reviews,0,C.cream,"Weekly reviews")+'</div></div>';
+    h+='<div class="grid2"><div class="card"><div class="card-h"><h3>Energy and motivation</h3><span class="hint">last 28 days · <span style="color:'+C.gold+'">energy</span> · <span style="color:'+C.green+'">motivation</span></span></div>'+
+      (days.some(function(d){return ci[d]})?lineChart([{v:days.map(function(d){return ci[d]&&ci[d].energy?+ci[d].energy:null}),c:C.gold},{v:days.map(function(d){return ci[d]&&ci[d].motivation?+ci[d].motivation:null}),c:C.green}],days,10):'<p class="empty">No check-ins yet.</p>')+'</div>'+
+      '<div class="card"><div class="card-h"><h3>Gym sessions by week</h3></div>'+(gw.some(function(v){return v})?barChart(gw,labels,st.gymT||0,C.red):'<p class="empty">No gym sessions logged yet.</p>')+'</div></div>';
+    var wt=(pd&&pd.weight)||{};h+='<div class="grid2"><div class="card"><div class="card-h"><h3>Weight</h3>'+(wt.target?'<span class="hint">target '+esc(wt.target)+' '+esc(wt.unit||"kg")+'</span>':'')+'</div>'+((S.weights||[]).length?weightChart(S.weights,wt.target):'<p class="empty">No weigh-ins yet.</p>')+'</div>'+
+      '<div class="card"><div class="card-h"><h3>Practice and drills</h3></div>'+practiceCard(S,pd)+'</div></div>';
+    h+=reviewsCard(S);
+  }else if(p.type==="golf"){h+='<div class="card"><div class="card-h"><h3>Golf</h3></div><p class="hint">This player’s games and practice are on their own email record'+(p.other.length?' ('+p.other.length+' record'+(p.other.length===1?'':'s')+')':'')+'. The full detail is in the training dashboard.</p></div>'}
+  else h+='<div class="card"><p class="empty">'+esc(p.name)+' hasn’t opened their plan yet. Their data will show here once they do.</p></div>';
+  h+='<div class="grid2" id="ch-notes"><div class="card"><div class="card-h"><h3>1-to-1 notes</h3><span class="hint">'+b.notes.length+' meeting'+(b.notes.length===1?'':'s')+'</span></div>'+noteForm()+(b.notes.length?b.notes.map(noteHTML).join(""):'<p class="empty">No 1-to-1 notes yet.</p>')+'</div>'+
+    '<div class="card"><div class="card-h"><h3>Accountability</h3>'+taskBar(b.tasks)+'</div>'+taskForm()+(b.tasks.length?b.tasks.map(taskHTML).join(""):'<p class="empty">No tasks yet. Add the actions agreed in your 1-to-1.</p>')+'</div></div>';
+  return h}
+function practiceCard(S,pd){var ws=Object.keys(S.practice||{}).filter(function(k){return /^w\d+$/.test(k)}).sort(function(a,b){return +a.slice(1)-+b.slice(1)});
+  var vals=ws.map(function(k){var o=S.practice[k];return Object.keys(o).filter(function(x){return x!=="drills"&&o[x]===true}).length});
+  var pb=S.drillPB||{},NM={"drill-ladder":"Ladder up to 70 yds","drill-strike":"Strike station","drill-landing-ladder":"Landing ladder"};
+  var h=vals.length?barChart(vals,ws.map(function(k){return "W"+k.slice(1)}),0,C.gold):'<p class="empty">No practice ticked off yet.</p>';
+  var pbs=Object.keys(pb);if(pbs.length)h+='<div class="hint">Drill personal bests</div><div class="chips">'+pbs.map(function(k){return '<span class="chip gold">'+esc(NM[k]||k)+' · best '+pb[k].best+' · last '+pb[k].last+'</span>'}).join("")+'</div>';
+  return h}
+function reviewsCard(S){var R=S.reviews||{},ks=Object.keys(R).filter(function(k){return R[k]&&R[k].at}).sort(function(a,b){return +b.slice(1)-+a.slice(1)});if(!ks.length)return '<div class="card"><div class="card-h"><h3>Weekly reviews</h3></div><p class="empty">No weekly reviews sent yet.</p></div>';
+  var r=R[ks[0]],qs=r.q||{},as=r.a||{};
+  return '<div class="card"><div class="card-h"><h3>Latest weekly review</h3><span class="hint">Week '+esc(ks[0].slice(1))+' · sent '+esc(nice(r.at))+' · '+ks.length+' sent in total</span></div>'+Object.keys(as).filter(function(k){return String(as[k]).trim()}).map(function(k){return '<div class="rv"><span>'+esc(qs[k]||k)+'</span><p>'+esc(as[k])+'</p></div>'}).join("")+'</div>'}
+function noteForm(){var n=ui.editNote||{};return '<form class="form" id="ch-noteform"><div class="row"><input type="date" id="nf-date" value="'+esc(n.meet_date||today())+'" aria-label="Meeting date"><input type="text" id="nf-title" placeholder="Title, e.g. Week 3 check-in call" value="'+esc(n.title||"")+'" style="flex:1;min-width:200px"></div>'+
+  '<textarea id="nf-body" placeholder="What you talked about, what’s going well, what to work on, what was agreed…">'+esc(n.body||"")+'</textarea>'+
+  '<div class="row"><label class="ck"><input type="checkbox" id="nf-shared"'+(n.shared===false?'':' checked')+'> Player can see this note in their plan</label><span class="spacer"></span>'+(n.id?'<button class="btn sm ghost" type="button" data-act="cancelnote">Cancel</button>':'')+'<button class="btn gold" type="submit">'+(n.id?'Save changes':'Save note')+'</button></div><div class="err" id="nf-err"></div></form>'}
+function noteHTML(n){return '<div class="note'+(n.shared?'':' private')+'"><div class="nh"><b>'+esc(n.title||"1-to-1")+'</b><span class="hint">'+esc(nice(n.meet_date))+(n.coach?' · '+esc(n.coach):'')+' · '+(n.shared?'shared with player':'coach only')+'</span><span class="spacer"></span>'+
+  '<button class="btn sm ghost" type="button" data-editnote="'+esc(n.id)+'">Edit</button><button class="btn sm ghost" type="button" data-del="note" data-id="'+esc(n.id)+'">Delete</button></div><div class="body">'+esc(n.body||"")+'</div></div>'}
+function taskBar(ts){var d=ts.filter(function(t){return t.status==="done"}).length;return ts.length?'<span class="spacer"></span><span class="hint">'+d+' of '+ts.length+' done</span><div class="bar" style="flex-basis:100%"><i style="width:'+Math.round(d/ts.length*100)+'%"></i></div>':''}
+function taskForm(){return '<form class="form" id="ch-taskform"><input type="text" id="tf-title" placeholder="Task, e.g. Send me 3 swing videos from the range" required><div class="row"><input type="date" id="tf-due" aria-label="Due date"><select id="tf-owner" aria-label="Who does it"><option value="player">Player does it</option><option value="coach">Coach does it</option></select><span class="spacer"></span><button class="btn gold" type="submit">Add task</button></div>'+
+  '<input type="text" id="tf-detail" placeholder="Detail (optional)"><div class="err" id="tf-err"></div></form>'}
+function taskHTML(t){var over=t.status==="open"&&t.due&&t.due<today();return '<div class="task'+(t.status==="done"?' done':'')+'"><input type="checkbox" data-task="'+esc(t.id)+'"'+(t.status==="done"?' checked':'')+' aria-label="Done"><div><div class="tt">'+esc(t.title)+'</div>'+(t.detail?'<div class="td">'+esc(t.detail)+'</div>':'')+
+  '<div class="chips" style="margin-top:4px"><span class="chip '+(t.owner==="coach"?"":"gold")+'">'+(t.owner==="coach"?"Coach":"Player")+'</span>'+(t.due?'<span class="chip '+(over?"bad":"")+'">'+(over?"Overdue · ":"Due ")+esc(nice(t.due))+'</span>':'')+(t.status==="done"&&t.done_at?'<span class="chip ok">Done '+esc(nice(t.done_at))+(t.done_by==="player"?' by player':'')+'</span>':'')+'</div></div>'+
+  '<button class="btn sm ghost" type="button" data-del="task" data-id="'+esc(t.id)+'" aria-label="Delete task">✕</button></div>'}
+
+/* ---------- actions ---------- */
+function openPlayer(code){cur=PEOPLE.filter(function(p){return p.code===code})[0];if(!cur)return;view="player";BOARD=null;ui.editNote=null;history.replaceState(null,"","#player="+code);render();window.scrollTo(0,0);
+  rpc("mg_coach_board",{p_code:code}).then(function(b){BOARD=b;if(view==="player"&&cur&&cur.code===code)render()}).catch(function(e){BOARD={notes:[],tasks:[]};render();alert("Couldn’t load notes and tasks: "+e.message)})}
+function refreshBoard(){return Promise.all([rpc("mg_coach_board",{p_code:cur.code}),rpc("mg_coach_board_summary").catch(function(){return SUM})]).then(function(r){BOARD=r[0];SUM=r[1]||SUM;render()})}
+document.addEventListener("click",function(e){var t=e.target;
+  var go=t.closest("[data-go]");if(go){view=go.dataset.go;if(view!=="player")cur=null;history.replaceState(null,"",view==="home"?"#":"#"+view);render();window.scrollTo(0,0);return}
+  var pl=t.closest("[data-player]");if(pl){openPlayer(pl.dataset.player);return}
+  var f=t.closest("[data-filter]");if(f){filter=f.dataset.filter;render();return}
+  var en=t.closest("[data-editnote]");if(en){ui.editNote=(BOARD.notes||[]).filter(function(n){return n.id===en.dataset.editnote})[0]||null;render();var fm=$("#ch-noteform");if(fm)fm.scrollIntoView({block:"center"});return}
+  var a=t.closest("[data-act]");if(a){var k=a.dataset.act;
+    if(k==="signout"){ss("mg-coach-s",null);location.reload();return}
+    if(k==="cancelnote"){ui.editNote=null;render();return}
+    if(k==="builder"){ss("mg-coach-s",pass);return}}
+  var d=t.closest("[data-del]");if(d){if(!confirm(d.dataset.del==="note"?"Delete this note? This can’t be undone.":"Delete this task? This can’t be undone."))return;
+    rpc("mg_coach_board_delete",{p_kind:d.dataset.del,p_id:d.dataset.id}).then(refreshBoard).catch(function(err){alert("Couldn’t delete: "+err.message)});return}});
+document.addEventListener("change",function(e){var t=e.target;
+  if(t.dataset&&t.dataset.task){var task=(BOARD.tasks||[]).filter(function(x){return x.id===t.dataset.task})[0];if(!task)return;
+    rpc("mg_coach_task_save",{p_task:Object.assign({},task,{code:cur.code,status:t.checked?"done":"open"})}).then(refreshBoard).catch(function(err){alert("Couldn’t update: "+err.message)});return}
+  if(t.id==="ch-coach"){ls("mg-coach-name",t.value);if(view==="home")render()}});
+document.addEventListener("input",function(e){if(e.target.id==="ch-q"){q=e.target.value;var p=e.target.selectionStart;render();var s=$("#ch-q");if(s){s.focus();try{s.setSelectionRange(p,p)}catch(x){}}}});
+document.addEventListener("submit",function(e){var f=e.target;
+  if(f.id==="ch-noteform"){e.preventDefault();var body=$("#nf-body").value.trim();if(!body&&!$("#nf-title").value.trim()){$("#nf-err").textContent="Write something first.";return}
+    var n={id:ui.editNote&&ui.editNote.id||"",code:cur.code,meet_date:$("#nf-date").value,title:$("#nf-title").value.trim(),body:body,coach:coach(),shared:$("#nf-shared").checked};
+    f.querySelector("[type=submit]").disabled=true;rpc("mg_coach_note_save",{p_note:n}).then(function(){ui.editNote=null;return refreshBoard()}).catch(function(err){$("#nf-err").textContent="Couldn’t save: "+err.message;f.querySelector("[type=submit]").disabled=false});return}
+  if(f.id==="ch-taskform"){e.preventDefault();var tk={code:cur.code,title:$("#tf-title").value.trim(),detail:$("#tf-detail").value.trim(),due:$("#tf-due").value,owner:$("#tf-owner").value,coach:coach()};
+    f.querySelector("[type=submit]").disabled=true;rpc("mg_coach_task_save",{p_task:tk}).then(refreshBoard).catch(function(err){$("#tf-err").textContent="Couldn’t add: "+err.message;f.querySelector("[type=submit]").disabled=false});return}});
+
+/* ---------- sign in ---------- */
+function start(){return load().then(function(){$("#ch-gate").hidden=true;$("#ch-app").hidden=false;ss("mg-coach-s",pass);var hs=location.hash;
+  var m=/^#player=(\d{6})/.exec(hs);if(m){openPlayer(m[1]);return}view=hs==="#players"?"players":"home";render()})}
+$("#ch-login").addEventListener("submit",function(e){e.preventDefault();var b=$("#ch-loginbtn");pass=$("#ch-pw").value;$("#ch-pw").value="";$("#ch-err").textContent="";b.disabled=true;b.textContent="Opening";
+  start().catch(function(err){pass="";$("#ch-err").textContent=/Wrong password/.test(err.message)?"Wrong password.":err.message;b.disabled=false;b.textContent="Open"})});
+var savedName=ls("mg-coach-name");if(savedName)$("#ch-coach").value=savedName;
+var sp=ss("mg-coach-s");if(sp){pass=sp;start().catch(function(){pass="";ss("mg-coach-s",null)})}
+})();
+</script>

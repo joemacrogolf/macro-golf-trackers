@@ -47,7 +47,7 @@ function boot(){
   fetch(API+'mg_plan_content',{method:'POST',headers:{apikey:APIKEY,'Content-Type':'application/json'},body:JSON.stringify({p_code:c.code,p_pin:c.pin})})
   .then(function(r){return r.json()}).then(function(j){
     if(!j||j.error||!j.plan){var e=(j&&(j.error||j.message))||'Could not load your plan.';msg('Your plan',/PIN/i.test(e)?'That PIN did not match. Open My Plan and sign in again.':e,/PIN|code/i.test(e));return}
-    window.MGCP_CODE=c.code;window.MGCP_DATA=j.plan;var ran=0,go=function(){if(ran++)return;clearMsg();runDeferred()};
+    CRED=c;loadBoard();window.MGCP_CODE=c.code;window.MGCP_DATA=j.plan;var ran=0,go=function(){if(ran++)return;clearMsg();runDeferred()};
     if(window.MGLib&&MGLib.loadGames){setTimeout(go,2500);MGLib.loadGames().then(go,go)}else go();
   }).catch(function(){msg('No connection','Your plan could not load. Check your connection and try again.',true)});
 }
@@ -57,6 +57,23 @@ function runDeferred(){
     if(src){s.src=src;s.charset='utf-8';s.onload=s.onerror=function(){next(i+1)};document.body.appendChild(s)}
     else{s.text=old.textContent;document.body.appendChild(s);next(i+1)}})(0);
 }
+/* ---------- from your coach: shared 1-to-1 notes + accountability tasks (supabase/016, written in the Player dashboard) ---------- */
+var CRED=null,BOARD=null;
+function loadBoard(){if(!CRED)return;fetch(API+'mg_player_board',{method:'POST',headers:{apikey:APIKEY,'Content-Type':'application/json'},body:JSON.stringify({p_code:CRED.code,p_pin:CRED.pin})})
+  .then(function(r){return r.json()}).then(function(j){if(j&&!j.error){BOARD=j;if(window.__cpPut)window.__cpPut(true)}}).catch(function(){})}
+function niceD(s){if(!s)return '';var d=new Date(String(s).slice(0,10)+'T12:00:00');return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
+function boardHTML(){var b=BOARD;if(window.MGCP_PREVIEW&&!b)return '<div class="cp-coach" id="cp-coach"><span class="k">From your coach</span><h3>Notes and actions</h3><p class="cp-cn">Shared 1-to-1 notes and the actions you agree with your coach show here. (Coach preview: nothing to show.)</p></div>';
+  if(!b||(!(b.notes||[]).length&&!(b.tasks||[]).length))return '';
+  var tasks=(b.tasks||[]),open=tasks.filter(function(t){return t.status!=='done'}),done=tasks.length-open.length,t0=new Date().toISOString().slice(0,10),n=(b.notes||[])[0];
+  var h='<div class="cp-coach" id="cp-coach"><span class="k">From your coach</span><h3>Your actions'+(tasks.length?' <small>'+done+' of '+tasks.length+' done</small>':'')+'</h3>';
+  if(tasks.length)h+='<div class="cp-bar"><i style="width:'+Math.round(done/tasks.length*100)+'%"></i></div>'+tasks.map(function(t){var mine=t.owner!=='coach',over=t.status!=='done'&&t.due&&t.due<t0;
+    return '<label class="cp-task'+(t.status==='done'?' done':'')+'"><input type="checkbox" data-cptask="'+esc(t.id)+'"'+(t.status==='done'?' checked':'')+(mine?'':' disabled')+'><span><b>'+esc(t.title)+'</b>'+(t.detail?'<em>'+esc(t.detail)+'</em>':'')+
+      '<i>'+(mine?'':'Your coach is doing this \u00b7 ')+(t.due?(over?'<span class="ov">Overdue \u00b7 was due '+esc(niceD(t.due))+'</span>':'Due '+esc(niceD(t.due))):'')+'</i></span></label>'}).join('');
+  if(n)h+='<details class="cp-notes"'+(tasks.length?'':' open')+'><summary>1-to-1 notes \u00b7 '+esc(niceD(n.meet_date))+(b.notes.length>1?' (and '+(b.notes.length-1)+' earlier)':'')+'</summary>'+b.notes.map(function(x){return '<div class="cp-note"><b>'+esc(x.title||'1-to-1')+'</b><span>'+esc(niceD(x.meet_date))+(x.coach?' \u00b7 '+esc(x.coach):'')+'</span><p>'+esc(x.body||'')+'</p></div>'}).join('')+'</details>';
+  return h+'</div>'}
+document.addEventListener('change',function(e){var t=e.target;if(!t.dataset||!t.dataset.cptask||!CRED||!BOARD)return;var id=t.dataset.cptask,on=t.checked,tk=(BOARD.tasks||[]).filter(function(x){return x.id===id})[0];if(tk){tk.status=on?'done':'open'}
+  fetch(API+'mg_player_task_done',{method:'POST',headers:{apikey:APIKEY,'Content-Type':'application/json'},body:JSON.stringify({p_code:CRED.code,p_pin:CRED.pin,p_id:id,p_done:on})}).then(function(r){return r.json()})
+    .then(function(j){if(j&&j.error){if(tk)tk.status=on?'open':'done';alert(j.error)}if(window.__cpPut)window.__cpPut(true)}).catch(function(){if(tk)tk.status=on?'open':'done';if(window.__cpPut)window.__cpPut(true)})});
 function after(){returned();try{weeklyReminder()}catch(e){}try{dashSetup()}catch(e){}}
 
 /* ---------- colour + 'Your week' dashboard (Joe, 13 Nov: less white, more graphs) ---------- */
@@ -70,6 +87,15 @@ function dashCss(){if(document.getElementById('cp-dash-css'))return;var s=docume
  '.cp-spark{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cp-spark>div{background:#1a1916;padding:10px}.cp-spark svg{display:block;width:100%;height:auto}',
  '.cp-spark b{font:400 20px Anton,Impact,sans-serif;color:#FFD900;margin-left:6px}',
  '.cp-att{background:#0B0B0B;padding:10px 10px 6px;margin:4px 0 2px}.cp-att svg{display:block;width:100%;height:auto;max-height:150px}',
+ '.cp-coach{background:#fff;border:1px solid rgba(11,11,11,.13);border-left:6px solid #0B0B0B;padding:16px;display:flex;flex-direction:column;gap:8px}',
+ '.cp-coach .k{font:700 11px Inter,sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:#8a7f00}.cp-coach h3{margin:0;font:400 22px/1 Anton,Impact,sans-serif;text-transform:uppercase;color:#0B0B0B}',
+ '.cp-coach h3 small{font:600 13px Inter,sans-serif;color:#77715F;text-transform:none;margin-left:6px}.cp-cn{margin:0;color:#3B3830;font-size:14px}',
+ '.cp-bar{height:8px;background:#E6E1D3}.cp-bar i{display:block;height:100%;background:#FFD900}',
+ '.cp-task{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:10px 0;border-top:1px solid rgba(11,11,11,.1);cursor:pointer}.cp-task input{width:22px;height:22px;accent-color:#0B0B0B;margin:2px 0 0}',
+ '.cp-task b{display:block;font-size:15px;color:#0B0B0B}.cp-task em{display:block;font-style:normal;font-size:13px;color:#3B3830}.cp-task i{display:block;font-style:normal;font-size:12px;color:#77715F;margin-top:2px}',
+ '.cp-task.done b{text-decoration:line-through;color:#77715F}.cp-task .ov{color:#b3261e;font-weight:700}',
+ '.cp-notes summary{cursor:pointer;font-weight:700;font-size:14px;padding:8px 0;border-top:1px solid rgba(11,11,11,.1)}.cp-note{padding:10px 0;border-top:1px solid rgba(11,11,11,.08)}',
+ '.cp-note b{font:400 17px Anton,Impact,sans-serif;text-transform:uppercase}.cp-note span{display:block;font-size:12px;color:#77715F}.cp-note p{margin:6px 0 0;white-space:pre-wrap;font-size:14px;color:#3B3830}',
  '@media(max-width:420px){.cp-rings{grid-template-columns:repeat(2,1fr)}}'].join('');document.head.appendChild(s)}
 function ring(v,max,label,col,pct){var p=pct?Math.min(1,v/100):max?Math.min(1,v/max):0,R=34,C=2*Math.PI*R;
   return '<div><svg viewBox="0 0 84 84"><circle cx="42" cy="42" r="'+R+'" fill="none" stroke="#2a2925" stroke-width="9"/>'+(p>0?'<circle cx="42" cy="42" r="'+R+'" fill="none" stroke="'+col+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+(C*p)+' '+C+'" transform="rotate(-90 42 42)"/>':'')+
@@ -87,8 +113,8 @@ function dashHTML(){var S=window.S,p=window.MGCP_DATA||{},w=S.week||1,c=typeof w
   var avg=function(a){var v=a.filter(function(x){return x!=null});return v.length?(v.reduce(function(s,x){return s+x},0)/v.length).toFixed(1):'\u2013'};
   if(en.some(function(x){return x!=null}))h+='<div class="cp-spark"><div><span class="k">Energy \u00b7 7 days</span><b>'+avg(en)+'</b>'+spark(en,'#FFD900')+'</div><div><span class="k">Motivation \u00b7 7 days</span><b>'+avg(mo)+'</b>'+spark(mo,'#5fbf7a')+'</div></div>';
   return h+'</div>'}
-function dashSetup(){dashCss();var lastH='',put=function(){var el=document.getElementById('p-today');if(!el||el.hidden)return;var old=document.getElementById('cp-dash'),html=dashHTML();
-    if(old&&old.parentNode===el&&html===lastH)return;lastH=html;if(old)old.remove();var d=document.createElement('div');d.innerHTML=html;el.insertBefore(d.firstChild,el.firstChild)};
+function dashSetup(){dashCss();var lastH='',put=function(force){var el=document.getElementById('p-today');if(!el||el.hidden)return;var old=document.getElementById('cp-dash'),oc=document.getElementById('cp-coach'),html=dashHTML()+boardHTML();
+    if(!force&&old&&old.parentNode===el&&html===lastH)return;lastH=html;if(old)old.remove();if(oc)oc.remove();var d=document.createElement('div');d.innerHTML=html;while(d.lastChild)el.insertBefore(d.lastChild,el.firstChild)};window.__cpPut=put;
   put();var tm=null;new MutationObserver(function(){clearTimeout(tm);tm=setTimeout(put,60)}).observe(document.getElementById('p-today')||document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','class','aria-pressed']});
   var o=window.save;if(typeof o==='function'&&!o._cp){window.save=function(){var r=o.apply(this,arguments);clearTimeout(tm);tm=setTimeout(put,60);return r};window.save._cp=1}}
 /* attention through a session, small chart for the Practice tab */

@@ -295,7 +295,7 @@
     <div class="who" id="pb-who"></div>
     <div class="spacer"></div>
     <span class="status" id="pb-status" aria-live="polite"></span>
-    <button class="btn" id="pb-openPlans" type="button">All plans</button>
+    <a class="btn" href="https://www.macro.golf/coach-home" id="pb-home" title="Coach home: player dashboard, notes and tasks">Coach home</a><button class="btn" id="pb-openPlans" type="button">All plans</button>
     <button class="btn gold" id="pb-newPlan" type="button">+ New plan</button>
   </header>
   <div class="body">
@@ -1193,15 +1193,19 @@ $("#pb-login").addEventListener("submit",async e=>{
   e.preventDefault();const err=$("#pb-loginerr"),btn=$("#pb-loginbtn");pass=$("#pb-pw").value;$("#pb-pw").value="";err.textContent="";btn.disabled=true;btn.textContent="Opening";
   try{
     const [pl,ik]=await Promise.all([rpc("mg_coach_plans_list"),rpc("mg_coach_intake"),loadSuggestions(),loadGames(true)]);
-    plans.clear();(pl.rows||[]).forEach(p=>plans.set(p.id,p));INTAKE=ik.rows||[];loggedIn=true;
+    plans.clear();(pl.rows||[]).forEach(p=>plans.set(p.id,p));INTAKE=ik.rows||[];loggedIn=true;try{sessionStorage.setItem("mg-coach-s",pass)}catch(x){}
     $("#pb-gate").hidden=true;$("#pb-app").hidden=false;
     let draft=null;try{draft=JSON.parse(localStorage.getItem("mg-planbuilder-draft")||"null")}catch(x){}
-    if(draft&&draft.playerName){plan=normalise(draft);dirty=true;render();setStatus("Restored unsaved changes");save()}
+    const hp=/#plan=([^&]+)/.exec(location.hash),want=hp&&plans.get(decodeURIComponent(hp[1]));
+    if(draft&&draft.playerName&&!(want&&draft.id!==want.id)){plan=normalise(draft);dirty=true;render();setStatus("Restored unsaved changes");save()}
+    else if(want){openPlan(want.id)}
     else{plan=newPlan();render();setStatus(plans.size+" plans · "+intakePeople().length+" players with forms");openDrawer()}
   }catch(x){pass="";err.textContent=/Wrong password/.test(x.message)?"Wrong password.":/Too many/.test(x.message)?x.message:"Couldn't open: "+x.message}
   btn.disabled=false;btn.textContent="Open";
 });
 window.addEventListener("beforeunload",e=>{if(dirty&&loggedIn){e.preventDefault();e.returnValue=""}});
+/* signed in on Coach home in this tab (sessionStorage 'mg-coach-s'): open straight away */
+(()=>{let sp=null;try{sp=sessionStorage.getItem("mg-coach-s")}catch(x){}if(sp){$("#pb-pw").value=sp;$("#pb-login").requestSubmit?$("#pb-login").requestSubmit():$("#pb-loginbtn").click()}})();
 
 })();
 </script>
