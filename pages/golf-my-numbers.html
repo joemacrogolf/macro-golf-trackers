@@ -298,7 +298,7 @@ function paint(d){greet(d.name);var H=d.history,last=function(k){var h=H[k];retu
   $('sLong').textContent=t(last('long'));$('sShort').textContent=t(last('short'));$('sPutt').textContent=t(last('putting'));
   var per='3m';try{per=localStorage.getItem('mgn-period')||'3m'}catch(e){}
   var st=N.streak(d);
-  app.innerHTML=N.streakCard(st)+N.sgCard(d.tests)+'<div id="trendWrap">'+N.trendsCard(d,per)+'</div>'+N.planCard(d.practice)+N.testsCard(H)+N.gamesCard(d.games)+
+  app.innerHTML=N.streakCard(st)+N.sgCard(d.tests,{live:N.live?N.live(d.tests,d.records,d.practice):null})+'<div id="trendWrap">'+N.trendsCard(d,per)+'</div>'+N.planCard(d.practice)+N.testsCard(H)+N.gamesCard(d.games)+
    '<div class="foot"><span>Signed in as '+N.esc((creds()||{}).em||'')+'</span><button type="button" id="out">Not you?</button></div>';
   /* period chips: redraw only the trend card, remember the choice on this phone */
   $('trendWrap').addEventListener('click',function(e){var b=e.target.closest('[data-per]');if(!b)return;per=b.getAttribute('data-per');try{localStorage.setItem('mgn-period',per)}catch(x){}$('trendWrap').innerHTML=N.trendsCard(d,per)});

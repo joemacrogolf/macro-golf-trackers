@@ -1248,6 +1248,9 @@ window.MG_SCORE=function(){try{var R=(window.S&&Array.isArray(S.mgRounds))?S.mgR
   return mgPack(R.slice().sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:0}))}catch(e){return null}};
 })();
 </script>
+<script src="{{BASE}}src/golf-sg.js"></script>
+<script>/* live strokes gained: keep each round on the record (S.sgLog) for My Numbers and the Practice Plan */
+(function(){if(!window.GSG||typeof window.renderAll!=="function")return;var r=window.renderAll;window.renderAll=function(){var x=r.apply(this,arguments);try{GSG.logRound((S.shots||[]).filter(function(s){return s&&isFinite(s.sg)}).map(function(s,i){return {n:'Tee shot '+(i+1),sg:s.sg}}),'Driving',S.target)}catch(e){}return x}})();</script>
 <script src="{{BASE}}src/sync.js"></script>
 <script src="{{BASE}}src/golfwarm.js"></script>
 <script src="{{BASE}}src/videos.js"></script>

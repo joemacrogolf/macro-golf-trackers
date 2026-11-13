@@ -46,7 +46,7 @@ var C=null,last=-1;
 function fmt(x){return (x>=0?"+":"−")+Math.abs(x).toFixed(2)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function list(){try{return (C.shots()||[]).filter(function(s){return s&&isFinite(s.sg)})}catch(e){return []}}
-function tgt(){try{return C.target()}catch(e){return "10"}}
+function tgt(){try{return C.target()}catch(e){return (window.S&&window.S.target)||"10"}}
 function sum(L){return L.reduce(function(a,s){return a+s.sg},0)}
 function head(L){if(C.summary)return C.summary(L,tgt());var t=sum(L);
   return {big:L.length?fmt(t):"–",line:L.length?fmt(t/L.length)+" per "+(C.unit||"shot")+" over "+L.length+" "+(C.unit||"shot")+(L.length===1?"":"s"):"Each "+(C.unit||"shot")+" is scored as you go."}}
@@ -80,11 +80,25 @@ function paintCard(L){if(C.card===false)return;var fin=document.getElementById("
   el.innerHTML='<div class="gsg-top"><div><span class="eyebrow">Strokes gained vs '+esc(hname(tgt()))+'</span><div class="gsg-big tnum">'+esc(h.big)+'</div></div><div class="gsg-sub">'+esc(h.line)+'</div></div>'+
     (rows?'<div class="grid"><table><thead><tr><th>#</th><th class="l">'+esc(C.colLabel||"Shot")+'</th><th>SG</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'')+
     '<p class="gsg-note">'+esc(C.note||"")+' Plus means better than a '+esc(hname(tgt()))+' golfer from the same spot, minus means worse. Baseline: Mark Broadie’s strokes gained data, adjusted by handicap.</p>'}
-function paint(){if(!C)return;var L=list();paintBoard(L);paintFlash(L);paintCard(L)}
+/* live strokes gained: every round of a game is kept on the player's record as S.sgLog (newest first, last 60 rounds),
+   so My Numbers and the Practice Plan can move the test numbers with day-to-day practice. Tests are not logged here. */
+var AREA={'golf-insanity':'Putting','golf-money-stealers':'Putting','golf-hole-out':'Putting','golf-par-18':'Short game','golf-fifty-ft-bank':'Short game',
+  'golf-left-is-lava':'Approach','golf-wedge-darts':'Approach','golf-three-strikes':'Driving','golf-driver-corridor':'Driving'};
+function pageName(){var s=document.querySelector('script[data-page]');return s?s.getAttribute('data-page'):''}
+function today(){var d=new Date(),m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd}
+function logRound(L,area,hc){try{var S=window.S;area=area||AREA[pageName()];if(!S||!area||!L||!L.length)return;
+  var n=L.length,t=L.reduce(function(a,x){return a+(+x.sg||0)},0),cur=S._sgRound;
+  /* a new round starts when the shot list goes back to one shot after a longer round (an undo only ever drops one shot) */
+  if(!cur||!cur.id||(n===1&&cur.n>=3)||n<cur.n-1)cur=S._sgRound={id:today()+'|'+Date.now().toString(36),n:n};cur.n=n;var id=cur.id;
+  S.sgLog=Array.isArray(S.sgLog)?S.sgLog:[];var e=S.sgLog.filter(function(x){return x&&x.id===id})[0];
+  if(e&&e.n===n&&Math.abs(e.sum-t)<1e-6)return;
+  if(!e){e={id:id};S.sgLog.unshift(e)}e.d=id.slice(0,10);e.a=area;e.n=n;e.sum=Math.round(t*1000)/1000;e.hc=String(hc!=null&&hc!==''?hc:tgt());
+  S.sgLog=S.sgLog.slice(0,60);if(typeof window.save==='function')window.save()}catch(e){}}
+function paint(){if(!C)return;var L=list();paintBoard(L);paintFlash(L);paintCard(L);if(C.log!==false)logRound(L)}
 function reportLines(){var L=list();if(!L.length)return [];var h=head(L);return ["","Strokes gained vs "+hname(tgt())+": "+h.big+" ("+h.line+")"]}
 function init(o){C=o;css();last=list().length;
   if(typeof window.renderAll==="function"){var r=window.renderAll;window.renderAll=function(){var x=r.apply(this,arguments);try{paint()}catch(e){}return x}}
   if(typeof window.buildReport==="function"){var b=window.buildReport;window.buildReport=function(){var t=b.apply(this,arguments);try{var add=reportLines();if(add.length&&typeof t==="string")t=t.replace(/\s+$/,"")+"\n"+add.join("\n")}catch(e){}return t}}
   paint()}
-return {init:init,paint:paint,E:E,num:num,name:hname,lieOf:lieOf,putt:putt,puttSG:puttSG,shortSG:shortSG,approachSG:approachSG,driveSG:driveSG,driveTotal:driveTotal,fmt:fmt,P:P};
+return {init:init,paint:paint,logRound:logRound,E:E,num:num,name:hname,lieOf:lieOf,putt:putt,puttSG:puttSG,shortSG:shortSG,approachSG:approachSG,driveSG:driveSG,driveTotal:driveTotal,fmt:fmt,P:P};
 })();

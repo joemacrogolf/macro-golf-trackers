@@ -1155,7 +1155,14 @@ function describeApp(s,b){const st=endApp(s,b.c,b.o);return `Carry ${b.c} yds, $
 function describeTee(s,b){const st=endTee(s,b.c,b.o);return `Carry about ${b.c} yds, ${b.o===0?"straight":Math.abs(b.o)+" yds "+(b.o<0?"left":"right")}. ${st.desc}.`}
 function recordShot(r){const g=cur(),s=g.shots[g.res.length],o=shotSG(s,r,hcNum(S.cfg.target));g.res.push(r);
   let txt=o.st.desc;if(s.kind==="putt"&&s.mode==="pace"&&fl(S.cfg,"putt").includes("pace"))txt+=r.ft===0?" · 2 points":inZone(r.ft)?" · in the zone, 1 point":" · outside the zone";
-  ui.flash={cls:o.sg>=0?"p":"m",txt,big:fmt2(o.sg)};ui.tapBall=null;ui.dir=null;save();render()}
+  ui.flash={cls:o.sg>=0?"p":"m",txt,big:fmt2(o.sg)};ui.tapBall=null;ui.dir=null;sgLogSession();save();render()}
+/* live strokes gained: this session's strokes gained games are kept on the player's record (practice.sgLog), one row per area,
+   so My Numbers and the plan's strokes gained card move with every session (same rows as the games' S.sgLog) */
+function sgLogSession(){try{const P=PG(),tn=hcNum(S.cfg.target),G={app:"Approach",drive:"Driving",short:"Short game",putt:"Putting"},acc={};
+  S.blocks.filter(b=>b.type==="game").forEach(b=>b.res.forEach((r,i)=>{const sh=b.shots[i];if(!sh)return;const a=G[areaOf(sh)];if(!a)return;const v=shotSG(sh,r,tn).sg;if(!isFinite(v))return;(acc[a]=acc[a]||{n:0,sum:0}).n++;acc[a].sum+=v}));
+  P.sgLog=Array.isArray(P.sgLog)?P.sgLog:[];const d=new Date(S.t0||Date.now()),m=d.getMonth()+1,dd=d.getDate(),ds=d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(dd<10?"0":"")+dd;
+  Object.keys(acc).forEach(a=>{const id="plan|"+(S.t0||0)+"|"+a;let e=P.sgLog.find(x=>x&&x.id===id);if(!e){e={id};P.sgLog.unshift(e)}e.d=ds;e.a=a;e.n=acc[a].n;e.sum=Math.round(acc[a].sum*1000)/1000;e.hc=String(S.cfg.target||"10")});
+  P.sgLog=P.sgLog.slice(0,80);window.save()}catch(e){}}
 
 /* ---------- report ---------- */
 function finish(){if(S&&S.plan){planDone();LOGS.unshift({t:Date.now(),areas:S.cfg.areas,mins:S.cfg.mins,plan:true,games:S.blocks.filter(b=>b.type==="play"&&b.opened).map(b=>b.title),target:S.cfg.target,hc:null,sg:null,n:0});LOGS=LOGS.slice(0,60);wr(LOG,LOGS);S.step="report";save();render();window.scrollTo(0,0);return}
@@ -1313,7 +1320,7 @@ let streakData=null,streakLoading=false;
 function streakFor(){return MGNumbers.streak(Object.assign({},streakData,{practice:PG()}))}
 function streakSlot(){loadStreak();if(!streakData)return '<div id="mgnStreak"></div>';const st=streakFor();setTimeout(()=>{let g=null;try{g=JSON.parse(localStorage.getItem("mgsync-group:golf")||"null")}catch(e){}MGNumbers.celebrate(st,g&&g.em)},300);return '<div id="mgnStreak">'+MGNumbers.streakCard(st)+'</div>'}
 function loadStreak(){if(streakData||streakLoading||!MGNumbers.load)return;let g=null;try{g=JSON.parse(localStorage.getItem("mgsync-group:golf")||"null")}catch(e){}if(!g||!g.em||!g.pin)return;streakLoading=true;
-  MGNumbers.load(g.em,g.pin).then(d=>{streakLoading=false;if(!d||d.error)return;streakData=d;const el=document.getElementById("mgnStreak");if(el){const st=streakFor();el.innerHTML=MGNumbers.streakCard(st);MGNumbers.celebrate(st,g.em)}}).catch(()=>{streakLoading=false})}
+  MGNumbers.load(g.em,g.pin).then(d=>{streakLoading=false;if(!d||d.error)return;streakData=d;if(!S&&hview==="home"&&PG().plan){render();return}const el=document.getElementById("mgnStreak");if(el){const st=streakFor();el.innerHTML=MGNumbers.streakCard(st);MGNumbers.celebrate(st,g.em)}}).catch(()=>{streakLoading=false})}
 function fetchTests(){if(fetching||fetched)return;let g=null;try{g=JSON.parse(localStorage.getItem("mgsync-group:golf")||"null")}catch(e){}if(!g||!g.em||!g.pin)return;fetching=true;
   const U="https://zhcgwtlyqriwlhbzkxcl.supabase.co/rest/v1/rpc/mg_load",AK="sb_publishable__IBhmrVHOXsLHruU7XJB-g_OSN9Ljne";
   Promise.all(TEST_ORDER.map(k=>fetch(U,{method:"POST",headers:{apikey:AK,"Content-Type":"application/json"},
@@ -1541,7 +1548,7 @@ function welcomeCard(){const P=PG(),p=P.plan,G=goalsOf(p),wk=weekNo(),W=p.retest
       <div class="gbar" aria-label="${o}% likely"><i style="width:${o}%"></i></div><small class="gp">${o}% likely · ${minsDoneOn(g.key)} of ${g.mins*W} practice minutes done</small></li>`}).join("")}</ul>
    <details class="ghow"><summary>How these goals work</summary><p>Each number is strokes gained a round against a ${T} player, from your tests. Minus means it's costing you shots. A gap of half a shot or less, we aim to close completely. A bigger gap, we aim to halve it in ${W} weeks. That's a realistic step, and the next ${W} weeks take it further.</p><p>Your goals change with your tests. One player might need wedges from 100–150 yds, another 150–175 yds and their short putts. When you retest, you'll see which goals you hit and get new ones.</p><p>The chance goes up as you complete sessions that work on each goal. It's a guide to how much of the work you've put in, not a promise.</p></details></section>`}
 function weekCard(){const P=PG(),p=P.plan,done=doneThisWeek(),n=p.week.length,next=p.week.findIndex((_,i)=>!done.includes(i)),wk=weekNo(),retest=wk>p.retestWeeks;
-  let h=welcomeCard()+(window.MGNumbers?(MGNumbers.css(),streakSlot()+MGNumbers.sgCard(testEntries(),{empty:false})):"")+`<div class="board"><div><span class="label">${wk>p.retestWeeks?"Your "+p.retestWeeks+" week plan is done":"This week"}</span><div class="big tnum">${done.length}<small style="font-size:.4em;color:var(--on-ink-muted)"> / ${n}</small></div></div>
+  let h=welcomeCard()+(window.MGNumbers?(MGNumbers.css(),streakSlot()+MGNumbers.sgCard(testEntries(),{empty:false,live:MGNumbers.live?MGNumbers.live(testEntries(),streakData&&streakData.records,PG()):null})):"")+`<div class="board"><div><span class="label">${wk>p.retestWeeks?"Your "+p.retestWeeks+" week plan is done":"This week"}</span><div class="big tnum">${done.length}<small style="font-size:.4em;color:var(--on-ink-muted)"> / ${n}</small></div></div>
    <div class="side"><span class="label">Sessions</span><b>${n} × ${p.mins} min</b></div>
    <div class="prog">${p.week.map((_,i)=>`<i class="${done.includes(i)?"on":i===next?"cur":""}"></i>`).join("")}</div>
    <div class="bstat">${next<0?"Every session done this week. That's how you get better.":done.length?`${n-done.length} to go this week. Keep it going.`:`You've got ${n} practice session${n===1?"":"s"} this week. Pick whichever suits today.`}</div></div>`;
