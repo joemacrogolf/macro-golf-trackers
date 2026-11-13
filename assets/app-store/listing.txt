@@ -1,0 +1,33 @@
+MACRO GOLF: APP STORE LISTING (paste into App Store Connect)
+
+App name (30 max): Macro Golf: Practice & Stats
+Subtitle (30 max): Strokes gained tests & games
+Promotional text (170 max): See your whole game in strokes gained. New: weekly practice streaks. Practise every week, keep your flame alive and celebrate every milestone.
+Keywords (100 max; 'golf', 'practice' and 'stats' are already in the name, so they're left out): strokes gained,handicap,putting,short game,drills,golf fitness,swing speed,training,range,coach
+
+Description:
+See your whole game in strokes gained, find where you lose shots, then fix them.
+
+Macro Golf turns your practice into numbers you can trust: strokes gained, the same measure the tour uses. Take three tests (putting, short game and long game) and see your game in strokes gained, area by area, against the handicap you're aiming for.
+
+YOUR 6 WEEK PLAN
+Your plan is built from your tests. Each week you pick the session that suits you: range, short game or putting. Every session is aimed at your biggest leaks. After six weeks, retest on exactly the same shots and see what moved.
+
+PRACTICE GAMES THAT KEEP SCORE
+Nine games for putting, short game and long game, including Hole Out, Insanity, Money Stealers, Wedge Darts, Par 18 and Driver Corridor. Every round is scored and saved, and Hole Out turns every putt into strokes gained. Play solo or head to head with a friend, and climb the monthly and all-time leaderboards.
+
+MY NUMBERS
+Your strokes gained a round by area (driving, approach, short game, putting), your biggest leak and strength, and trends over the last month, three months, a year or all time. Your weekly practice streak lives here too.
+
+MOVE BETTER, SWING FASTER
+Golf fitness programmes for the gym or at home, with demo videos, plus warm-up and mobility routines.
+
+One email and PIN works across the whole app. Rounds save on your phone and sync when you have signal, so poor range Wi-Fi never loses a session.
+
+Screenshots (upload in this order):
+ 6.9" iPhone (1320 x 2868): screenshots-6.9in-1320x2868/01 to 07
+ 6.3" iPhone (1206 x 2622, required): screenshots-6.3in-1206x2622/01 to 07
+App preview video (886 x 1920, 28 s, H.264 + silent stereo AAC): macro-golf-app-preview-886x1920.mp4
+ Upload it under the 6.9" and 6.3" sizes. Poster frame: around 4-5 s (the strokes gained card).
+
+Note: all screens show a made-up demo player (Alex) with sample data.
