@@ -22,7 +22,12 @@ function css(){if(document.getElementById('mgpr-css'))return;var s=document.crea
  '.mgpr-card h2{margin:0;font:400 40px/1 Anton,Impact,sans-serif;text-transform:uppercase}',
  '.mgpr-card p{margin:0;color:#c9c4b8;font-size:15px;line-height:1.5}',
  '.mgpr-card button{min-height:52px;border:0;font:400 20px Anton,Impact,sans-serif;text-transform:uppercase;cursor:pointer}',
- '.mgpr-go{background:#FFD900;color:#0B0B0B}.mgpr-stay{background:transparent;color:#F4F1EA;border:1px solid rgba(244,241,234,.35)!important;font-size:16px!important;min-height:44px!important}'
+ '.mgpr-card .mgpr-go{background:#FFD900;color:#0B0B0B;min-height:68px;font-size:clamp(20px,6.4vw,28px);white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:10px;animation:mgprPulse 1.6s ease-out infinite}',
+ '@keyframes mgprPulse{0%{box-shadow:0 0 0 0 rgba(255,217,0,.7)}70%{box-shadow:0 0 0 14px rgba(255,217,0,0)}100%{box-shadow:0 0 0 0 rgba(255,217,0,0)}}',
+ '.mgpr-cont{position:fixed;left:0;right:0;bottom:0;z-index:62;display:flex;align-items:center;justify-content:center;gap:10px;min-height:68px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));border:0;background:#FFD900;color:#0B0B0B;font:400 26px Anton,Impact,sans-serif;text-transform:uppercase;cursor:pointer;box-shadow:0 -8px 24px rgba(0,0,0,.35);animation:mgprPulse 1.6s ease-out infinite}',
+ 'html.mg-inapp .mgpr-cont{bottom:calc(68px + env(safe-area-inset-bottom,0px))}',
+ '@media (prefers-reduced-motion:reduce){.mgpr-card .mgpr-go,.mgpr-cont{animation:none}}',
+ '.mgpr-x{}.mgpr-stay{background:transparent;color:#F4F1EA;border:1px solid rgba(244,241,234,.35)!important;font-size:16px!important;min-height:44px!important}'
  ].join('');document.head.appendChild(s)}
 
 function backBtn(){if(document.querySelector('.mgpr-back'))return;css();var b=document.createElement('button');b.type='button';b.className='mgpr-back';
@@ -36,14 +41,17 @@ function watch(){if(finished)return;var r=rounds();
   if(base===null){base=r}else if(r!==null&&r!==base&&count(r)>=count(base)){done();return}
   setTimeout(watch,1000)}
 function saving(){var p=document.querySelector('.mgs-pill');return p&&p.getAttribute('data-s')==='saving'}
-function done(){finished=true;mark(true);css();var w=document.createElement('div');w.className='mgpr-wrap';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');
-  w.innerHTML='<div class="mgpr-card"><small>Game done</small><h2>Nice one</h2><p id="mgprMsg">Saving your score\u2026</p><button type="button" class="mgpr-go">Back to my plan</button><button type="button" class="mgpr-stay">Stay and look at my results</button></div>';
+function done(){finished=true;mark(true);css();contBar();var w=document.createElement('div');w.className='mgpr-wrap';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');
+  w.innerHTML='<div class="mgpr-card"><small>Game done</small><h2>Nice one</h2><p id="mgprMsg">Saving your score\u2026</p><button type="button" class="mgpr-go">Continue with plan <span aria-hidden="true">&rarr;</span></button><button type="button" class="mgpr-stay">Stay and look at my results</button></div>';
   document.body.appendChild(w);var msg=w.querySelector('#mgprMsg'),left=4,t0=Date.now();
   w.querySelector('.mgpr-go').addEventListener('click',function(){clearTimeout(timer);go(true)});
-  w.querySelector('.mgpr-stay').addEventListener('click',function(){clearTimeout(timer);w.remove()});
+  w.querySelector('.mgpr-stay').addEventListener('click',function(){clearTimeout(timer);w.remove();contBar()});
   (function tick(){if(saving()&&Date.now()-t0<8000){msg.textContent='Saving your score\u2026';timer=setTimeout(tick,400);return}
-    msg.textContent='Score saved. Taking you back to your practice plan in '+left+'\u2026';if(left<=0){go(true);return}left--;timer=setTimeout(tick,1000)})()}
+    msg.textContent='Score saved. Continuing with your plan in '+left+'\u2026';if(left<=0){go(true);return}left--;timer=setTimeout(tick,1000)})()}
 
+/* once the game is done the small corner button becomes one big, obvious button */
+function contBar(){var o=document.querySelector('.mgpr-back');if(o)o.remove();if(document.querySelector('.mgpr-cont'))return;var b=document.createElement('button');b.type='button';b.className='mgpr-cont';
+  b.innerHTML='Continue with plan <span aria-hidden="true">&rarr;</span>';b.addEventListener('click',function(){go(true)});document.body.appendChild(b)}
 function start(){backBtn();setTimeout(watch,2500)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
