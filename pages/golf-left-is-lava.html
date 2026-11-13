@@ -399,7 +399,7 @@ body.gated{overflow:hidden}
           <tr><td>Within 10% of the distance (on the green)</td><td><b>+1</b></td></tr>
           <tr><td id="hSafe">Safe-side miss, outside 10%</td><td><b>0</b></td></tr>
           <tr id="hShortRow"><td>Short by more than 10% of the distance</td><td><b>−1</b></td></tr>
-          <tr><td id="hLava">More than 10 yds offline on the lava side</td><td><b>−2</b></td></tr>
+          <tr><td id="hLava">In the lava (it starts just off the green on the lava side; the picture shows where for each ball)</td><td><b>−2</b></td></tr>
         </tbody></table>
         <ul style="margin-top:8px"><li>If two apply, take the lower score. Maximum 54.</li></ul></div>
       <div><h3>Shifts, handicap and report</h3><ul>
@@ -498,7 +498,7 @@ body.gated{overflow:hidden}
       <span class="chip s1">+1</span><span>Within 10% of the distance (on the green)</span>
       <span class="chip s0">0</span><span id="safeTxt">Miss right, outside 10%: the safe miss</span>
       <span class="chip sm1" id="kShortC">−1</span><span id="kShortT">Short by more than 10% of the distance</span>
-      <span class="chip sm2">−2</span><span id="lavaTxt">Miss left by more than 10 yds</span>
+      <span class="chip sm2">−2</span><span id="lavaTxt">In the lava: past the edge of the green on the left</span>
     </div>
     <p class="muted" style="margin:0">If two apply, take the lower score. Maximum 54.</p>
   </section>
@@ -553,7 +553,7 @@ body.gated{overflow:hidden}
         <li>Enter carry and offline from the sim, and which side of the pin line the ball finished.</li>
         <li>Proximity is worked out from the carry miss and the offline miss together.</li>
         <li>Choose a target handicap at the top. Beat its par twice to unlock shifts: the last 6 balls are called as hold it straight or lower flight, scored the same way.</li>
-        <li>Lava can be left, right, short or long. Put it on the side of your big miss: a slicer sets it right, so the right miss costs 2 and you learn to finish left. Short lava: more than 10% short costs 2. Long lava: more than 10% long costs 2, and short misses cost nothing.</li>
+        <li>Lava can be left, right, short or long. Put it on the side of your big miss: a slicer sets it right, so the right miss costs 2 and you learn to finish left. The lava is never on the green: it starts just past the fringe on your lava side, so how far it is from the pin changes every ball with the shape of the green. The picture shows exactly where it starts each time. With short or long lava, short misses (or long ones) on the other side cost nothing.</li>
       </ul>
     </details>
     <div class="confirm" id="newWrap"><button class="ghost" id="newBtn">New game</button></div>
@@ -582,7 +582,7 @@ function expPts(hc,d){
     for(let i=-N;i<=N;i++)for(let j=-N;j<=N;j++){const x=i/N*4,y=j/N*4,p=Math.exp(-(x*x+y*y)/2);w+=p;
       if(!doScore){m+=p*Math.hypot(x*sc,y*sl);continue}
       const dc=bias+x*sc,off=y*sl,prox=Math.hypot(dc,off),lv=S?S.lava:"L";
-      let pos=prox*3<=15?3:prox<=d*0.1?1:0;const o=[pos];if(lv==="S"){if(dc<-d*0.1)o.push(-2)}else if(lv==="G"){if(dc>d*0.1)o.push(-2)}else{if(off>10)o.push(-2);if(dc<-d*0.1)o.push(-1)}e+=p*Math.min(...o)}
+      const ln=8+0.03*d+3.5;let pos=prox*3<=15?3:prox<=d*0.1?1:0;const o=[pos];if(lv==="S"){if(dc<-ln)o.push(-2)}else if(lv==="G"){if(dc>ln)o.push(-2)}else{if(off>ln)o.push(-2);if(dc<-d*0.1)o.push(-1)}e+=p*Math.min(...o)}
     return doScore?e/w:m/w}
   const sl=meanY/run(1,false), v=run(sl,true);
   EXP_CACHE[key]=v; return v;
@@ -664,20 +664,25 @@ function load(){try{const v=JSON.parse(localStorage.getItem("leftIsLava"));if(v&
 
 /* side: "L","R" or "C". Returns signed offline: positive = lava side */
 function lavaOff(off,side){if(side==="C"||!off)return 0;return side===S.lava?off:-off}
-function score(target,carry,off,side){
+/* where the lava starts for ball i: just past the fringe of that ball's green on the lava side (src/lava-art.js), so the
+   lava is never on the green and its distance from the pin changes every ball. Offline yds for L/R, yds short/long for S/G. */
+function lavaLine(i,t){t=t||S.order[i];try{if(window.LavaArt)return LavaArt.hole(t,S.lava,artSeed(i)).line}catch(e){}
+  return S.lava==="S"||S.lava==="G"?Math.max(5,Math.round(t*0.1)):10}
+function score(target,carry,off,side,line){
+  if(line==null)line=S.lava==="S"||S.lava==="G"?target*0.1:10;
   const dc=carry-target, prox=Math.sqrt(dc*dc+off*off), ft=prox*3;
   const lo=lavaOff(off,side), short=carry<target*0.9, long=carry>target*1.1, depth=S.lava==="S"||S.lava==="G";
   let pos=0;
   if(ft<=15)pos=3; else if(prox<=target*0.1)pos=1;
   const opts=[pos];
-  if(S.lava==="S"){if(short)opts.push(-2)}
-  else if(S.lava==="G"){if(long)opts.push(-2)}
-  else{if(lo>10)opts.push(-2);if(short)opts.push(-1)}
+  if(S.lava==="S"){if(dc<-line)opts.push(-2)}
+  else if(S.lava==="G"){if(dc>line)opts.push(-2)}
+  else{if(lo>line)opts.push(-2);if(short)opts.push(-1)}
   const pts=Math.min(...opts), onLava=depth?(S.lava==="S"?carry<target:carry>target):lo>0;
   let why;
   if(pts===-2)why="In the lava"; else if(pts===-1)why="Short"; else if(pts===3)why="Inside 15 ft";
   else if(pts===1)why="On the green"; else why=!onLava?"Safe miss":"Missed the green";
-  return {prox,ft,lava:onLava,short,pts,why};
+  return {prox,ft,lava:onLava,short,pts,why,line};
 }
 function idx(){return S.shots.length}
 function isShift(i){return S.mode==="shift"&&i>=12}
@@ -691,14 +696,15 @@ function safeWord(){return {L:"right",R:"left",S:"long",G:"short"}[S.lava]||"rig
 function chipCls(p){return p===3?"s3":p===1?"s1":p===0?"s0":p===-1?"sm1":"sm2"}
 
 /* distance-from-pin entry: the result is turned into the carry/offline it implies, so scoring and strokes gained use one model.
-   Safe = that far away on the safe side; Short = that far short on line; In the lava = at least 10.5 yds out on the lava side */
+   Safe = that far away on the safe side; Short = that far short on line; In the lava = just past this ball's lava line */
 var pres=null,pinMode=()=>S.inMode==="pin";
 function readInputs(){
   if(pinMode()){const p=parseFloat($("carry").value)/3,t=S.order[idx()];if(isNaN(p)||p<0||!pres)return {c:isNaN(p)?NaN:t,off:0,side:"C",ok:false,pin:p};
-    if(S.lava==="S"){if(pres==="lava")return {c:Math.max(0,t-Math.max(p,t*0.1+0.5)),off:0,side:"C",ok:true,pin:p};return {c:t+p,off:0,side:"C",ok:true,pin:p}}
-    if(S.lava==="G"){if(pres==="lava")return {c:t+Math.max(p,t*0.1+0.5),off:0,side:"C",ok:true,pin:p};return {c:Math.max(0,t-p),off:0,side:"C",ok:true,pin:p}}
+    const ln=lavaLine(idx(),t);
+    if(S.lava==="S"){if(pres==="lava")return {c:Math.max(0,t-Math.max(p,ln+0.5)),off:0,side:"C",ok:true,pin:p};return {c:t+p,off:0,side:"C",ok:true,pin:p}}
+    if(S.lava==="G"){if(pres==="lava")return {c:t+Math.max(p,ln+0.5),off:0,side:"C",ok:true,pin:p};return {c:Math.max(0,t-p),off:0,side:"C",ok:true,pin:p}}
     if(pres==="short")return {c:Math.max(0,t-p),off:0,side:"C",ok:true,pin:p};
-    if(pres==="lava")return {c:t,off:Math.max(p,10.5),side:S.lava,ok:true,pin:p};
+    if(pres==="lava")return {c:t,off:Math.max(p,ln+0.5),side:S.lava,ok:true,pin:p};
     return {c:t,off:p,side:p===0?"C":(S.lava==="L"?"R":"L"),ok:true,pin:p}}
   const c=parseFloat($("carry").value), o=parseFloat($("off").value);
   const off=isNaN(o)?0:Math.abs(o);
@@ -714,13 +720,13 @@ function updatePreview(){
     if(!ok){$("preview").textContent="Enter the distance from the pin, then tap where it finished.";return}}
   if(isNaN(c)){$("preview").textContent="Enter carry and offline from the sim, then tap the side it finished.";return}
   if(!ok){$("preview").textContent="Tap Left or Right to show which side of the pin it finished.";return}
-  const t=S.order[idx()], s=score(t,c,off,side);
+  const t=S.order[idx()], s=score(t,c,off,side,lavaLine(idx(),t));
   const dc=c-t, d=Math.abs(dc)<0.05?"pin high":(Math.abs(dc).toFixed(1)+" yds "+(dc<0?"short":"long"));
   $("preview").textContent=`${s.ft.toFixed(0)} ft from the pin · ${d}${off?", "+off.toFixed(1)+" "+(side==="L"?"left":"right"):""} → ${s.pts>0?"+":""}${s.pts}`;
 }
 function enter(){
   const {c,off,side,ok}=readInputs(); if(!ok||idx()>=BALLS)return;
-  const i=idx(), t=S.order[i], s=score(t,c,off,side);
+  const i=idx(), t=S.order[i], s=score(t,c,off,side,lavaLine(i,t));
   const shot={target:t,carry:c,off,side,flight:flightCall(i),...s};
   S.shots.push(shot);
   if(idx()===BALLS&&!S.saved){S.history.unshift({date:new Date().toISOString().slice(0,10),pts:total(),goal:Math.round(goal()*10)/10,hc:S.target,lava:S.lava,left:pctLava(S.shots),prox:median(S.shots.map(x=>x.ft)),mode:S.mode});S.history=S.history.slice(0,12);S.saved=true}
@@ -750,11 +756,11 @@ function renderHeader(){
   $("h1Side").textContent="Lava"; 
   $("lavaLbl").textContent="Finished "+sideWord();
   const dp=S.lava==="S"||S.lava==="G";
-  $("lavaTxt").textContent=dp?`${S.lava==="S"?"Short":"Long"} by more than 10% of the distance`:`Miss ${sideWord()} by more than 10 yds`;
+  $("lavaTxt").textContent=`In the lava: past the edge of the green ${dp?(S.lava==="S"?"short":"long"):"on the "+sideWord()}`;
   $("safeTxt").textContent=dp?`Miss ${safeWord()} or offline, outside 10%: the safe miss`:`Miss ${safeWord()}, outside 10%: the safe miss`;
   ["kShortC","kShortT","hShortRow"].forEach(id=>{const e=$(id);if(e)e.hidden=dp});
   if($("hSafe"))$("hSafe").textContent=dp?`${safeWord()[0].toUpperCase()+safeWord().slice(1)} or offline miss, outside 10%`:"Safe-side miss, outside 10%";
-  if($("hLava"))$("hLava").textContent=dp?`${S.lava==="S"?"Short":"Long"} by more than 10% of the distance (the lava)`:"More than 10 yds offline on the lava side";
+  if($("hLava"))$("hLava").textContent=`In the lava: it starts just off the green ${dp?(S.lava==="S"?"short":"long"):"on the "+sideWord()} (the picture shows where for each ball)`;
   if($("resShort"))$("resShort").hidden=dp;
   if($("resSafe"))$("resSafe").textContent=dp?"Safe ("+safeWord()+")":"Safe";
   if($("resLava"))$("resLava").textContent=dp?"In the lava ("+sideWord()+")":"In the lava";
@@ -886,7 +892,7 @@ $("showBtn").addEventListener("click",()=>{const r=$("report"),open=r.hidden;r.h
 $("targetHc").addEventListener("change",e=>{S.target=e.target.value;save();renderAll()});
 $("lavaSide").addEventListener("change",e=>{
   S.lava=e.target.value;
-  S.shots=S.shots.map(s=>({...s,...score(s.target,s.carry,s.off,s.side)}));
+  S.shots=S.shots.map((s,k)=>({...s,...score(s.target,s.carry,s.off,s.side,lavaLine(k,s.target))}));
   ["dirL","dirR"].forEach(id=>$(id).classList.toggle("lavaBtn",id==="dir"+S.lava));
   save();renderAll();
 });
