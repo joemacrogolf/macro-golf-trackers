@@ -80,6 +80,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .seg button.lavaBtn[aria-pressed="true"]{background:var(--lava);color:#fff}
 .seg button + button{border-left:1px solid var(--line)}
 
+.lart{margin:4px 0 12px;border-radius:4px;overflow:hidden;line-height:0;box-shadow:0 6px 18px rgba(0,0,0,.25)}.lart svg{width:100%;height:auto;display:block}.lart.done{margin:10px 0 0}
 .flash{border-radius:3px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#fff;animation:pop .35s ease}
 .flash b{font-family:var(--display);font-size:42px;line-height:1}
 .flash span{font-size:14px}
@@ -433,6 +434,7 @@ body.gated{overflow:hidden}
       </div>
       <span class="pill norm" id="flightPill">Call: stock flight</span>
     </div>
+    <div class="lart" id="lavaArt" aria-live="polite"></div>
     <div class="fields">
       <label><span class="label" id="carryLbl">Carry (yds)</span>
         <input id="carry" type="number" inputmode="decimal" step="0.1" placeholder="e.g. 131.4"></label>
@@ -563,6 +565,8 @@ body.gated{overflow:hidden}
   </footer>
 </div>
 
+<script src="{{BASE}}src/golf-art.js"></script>
+<script src="{{BASE}}src/lava-art.js"></script>
 <script>
 var PER=6, BALLS=18, MAX=54, METER_MAX=45;
 /* Handicap model: on-course proximity multiplier vs Tour, tightened for sim lies */
@@ -704,6 +708,7 @@ function readInputs(){
 function setDir(d){dir=d;["L","C","R"].forEach(k=>$("dir"+k).setAttribute("aria-pressed",String(dir===k)));
   if(d==="C")$("off").value="0";updatePreview()}
 function updatePreview(){
+  try{drawArt()}catch(e){}
   const {c,off,side,ok}=readInputs(); $("enter").disabled=!ok;
   if(pinMode()){["Safe","Short","Lava"].forEach(k=>$("res"+k).setAttribute("aria-pressed",String(pres===k.toLowerCase())));
     if(!ok){$("preview").textContent="Enter the distance from the pin, then tap where it finished.";return}}
@@ -731,8 +736,15 @@ function undo(){
 }
 function flash(s){
   const col={3:"var(--p3)",1:"var(--p1)",0:"var(--p0)","-1":"var(--pm1)","-2":"var(--pm2)"}[s.pts];
-  $("flash").innerHTML=`<div class="flash" style="background:${col}"><span>${s.target} yds · ${s.ft.toFixed(0)} ft<br>${s.why}</span><b>${s.pts>0?"+":""}${s.pts}</b></div>`;
+  $("flash").innerHTML=`<div class="flash" style="background:${col}"><span>${s.target} yds · ${s.ft.toFixed(0)} ft<br>${s.why}</span><b>${s.pts>0?"+":""}${s.pts}</b></div>`+
+    (window.LavaArt?`<div class="lart done">${LavaArt.svg({t:s.target,lava:S.lava,seed:artSeed(S.shots.length-1),ball:shotXY(s),label:"Ball "+S.shots.length})}</div>`:"");
 }
+/* the picture for each ball: the green for that distance (a different shape every ball) with the lava where it was set */
+function artSeed(i){let h=7;(S.order||[]).forEach((d,k)=>{h=(h*31+d*(k+3))%100003});return h+i*101}
+function shotXY(s){const x=s.side==="L"?-s.off:s.side==="R"?s.off:0;return {x,y:s.carry-s.target}}
+function drawArt(){const el=$("lavaArt");if(!el||!window.LavaArt)return;const i=idx();if(i>=BALLS){el.innerHTML="";return}
+  const r=readInputs(),t=S.order[i],has=!isNaN(r.c)&&(r.ok||!pinMode());
+  el.innerHTML=LavaArt.svg({t,lava:S.lava,seed:artSeed(i),ball:has?{x:r.side==="L"?-r.off:r.side==="R"?r.off:0,y:r.c-t}:null,ghost:true,label:"Ball "+(i+1)})}
 
 function renderHeader(){
   $("h1Side").textContent="Lava"; 

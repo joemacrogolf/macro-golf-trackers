@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-13 15:20 · Jack's Claude · Lava: every ball now has a picture of its green (new src/lava-art.js + golf-art.js greens, a different shape each ball) with molten lava drawn exactly where the scoring puts it (L/R: >10 yds off line; S/G: >10% short/long); the ball appears as you type and the result picture shows under the score. Pinned Lava p-740258 · live
 2026-11-13 15:00 · Jack's Claude · FOR JOE'S CLAUDE: App Store pack (8 screenshots at both sizes, preview video, listing) now complete in assets/app-store/ + docs/for-joe-app-store-pack.md; note added at the top of CLAUDE.md. Please tell Joe and help him upload in VidApp → App Store → iOS · waiting on Joe
 2026-11-13 14:55 · Jack's Claude · FOR JOE (App Store is Joe-only, nothing was uploaded to VidApp by any Claude): App Store screenshot pack redone with a new slide 2 'Watch your game climb' (big rising strokes-gained trend, +3.5 shots a round since June). 8 screenshots at 6.9" 1320x2868 and 6.3" 1206x2622 + listing text in assets/app-store/; full zip incl. the 886x1920 preview video sent to Jack to pass on. Joe uploads in VidApp → App Store · waiting on Joe
 2026-11-13 14:45 · Jack's Claude · Meeting list: added Jack's items J1–J4 to docs/meeting-2026-11-13.md (weekly leaderboard SQL, VidApp browser bar, advert, website update) · done
