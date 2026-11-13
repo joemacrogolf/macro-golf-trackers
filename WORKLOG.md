@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-13 22:40 · Joe's Claude · /app: 7-day free trial added to pricing + CTA (Joe). In VidApp App Store section (Joe's go-ahead): uploading pack update 2 (iPhone X/8 replace, iPad add, Android phone replace, tablet add, feature graphic) · in progress
 2026-11-13 22:32 · Joe's Claude · Emailed Jack + CLAUDE.md note for Jack's Claude: App Store slides 4, 5, 8 still have white app screens; fix in every size. iPad / Android tablet upload waits on that (Joe-only, Joe's Claude does it) · waiting on Jack
 2026-11-13 22:40 · Joe's Claude · (1) Weekly review tab for 1-to-1 template plans (new src/weekly-review.js; Report tab renamed Weekly; answers in S.reviews, shown on the coach dashboard). (2) /app: pricing section £9.99/month or £99/year, 'Nine scored games' claim removed. · DONE: 7 template plans, coach dashboard and /app pinned to 5dc0e87, checked live
 2026-11-13 22:05 · Joe's Claude · supabase/012-intake-plans.sql RUN in Supabase (Joe asked); old Google Form answers imported into mg_intake (15 matchup, 4 onboarding, source 'google-form'). Forms and Plan Builder fully live · done
