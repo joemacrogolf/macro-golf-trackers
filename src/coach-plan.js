@@ -75,7 +75,9 @@ function build(){
   var p=window.MGCP_DATA||{},code=window.MGCP_CODE||'0',inc=p.include||{},ph=p.physical||{},wk=p.weekly||{},mob=p.mobility||{};
   var first=String(p.playerName||'').trim().split(/\s+/)[0]||'there';
   var habits=inc.habits===false?[]:(p.habits||[]).filter(function(h){return h&&h.name}).map(function(h){return {id:'h-'+slug(h.name),name:h.name,desc:[h.detail,h.dose].filter(Boolean).join(' ')}});
-  var items=(inc.mobility===false?[]:(mob.items||[])).filter(function(m){return m&&m.name});
+  /* mobility: 'random' / 'time' = a new set of follow-along videos each day (same all day: seeded with plan code + date); 'manual' = the coach's list */
+  var auto=(mob.mode==='random'||mob.mode==='time')&&window.MGLib&&MGLib.mobDay,dt=new Date(),today=dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate();
+  var items=inc.mobility===false?[]:auto?MGLib.mobDay(mob,code+':'+today).map(function(v){return {kind:'video',name:v[0],wistia:v[1],mins:v[2]}}):(mob.items||[]).filter(function(m){return m&&m.name});
   var days=inc.physical===false?[]:(ph.dayList||[]);
   var SESSIONS=days.map(function(d,di){return {name:'Day '+(di+1),tab:'D'+(di+1),title:d.title||('Day '+(di+1)),short:d.title||('Day '+(di+1)),
     blocks:(d.pairs||[]).map(function(pr,pi){var L=String.fromCharCode(65+pi),ex=[];['a','b'].forEach(function(s,j){var e=pr[s];if(e&&String(e.name||'').trim())ex.push(window.x(slug(e.name)+'-'+(di+1)+L+(j+1),e.name,rx(e,ph)))});
@@ -95,7 +97,7 @@ function build(){
       ['Load','After each set, enter the kg, reps and RPE. The next set is suggested from the same set last time.']]};
   if(habits.length)CLIENT.streak={id:habits[0].id,label:habits[0].name+' streak',name:habits[0].name};
   if(items.length){CLIENT.mobilityRoutine=items.map(function(m){return {name:m.kind==='video'?m.name:(m.name+(m.dose?' · '+m.dose:'')),mins:m.mins||'',wistia:m.wistia||null}});
-    CLIENT.mobilityDesc=[mob.frequency,mob.when].filter(Boolean).join(' · ')+'. Tap Watch now to follow along, then tick it off.'}
+    CLIENT.mobilityDesc=[mob.frequency,mob.when].filter(Boolean).join(' · ')+'. '+(auto?'A new routine every day. ':'')+'Tap Watch now to follow along, then tick it off.'}
   if(inc.checkin!==false&&((p.checkin||{}).questions||[]).length)CLIENT.weeklyQuestions=qmap(p.checkin.questions);
   if(hasPractice)CLIENT.extraTabs=[{id:'practice',label:'Practice',render:renderPractice}];
   return {CLIENT:CLIENT,SESSIONS:SESSIONS};

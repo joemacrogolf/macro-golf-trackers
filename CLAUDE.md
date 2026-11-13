@@ -63,12 +63,12 @@ Template (fill in the brackets, keep the steps):
 > **[123456]**
 >
 > To open it:
-> 1. Open the Macro Golf app and tap **My Plan**.
+> 1. Open the Macro Golf app and tap **MG Athletes** at the bottom.
 > 2. Enter your email address.
 > 3. Tap **First time here?** and type your plan code: **[123456]**
 > 4. Choose a 4-digit PIN you'll remember.
 >
-> That's it. From then on, tapping My Plan opens your plan straight away. If you change phones, just log in with your email and PIN.
+> That's it. From then on, tapping MG Athletes opens your plan straight away. If you change phones, just log in with your email and PIN.
 >
 > Every session you log saves automatically, and your coach can see how you're getting on.
 >

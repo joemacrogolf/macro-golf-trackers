@@ -166,6 +166,11 @@
 }
 #pb .mgdoc{--d-ink:#0c0c0b;--d-paper:#faf9f5;--d-line:#dedbd0;--d-muted:#6d6a60;--d-gold:#FFD900;background:var(--d-paper);color:var(--d-ink);font:13.5px/1.55 "Inter",system-ui,sans-serif;border-radius:8px;overflow:hidden}
 #pb .mgdoc *{box-sizing:border-box}
+#pb .mgdoc h1,#pb .mgdoc h2,#pb .mgdoc h3{color:var(--d-ink)!important;font-family:"Anton",Impact,sans-serif!important;font-weight:400!important}
+#pb .mgdoc h4{color:var(--d-muted)!important;font-family:"Space Mono",monospace!important}
+#pb .mgdoc .cover h1,#pb .mgdoc .box.dark h3,#pb .mgdoc .box.dark h2,#pb .mgdoc .end h2,#pb .mgdoc .end h3{color:#f3f1ea!important}
+#pb .mgdoc .box.dark h4{color:#9b988d!important}
+#pb .mgdoc p,#pb .mgdoc td,#pb .mgdoc li,#pb .mgdoc th{background:transparent;text-shadow:none}
 #pb .mgdoc .pg{padding:44px 48px;border-bottom:1px solid var(--d-line);break-after:page}
 #pb .mgdoc .runner{display:flex;justify-content:space-between;font:9.5px "Space Mono",monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--d-muted);margin-bottom:26px}
 #pb .mgdoc .cover{background:#0c0c0b;color:#f3f1ea;padding:56px 48px 48px}
@@ -323,7 +328,7 @@ const PHYS_TEMPLATE=[
 ];
 function fillDatalists(){
   const put=(id,arr)=>{document.getElementById(id).innerHTML=arr.map(v=>`<option value="${esc(v)}"></option>`).join("")};
-  put("dl-drills",DRILLS);put("dl-ex",EXERCISES);put("dl-mob",MGLib.MOB_EX.filter(x=>x[3].every(e=>e==="No equipment"||["Foam roller","Massage ball","Resistance band"].includes(e))).map(x=>x[0]));put("dl-habit",HABITS);put("dl-stat",STATS);put("dl-tpi",TPI);
+  put("dl-drills",DRILLS);put("dl-ex",EXERCISES);put("dl-mob",[...new Set(MGLib.MOB_EX.map(x=>x[0]).concat(MGLib.MOB_VIDEOS.map(v=>v[0]+" (follow-along, "+v[2]+" min)")))]);put("dl-habit",HABITS);put("dl-stat",STATS);put("dl-tpi",TPI);
 }
 
 /* ---------- utils ---------- */
@@ -371,7 +376,7 @@ function newPlan(){
     practice:{intro:"",sessions:[]},
     oncourse:{games:[],technical:"",intention:"",strategy:"",preround:"",postround:"Complete statistics for full rounds. Send the reflection and relevant statistics to the coaching team. Rather than diagnosing poor shots, look for patterns: what performed well, what became more difficult, what changed when performance changed, which parts of practice transferred.",balance:4},
     physical:{days:4,structure:"Supersets · A1 / A2 pairs",rest:"45–60s between rounds",strength:"3 sets: 12 / 10 / 8 reps @ RPE 7 / 8 / 9",power:"3 x 5 @ RPE 10 (maximal intent, not failure)",progression:"Keep exercises, sets and reps consistent through the block. Progress through load using the prescribed RPE. Do not add fatigue for the sake of progression.",note:"This plan should assist your golf performance. If at any time your training is limiting your ability to practise or play, notify your coach immediately.",dayList:[]},
-    mobility:{frequency:"Daily",when:"Evenings before sleep",mode:"follow",areas:[],equip:[],count:3,items:[]},
+    mobility:{frequency:"Daily",when:"Evenings before sleep",mode:"random",areas:[],equip:[],count:3,minutes:10,items:[]},
     weight:{unit:"kg",start:"",target:"",direction:"Maintain",frequency:"Weekly",day:"Monday",conditions:"First thing in the morning, before food",waist:false,notes:""},
     stats:STD_STATS(),
     recovery:{sleep:"8",routine:"",notes:""},
@@ -379,6 +384,8 @@ function newPlan(){
   };
 }
 function normalise(p){
+  if(p.mobility){const m=p.mobility;if(m.mode==="follow"||!m.mode){const v=(m.items||[]).filter(x=>x.kind==="video").length;m.mode=v||!(m.items||[]).length?"random":"manual";if(v&&!m.count)m.count=v}
+    if(!m.minutes)m.minutes=10;m.equip=(m.equip||[]).filter(e=>e!=="No equipment")}
   if(!p.attV2){const fix=o=>{if(o&&typeof o.attention==="number"&&o.attention>=1&&o.attention<=5)o.attention=(o.attention-1)*25};
     ((p.practice||{}).sessions||[]).forEach(s=>(s.drills||[]).forEach(d=>{fix(d);if(d.env&&d.env!=="Technical")d.env="Game"}));
     ((p.oncourse||{}).games||[]).forEach(fix);if(p.oncourse&&p.oncourse.balance>=1&&p.oncourse.balance<=5)p.oncourse.balance=(p.oncourse.balance-1)*25;p.attV2=true}
@@ -412,7 +419,7 @@ const SECTIONS=[
  {k:"practice",l:"Practice plan",show:()=>plan.include.practice,meta:()=>{const d=plan.practice.sessions.reduce((a,s)=>a+s.drills.length,0);return `${plan.practice.sessions.length} sessions · ${d} drills`}},
  {k:"oncourse",l:"On-course plan",show:()=>plan.include.oncourse,meta:()=>`${plan.oncourse.games.length} games`},
  {k:"physical",l:"Physical plan",show:()=>plan.include.physical,meta:()=>`${plan.physical.dayList.length} days built`},
- {k:"mobility",l:"Mobility",show:()=>plan.include.mobility,meta:()=>{const n=plan.mobility.items.length,t=plan.mobility.items.reduce((a,x)=>a+(+x.mins||0),0);return n?`${n} item${n>1?"s":""}${t?" · "+t+" min":""}`:"Build the routine"}},
+ {k:"mobility",l:"Mobility",show:()=>plan.include.mobility,meta:()=>mobSummary(plan.mobility)||"Build the routine"},
  {k:"weight",l:"Weight tracking",show:()=>plan.include.weight,meta:()=>plan.weight.start?`${plan.weight.start} → ${plan.weight.target||"?"} ${plan.weight.unit}`:"Set baseline"},
  {k:"stats",l:"Performance stats",show:()=>plan.include.stats,meta:()=>`${plan.stats.length} KPIs`},
  {k:"recovery",l:"Sleep & recovery",show:()=>plan.include.recovery,meta:()=>`${plan.recovery.sleep||"?"}h target`},
@@ -525,20 +532,28 @@ physical(){
    <div class="row" style="margin-bottom:12px"><h2 style="margin:0">Training days</h2><span class="spacer"></span><button class="btn${ph.dayList.length?"":" gold"}" type="button" data-act="tpl-phys">${ph.dayList.length?"Replace with":"Load"} ${tplDays()}-day superset template</button><button class="btn sm" type="button" data-act="addday">+ Add day</button></div>${days||`<p class="hint">No days yet. Load the ${tplDays()}-day template to start from the standard structure, then swap exercises.</p>`}`;
 },
 mobility(){
-  const m=plan.mobility,mode=m.mode||"follow",fails=plan.intake.tpi.filter(t=>t.result&&t.result!=="Pass"),pool=mobPool();
+  const m=plan.mobility,mode=m.mode||"random",fails=plan.intake.tpi.filter(t=>t.result&&t.result!=="Pass"),pool=mobPool(),auto=mode!=="manual";
   const chips=(key,vals)=>`<div class="chips">${vals.map(v=>{const on=(m[key]||[]).includes(v);return `<button type="button" data-act="mobchip" data-k="${key}" data-v="${esc(v)}" class="${on?"on":""}" aria-pressed="${on}">${esc(MOB_EQUIP_LABEL[v]||v)}</button>`}).join("")}</div>`;
-  const total=m.items.reduce((a,x)=>a+(+x.mins||0),0);
-  const rows=m.items.map((x,i)=>x.kind==="video"?`<div class="mobv"><div><b>${esc(x.name)}</b><div class="hint" style="margin:2px 0 0">${x.mins} min follow-along · ${esc(x.area)} · ${esc(x.equip)}</div></div><div class="row" style="gap:0"><button class="btn sm ghost" type="button" data-act="mobswap" data-i="${i}">Swap</button>${mv("mobility.items."+i,-1)}${mv("mobility.items."+i,1)}${del("mobility.items."+i)}</div></div>`
-    :`<div class="listrow lr-mob">${T(`mobility.items.${i}.name`,i?"":"Exercise (from the app)","Start typing","","dl-mob")}${T(`mobility.items.${i}.dose`,i?"":"Dose","e.g. 2 x 8 each side")}${T(`mobility.items.${i}.area`,i?"":"Area","")}${T(`mobility.items.${i}.cue`,i?"":"Why","e.g. Lower quarter rotation fail")}<div style="padding-top:${i?0:20}px">${del("mobility.items."+i)}</div></div>`).join("");
-  return head("08 / Mobility","Mobility","Pick the body areas and the kit they have, and the routine is built from the app's follow-along mobility videos. Or add single exercises by hand.")+
-  (fails.length?`<div class="card hl"><div class="card-h"><h3>TPI limitations on file</h3><span class="spacer"></span><button class="btn sm gold" type="button" data-act="mobsuggest">Build a routine for these</button></div><div class="chips">${fails.map(f=>`<button type="button" class="on" tabindex="-1">${esc(f.test)} · ${esc(f.result)}</button>`).join("")}</div></div>`:"")+
-  `<div class="card"><div class="grid g3">${S("mobility.frequency","Frequency",["Daily","5x per week","3x per week","Before every session","Before practice and training"])}${S("mobility.when","When",WHEN)}
-    <div class="f"><span>Routine type</span><div class="seg"><button type="button" data-act="mobmode" data-v="follow" class="${mode==="follow"?"on":""}">Follow-along videos</button><button type="button" data-act="mobmode" data-v="manual" class="${mode==="manual"?"on":""}">Manual</button></div></div></div></div>`+
-  (mode==="follow"?`<div class="card"><div class="card-h"><h3>Build the routine</h3></div>
+  const vidRow=(v,act)=>`<div class="mobv"><div><b>${esc(v.name)}</b><div class="hint" style="margin:2px 0 0">${v.mins} min follow-along · ${esc(v.area)}${v.equip&&v.equip!=="No equipment"?" · "+esc(v.equip):""}</div></div>${act||""}</div>`;
+  const seg=[["random","Random each day"],["time","Time each day"],["manual","Manual"]].map(([v,l])=>`<button type="button" data-act="mobmode" data-v="${v}" class="${mode===v?"on":""}">${l}</button>`).join("");
+  let body="";
+  if(auto){const ex=mobExample(),tot=ex.reduce((a,v)=>a+v[2],0);
+    body=`<div class="card"><div class="card-h"><h3>${mode==="time"?"Time each day":"Random each day"}</h3></div>
+    <p class="hint" style="margin:0 0 10px">${mode==="time"?"Set the minutes. Each day the player's app fills that time with one or more follow-along videos from the areas below.":"Set how many videos. Each day the player's app picks that many follow-along videos from the areas below, a new mix every day."} Body areas picked are covered first.</p>
     <div class="f"><span>Body areas (none picked = any)</span></div>${chips("areas",MGLib.AREAS)}
-    <div class="f" style="margin-top:14px"><span>Equipment they have (no-equipment routines are always included)</span></div>${chips("equip",MOB_EQUIP)}
-    <div class="row" style="margin-top:14px;align-items:flex-end">${N("mobility.count","Number of videos")}<span class="hint" style="margin:0 0 10px">${pool.length} follow-along videos of 3 minutes or more match</span><span class="spacer"></span><button class="btn gold" type="button" data-act="mobgen" ${pool.length?"":"disabled"}>Generate routine</button></div></div>`:"")+
-  `${ui.mobMsg?`<div class="banner">${esc(ui.mobMsg)}</div>`:""}<div class="card"><div class="card-h"><h3>Routine</h3>${total?`<span class="chip">${total} min</span>`:""}<span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="mobility.items">+ Add exercise by hand</button></div><div class="stack">${rows||'<p class="hint">No mobility yet. Pick areas and equipment above, then Generate routine.</p>'}</div></div>`;
+    <div class="f" style="margin-top:14px"><span>Equipment they have (no-equipment videos are always included)</span></div>${chips("equip",MOB_EQUIP)}
+    <div class="row" style="margin-top:14px;align-items:flex-end">${mode==="time"?N("mobility.minutes","Minutes each day"):N("mobility.count","Videos each day")}<span class="hint" style="margin:0 0 10px">${pool.length} follow-along videos of 3 minutes or more to pick from</span></div></div>
+    <div class="card"><div class="card-h"><h3>Example day</h3>${tot?`<span class="chip">${tot} min</span>`:""}<span class="spacer"></span><button class="btn sm" type="button" data-act="mobshuffle"${pool.length?"":" disabled"}>Show another day</button></div>
+    <div class="stack">${ex.length?ex.map(v=>vidRow(vidItem(v))).join(""):'<p class="hint">No videos match. Pick more areas or add equipment.</p>'}</div></div>`}
+  else{const total=m.items.reduce((a,x)=>a+(+x.mins||0),0);
+    const rows=m.items.map((x,i)=>x.kind==="video"?vidRow(x,`<div class="row" style="gap:0"><button class="btn sm ghost" type="button" data-act="mobswap" data-i="${i}">Swap</button>${mv("mobility.items."+i,-1)}${mv("mobility.items."+i,1)}${del("mobility.items."+i)}</div>`)
+      :`<div class="listrow lr-mob">${T(`mobility.items.${i}.name`,i?"":"Exercise or video (from the app)","Start typing","","dl-mob")}${T(`mobility.items.${i}.dose`,i?"":"Dose","e.g. 2 x 8 each side")}${T(`mobility.items.${i}.area`,i?"":"Area","")}${T(`mobility.items.${i}.cue`,i?"":"Why","e.g. Lower quarter rotation fail")}<div style="padding-top:${i?0:20}px">${del("mobility.items."+i)}</div></div>`).join("");
+    body=`<div class="card"><div class="card-h"><h3>Routine</h3>${total?`<span class="chip">${total} min of videos</span>`:""}<span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="mobility.items">+ Add exercise or video</button></div><p class="hint" style="margin:0 0 10px">The same routine every day. Type any part of a name: every mobility and stability exercise and follow-along video in the app is listed (foam roller, massage ball, band or no kit).</p><div class="stack">${rows||'<p class="hint">Nothing yet. Press Add exercise or video.</p>'}</div></div>`}
+  return head("08 / Mobility","Mobility","Random videos each day, a set time each day made up of one or more videos, or a routine you build by hand.")+
+  (fails.length?`<div class="card hl"><div class="card-h"><h3>TPI limitations on file</h3><span class="spacer"></span><button class="btn sm gold" type="button" data-act="mobsuggest">Use these body areas</button></div><div class="chips">${fails.map(f=>`<button type="button" class="on" tabindex="-1">${esc(f.test)} · ${esc(f.result)}</button>`).join("")}</div></div>`:"")+
+  `<div class="card"><div class="grid g3">${S("mobility.frequency","Frequency",["Daily","5x per week","3x per week","Before every session","Before practice and training"])}${S("mobility.when","When",WHEN)}
+    <div class="f"><span>Routine type</span><div class="seg">${seg}</div></div></div></div>`+
+  `${ui.mobMsg?`<div class="banner">${esc(ui.mobMsg)}</div>`:""}`+body;
 },
 weight(){
   const w=plan.weight,s=parseFloat(w.start),t=parseFloat(w.target);let calc="";
@@ -634,7 +649,7 @@ function checks(){
   if(!p.isFirst)out.push([!!p.review.progress.trim(),"Previous six weeks review written"]);
   if(p.include.practice){const d=p.practice.sessions.flatMap(s=>s.drills);out.push([d.length>0,"Practice sessions have drills or games"]);out.push([d.length>0&&d.every(x=>x.env==="Technical"?x.name.trim():(x.game||(x.newGame&&x.name.trim()))),"Every game is picked from the app or described"])}
   if(p.include.physical)out.push([p.physical.dayList.length>0&&p.physical.dayList.every(d=>d.pairs.every(pr=>pr.a.name&&pr.b.name)),"Physical days complete"]);
-  if(p.include.mobility)out.push([p.mobility.items.length>0,"Mobility routine added"]);
+  if(p.include.mobility)out.push([!!mobSummary(p.mobility),"Mobility routine added"]);
   if(p.include.weight)out.push([!!p.weight.start,"Starting weight recorded"]);
   out.push([!!p.appCode,"Put in the player's app"]);
   return out;
@@ -671,7 +686,7 @@ function docBody(p){
      <div class="box"><h3>Games</h3><p>Games from the Macro Golf app. One attempt matters, the score counts, and your attention moves to producing the shot. Open each one from the Practice tab in your plan.</p></div></div>
      <div class="box"><h4>Attention target</h4><p>${scale(50)} Towards Internal means attention on body movement, feels or technical change. Towards External means attention on strike, ball flight, target or task.</p></div>`);
     p.practice.sessions.forEach((s,si)=>{h+=`<section class="pg">${runner}<div class="sec">${String(n).padStart(2,"0")} / Your practice plan</div><h2>${esc(s.name||"Session "+(si+1))}</h2>${s.warmup?`<div class="box gold"><p>${nl2br(s.warmup)}</p></div>`:""}
-      <table><tr><th></th><th>Drill or game</th><th>Volume</th><th>Attention</th></tr>${s.drills.map(d=>`<tr><td class="k">${d.env==="Technical"?"Technical":"Game"}</td><td><b>${esc(d.name)}</b>${d.env!=="Technical"&&d.game?'<div class="note">In the Macro Golf app</div>':""}${d.detail?`<div class="note">${esc(d.detail)}</div>`:""}</td><td class="k">${esc(d.volume)} ${esc(d.volume?d.unit:"")}</td><td>${scale(d.attention)}</td></tr>`).join("")}</table>
+      <table><tr><th></th><th>Drill or game</th><th>Volume</th><th>Attention</th></tr>${s.drills.map(d=>`<tr><td class="k">${d.env==="Technical"?"Technical":"Game"}</td><td><b>${esc(d.name)}</b>${d.env!=="Technical"&&d.game?`<div class="note">${/^drill-/.test(d.game)?"Macro Golf scored drill":"In the Macro Golf app: open it from the Practice tab in your plan"}</div>`:""}${d.detail?`<div class="note">${esc(d.detail)}</div>`:""}</td><td class="k">${esc(d.volume)} ${esc(d.volume?(String(d.volume).trim()==="1"?String(d.unit||"").replace(/s$/,""):d.unit):"")}</td><td>${scale(d.attention)}</td></tr>`).join("")}</table>
       ${s.close?`<p class="note">${nl2br(s.close)}</p>`:""}</section>`});
   }
   if(p.include.oncourse){const o=p.oncourse;h+=page("Your on-course plan",`<h2>Your on-course plan</h2>
@@ -684,7 +699,8 @@ function docBody(p){
     ${ph.progression?`<div class="box gold"><h4>Progression</h4><p>${nl2br(ph.progression)}</p></div>`:""}`);
     ph.dayList.forEach((d,di)=>{h+=`<section class="pg">${runner}<div class="sec">${String(n).padStart(2,"0")} / Your physical plan</div><h2>Day ${di+1}</h2><h3>${esc(d.title)}</h3><table><tr><th></th><th>Exercise</th><th>Type</th><th>Prescription</th></tr>${d.pairs.map((pr,pi)=>["a","b"].map((s,j)=>{const e=pr[s];const rx=e.reps||(e.type==="Power"?ph.power:ph.strength);return `<tr><td class="k">${String.fromCharCode(65+pi)}${j+1}</td><td><b>${esc(e.name)}</b></td><td>${esc(e.type)}</td><td>${esc(rx)}${e.each?" · each side":""}</td></tr>`}).join("")).join("")}</table></section>`});
   }
-  if(p.include.mobility&&p.mobility.items.length)h+=page("Your mobility",`<h2>Your mobility</h2><p><b>${esc(p.mobility.frequency)}</b>${p.mobility.when?" · "+esc(p.mobility.when):""}</p><table><tr><th>Video or exercise</th><th>Length / dose</th><th>Area</th></tr>${p.mobility.items.map(m=>`<tr><td><b>${esc(m.name)}</b>${m.kind==="video"?'<div class="note">Follow-along video in your plan</div>':""}</td><td class="k">${m.kind==="video"?esc(m.mins)+" min":esc(m.dose)}</td><td>${esc(m.area)}</td></tr>`).join("")}</table>`);
+  if(p.include.mobility&&p.mobility.mode!=="manual"&&mobSummary(p.mobility))h+=page("Your mobility",`<h2>Your mobility</h2><p><b>${esc(p.mobility.frequency)}</b>${p.mobility.when?" · "+esc(p.mobility.when):""}</p><p>${p.mobility.mode==="time"?`About ${esc(p.mobility.minutes)} minutes of follow-along mobility`:`${esc(p.mobility.count)} follow-along mobility videos`} a day${(p.mobility.areas||[]).length?", focused on "+esc(p.mobility.areas.join(", ").toLowerCase()):""}. Your plan in the Macro Golf app picks a new routine for you every day: open it, press play and follow along.</p>`);
+  else if(p.include.mobility&&p.mobility.items.length)h+=page("Your mobility",`<h2>Your mobility</h2><p><b>${esc(p.mobility.frequency)}</b>${p.mobility.when?" · "+esc(p.mobility.when):""}</p><table><tr><th>Video or exercise</th><th>Length / dose</th><th>Area</th></tr>${p.mobility.items.map(m=>`<tr><td><b>${esc(m.name)}</b>${m.kind==="video"?'<div class="note">Follow-along video in your plan</div>':""}</td><td class="k">${m.kind==="video"?esc(m.mins)+" min":esc(m.dose)}</td><td>${esc(m.area)}</td></tr>`).join("")}</table>`);
   if(p.include.weight){const w=p.weight;h+=page("Your weight tracking",`<h2>Weight tracking</h2><div class="cols c3"><div class="box stat"><span>Starting</span><b>${esc(w.start||"–")}</b><span>${esc(w.unit)}</span></div><div class="box stat"><span>Target by review</span><b>${esc(w.target||"–")}</b><span>${esc(w.unit)} · ${esc(w.direction)}</span></div><div class="box stat"><span>Weigh-in</span><b style="font-size:22px;margin:8px 0">${esc(w.frequency)}</b><span>${esc(w.day)}</span></div></div>
     <p>${esc(w.conditions)}</p>${w.notes?`<p>${nl2br(w.notes)}</p>`:""}<table class="grid6"><tr><th></th>${Array.from({length:p.weeks},(_,i)=>`<th>Week ${i+1}</th>`).join("")}</tr><tr><td class="k">Weight</td>${"<td></td>".repeat(p.weeks)}</tr>${w.waist?`<tr><td class="k">Waist</td>${"<td></td>".repeat(p.weeks)}</tr>`:""}</table>`)}
   if(p.include.stats&&p.stats.length)h+=page("Your numbers",`<h2>Your numbers</h2><table><tr><th>Metric</th><th>Baseline</th><th>Target by review</th><th>Measured by</th></tr>${p.stats.map(s=>`<tr><td><b>${esc(s.name)}</b></td><td class="k">${esc(s.baseline||"–")}</td><td class="k">${esc(s.target||"–")}</td><td>${esc(s.how)}</td></tr>`).join("")}</table>`);
@@ -739,7 +755,7 @@ function startNext(src){
 
 /* ---------- events ---------- */
 function changed(rerender){dirty=true;setStatus("Unsaved changes");try{localStorage.setItem("mg-planbuilder-draft",JSON.stringify(plan))}catch(e){}clearTimeout(saveTimer);saveTimer=setTimeout(save,1200);if(rerender)render();else{renderRail();renderWho()}}
-function isStructural(path){return /\.game$/.test(path)||path==="weekly.physical"||path==="mobility.count"||/^mobility\.items\.\d+\.name$/.test(path)||path.startsWith("include.")||path==="phase"||path==="weeks"||path==="startDate"||/\.env$/.test(path)||path==="weight.start"||path==="weight.target"||path==="weight.unit"||path==="physical.days"}
+function isStructural(path){return /\.game$/.test(path)||path==="weekly.physical"||path==="mobility.count"||path==="mobility.minutes"||/^mobility\.items\.\d+\.name$/.test(path)||path.startsWith("include.")||path==="phase"||path==="weeks"||path==="startDate"||/\.env$/.test(path)||path==="weight.start"||path==="weight.target"||path==="weight.unit"||path==="physical.days"}
 function onField(e){
   const el=e.target.closest("[data-b]");if(!el)return;
   const path=el.dataset.b,t=el.dataset.t;let v=el.type==="checkbox"?el.checked:el.value;
@@ -752,7 +768,9 @@ function onField(e){
   if(path==="weekly.physical"&&v!=="")plan.physical.days=v;
   if(path==="physical.days"&&v!=="")plan.weekly.physical=v;
   const mm=path.match(/^mobility\.items\.(\d+)\.name$/);
-  if(mm&&e.type==="change"){const x=MGLib.MOB_EX.find(z=>z[0].toLowerCase()===String(v).trim().toLowerCase()),it=plan.mobility.items[+mm[1]];if(x&&it){it.wistia=x[1];if(!it.dose)it.dose=x[2]||"";if(!it.area)it.area=x[4].join(", ");changed(true);return}}
+  if(mm&&e.type==="change"){const vm=String(v).match(/^(.*) \(follow-along, \d+ min\)$/),vv=vm&&MGLib.MOB_VIDEOS.find(z=>z[0]===vm[1]);
+    if(vv){plan.mobility.items[+mm[1]]=vidItem(vv);changed(true);return}
+    const x=MGLib.MOB_EX.find(z=>z[0].toLowerCase()===String(v).trim().toLowerCase()),it=plan.mobility.items[+mm[1]];if(x&&it){it.wistia=x[1];if(!it.dose)it.dose=x[2]||"";if(!it.area)it.area=x[4].join(", ");changed(true);return}}
   if(/^practice\.sessions\.\d+\.drills\.\d+\.(name|detail)$/.test(path)&&e.type==="change")suggestGame(getPath(plan,path.replace(/\.(name|detail)$/,"")));
   if(isStructural(path)&&e.type==="change"){const y=PBMAIN.scrollTop;changed(true);PBMAIN.scrollTop=y}else changed(false);
 }
@@ -781,7 +799,7 @@ document.addEventListener("click",async e=>{
     case"fillintake":ui.fillMsg=applyIntake();break;
     case"tpiadd":addTPI();return;
     case"mobsuggest":ui.mobMsg=suggestMobility();break;
-    case"mobgen":ui.mobMsg=mobGenerate();break;
+    case"mobshuffle":ui.mobSeed=String(Math.random());break;
     case"mobswap":ui.mobMsg=mobSwap(+b.dataset.i);break;
     case"mobmode":plan.mobility.mode=b.dataset.v;break;
     case"mobchip":{const k=b.dataset.k,arr=plan.mobility[k]=plan.mobility[k]||[],v=b.dataset.v,i=arr.indexOf(v);i>=0?arr.splice(i,1):arr.push(v);break}
@@ -1015,25 +1033,22 @@ function freshHTML(list){
 const TPI_AREAS={pelvictilt:["Lower back","Core"],pelvicrotation:["Hips"],torsorotation:["Upper back"],overheaddeepsquat:["Hips","Lower legs"],toetouch:["Hamstrings","Lower back"],"9090":["Shoulders"],singlelegbalance:["Hips","Lower legs"],lattest:["Upper back","Shoulders"],lowerquarterrotation:["Hips"],seatedtrunkrotation:["Upper back"],bridgewithlegextension:["Hips","Core"],cervicalrotation:["Neck"],forearmrotation:["Wrists & forearms"],wristhinge:["Wrists & forearms"],wristflexionextension:["Wrists & forearms"],setupposture:["Upper back","Hips"]};
 /* mobility kit (Joe, 13 Nov): only foam roller, massage ball and band. Routines and exercises that need anything else are left out. */
 const MOB_EQUIP=["Foam roller","Massage ball","Resistance band"],MOB_EQUIP_LABEL={"Resistance band":"Band"},MOB_OK=e=>e==="No equipment"||MOB_EQUIP.includes(e);
-function mobPool(){const m=plan.mobility,ar=m.areas||[],eq=m.equip||[];
-  return MGLib.MOB_VIDEOS.filter(v=>(!ar.length||v[4].some(a=>ar.includes(a)))&&v[3].every(e=>e==="No equipment"||eq.includes(e)))}
+function mobSummary(m){if(!m)return "";if(m.mode==="time")return (m.minutes||10)+" min a day";if(m.mode==="random"||m.mode==="follow"&&!(m.items||[]).length)return (m.count||3)+" videos a day";
+  const n=(m.items||[]).filter(x=>x.name).length,t=(m.items||[]).reduce((a,x)=>a+(+x.mins||0),0);return n?`${n} item${n>1?"s":""}${t?" · "+t+" min":""}`:""}
+function mobPool(){const m=plan.mobility;return MGLib.mobPool(m.areas,m.equip)}
+/* one example day of the random / time routine (the player's app makes a new one each day from the same settings) */
+function mobExample(){return MGLib.mobDay(plan.mobility,ui.mobSeed||"example")}
 const vidItem=v=>({id:uid(),kind:"video",name:v[0],wistia:v[1],mins:v[2],area:v[4].join(", "),equip:v[3].join(", "),dose:"Follow along",cue:""});
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function mobGenerate(){const m=plan.mobility,pool=mobPool(),n=Math.max(1,Math.min(8,parseInt(m.count)||3));
-  if(!pool.length)return "No videos match those areas and equipment. Add equipment or pick more areas.";
-  const ar=m.areas||[],pick=[];
-  if(ar.length){shuffle(ar).forEach(a=>{const c=shuffle(pool.filter(v=>v[4].includes(a)&&!pick.includes(v)))[0];if(c&&pick.length<n)pick.push(c)})}
-  shuffle(pool).forEach(v=>{if(pick.length<n&&!pick.includes(v))pick.push(v)});
-  m.items=m.items.filter(x=>x.kind!=="video").concat(pick.map(vidItem));m.mode="follow";
-  return `Picked ${pick.length} video${pick.length>1?"s":""} (${pick.reduce((a,v)=>a+v[2],0)} min). Swap any that don't suit them.`}
 function mobSwap(i){const m=plan.mobility,cur=m.items[i],have=new Set(m.items.map(x=>x.wistia));
   let pool=mobPool().filter(v=>!have.has(v[1]));const curA=(cur.area||"").split(", ");const near=pool.filter(v=>v[4].some(a=>curA.includes(a)));
   const c=shuffle(near.length?near:pool)[0];if(!c)return "No other videos match. Add equipment or areas.";m.items[i]=vidItem(c);return "Swapped for "+c[0]+"."}
 function suggestMobility(){
   const fails=plan.intake.tpi.filter(t=>t.result&&t.result!=="Pass"),m=plan.mobility,set=new Set(m.areas||[]);
-  fails.forEach(f=>(TPI_AREAS[norm(f.test)]||[]).forEach(a=>set.add(a)));m.areas=[...set];m.mode="follow";
+  fails.forEach(f=>(TPI_AREAS[norm(f.test)]||[]).forEach(a=>set.add(a)));m.areas=[...set];
   if(!m.count||m.count<Math.min(5,m.areas.length))m.count=Math.min(5,Math.max(3,m.areas.length));
-  return "Areas set from the TPI results ("+m.areas.join(", ")+"). "+mobGenerate();
+  if(m.mode==="manual")m.mode="random";
+  return "Areas set from the TPI results ("+m.areas.join(", ")+"). The player's app picks a new routine from these every day.";
 }
 
 /* ---------- new game suggestions for Jack (mg_game_suggestions) ---------- */
@@ -1072,12 +1087,12 @@ Your plan code:
 *${code}*
 
 To open it:
-1. Open the Macro Golf app and tap *My Plan*.
+1. Open the Macro Golf app and tap *MG Athletes* at the bottom.
 2. Enter your email address.
 3. Tap *First time here?* and type your plan code: *${code}*
 4. Choose a 4-digit PIN you'll remember.
 
-That's it. From then on, tapping My Plan opens your plan straight away. If you change phones, just log in with your email and PIN.
+That's it. From then on, tapping MG Athletes opens your plan straight away. If you change phones, just log in with your email and PIN.
 
 Every session you log saves automatically, and your coach can see how you're getting on.
 
