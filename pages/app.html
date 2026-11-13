@@ -7,11 +7,11 @@
 #mga a{color:inherit}
 #mga .w{max-width:1180px;margin:0 auto;padding:0 24px}
 #mga .k{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:500;margin:0 0 14px}
-#mga h1,#mga h2,#mga h3{font-family:Anton,Impact,sans-serif!important;font-weight:400;text-transform:uppercase;letter-spacing:normal;line-height:1.12;margin:0;color:inherit!important}
+#mga h1,#mga h2,#mga h3{font-family:Anton,Impact,sans-serif!important;font-weight:400;text-transform:uppercase;letter-spacing:normal;line-height:1.14;margin:0;color:inherit!important}
 #mga h1{font-size:clamp(44px,7vw,84px)}
 #mga h2{font-size:clamp(36px,5vw,60px);margin-bottom:18px}
 #mga h3{font-size:24px;margin-bottom:8px}
-#mga .hl{background:var(--y);color:var(--ink);padding:0 .12em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+#mga .hl{background:linear-gradient(to bottom,transparent 8%,var(--y) 8%,var(--y) 94%,transparent 94%);color:var(--ink);padding:0 .1em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 #mga p{margin:0 0 14px}
 #mga .lead{font-size:20px;max-width:560px}
 #mga .btn{display:inline-flex;align-items:center;gap:8px;min-height:54px;padding:0 22px;font-family:Anton,Impact,sans-serif;text-transform:uppercase;font-size:17px;letter-spacing:.5px;text-decoration:none;border:2px solid var(--ink);background:var(--ink);color:#fff}
@@ -36,9 +36,9 @@
 /* hero */
 #mga .hero{padding:72px 0 88px;background:radial-gradient(1200px 600px at 75% 40%,#1d1b12 0%,var(--ink) 60%);color:#F4F1EA}
 #mga .hero .k{color:var(--y)}
-#mga .phone{position:relative;width:min(340px,80vw);margin:0 auto;border-radius:44px;padding:12px;background:#1a1a1a;box-shadow:0 0 0 2px #2c2c2c,0 30px 80px rgba(0,0,0,.6),0 0 120px rgba(255,217,0,.12)}
-#mga .phone video,#mga .phone img{width:100%;border-radius:34px;aspect-ratio:9/19.2;object-fit:cover;background:#000}
-#mga .shot{width:min(360px,86vw);margin:0 auto;filter:drop-shadow(0 30px 60px rgba(0,0,0,.35))}
+#mga .phone{position:relative;width:min(330px,78vw);margin:0 auto}
+#mga .phone video,#mga .phone img{width:100%;aspect-ratio:9/16;object-fit:cover;background:#0B0B0B;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 120px rgba(255,217,0,.10)}
+#mga .shot{width:min(330px,80vw);height:auto;margin:0 auto;filter:drop-shadow(0 24px 40px rgba(0,0,0,.28))}
 #mga .note{font-size:13px;opacity:.65;margin-top:14px}
 /* steps */
 #mga .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(11,11,11,.15)}
@@ -82,7 +82,7 @@
 #mga .dark .feat div{border-color:var(--y)}
 #mga .feat p{font-size:16px}
 #mga .video{position:relative;max-width:420px;margin:0 auto}
-#mga .video video{width:100%;aspect-ratio:9/16;object-fit:cover;background:#000;border:1px solid rgba(255,255,255,.15)}
+#mga .video video{width:100%;aspect-ratio:9/16;object-fit:cover;background:#000;border-radius:18px}
 #mga .cta{background:var(--y);text-align:center;padding:90px 0}
 #mga .cta h2{font-size:clamp(40px,6vw,72px)}
 #mga .cta p{max-width:620px;margin:0 auto 10px;font-size:20px}
@@ -93,12 +93,12 @@
 @media (max-width:980px){#mga .top nav{display:none}#mga .top .btn{margin-left:auto}#mga .split{grid-template-columns:1fr;gap:44px}#mga .split.rev>:first-child{order:0}
  #mga .steps{grid-template-columns:1fr 1fr}#mga .steps div:nth-child(2){border-right:0}#mga .cards{grid-template-columns:1fr}#mga .games{grid-template-columns:1fr 1fr}#mga .feat{grid-template-columns:1fr}#mga section{padding:68px 0}}
 @media (max-width:560px){#mga{font-size:17px}#mga .steps{grid-template-columns:1fr}#mga .steps div{border-right:0;border-bottom:1px solid rgba(11,11,11,.15)}#mga .games{grid-template-columns:1fr}#mga .big{font-size:52px}#mga .bars div{grid-template-columns:92px 1fr 48px}}
-@media (prefers-reduced-motion:reduce){#mga video[autoplay]{display:none}#mga .phone .poster{display:block!important}}
+@media (prefers-reduced-motion:reduce){#mga video[autoplay]{display:none}}
 </style>
 
 <header class="top"><div class="w">
   <a href="https://www.macro.golf/" aria-label="Macro Golf home"><img src="https://kajabi-storefronts-production.kajabi-cdn.com/kajabi-storefronts-production/file-uploads/themes/2159677544/settings_images/23403ad-e53e-57ac-33ee-d53e7d4f741b_8ca78ae6-8b07-40dc-9f44-c6fc3af957f3.png" alt="Macro Golf"></a>
-  <nav aria-label="Main"><a href="https://www.macro.golf/coaching">Coaching</a><a href="https://www.macro.golf/philosophy">Our Philosophy</a><a href="https://www.macro.golf/studios">Studios</a><a href="https://www.macro.golf/the-app" aria-current="page">The App</a><a href="https://www.macro.golf/blog">Blog</a><a href="https://www.macro.golf/faqs">FAQs</a><a href="https://www.macro.golf/contact">Contact</a></nav>
+  <nav aria-label="Main"><a href="https://www.macro.golf/coaching">Coaching</a><a href="https://www.macro.golf/philosophy">Our Philosophy</a><a href="https://www.macro.golf/studios">Studios</a><a href="https://www.macro.golf/app" aria-current="page">The App</a><a href="https://www.macro.golf/blog">Blog</a><a href="https://www.macro.golf/faqs">FAQs</a><a href="https://www.macro.golf/contact">Contact</a></nav>
   <a class="btn y" href="https://www.macro.golf/audit">Match-Up Audit</a>
 </div></header>
 
@@ -111,7 +111,7 @@
     <div class="row"><a class="btn y" href="#get">Get the app</a><a class="btn o" href="#how">See how it works</a></div>
   </div>
   <div>
-    <div class="phone"><video src="{{BASE}}assets/video/macro-golf-ad.mp4" poster="{{BASE}}assets/web/slide-02-watch-your-game-climb.jpg" autoplay muted loop playsinline preload="metadata" aria-label="25 second tour of the Macro Golf app"></video><img class="poster" src="{{BASE}}assets/web/slide-02-watch-your-game-climb.jpg" alt="" style="display:none"></div>
+    <div class="phone"><video src="{{BASE}}assets/video/macro-golf-ad.mp4" autoplay muted loop playsinline disablepictureinpicture preload="metadata" aria-label="25 second tour of the Macro Golf app"></video></div>
   </div>
 </div></section>
 
@@ -186,7 +186,7 @@
       <li>Working with a Macro Golf coach? Your 1-to-1 plan uses the same tools.</li>
     </ul>
   </div>
-  <div><img class="shot" src="{{BASE}}assets/web/slide-03-your-6-week-plan.jpg" alt="The 6 week Practice Plan in the app" loading="lazy"></div>
+  <div><img class="shot" src="{{BASE}}assets/web/phone-03-your-6-week-plan.webp" alt="The 6 week Practice Plan in the app" loading="lazy"></div>
 </div></section>
 
 <section class="dark"><div class="w">
@@ -194,15 +194,15 @@
   <h2>Games that make <span class="hl">practice count</span></h2>
   <p class="lead">Nine scored games, every shot measured in strokes gained.</p>
   <div class="games">
-    <figure><img src="{{BASE}}assets/web/game-hole-out.jpg" alt="Hole Out" loading="lazy"><figcaption>Putting</figcaption></figure>
-    <figure><img src="{{BASE}}assets/web/game-insanity.jpg" alt="Insanity" loading="lazy"><figcaption>Putting</figcaption></figure>
-    <figure><img src="{{BASE}}assets/web/game-money-stealers.jpg" alt="Money Stealers" loading="lazy"><figcaption>Putting</figcaption></figure>
-    <figure><img src="{{BASE}}assets/web/game-par-18.jpg" alt="Par 18" loading="lazy"><figcaption>Short game</figcaption></figure>
-    <figure><img src="{{BASE}}assets/web/game-fifty-ft-bank.jpg" alt="50ft Bank" loading="lazy"><figcaption>Short game</figcaption></figure>
-    <figure><img src="{{BASE}}assets/web/game-wedge-darts.jpg" alt="Wedge Darts" loading="lazy"><figcaption>Long game</figcaption></figure>
-    <figure><img src="{{BASE}}assets/web/game-lava.jpg" alt="Lava" loading="lazy"><figcaption>Long game</figcaption></figure>
-    <figure><img src="{{BASE}}assets/web/game-driver-corridor.jpg" alt="Driver Corridor" loading="lazy"><figcaption>Long game</figcaption></figure>
-    <figure><img src="{{BASE}}assets/web/game-three-strikes.jpg" alt="3 Strikes" loading="lazy"><figcaption>Long game</figcaption></figure>
+    <figure><img src="{{BASE}}assets/web/game-hole-out.jpg" alt="Hole Out" loading="lazy"></figure>
+    <figure><img src="{{BASE}}assets/web/game-insanity.jpg" alt="Insanity" loading="lazy"></figure>
+    <figure><img src="{{BASE}}assets/web/game-money-stealers.jpg" alt="Money Stealers" loading="lazy"></figure>
+    <figure><img src="{{BASE}}assets/web/game-par-18.jpg" alt="Par 18" loading="lazy"></figure>
+    <figure><img src="{{BASE}}assets/web/game-fifty-ft-bank.jpg" alt="50ft Bank" loading="lazy"></figure>
+    <figure><img src="{{BASE}}assets/web/game-wedge-darts.jpg" alt="Wedge Darts" loading="lazy"></figure>
+    <figure><img src="{{BASE}}assets/web/game-lava.jpg" alt="Lava" loading="lazy"></figure>
+    <figure><img src="{{BASE}}assets/web/game-driver-corridor.jpg" alt="Driver Corridor" loading="lazy"></figure>
+    <figure><img src="{{BASE}}assets/web/game-three-strikes.jpg" alt="3 Strikes" loading="lazy"></figure>
   </div>
   <div class="gtitle"><span><b>Plus On-Course Games:</b> Worst Ball and PGA Tour Average, shot by shot on the course.</span></div>
 </div></section>
@@ -216,7 +216,7 @@
       <div><h3>Leaderboards</h3><p>Monthly and all-time boards for every game. Finish in the top three and it shows on your result and your share picture.</p></div>
     </div>
   </div>
-  <div><img class="shot" src="{{BASE}}assets/web/slide-05-climb-the-leaderboard.jpg" alt="A game leaderboard in the app" loading="lazy"></div>
+  <div><img class="shot" src="{{BASE}}assets/web/phone-05-climb-the-leaderboard.webp" alt="A game leaderboard in the app" loading="lazy"></div>
 </div></section>
 
 <section class="dark"><div class="w split rev">
@@ -228,7 +228,7 @@
       <div><h3>Streaks</h3><p>A day streak at the top of every page, and a weekly practice streak with rain weeks, so one missed week doesn't wipe it out.</p></div>
     </div>
   </div>
-  <div><img class="shot" src="{{BASE}}assets/web/slide-06-keep-your-streak.jpg" alt="The weekly practice streak in the app" loading="lazy"></div>
+  <div><img class="shot" src="{{BASE}}assets/web/phone-06-keep-your-streak.webp" alt="The weekly practice streak in the app" loading="lazy"></div>
 </div></section>
 
 <section><div class="w split">
@@ -243,7 +243,7 @@
       <li>Warm-ups, mobility and recovery routines.</li>
     </ul>
   </div>
-  <div><img class="shot" src="{{BASE}}assets/web/slide-08-move-better-swing-faster.jpg" alt="A training session in the app" loading="lazy"></div>
+  <div><img class="shot" src="{{BASE}}assets/web/phone-08-move-better-swing-faster.webp" alt="A training session in the app" loading="lazy"></div>
 </div></section>
 
 <section class="dark"><div class="w split rev">
@@ -258,10 +258,11 @@
 <section class="cta" id="get"><div class="w">
   <h2>Get the Macro Golf app</h2>
   <p>On iPhone and Android. One email and PIN works across the whole app.</p>
-  <div class="row"><a class="btn" href="https://apps.apple.com/app/apple-store/id6450019231">Download on the App Store</a><a class="btn" href="https://www.macro.golf/app">Get it on Google Play</a></div>
+  <div class="row"><a class="btn" href="https://apps.apple.com/app/apple-store/id6450019231">Download on the App Store</a><a class="btn" href="https://play.google.com/store/apps/details?id=com.VidApp.MacroGolfStudios">Get it on Google Play</a></div>
   <p style="margin-top:22px;font-size:17px"><a href="https://www.macro.golf/coaching">Prefer a coach to build it with you? Explore 1-to-1 coaching →</a></p>
 </div></section>
 </main>
 
 <footer class="foot"><div class="w"><span>© Macro Golf Studios Ltd</span><span><a href="https://www.macro.golf/coaching">Coaching</a> · <a href="https://www.macro.golf/faqs">FAQs</a> · <a href="https://www.macro.golf/contact">Contact</a></span></div></footer>
+<script>(function(){var v=document.querySelector('#mga .phone video');if(!v)return;v.muted=true;v.defaultMuted=true;v.volume=0;v.setAttribute('muted','');var p=v.play();if(p&&p.catch)p.catch(function(){});v.addEventListener('volumechange',function(){if(!v.muted)v.muted=true})})();</script>
 </div>

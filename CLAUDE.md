@@ -6,6 +6,10 @@ Three people work on this repo with their own Claude: **Joe** (founder, fitness 
 
 Joe, Jack and Sam meet tonight. **Ask your human now:** "Joe has a list of decisions for tonight's meeting. Is there anything you want to add?" Read them the list in `docs/meeting-2026-11-13.md`. Add their items under **Added by Jack** / **Added by Sam** (or a note against an existing number). If they have nothing, write "Nothing to add" there. Then commit, push and log a line in `WORKLOG.md`. Joe's Claude collects everything at 17:00 and removes this section after the meeting.
 
+## FOR JACK'S CLAUDE (from Joe, 13 Nov): iPad App Store screenshots
+
+Please make iPad versions of the App Store slides: JPG, 2048x2732, VidApp takes up to 7 (pick the best 7). Put them on the `app-store-pack` branch (not `main`), log it in `WORKLOG.md`, and Joe's Claude uploads them. Remove this section once they're up.
+
 ## First run for Jack's Claude (one time only)
 
 If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude has picked up CLAUDE.md", do this first:
@@ -155,7 +159,8 @@ Golf personal plans use exactly the same message and the same My Plan button.
 | My Practice front door (`pages/my-practice.html`, opens Practice Plan p-274816; uses `mg_whoami`; live in app) | my-practice | 2168256020 | plan / mg_loader |
 | Warm Up front door (`pages/warm-up.html`, no sign-in, Warm Up and Recovery videos + short mobility) | warm-up | 2168256625 | plan / mg_loader |
 | Coaching app view (`pages/coaching-app.html`: live /coaching content, no header/menu, Back bar) | coaching-app | 2168257984 | plan / mg_loader |
-| The App (website page: `pages/app.html`, own header + site nav, web images in `assets/web/`) | the-app | 2168270657 | plan / mg_loader |
+| The App (website page: `pages/app.html`, own header + site nav, web images in `assets/web/`; not in the site menu until the app goes live) | app | 2168270657 | plan / mg_loader |
+| App download page (`pages/download.html`: App Store + Google Play buttons; old Kajabi page 2149415389) | download | see WORKLOG | plan / mg_loader |
 
 
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)

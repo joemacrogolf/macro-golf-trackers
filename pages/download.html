@@ -1,0 +1,58 @@
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<div id="mgd">
+<style>
+#mgd{--ink:#0B0B0B;--y:#FFD900;--cream:#F4F1EA;margin:0;min-height:100vh;background:radial-gradient(900px 600px at 70% 30%,#1d1b12 0%,var(--ink) 62%);color:var(--cream);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+#mgd *{box-sizing:border-box}
+#mgd a{color:inherit}
+#mgd .w{max-width:1080px;margin:0 auto;padding:0 24px}
+#mgd .top{display:flex;align-items:center;justify-content:space-between;min-height:76px}
+#mgd .top img{height:34px;width:auto;display:block}
+#mgd .top a.more{font-size:15px;text-decoration:none;opacity:.85}
+#mgd .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;padding:40px 0 72px}
+#mgd .k{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--y);margin:0 0 14px}
+#mgd h1{font-family:Anton,Impact,sans-serif!important;font-weight:400;text-transform:uppercase;font-size:clamp(46px,7vw,82px);line-height:1.08;margin:0 0 20px;color:var(--cream)!important;letter-spacing:normal}
+#mgd .hl{background:var(--y);color:var(--ink);padding:0 .12em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+#mgd p.lead{font-size:20px;line-height:1.55;max-width:520px;margin:0 0 28px;color:#e6e1d6}
+#mgd .stores{display:flex;flex-wrap:wrap;gap:14px}
+#mgd .store{display:flex;align-items:center;gap:12px;min-height:64px;min-width:220px;padding:10px 20px;border-radius:14px;background:#000;border:1.5px solid rgba(244,241,234,.55);text-decoration:none;color:#fff;transition:border-color .15s}
+#mgd .store:hover{border-color:var(--y)}
+#mgd .store.mine{border-color:var(--y);box-shadow:0 0 0 3px rgba(255,217,0,.25)}
+#mgd .store svg{width:30px;height:30px;flex:none}
+#mgd .store small{display:block;font-size:12px;opacity:.85;line-height:1.1}
+#mgd .store b{display:block;font-size:22px;font-weight:600;line-height:1.15;letter-spacing:-.2px}
+#mgd .store:focus-visible{outline:3px solid var(--y);outline-offset:3px}
+#mgd ul{list-style:none;padding:0;margin:30px 0 0;display:grid;gap:12px;font-size:17px}
+#mgd li{padding-left:30px;position:relative;color:#e6e1d6}
+#mgd li:before{content:'';position:absolute;left:0;top:.38em;width:16px;height:16px;background:var(--y)}
+#mgd .phone{width:min(320px,76vw);margin:0 auto}
+#mgd .phone img{display:block;width:100%;height:auto;filter:drop-shadow(0 30px 60px rgba(0,0,0,.6)) drop-shadow(0 0 60px rgba(255,217,0,.10))}
+#mgd .foot{border-top:1px solid rgba(244,241,234,.12);padding:22px 0 30px;font-size:14px;color:#a9a397;display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-between}
+#mgd .foot a{text-decoration:none}
+@media (max-width:860px){#mgd .grid{grid-template-columns:1fr;gap:40px;padding:20px 0 56px}#mgd .phone{width:min(280px,72vw)}#mgd .store{flex:1 1 100%}}
+</style>
+<div class="w">
+  <div class="top"><a href="https://www.macro.golf/" aria-label="Macro Golf home"><img src="https://kajabi-storefronts-production.kajabi-cdn.com/kajabi-storefronts-production/file-uploads/themes/2159677544/settings_images/23403ad-e53e-57ac-33ee-d53e7d4f741b_8ca78ae6-8b07-40dc-9f44-c6fc3af957f3.png" alt="Macro Golf"></a><a class="more" href="https://www.macro.golf/app">What's in the app →</a></div>
+  <main class="grid">
+    <div>
+      <p class="k">Download</p>
+      <h1>Get the <span class="hl">Macro Golf</span> app</h1>
+      <p class="lead">Find where you lose shots, follow a plan built from your tests and watch your numbers climb.</p>
+      <div class="stores">
+        <a class="store" id="ios" href="https://apps.apple.com/app/apple-store/id6450019231"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.1zM13.9 5c.7-.9 1.2-2 1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.2.1 2.3-.6 3.1-1.5z"/></svg><span><small>Download on the</small><b>App Store</b></span></a>
+        <a class="store" id="android" href="https://play.google.com/store/apps/details?id=com.VidApp.MacroGolfStudios"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#34A853" d="M3.6 2.2c-.3.3-.5.8-.5 1.4v16.8c0 .6.2 1.1.5 1.4l9.5-9.8z"/><path fill="#FBBC04" d="M16.3 15.2 13.1 12l3.2-3.2 3.8 2.2c1.1.6 1.1 1.6 0 2.2z"/><path fill="#EA4335" d="M16.3 15.2 13.1 12l-9.5 9.8c.4.4 1 .4 1.7 0z"/><path fill="#4285F4" d="M16.3 8.8 5.3 2.2c-.7-.4-1.3-.4-1.7 0l9.5 9.8z"/></svg><span><small>Get it on</small><b>Google Play</b></span></a>
+      </div>
+      <ul>
+        <li>Three tests put your whole game in strokes gained.</li>
+        <li>My Numbers shows where you gain and lose shots.</li>
+        <li>A weekly plan, scored games, leaderboards and streaks.</li>
+      </ul>
+    </div>
+    <div><div class="phone"><img src="{{BASE}}assets/web/phone-02-watch-your-game-climb.webp" alt="My Numbers in the Macro Golf app, showing a rising strokes gained trend (example player)"></div></div>
+  </main>
+  <div class="foot"><span>© Macro Golf Studios Ltd</span><span><a href="https://www.macro.golf/app">The App</a> · <a href="https://www.macro.golf/coaching">Coaching</a> · <a href="https://www.macro.golf/contact">Contact</a></span></div>
+</div>
+<script>
+(function(){var u=navigator.userAgent||'',ios=/iPhone|iPad|iPod/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1),and=/Android/.test(u);
+  var a=document.getElementById(ios?'ios':and?'android':''),s=document.querySelector('#mgd .stores');if(a){a.classList.add('mine');s.insertBefore(a,s.firstChild)}})();
+</script>
+</div>
