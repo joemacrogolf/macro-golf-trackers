@@ -8,7 +8,8 @@ if(window.MGBoard)return;
 var ME=document.currentScript&&document.currentScript.src;
 /* MG players (logged in through MG Athletes, or on the MG pros list) come back with r.mg (supabase/013-leaderboard-mg.sql) */
 var MGIMG=ME?ME.replace(/src\/leaderboard\.js.*$/,'assets/icons/mg-mark-yellow-44.png'):'';
-function mgMark(r){return r&&r.mg?'<span class="lb-mg" title="MG Athlete">'+(MGIMG?'<img src="'+MGIMG+'" alt="MG Athlete">':'MG')+'</span>':''}
+var MGBLK=MGIMG.replace('mg-mark-yellow-44','mg-mark-black-44');
+function mgMark(r){if(r&&r.coach)return '<span class="lb-coach" title="MG Coach">'+(MGIMG?'<img src="'+MGBLK+'" alt="">':'MG')+'Coach</span>';return r&&r.mg?'<span class="lb-mg" title="MG Athlete">'+(MGIMG?'<img src="'+MGIMG+'" alt="MG Athlete">':'MG')+'</span>':''}
 var URL='https://zhcgwtlyqriwlhbzkxcl.supabase.co/rest/v1/rpc/mg_leaderboard',APIKEY='sb_publishable__IBhmrVHOXsLHruU7XJB-g_OSN9Ljne';
 var view='month',cache={};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -73,6 +74,7 @@ function css(){var s=document.createElement('style');s.textContent=[
  '.lb-date{font-size:12.5px;color:#9C988C}.lb-score{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:20px;color:#F4F1EA;text-align:right;min-width:64px}',
  '.lb-rows li.me{background:rgba(255,217,0,.1)}',
  '.lb-mg{display:inline-flex;align-items:center;vertical-align:-3px;margin-left:7px;color:#FFD900;font:400 15px/1 Anton,Impact,sans-serif}.lb-mg img{height:18px;width:auto;display:block}',
+ '.lb-coach{display:inline-flex;align-items:center;gap:5px;vertical-align:-2px;margin-left:7px;padding:3px 7px 3px 5px;background:#FFD900;color:#0B0B0B;font:400 13px/1 Anton,Impact,sans-serif;text-transform:uppercase;letter-spacing:.6px}.lb-coach img{height:14px;width:auto;display:block}',
  '.lb-msg{color:#cfcabd;margin:6px 0}.lb-small{color:#9C988C;font-size:12.5px;margin:8px 0 0}',
  '.lb-foot{border-top:1px solid rgba(244,241,234,.15);padding-top:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}.lb-foot p{margin:0;color:#cfcabd;font-size:14px}',
  '.lb-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(120px + env(safe-area-inset-bottom,0px));z-index:70;width:min(440px,calc(100vw - 24px));display:flex;align-items:center;gap:12px;padding:14px;background:#0B0B0B;color:#F4F1EA;border-left:6px solid #FFD900;box-shadow:0 12px 30px rgba(0,0,0,.35);font-family:Inter,system-ui,sans-serif;animation:lbIn .45s cubic-bezier(.2,1.4,.4,1)}',
