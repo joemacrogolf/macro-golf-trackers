@@ -240,6 +240,18 @@
 #pb .ans span{font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
 #pb .ans p{margin:2px 0 0;font-size:13px;color:var(--paper)}
 @media (max-width:700px){#pb .anslist{grid-template-columns:1fr}#pb nav.rail{position:static;max-height:none}}
+#pb .ie2{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#pb .ie2>span{font:9.5px var(--mono);letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+#pb .ie2 input[type=range]{flex:1;min-width:160px;accent-color:#FFD900;background:transparent;border:0;padding:0}
+#pb .ie2 output{font:11px var(--mono);color:var(--gold);min-width:118px}
+#pb .drill .top.g-top{grid-template-columns:120px 1fr 80px 100px auto}
+@media (max-width:860px){#pb .drill .top.g-top{grid-template-columns:1fr 1fr}}
+#pb .mobv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--ink)}
+#pb .mobv b{font-size:13.5px}
+#pb .welcome{width:100%;min-height:300px;font:13px/1.5 var(--body);background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:6px;padding:12px}
+#pb .sugg{border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--ink);display:grid;gap:4px}
+#pb .mgdoc .sbar{display:inline-block;position:relative;width:74px;height:8px;border-radius:4px;background:linear-gradient(90deg,#d8d4c8,#0c0c0b);vertical-align:middle;margin:0 5px}
+#pb .mgdoc .sbar i{position:absolute;top:-3px;width:5px;height:14px;background:#FFD900;border:1px solid #0c0c0b;transform:translateX(-50%)}
 </style>
 <div id="pb">
 <div class="gate" id="pb-gate"><form class="gatebox" id="pb-login">
@@ -286,6 +298,7 @@
 <datalist id="dl-tpi"></datalist>
 
 </div>
+<script charset="utf-8" src="{{BASE}}src/mg-library.js"></script>
 <script>
 "use strict";
 (function(){
@@ -295,10 +308,10 @@ const EXERCISES=["Pull up","High hands slam","Cable lat pull down","Med ball sla
 const MOBILITY=["90/90 hip switches","Open books","Quadruped thoracic rotation","Cat cow","World's greatest stretch","Half kneeling hip flexor stretch","Pigeon stretch","Bench lat stretch","Deep squat hold","Wrist flexor and extensor stretch","Ankle rocks","Pelvic tilts","Pelvic rotations with club","Seated trunk rotations","Cossack squat","Banded shoulder dislocates","Couch stretch","Golf Warm Up (Macro Golf App)"];
 const AREAS=["Hips","Thoracic spine","Shoulders","Lats","Ankles","Wrists / forearms","Neck","Pelvic control","Hamstrings","Full body"];
 const HABITS=["Meditation","Gratitude","Breath work","Visualisation","Performance Log entry","Journalling","Daily steps","Hydration","Screen-free wind down"];
-const STATS=["Scoring average","Handicap index","Fairways hit %","Greens in regulation","Up and down %","Putts per round","3-putts per round","Penalty shots per round","Strokes gained: approach","Driver clubhead speed (mph)","Driver ball speed (mph)","7 iron carry (yds)"];
+const STATS=["Scoring average","Off the tee strokes gained","Approach strokes gained","Short game strokes gained","Putting strokes gained","Score killers per round"];
 const TPI=["Pelvic tilt","Pelvic rotation","Torso rotation","Overhead deep squat","Toe touch","90/90","Single leg balance","Lat test","Lower quarter rotation","Seated trunk rotation","Bridge with leg extension","Cervical rotation","Forearm rotation","Wrist hinge","Wrist flexion / extension"];
 const SWING=["S-posture","C-posture","Loss of posture","Flat shoulder plane","Early extension","Over the top","Sway","Slide","Late buckling","Reverse spine angle","Forward lunge","Hanging back","Casting / early release","Scooping","Chicken winging"];
-const ENVS=["Technical","Random","Competitive"];
+const ENVS=["Technical","Game"];
 const RPE_LABEL={1:"No consequence",2:"Relaxed",3:"Light focus",4:"Some challenge",5:"Stretching",6:"Demanding",7:"Consequence",8:"Pressure",9:"Tournament feel",10:"One ball, everything on it"};
 const PHYS_TEMPLATE=[
  ["Arm chop + upper body",[["Pull up","High hands slam"],["Cable lat pull down","Med ball slam"],["Dumbbell incline bench press","Cable power row"],["Cable woodchop","Low to high cable cross chop*"]]],
@@ -308,7 +321,7 @@ const PHYS_TEMPLATE=[
 ];
 function fillDatalists(){
   const put=(id,arr)=>{document.getElementById(id).innerHTML=arr.map(v=>`<option value="${esc(v)}"></option>`).join("")};
-  put("dl-drills",DRILLS);put("dl-ex",EXERCISES);put("dl-mob",MOBILITY);put("dl-habit",HABITS);put("dl-stat",STATS);put("dl-tpi",TPI);
+  put("dl-drills",DRILLS);put("dl-ex",EXERCISES);put("dl-mob",MGLib.MOB_EX.map(x=>x[0]));put("dl-habit",HABITS);put("dl-stat",STATS);put("dl-tpi",TPI);
 }
 
 /* ---------- utils ---------- */
@@ -328,10 +341,21 @@ function blockLabel(p){if(!p.startDate)return"";const s=new Date(p.startDate+"T1
 const reviewWeek=p=>(p.phase||1)*(p.weeks||6);
 
 /* ---------- plan model ---------- */
-function blankDrill(env="Technical",name="",o={}){return Object.assign({id:uid(),env,name,source:name.includes("CoachNow")?"CoachNow":"Macro Golf App",detail:"",volume:env==="Technical"?15:9,unit:"balls",intention:"",thought:"",attention:env==="Technical"?2:env==="Random"?4:5,rpe:env==="Technical"?3:env==="Random"?5:8},o)}
+function blankDrill(env="Technical",name="",o={}){return Object.assign({id:uid(),env,name,game:"",newGame:false,detail:"",volume:env==="Technical"?15:"",unit:env==="Technical"?"balls":"rounds",attention:env==="Technical"?25:80},o)}
+const GAME_BY_PATH=Object.fromEntries(MGLib.GAMES.map(g=>[g[1],g]));
+const gameDrill=(path,o={})=>blankDrill("Game",GAME_BY_PATH[path][0],Object.assign({game:path,volume:1},o));
+const STD_STATS=()=>STATS.map(n=>({id:uid(),name:n,baseline:"",target:"",how:/strokes gained/.test(n)?"Strokes gained in My Numbers (Macro Golf app tests and games)":n==="Score killers per round"?"Doubles or worse, 3-putts, penalties and duffed chips per round":"Last 5 full rounds"}));
+const STD_Q=()=>[
+  {id:uid(),q:"Did you vary from your plan this week?",type:"Yes / No"},
+  {id:uid(),q:"If yes, how did you vary from the plan, and why?",type:"Text"},
+  {id:uid(),q:"Is anything happening next week that will affect your availability to do the plan?",type:"Text"},
+  {id:uid(),q:"What do you need your coaching team to focus on next week?",type:"Text"},
+  {id:uid(),q:"Do you need support with anything this week?",type:"Text"},
+  {id:uid(),q:"How well do you feel you transferred your golf to the course this week?",type:"1–10"}];
+const WHEN=["Evenings before sleep","Morning","Before practice","Before training","Before a round","Any time in the day"];
 function newPlan(){
   return {
-    id:uid(),playerName:"",playerEmail:"",coach:"",phase:1,isFirst:true,startDate:nextMonday(),weeks:6,status:"draft",createdAt:Date.now(),
+    id:uid(),attV2:true,playerName:"",playerEmail:"",coach:"",phase:1,isFirst:true,startDate:nextMonday(),weeks:6,status:"draft",createdAt:Date.now(),
     include:{habits:true,practice:true,oncourse:true,physical:true,mobility:true,weight:true,stats:true,recovery:false,checkin:true},
     intake:{source:"Match Up Session",fileName:"",summary:"",handicap:"",homeClub:"",goals:"",history:"",injuries:"",equipment:"",tpi:[],swing:[],notes:""},
     review:{progress:"",learned:"",nextStep:"",nextStepDetail:"",adherence:{practice:"",physical:"",habits:""},priorityReview:[],notes:""},
@@ -342,28 +366,24 @@ function newPlan(){
     practice:{intro:"",sessions:[]},
     oncourse:{games:[],technical:"",intention:"",strategy:"",preround:"",postround:"Complete statistics for full rounds. Send the reflection and relevant statistics to the coaching team. Rather than diagnosing poor shots, look for patterns: what performed well, what became more difficult, what changed when performance changed, which parts of practice transferred.",balance:4},
     physical:{days:4,structure:"Supersets · A1 / A2 pairs",rest:"45–60s between rounds",strength:"3 sets: 12 / 10 / 8 reps @ RPE 7 / 8 / 9",power:"3 x 5 @ RPE 10 (maximal intent, not failure)",progression:"Keep exercises, sets and reps consistent through the block. Progress through load using the prescribed RPE. Do not add fatigue for the sake of progression.",note:"This plan should assist your golf performance. If at any time your training is limiting your ability to practise or play, notify your coach immediately.",dayList:[]},
-    mobility:{frequency:"Daily",when:"Morning or before practice",items:[]},
+    mobility:{frequency:"Daily",when:"Evenings before sleep",mode:"follow",areas:[],equip:["No equipment"],count:3,items:[]},
     weight:{unit:"kg",start:"",target:"",direction:"Maintain",frequency:"Weekly",day:"Monday",conditions:"First thing in the morning, before food",waist:false,notes:""},
-    stats:[{id:uid(),name:"Scoring average",baseline:"",target:"",how:""},{id:uid(),name:"Greens in regulation",baseline:"",target:"",how:""},{id:uid(),name:"Up and down %",baseline:"",target:"",how:""},{id:uid(),name:"Putts per round",baseline:"",target:"",how:""}],
+    stats:STD_STATS(),
     recovery:{sleep:"8",routine:"",notes:""},
-    checkin:{day:"Sunday",questions:[
-      {id:uid(),q:"On course, how internal or external was your attention? (1 internal – 10 external)",type:"1–10"},
-      {id:uid(),q:"How easily could you access your golf this week?",type:"1–10"},
-      {id:uid(),q:"Hardest practice session: how much pressure did it carry? (Golf RPE)",type:"1–10"},
-      {id:uid(),q:"Practice sessions completed",type:"Number"},
-      {id:uid(),q:"Physical sessions completed",type:"Number"},
-      {id:uid(),q:"Days daily habits were completed",type:"Number"},
-      {id:uid(),q:"One thing that transferred, one thing that got harder",type:"Text"}
-    ]}
+    checkin:{day:"Sunday",questions:STD_Q()}
   };
 }
-function normalise(p){return deepFill(p,newPlan())}
+function normalise(p){
+  if(!p.attV2){const fix=o=>{if(o&&typeof o.attention==="number"&&o.attention>=1&&o.attention<=5)o.attention=(o.attention-1)*25};
+    ((p.practice||{}).sessions||[]).forEach(s=>(s.drills||[]).forEach(d=>{fix(d);if(d.env&&d.env!=="Technical")d.env="Game"}));
+    ((p.oncourse||{}).games||[]).forEach(fix);if(p.oncourse&&p.oncourse.balance>=1&&p.oncourse.balance<=5)p.oncourse.balance=(p.oncourse.balance-1)*25;p.attV2=true}
+  return deepFill(p,newPlan())}
 
 /* ---------- state ---------- */
 let plan=null, section="player", pass="", INTAKE=[], loggedIn=false;
 const plans=new Map();
 let saving=false, pendingSave=false, saveTimer=null, dirty=false;
-const ui={confirmDel:false,fillMsg:"",tpiMsg:"",tpiText:"",mobMsg:""};
+const ui={confirmDel:false,fillMsg:"",tpiMsg:"",tpiText:"",mobMsg:"",confirmTpl:false,pubMsg:"",pubConfirm:null};
 
 /* ---------- field helpers ---------- */
 const V=path=>{const v=getPath(plan,path);return v==null?"":v};
@@ -371,7 +391,9 @@ const T=(path,label,ph="",cls="",list="")=>`<label class="f ${cls}"><span>${labe
 const N=(path,label,cls="",step="1")=>`<label class="f ${cls}"><span>${label}</span><input type="number" step="${step}" data-b="${path}" data-t="num" value="${esc(V(path))}"></label>`;
 const A=(path,label,ph="",rows=3,cls="")=>`<label class="f ${cls}"><span>${label}</span><textarea rows="${rows}" data-b="${path}" placeholder="${esc(ph)}">${esc(V(path))}</textarea></label>`;
 const S=(path,label,opts,cls="")=>`<label class="f ${cls}"><span>${label}</span><select data-b="${path}">${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}"${String(V(path))===String(v)?" selected":""}>${esc(l)}</option>`}).join("")}</select></label>`;
-const IE=(path)=>{const v=+V(path)||3;return `<div class="ie" role="group" aria-label="Attention: internal to external"><span>Internal</span><div class="dots">${[1,2,3,4,5].map(n=>`<button type="button" data-act="ie" data-path="${path}" data-v="${n}" class="${v===n?"on":""}" aria-pressed="${v===n}">${n}</button>`).join("")}</div><span>External</span></div>`};
+const att=v=>{v=+v;return isNaN(v)?50:Math.max(0,Math.min(100,v))};
+const attLabel=v=>v<=15?"Fully internal":v<40?"Mostly internal":v<=60?"Balanced":v<85?"Mostly external":"Fully external";
+const IE=(path)=>{const v=att(V(path));return `<div class="ie2"><span>Internal</span><input type="range" min="0" max="100" step="5" data-b="${path}" data-t="num" data-att value="${v}" aria-label="Attention target, internal to external"><span>External</span><output>${attLabel(v)}</output></div>`};
 const RPE=(path)=>`<label class="f" style="min-width:210px"><span>Pressure · Golf RPE</span><select data-b="${path}" data-t="num">${Array.from({length:10},(_,i)=>i+1).map(n=>`<option value="${n}"${+V(path)===n?" selected":""}>${n} · ${RPE_LABEL[n]}</option>`).join("")}</select></label>`;
 const del=(path,label="Remove")=>`<button type="button" class="iconbtn" data-act="del" data-path="${path}" aria-label="${label}" title="${label}">✕</button>`;
 const mv=(path,dir)=>`<button type="button" class="iconbtn" data-act="mv" data-path="${path}" data-dir="${dir}" aria-label="Move ${dir<0?"up":"down"}">${dir<0?"↑":"↓"}</button>`;
@@ -385,7 +407,7 @@ const SECTIONS=[
  {k:"practice",l:"Practice plan",show:()=>plan.include.practice,meta:()=>{const d=plan.practice.sessions.reduce((a,s)=>a+s.drills.length,0);return `${plan.practice.sessions.length} sessions · ${d} drills`}},
  {k:"oncourse",l:"On-course plan",show:()=>plan.include.oncourse,meta:()=>`${plan.oncourse.games.length} games`},
  {k:"physical",l:"Physical plan",show:()=>plan.include.physical,meta:()=>`${plan.physical.dayList.length} days built`},
- {k:"mobility",l:"Mobility",show:()=>plan.include.mobility,meta:()=>`${plan.mobility.items.length} exercises`},
+ {k:"mobility",l:"Mobility",show:()=>plan.include.mobility,meta:()=>{const n=plan.mobility.items.length,t=plan.mobility.items.reduce((a,x)=>a+(+x.mins||0),0);return n?`${n} item${n>1?"s":""}${t?" · "+t+" min":""}`:"Build the routine"}},
  {k:"weight",l:"Weight tracking",show:()=>plan.include.weight,meta:()=>plan.weight.start?`${plan.weight.start} → ${plan.weight.target||"?"} ${plan.weight.unit}`:"Set baseline"},
  {k:"stats",l:"Performance stats",show:()=>plan.include.stats,meta:()=>`${plan.stats.length} KPIs`},
  {k:"recovery",l:"Sleep & recovery",show:()=>plan.include.recovery,meta:()=>`${plan.recovery.sleep||"?"}h target`},
@@ -463,12 +485,9 @@ practice(){
     <div class="stack" style="margin-top:12px">${s.drills.map((d,di)=>drillRow(si,di,d)).join("")||'<p class="hint">No drills yet.</p>'}</div>
     <div class="row" style="margin-top:12px">${ENVS.map(e=>`<button class="btn sm" type="button" data-act="adddrill" data-s="${si}" data-env="${e}">+ ${e}</button>`).join("")}</div>
     <div style="margin-top:12px">${A(`practice.sessions.${si}.close`,"Session note for the player","e.g. Across the session, attention moves progressively away from the movement and towards solving the golfing task.",2)}</div></div>`).join("");
-  return head("05 / Practice","Practice plan","Build each session in environments. Every drill gets an intention, a thought or cue, an attention target on the internal–external scale, and a pressure level (Golf RPE).")+
-  `<div class="card"><div class="grid g3" style="font-size:12.5px;color:var(--muted)">
-   <div><b style="color:var(--paper)">Attention scale</b><br>1 = fully internal: body, feels, technical change. 5 = fully external: strike, ball flight, target, task.</div>
-   <div><b style="color:var(--paper)">Golf RPE</b><br>How much consequence the drill carries. 1 = free reps, no outcome. 10 = one ball, score attached, tournament feel.</div>
-   <div><b style="color:var(--paper)">Intention vs thought</b><br>Intention is the shot or outcome they commit to. Thought is the single cue or feel they hold, if any.</div></div>
-   <div class="envlegend" style="margin-top:12px"><span><i style="background:#8fa7ff"></i>Technical</span><span><i style="background:#5fd38d"></i>Random</span><span><i style="background:#ff8a5e"></i>Competitive</span></div></div>
+  return head("05 / Practice","Practice plan","Build each session from technical drills and games from the Macro Golf app. Set where their attention should sit for each one. Games appear in the player's app plan with a Start button that opens the game and brings them back.")+
+  `<div class="card" style="font-size:12.5px;color:var(--muted)"><b style="color:var(--paper)">Attention target</b><br>Slide towards Internal for attention on the body, feels and technical change. Slide towards External for attention on strike, ball flight, the target and the task.
+   <div class="envlegend" style="margin-top:12px"><span><i style="background:#8fa7ff"></i>Technical</span><span><i style="background:#ff8a5e"></i>Game from the app</span></div></div>
    ${A("practice.intro","Intro note for this player (optional)","Anything specific about how they should approach practice this block",2)}
    <div style="height:14px"></div>${ss}
    <div class="row"><button class="btn" type="button" data-act="tpl-session" data-v="full">+ Full swing session (template)</button><button class="btn" type="button" data-act="tpl-session" data-v="short">+ Short game session (template)</button><button class="btn ghost" type="button" data-act="tpl-session" data-v="blank">+ Blank session</button></div>`;
@@ -493,19 +512,28 @@ physical(){
     <div class="row" style="margin-top:10px"><button class="btn sm" type="button" data-act="addpair" data-d="${di}">+ Superset</button></div></div>`).join("");
   const mismatch=ph.dayList.length&&+ph.days!==ph.dayList.length;
   return head("07 / Physical","Physical plan","Training days built as A1/A2 supersets. Strength work uses the pyramid, power work uses maximal intent.")+
-  `<div class="card"><div class="grid g3">${N("physical.days","Days per week")}${T("physical.structure","Structure")}${T("physical.rest","Rest")}
+  `<div class="card"><div class="grid g3">${N("physical.days","Days per week (same as section 4)")}${T("physical.structure","Structure")}${T("physical.rest","Rest")}
    ${T("physical.strength","Strength / hypertrophy loading","","span2")}${T("physical.power","Power / speed loading")}
    ${A("physical.progression","Progression","",3,"span2")}${A("physical.note","Note to the player","",3)}</div></div>
-   ${mismatch?`<div class="banner warn">You have ${ph.dayList.length} days built but ${ph.days} days per week set.</div>`:""}
-   <div class="row" style="margin-bottom:12px"><h2 style="margin:0">Training days</h2><span class="spacer"></span>${ph.dayList.length?"":`<button class="btn" type="button" data-act="tpl-phys">Load 4-day superset template</button>`}<button class="btn sm" type="button" data-act="addday">+ Add day</button></div>${days||'<p class="hint">No days yet. Load the template to start from the standard four-day structure and swap exercises.</p>'}`;
+   ${mismatch?`<div class="banner warn">You have ${ph.dayList.length} days built but ${ph.days} days per week set. Use <b>Replace with ${tplDays()}-day template</b> or add or remove days.</div>`:""}
+   ${ui.confirmTpl?`<div class="banner warn">This replaces the ${ph.dayList.length} days below with the ${tplDays()}-day template. <button class="btn sm danger" type="button" data-act="tpl-phys" data-v="yes">Yes, replace</button> <button class="btn sm ghost" type="button" data-act="tpl-cancel">Cancel</button></div>`:""}
+   <div class="row" style="margin-bottom:12px"><h2 style="margin:0">Training days</h2><span class="spacer"></span><button class="btn${ph.dayList.length?"":" gold"}" type="button" data-act="tpl-phys">${ph.dayList.length?"Replace with":"Load"} ${tplDays()}-day superset template</button><button class="btn sm" type="button" data-act="addday">+ Add day</button></div>${days||`<p class="hint">No days yet. Load the ${tplDays()}-day template to start from the standard structure, then swap exercises.</p>`}`;
 },
 mobility(){
-  const fails=plan.intake.tpi.filter(t=>t.result&&t.result!=="Pass");
-  const rows=plan.mobility.items.map((m,i)=>`<div class="listrow lr-mob">${T(`mobility.items.${i}.name`,i?"":"Exercise","","","dl-mob")}${S(`mobility.items.${i}.area`,i?"":"Area",["",...AREAS])}${T(`mobility.items.${i}.dose`,i?"":"Dose","e.g. 2 x 8 each side")}${T(`mobility.items.${i}.cue`,i?"":"Why / linked finding","e.g. Torso rotation limited")}<div style="padding-top:${i?0:20}px">${del("mobility.items."+i)}</div></div>`).join("");
-  return head("08 / Mobility","Mobility","A short routine aimed at what is limiting their golf movement.")+
-  (fails.length?`<div class="card hl"><div class="card-h"><h3>TPI limitations on file</h3><span class="spacer"></span><button class="btn sm gold" type="button" data-act="mobsuggest">Suggest mobility for these</button></div><div class="chips">${fails.map(f=>`<button type="button" class="on" tabindex="-1">${esc(f.test)} · ${esc(f.result)}</button>`).join("")}</div>${ui.mobMsg?`<p class="hint">${esc(ui.mobMsg)}</p>`:""}</div>`:"")+
-  `<div class="card"><div class="grid g2">${S("mobility.frequency","Frequency",["Daily","5x per week","3x per week","Before every session","Before practice and training"])}${T("mobility.when","When")}</div></div>
-  <div class="card"><div class="card-h"><h3>Routine</h3><span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="mobility.items">+ Add exercise</button></div><div class="stack">${rows||'<p class="hint">No mobility work yet.</p>'}</div></div>`;
+  const m=plan.mobility,mode=m.mode||"follow",fails=plan.intake.tpi.filter(t=>t.result&&t.result!=="Pass"),pool=mobPool();
+  const chips=(key,vals)=>`<div class="chips">${vals.map(v=>{const on=(m[key]||[]).includes(v);return `<button type="button" data-act="mobchip" data-k="${key}" data-v="${esc(v)}" class="${on?"on":""}" aria-pressed="${on}">${esc(v)}</button>`}).join("")}</div>`;
+  const total=m.items.reduce((a,x)=>a+(+x.mins||0),0);
+  const rows=m.items.map((x,i)=>x.kind==="video"?`<div class="mobv"><div><b>${esc(x.name)}</b><div class="hint" style="margin:2px 0 0">${x.mins} min follow-along · ${esc(x.area)} · ${esc(x.equip)}</div></div><div class="row" style="gap:0"><button class="btn sm ghost" type="button" data-act="mobswap" data-i="${i}">Swap</button>${mv("mobility.items."+i,-1)}${mv("mobility.items."+i,1)}${del("mobility.items."+i)}</div></div>`
+    :`<div class="listrow lr-mob">${T(`mobility.items.${i}.name`,i?"":"Exercise (from the app)","Start typing","","dl-mob")}${T(`mobility.items.${i}.dose`,i?"":"Dose","e.g. 2 x 8 each side")}${T(`mobility.items.${i}.area`,i?"":"Area","")}${T(`mobility.items.${i}.cue`,i?"":"Why","e.g. Lower quarter rotation fail")}<div style="padding-top:${i?0:20}px">${del("mobility.items."+i)}</div></div>`).join("");
+  return head("08 / Mobility","Mobility","Pick the body areas and the kit they have, and the routine is built from the app's follow-along mobility videos. Or add single exercises by hand.")+
+  (fails.length?`<div class="card hl"><div class="card-h"><h3>TPI limitations on file</h3><span class="spacer"></span><button class="btn sm gold" type="button" data-act="mobsuggest">Build a routine for these</button></div><div class="chips">${fails.map(f=>`<button type="button" class="on" tabindex="-1">${esc(f.test)} · ${esc(f.result)}</button>`).join("")}</div></div>`:"")+
+  `<div class="card"><div class="grid g3">${S("mobility.frequency","Frequency",["Daily","5x per week","3x per week","Before every session","Before practice and training"])}${S("mobility.when","When",WHEN)}
+    <div class="f"><span>Routine type</span><div class="seg"><button type="button" data-act="mobmode" data-v="follow" class="${mode==="follow"?"on":""}">Follow-along videos</button><button type="button" data-act="mobmode" data-v="manual" class="${mode==="manual"?"on":""}">Manual</button></div></div></div></div>`+
+  (mode==="follow"?`<div class="card"><div class="card-h"><h3>Build the routine</h3></div>
+    <div class="f"><span>Body areas (none picked = any)</span></div>${chips("areas",MGLib.AREAS)}
+    <div class="f" style="margin-top:14px"><span>Equipment they have</span></div>${chips("equip",MGLib.EQUIP)}
+    <div class="row" style="margin-top:14px;align-items:flex-end">${N("mobility.count","Number of videos")}<span class="hint" style="margin:0 0 10px">${pool.length} follow-along videos of 3 minutes or more match</span><span class="spacer"></span><button class="btn gold" type="button" data-act="mobgen" ${pool.length?"":"disabled"}>Generate routine</button></div></div>`:"")+
+  `${ui.mobMsg?`<div class="banner">${esc(ui.mobMsg)}</div>`:""}<div class="card"><div class="card-h"><h3>Routine</h3>${total?`<span class="chip">${total} min</span>`:""}<span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="mobility.items">+ Add exercise by hand</button></div><div class="stack">${rows||'<p class="hint">No mobility yet. Pick areas and equipment above, then Generate routine.</p>'}</div></div>`;
 },
 weight(){
   const w=plan.weight,s=parseFloat(w.start),t=parseFloat(w.target);let calc="";
@@ -520,21 +548,27 @@ weight(){
 stats(){
   const rows=plan.stats.map((s,i)=>`<div class="listrow lr-stat">${T(`stats.${i}.name`,i?"":"Metric","","","dl-stat")}${T(`stats.${i}.baseline`,i?"":"Baseline","")}${T(`stats.${i}.target`,i?"":"Target by review","")}${T(`stats.${i}.how`,i?"":"How it's measured","e.g. Last 5 full rounds")}<div style="padding-top:${i?0:20}px">${del("stats."+i)}</div></div>`).join("");
   return head("10 / Measure","Performance stats","The numbers that tell you whether practice is transferring to scoring.")+
-  `<div class="card"><div class="card-h"><h3>KPIs</h3><span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="stats">+ Add metric</button></div><div class="stack">${rows||'<p class="hint">No KPIs yet.</p>'}</div></div>`;
+  `<div class="card"><div class="card-h"><h3>KPIs</h3><span class="spacer"></span><button class="btn sm ghost" type="button" data-act="stdstats">Use the standard KPIs</button><button class="btn sm" type="button" data-act="add" data-list="stats">+ Add metric</button></div><p class="hint" style="margin:0 0 10px">Standard: scoring average, strokes gained off the tee, approach, short game and putting, and score killers.</p><div class="stack">${rows||'<p class="hint">No KPIs yet.</p>'}</div></div>`;
 },
 recovery(){
   return head("11 / Recovery","Sleep & recovery","")+`<div class="card"><div class="grid g3">${T("recovery.sleep","Sleep target (hours)","")}${A("recovery.routine","Wind-down routine","",3,"span2")}${A("recovery.notes","Recovery notes","Rest days, travel, tournament weeks",3,"full")}</div></div>`;
 },
 checkin(){
   const rows=plan.checkin.questions.map((q,i)=>`<div class="listrow lr-q">${T(`checkin.questions.${i}.q`,i?"":"Question","")}${S(`checkin.questions.${i}.type`,i?"":"Answer type",["1–10","Number","Yes / No","Text"])}<div style="padding-top:${i?0:20}px">${mv("checkin.questions."+i,-1)}${mv("checkin.questions."+i,1)}${del("checkin.questions."+i)}</div></div>`).join("");
-  return head("12 / Check-in","Weekly check-in","What the player reports back each week. The golf RPE and attention questions show whether the plan's targets are landing.")+
+  return head("12 / Check-in","Weekly check-in","Coaching questions the player answers in their app each week. Sessions completed, habits and weight come from the app automatically, so don't ask for them here.")+
   `<div class="card"><div class="grid g3">${S("checkin.day","Check-in day",["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"])}</div></div>
-  <div class="card"><div class="card-h"><h3>Questions</h3><span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="checkin.questions">+ Add question</button></div><div class="stack">${rows}</div></div>`;
+  <div class="card"><div class="card-h"><h3>Questions</h3><span class="spacer"></span><button class="btn sm ghost" type="button" data-act="stdq">Use the standard questions</button><button class="btn sm" type="button" data-act="add" data-list="checkin.questions">+ Add question</button></div><div class="stack">${rows}</div></div>`;
 },
 export(){
   const issues=checks();
-  return head("13 / Finish","Review & export","Check what's missing, mark it ready, then download the player's plan.")+
-  `<div class="card"><div class="card-h"><h3>Checklist</h3></div><ul class="checklist">${issues.map(([ok,t])=>`<li><span class="d" style="background:${ok?"var(--ok)":"var(--warn)"}"></span>${esc(t)}</li>`).join("")}</ul></div>
+  const app=plan.appCode;
+  return head("13 / Finish","Review & create","Check what's missing, then create the player's interactive plan in the Macro Golf app. A printable copy is below too.")+
+  `<div class="card hl"><div class="card-h"><h3>Player's app plan</h3>${app?`<span class="chip ok">In the app · plan code ${esc(app)}</span>`:""}</div>
+   <p class="hint" style="margin:0 0 12px">${app?"Save your changes here, then press Update app plan so they reach the player's app.":"Creates their interactive plan in the Macro Golf app (My Plan): daily habits, training with set logging, practice with Start buttons for each game, mobility videos, weight and the weekly check-in. They sign in with their email and plan code, then choose their own PIN."}</p>
+   ${ui.pubConfirm?`<div class="banner warn">${esc(plan.playerEmail)} already has a 1-to-1 plan (code ${esc(ui.pubConfirm.code)}, page /${esc(ui.pubConfirm.path)}). Replace it with this plan? They keep the same code and PIN. <button class="btn sm danger" type="button" data-act="publish" data-v="confirm">Yes, replace</button> <button class="btn sm ghost" type="button" data-act="pubcancel">Cancel</button></div>`:""}
+   <div class="row"><button class="btn gold" type="button" data-act="publish" ${plan.playerEmail&&plan.playerName?"":"disabled"}>${app?"Update app plan":"Create app plan"}</button><span class="hint" style="margin:0">${esc(ui.pubMsg)}</span></div>
+   ${app?`<div style="margin-top:14px"><div class="card-h" style="margin-bottom:8px"><h3>Welcome message</h3><span class="spacer"></span><button class="btn sm" type="button" data-act="copywelcome">Copy</button></div><textarea class="welcome" id="pb-welcome" readonly>${esc(welcomeText())}</textarea></div>`:""}</div>
+  <div class="card"><div class="card-h"><h3>Checklist</h3></div><ul class="checklist">${issues.map(([ok,t])=>`<li><span class="d" style="background:${ok?"var(--ok)":"var(--warn)"}"></span>${esc(t)}</li>`).join("")}</ul></div>
   <div class="card"><div class="row">
     <div class="seg"><button type="button" data-act="status" data-v="draft" class="${plan.status!=="ready"?"on":""}">Draft</button><button type="button" data-act="status" data-v="ready" class="${plan.status==="ready"?"on":""}">Ready to send</button></div>
     <span class="spacer"></span>
@@ -542,17 +576,18 @@ export(){
     <button class="btn" type="button" data-act="print">Print / save as PDF</button><button class="btn gold" type="button" data-act="download" id="dlBtn">Download plan (HTML)</button>
   </div><p class="hint" id="exportMsg">Print opens the plan in a new tab ready to save as PDF. The download is a web page that opens in any browser. "Copy plan data" gives you the full plan to paste into Claude for the designed PDF.</p>
   <div class="row" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><button class="btn sm" type="button" data-act="startnext">Start Phase ${plan.phase+1} from this plan</button><span class="spacer"></span>${ui.confirmDel?`<span class="hint" style="margin:0">Delete this plan for everyone?</span><button class="btn sm danger" type="button" data-act="delplan">Yes, delete</button><button class="btn sm ghost" type="button" data-act="canceldel">Cancel</button>`:`<button class="btn sm ghost danger" type="button" data-act="askdel">Delete plan</button>`}</div></div>
-  <h2 style="margin:26px 0 12px">Preview</h2><div class="mgdoc">${docBody(plan)}</div>`;
+  <h2 style="margin:26px 0 12px">Printable copy</h2><div class="mgdoc">${docBody(plan)}</div>`;
 }
 };
 
 function drillRow(si,di,d){
-  const b=`practice.sessions.${si}.drills.${di}`;
-  return `<div class="drill" data-env="${esc(d.env)}">
-   <div class="top">${S(b+".env","Environment",ENVS)}${T(b+".name","Drill / game","","","dl-drills")}${S(b+".source","Source",["Macro Golf App","CoachNow","Custom"])}${T(b+".volume","Volume","")}${S(b+".unit","Unit",["balls","shots","mins","holes","reps"])}<div class="row" style="gap:0">${mv(b,-1)}${mv(b,1)}${del(b,"Remove drill")}</div></div>
-   ${T(b+".detail","How to do it","e.g. Find video in the Macro Golf App")}
-   <div class="mid">${T(b+".intention","Intention","The shot or outcome they commit to")}${T(b+".thought","Thought / cue","Single feel or cue, or 'none'")}</div>
-   <div class="bot"><div class="f"><span>Attention target</span>${IE(b+".attention")}</div>${RPE(b+".rpe")}</div></div>`;
+  const b=`practice.sessions.${si}.drills.${di}`,isGame=d.env!=="Technical";
+  const gameSel=`<label class="f"><span>Game from the app</span><select data-b="${b}.game">${[["","Choose a game"],...MGLib.GAMES.map(g=>[g[1],g[0]+" · "+g[2]]),["new","New game (not in the app yet)"]].map(([v,l])=>`<option value="${esc(v)}"${(d.newGame?"new":(d.game||""))===v?" selected":""}>${esc(l)}</option>`).join("")}</select></label>`;
+  return `<div class="drill" data-env="${isGame?"Competitive":"Technical"}">
+   <div class="top g-top">${S(b+".env","Type",ENVS)}${isGame?gameSel:T(b+".name","Drill","e.g. Drill supplied by Jack through CoachNow")}${T(b+".volume","Volume","")}${S(b+".unit","Unit",["balls","shots","mins","rounds","holes","reps"])}<div class="row" style="gap:0">${mv(b,-1)}${mv(b,1)}${del(b,"Remove drill")}</div></div>
+   ${isGame&&d.newGame?`<div class="mid">${T(b+".name","New game name","")}${A(b+".detail","How the game works","Rules, scoring and what a good score looks like",2)}</div><p class="hint" style="margin:0">${d.suggested?"Sent to Jack as a new game to consider adding to the app.":"Once it has a name and a description, Jack gets it as a new game suggestion for the app."}</p>`
+     :T(b+".detail",isGame?"Note for the player (optional)":"How to do it",isGame?"e.g. Play it twice and try to beat your first score":"e.g. Film it from down the line and send it to Jack")}
+   <div class="bot"><div class="f" style="flex:1;min-width:260px"><span>Attention target</span>${IE(b+".attention")}</div></div></div>`;
 }
 
 /* ---------- intake views ---------- */
@@ -590,10 +625,11 @@ function checks(){
   out.push([!!p.focus.outcome.trim(),"Overall outcome written"]);
   out.push([p.priorities.some(x=>x.title.trim()),"At least one priority"]);
   if(!p.isFirst)out.push([!!p.review.progress.trim(),"Previous six weeks review written"]);
-  if(p.include.practice){const d=p.practice.sessions.flatMap(s=>s.drills);out.push([d.length>0,"Practice sessions have drills"]);out.push([d.length>0&&d.every(x=>x.name.trim()),"Every drill has a name"]);out.push([d.length>0&&d.every(x=>x.intention.trim()),"Every drill has an intention"])}
+  if(p.include.practice){const d=p.practice.sessions.flatMap(s=>s.drills);out.push([d.length>0,"Practice sessions have drills or games"]);out.push([d.length>0&&d.every(x=>x.env==="Technical"?x.name.trim():(x.game||(x.newGame&&x.name.trim()))),"Every game is picked from the app or described"])}
   if(p.include.physical)out.push([p.physical.dayList.length>0&&p.physical.dayList.every(d=>d.pairs.every(pr=>pr.a.name&&pr.b.name)),"Physical days complete"]);
   if(p.include.mobility)out.push([p.mobility.items.length>0,"Mobility routine added"]);
   if(p.include.weight)out.push([!!p.weight.start,"Starting weight recorded"]);
+  out.push([!!p.appCode,"Put in the player's app"]);
   return out;
 }
 
@@ -602,7 +638,7 @@ function docBody(p){
   const name=p.playerName||"Player";let n=0;const sec=()=>String(++n).padStart(2,"0");
   const runner=`<div class="runner"><span>${esc(name)} · Six-week performance plan · Phase ${p.phase}</span><span>Macro Golf</span></div>`;
   const page=(title,inner)=>`<section class="pg">${runner}<div class="sec">${sec()} / ${esc(title)}</div>${inner}</section>`;
-  const scale=v=>`<span class="scale">INT ${[1,2,3,4,5].map(i=>`<i class="${i===+v?"on":""}"></i>`).join("")} EXT</span>`;
+  const scale=v=>`<span class="scale">INT<span class="sbar"><i style="left:${att(v)}%"></i></span>EXT</span>`;
   const lines=s=>String(s||"").split("\n").filter(x=>x.trim());
   let h=`<section class="cover"><div class="wm">MACRO <i>GOLF</i></div><h1>Six-week<br>performance<br>plan</h1><div class="name">${esc(name)}</div>
    <div class="meta"><span>Phase</span><span>Block</span><span>Duration</span><b>${p.phase}</b><b>${esc(blockLabel(p))}</b><b>${p.weeks} weeks</b></div></section>`;
@@ -624,13 +660,11 @@ function docBody(p){
    ${p.weekly.connected?`<div class="box gold"><h4>How it's connected</h4><p>${nl2br(p.weekly.connected)}</p></div>`:""}`);
   if(p.include.practice&&p.practice.sessions.length){
     h+=page("Your practice plan",`<h2>Your practice plan</h2>${p.practice.intro?`<p>${nl2br(p.practice.intro)}</p>`:""}<div class="cols c2">
-     <div class="box"><h3>01 Technical</h3><p>Deliberate movement change and exploration. Take time between shots and use feedback. Ball flight is information, not the only measure.</p></div>
-     <div class="box"><h3>02 Random</h3><p>Change the problem regularly: clubs, targets, shots. Full preparation for each ball. Attention moves towards producing the shot.</p></div>
-     <div class="box"><h3>03 Competitive</h3><p>One attempt matters. Games create consequence and test whether your golf stays accessible without repeated attempts.</p></div>
-     <div class="box"><h3>04 On-course</h3><p>The transfer environment. Games and constraints test whether practice skills are available on the course.</p></div></div>
-     <div class="box"><h4>Reading your plan</h4><p><b>Attention:</b> ${scale(1)} Internal is attention on body movement, feels or technical change. External is attention on strike, ball flight, target or task. <b>Golf RPE</b> <span class="rpe">1–10</span> is how much pressure and consequence the drill should carry. After each block, note how internal you actually felt.</p></div>`);
+     <div class="box"><h3>Technical</h3><p>Deliberate movement change. Take time between shots and use feedback. Ball flight is information, not the only measure.</p></div>
+     <div class="box"><h3>Games</h3><p>Games from the Macro Golf app. One attempt matters, the score counts, and your attention moves to producing the shot. Open each one from the Practice tab in your plan.</p></div></div>
+     <div class="box"><h4>Attention target</h4><p>${scale(50)} Towards Internal means attention on body movement, feels or technical change. Towards External means attention on strike, ball flight, target or task.</p></div>`);
     p.practice.sessions.forEach((s,si)=>{h+=`<section class="pg">${runner}<div class="sec">${String(n).padStart(2,"0")} / Your practice plan</div><h2>${esc(s.name||"Session "+(si+1))}</h2>${s.warmup?`<div class="box gold"><p>${nl2br(s.warmup)}</p></div>`:""}
-      ${ENVS.filter(e=>s.drills.some(d=>d.env===e)).map(e=>`<div class="env">${e}</div><table><tr><th>Drill</th><th>Volume</th><th>Intention · Thought</th><th>Target</th><th>You felt</th></tr>${s.drills.filter(d=>d.env===e).map(d=>`<tr><td><b>${esc(d.name)}</b><div class="note">${esc(d.detail||(d.source==="CoachNow"?"Supplied through CoachNow":d.source==="Macro Golf App"?"Find video in the Macro Golf App":""))}</div></td><td class="k">${esc(d.volume)} ${esc(d.unit)}</td><td>${d.intention?`<b>Intention:</b> ${esc(d.intention)}<br>`:""}${d.thought?`<b>Thought:</b> ${esc(d.thought)}`:""}</td><td>${scale(d.attention)}<br><span class="rpe">RPE ${esc(d.rpe)}</span></td><td><span class="blank"></span></td></tr>`).join("")}</table>`).join("")}
+      <table><tr><th></th><th>Drill or game</th><th>Volume</th><th>Attention</th></tr>${s.drills.map(d=>`<tr><td class="k">${d.env==="Technical"?"Technical":"Game"}</td><td><b>${esc(d.name)}</b>${d.env!=="Technical"&&d.game?'<div class="note">In the Macro Golf app</div>':""}${d.detail?`<div class="note">${esc(d.detail)}</div>`:""}</td><td class="k">${esc(d.volume)} ${esc(d.volume?d.unit:"")}</td><td>${scale(d.attention)}</td></tr>`).join("")}</table>
       ${s.close?`<p class="note">${nl2br(s.close)}</p>`:""}</section>`});
   }
   if(p.include.oncourse){const o=p.oncourse;h+=page("Your on-course plan",`<h2>Your on-course plan</h2>
@@ -643,7 +677,7 @@ function docBody(p){
     ${ph.progression?`<div class="box gold"><h4>Progression</h4><p>${nl2br(ph.progression)}</p></div>`:""}`);
     ph.dayList.forEach((d,di)=>{h+=`<section class="pg">${runner}<div class="sec">${String(n).padStart(2,"0")} / Your physical plan</div><h2>Day ${di+1}</h2><h3>${esc(d.title)}</h3><table><tr><th></th><th>Exercise</th><th>Type</th><th>Prescription</th></tr>${d.pairs.map((pr,pi)=>["a","b"].map((s,j)=>{const e=pr[s];const rx=e.reps||(e.type==="Power"?ph.power:ph.strength);return `<tr><td class="k">${String.fromCharCode(65+pi)}${j+1}</td><td><b>${esc(e.name)}</b></td><td>${esc(e.type)}</td><td>${esc(rx)}${e.each?" · each side":""}</td></tr>`}).join("")).join("")}</table></section>`});
   }
-  if(p.include.mobility&&p.mobility.items.length)h+=page("Your mobility",`<h2>Your mobility</h2><p><b>${esc(p.mobility.frequency)}</b>${p.mobility.when?" · "+esc(p.mobility.when):""}</p><table><tr><th>Exercise</th><th>Area</th><th>Dose</th><th>Why</th></tr>${p.mobility.items.map(m=>`<tr><td><b>${esc(m.name)}</b></td><td>${esc(m.area)}</td><td class="k">${esc(m.dose)}</td><td>${esc(m.cue)}</td></tr>`).join("")}</table>`);
+  if(p.include.mobility&&p.mobility.items.length)h+=page("Your mobility",`<h2>Your mobility</h2><p><b>${esc(p.mobility.frequency)}</b>${p.mobility.when?" · "+esc(p.mobility.when):""}</p><table><tr><th>Video or exercise</th><th>Length / dose</th><th>Area</th></tr>${p.mobility.items.map(m=>`<tr><td><b>${esc(m.name)}</b>${m.kind==="video"?'<div class="note">Follow-along video in your plan</div>':""}</td><td class="k">${m.kind==="video"?esc(m.mins)+" min":esc(m.dose)}</td><td>${esc(m.area)}</td></tr>`).join("")}</table>`);
   if(p.include.weight){const w=p.weight;h+=page("Your weight tracking",`<h2>Weight tracking</h2><div class="cols c3"><div class="box stat"><span>Starting</span><b>${esc(w.start||"–")}</b><span>${esc(w.unit)}</span></div><div class="box stat"><span>Target by review</span><b>${esc(w.target||"–")}</b><span>${esc(w.unit)} · ${esc(w.direction)}</span></div><div class="box stat"><span>Weigh-in</span><b style="font-size:22px;margin:8px 0">${esc(w.frequency)}</b><span>${esc(w.day)}</span></div></div>
     <p>${esc(w.conditions)}</p>${w.notes?`<p>${nl2br(w.notes)}</p>`:""}<table class="grid6"><tr><th></th>${Array.from({length:p.weeks},(_,i)=>`<th>Week ${i+1}</th>`).join("")}</tr><tr><td class="k">Weight</td>${"<td></td>".repeat(p.weeks)}</tr>${w.waist?`<tr><td class="k">Waist</td>${"<td></td>".repeat(p.weeks)}</tr>`:""}</table>`)}
   if(p.include.stats&&p.stats.length)h+=page("Your numbers",`<h2>Your numbers</h2><table><tr><th>Metric</th><th>Baseline</th><th>Target by review</th><th>Measured by</th></tr>${p.stats.map(s=>`<tr><td><b>${esc(s.name)}</b></td><td class="k">${esc(s.baseline||"–")}</td><td class="k">${esc(s.target||"–")}</td><td>${esc(s.how)}</td></tr>`).join("")}</table>`);
@@ -659,26 +693,32 @@ function exportHTML(p){
 
 /* ---------- templates ---------- */
 function tplSession(kind){
-  const S=plan.practice.sessions,n=S.length+1;
-  if(kind==="full")S.push({id:uid(),name:"Session "+n,warmup:"Use the Golf Warm Up in the Macro Golf App for a body warm-up, then hit 10–15 balls gradually increasing speed.",close:"Across the session, attention moves progressively away from consciously working on movement and towards solving the golfing task.",drills:[
-    blankDrill("Technical","Drill supplied by Jack through CoachNow",{source:"CoachNow",volume:15}),blankDrill("Technical","Drill supplied by Jack through CoachNow",{source:"CoachNow",volume:15}),
-    blankDrill("Random","Approach Boss",{detail:"Find video in the Macro Golf App."}),blankDrill("Random","Reducing Height",{detail:"Find video in the Macro Golf App."}),
-    blankDrill("Competitive","Par 5 Game",{volume:12,detail:"Find video in the Macro Golf App."})]});
-  else if(kind==="short")S.push({id:uid(),name:"Short game session",warmup:"",close:"",drills:[
-    blankDrill("Technical","Worst Lies",{volume:"5–10",unit:"shots",detail:"Hit from the worst lies you can find."}),
-    blankDrill("Random","High, Medium and Low Flight Chips",{volume:9,unit:"shots",detail:"Film them and send to your coach for review."}),
-    blankDrill("Competitive","Par 18 Game",{volume:"",unit:"shots",detail:"Rotate between easy, medium and hard."})]});
-  else S.push({id:uid(),name:"Session "+n,warmup:"",close:"",drills:[blankDrill("Technical")]});
+  const L=plan.practice.sessions,n=L.length+1;
+  if(kind==="full")L.push({id:uid(),name:"Session "+n,warmup:"Use the Golf Warm Up in the Macro Golf App for a body warm-up, then hit 10–15 balls gradually increasing speed.",close:"Across the session, attention moves away from consciously working on movement and towards solving the golfing task.",drills:[
+    blankDrill("Technical","Drill supplied by Jack through CoachNow",{volume:15,attention:15}),blankDrill("Technical","Drill supplied by Jack through CoachNow",{volume:15,attention:30}),
+    gameDrill("p-740258",{attention:75}),gameDrill("p-937452",{attention:90})]});
+  else if(kind==="short")L.push({id:uid(),name:"Short game session",warmup:"",close:"",drills:[
+    blankDrill("Technical","Worst lies",{volume:"5–10",unit:"shots",detail:"Hit from the worst lies you can find.",attention:30}),
+    gameDrill("p-472096",{attention:80}),gameDrill("p-615974",{attention:90})]});
+  else L.push({id:uid(),name:"Session "+n,warmup:"",close:"",drills:[blankDrill("Technical")]});
 }
 function tplGame(kind){
-  const g={id:uid(),name:"",detail:"",holes:"9",target:"What can you shoot?",intention:"",thought:"",attention:5};
+  const g={id:uid(),name:"",detail:"",holes:"9",target:"What can you shoot?",intention:"",thought:"",attention:100};
   if(kind==="scramble")Object.assign(g,{name:"Front Tee Scramble",holes:"9 or 18",detail:"Play from the forward tee. Play a one-man, three-ball scramble. You do not have to hit all three shots. If you hit a shot you are happy with, take it and move on."});
-  if(kind==="mulligan")Object.assign(g,{name:"Mulligan",holes:"9",detail:"Play 9 holes with one mulligan per hole. Keep track of where you use it and see how low you can go.",attention:4});
+  if(kind==="mulligan")Object.assign(g,{name:"Mulligan",holes:"9",detail:"Play 9 holes with one mulligan per hole. Keep track of where you use it and see how low you can go.",attention:75});
   plan.oncourse.games.push(g);
 }
-const ex=(raw,def)=>{let name=raw,type=def,each=false;if(name.startsWith("!")){name=name.slice(1);type="Strength"}if(name.endsWith("*")){name=name.slice(0,-1);each=true}return{name,type,reps:"",each}};
-function tplPhys(){plan.physical.dayList=PHYS_TEMPLATE.map(([title,pairs])=>({id:uid(),title,pairs:pairs.map(([a,b])=>({id:uid(),a:ex(a,"Strength"),b:ex(b,"Power")}))}));plan.physical.days=4}
-const BLANK={priorities:()=>({id:uid(),title:"",start:"",why:"",change:""}),habits:()=>({id:uid(),name:"",detail:"",dose:""}),"mobility.items":()=>({id:uid(),name:"",area:"",dose:"",cue:""}),stats:()=>({id:uid(),name:"",baseline:"",target:"",how:""}),"intake.tpi":()=>({id:uid(),test:"",result:"",note:""}),"checkin.questions":()=>({id:uid(),q:"",type:"1–10"}),"review.priorityReview":()=>({id:uid(),title:"",rating:"0",note:""})};
+const ex=(raw,def)=>{let name=raw,type=def,each=false;if(name.startsWith("!")){name=name.slice(1);type="Strength"}if(name.startsWith("~")){name=name.slice(1);type="Core"}if(name.endsWith("*")){name=name.slice(0,-1);each=true}return{name,type,reps:"",each}};
+const PHYS_TEMPLATES={
+ 1:[["Full body: vertical, arm chop + rotation",[["Dumbbell goblet squat","Counter movement jump"],["Pull up","High hands slam"],["Dumbbell flat bench press","Supine chest throws"],["Cable full rotation","Med ball discus throw*"]]]],
+ 2:[["Full body A: vertical + arm chop",[["Dumbbell goblet squat","Counter movement jump"],["Pull up","High hands slam"],["Dumbbell flat bench press","Supine chest throws"],["Cable woodchop","Low to high cable cross chop*"]]],
+    ["Full body B: rotation + lateral",[["Dumbbell RDL","Power jumps"],["Dumbbell side lunge","Skater jumps*"],["Dumbbell single arm row","Med ball discus throw*"],["Cable full rotation","Overhead throw"]]]],
+ 3:[PHYS_TEMPLATE[0],PHYS_TEMPLATE[1],["Wrist release + rotation + lateral",[["Dumbbell flat bench press","Supine chest throws"],["Dumbbell side lunge","Skater jumps*"],["Cable full rotation","Med ball discus throw*"],["Dumbbell single arm row","Power press up"]]]],
+ 4:PHYS_TEMPLATE,
+ 5:PHYS_TEMPLATE.concat([["Movement, sequencing + core",[["~Pallof press","Med ball scoop toss*"],["~Dead bug","Overhead throw"],["~Copenhagen plank*","Heiden to vertical jump*"],["~Farmer carry","Overspeed swings"]]]])};
+const tplDays=()=>Math.max(1,Math.min(5,parseInt(plan.physical.days)||parseInt(plan.weekly.physical)||4));
+function tplPhys(){const n=tplDays();plan.physical.dayList=PHYS_TEMPLATES[n].map(([title,pairs])=>({id:uid(),title,pairs:pairs.map(([a,b])=>({id:uid(),a:ex(a,"Strength"),b:ex(b,"Power")}))}));plan.physical.days=n;plan.weekly.physical=n}
+const BLANK={priorities:()=>({id:uid(),title:"",start:"",why:"",change:""}),habits:()=>({id:uid(),name:"",detail:"",dose:""}),"mobility.items":()=>({id:uid(),kind:"manual",name:"",area:"",dose:"",cue:""}),stats:()=>({id:uid(),name:"",baseline:"",target:"",how:""}),"intake.tpi":()=>({id:uid(),test:"",result:"",note:""}),"checkin.questions":()=>({id:uid(),q:"",type:"1–10"}),"review.priorityReview":()=>({id:uid(),title:"",rating:"0",note:""})};
 
 /* ---------- next phase ---------- */
 function startNext(src){
@@ -692,16 +732,24 @@ function startNext(src){
 
 /* ---------- events ---------- */
 function changed(rerender){dirty=true;setStatus("Unsaved changes");try{localStorage.setItem("mg-planbuilder-draft",JSON.stringify(plan))}catch(e){}clearTimeout(saveTimer);saveTimer=setTimeout(save,1200);if(rerender)render();else{renderRail();renderWho()}}
-function isStructural(path){return path.startsWith("include.")||path==="phase"||path==="weeks"||path==="startDate"||/\.env$/.test(path)||path==="weight.start"||path==="weight.target"||path==="weight.unit"||path==="physical.days"}
+function isStructural(path){return /\.game$/.test(path)||path==="weekly.physical"||path==="mobility.count"||/^mobility\.items\.\d+\.name$/.test(path)||path.startsWith("include.")||path==="phase"||path==="weeks"||path==="startDate"||/\.env$/.test(path)||path==="weight.start"||path==="weight.target"||path==="weight.unit"||path==="physical.days"}
 function onField(e){
   const el=e.target.closest("[data-b]");if(!el)return;
   const path=el.dataset.b,t=el.dataset.t;let v=el.type==="checkbox"?el.checked:el.value;
   if(t==="num")v=v===""?"":+v;
   setPath(plan,path,v);
+  const dm=path.match(/^(practice\.sessions\.\d+\.drills\.\d+)\.(game|env)$/);
+  if(dm){const d=getPath(plan,dm[1]);if(dm[2]==="game"){if(v==="new"){d.newGame=true;d.game="";d.name="";d.detail=""}else{d.newGame=false;const g=GAME_BY_PATH[v];d.name=g?g[0]:""}}
+    else{d.game="";d.newGame=false;d.name=v==="Game"?"":d.name;d.attention=v==="Game"?80:25;d.unit=v==="Game"?"rounds":"balls"}}
+  if(path==="weekly.physical"&&v!=="")plan.physical.days=v;
+  if(path==="physical.days"&&v!=="")plan.weekly.physical=v;
+  const mm=path.match(/^mobility\.items\.(\d+)\.name$/);
+  if(mm&&e.type==="change"){const x=MGLib.MOB_EX.find(z=>z[0].toLowerCase()===String(v).trim().toLowerCase()),it=plan.mobility.items[+mm[1]];if(x&&it){it.wistia=x[1];if(!it.dose)it.dose=x[2]||"";if(!it.area)it.area=x[4].join(", ");changed(true);return}}
+  if(/^practice\.sessions\.\d+\.drills\.\d+\.(name|detail)$/.test(path)&&e.type==="change")suggestGame(getPath(plan,path.replace(/\.(name|detail)$/,"")));
   if(isStructural(path)&&e.type==="change"){const y=PBMAIN.scrollTop;changed(true);PBMAIN.scrollTop=y}else changed(false);
 }
-$("#pb-main").addEventListener("input",e=>{if(e.target.matches("input[type=text],input[type=email],input:not([type]),textarea"))onField(e)});
-$("#pb-main").addEventListener("change",e=>{if(e.target.id==="pb-tpitext")return;const p=e.target.dataset.b||"";if(!e.target.matches("input[type=text],input[type=email],input:not([type]),textarea")||isStructural(p))onField(e)});
+$("#pb-main").addEventListener("input",e=>{if(e.target.matches("[data-att]")){const o=e.target.parentElement.querySelector("output");if(o)o.textContent=attLabel(+e.target.value);return}if(e.target.matches("input[type=text],input[type=email],input:not([type]),textarea"))onField(e)});
+$("#pb-main").addEventListener("change",e=>{if(e.target.id==="pb-tpitext")return;const p=e.target.dataset.b||"";if(!e.target.matches("input[type=text],input[type=email],input:not([type]),textarea")||isStructural(p)||/^practice\.sessions\.\d+\.drills\.\d+\.(name|detail)$/.test(p)||/^mobility\.items\.\d+\.name$/.test(p))onField(e)});
 function arrAt(path){const ks=path.split(".");const idx=+ks.pop();return [getPath(plan,ks.join(".")),idx]}
 document.addEventListener("click",async e=>{
   const sb=e.target.closest("[data-sec]");if(sb){go(sb.dataset.sec);return}
@@ -716,7 +764,8 @@ document.addEventListener("click",async e=>{
     case"adddrill":plan.practice.sessions[+b.dataset.s].drills.push(blankDrill(b.dataset.env));break;
     case"tpl-session":tplSession(b.dataset.v);break;
     case"tpl-game":tplGame(b.dataset.v);break;
-    case"tpl-phys":tplPhys();break;
+    case"tpl-phys":if(plan.physical.dayList.length&&b.dataset.v!=="yes"){ui.confirmTpl=true;render();keep();return}ui.confirmTpl=false;tplPhys();break;
+    case"tpl-cancel":ui.confirmTpl=false;render();keep();return;
     case"addday":plan.physical.dayList.push({id:uid(),title:"",pairs:[{id:uid(),a:{name:"",type:"Strength",reps:"",each:false},b:{name:"",type:"Power",reps:"",each:false}}]});break;
     case"addpair":plan.physical.dayList[+b.dataset.d].pairs.push({id:uid(),a:{name:"",type:"Strength",reps:"",each:false},b:{name:"",type:"Power",reps:"",each:false}});break;
     case"swing":{const s=plan.intake.swing,v=b.dataset.v,i=s.indexOf(v);i>=0?s.splice(i,1):s.push(v);b.classList.toggle("on",i<0);b.setAttribute("aria-pressed",i<0);changed(false);return}
@@ -724,6 +773,16 @@ document.addEventListener("click",async e=>{
     case"fillintake":ui.fillMsg=applyIntake();break;
     case"tpiadd":addTPI();return;
     case"mobsuggest":ui.mobMsg=suggestMobility();break;
+    case"mobgen":ui.mobMsg=mobGenerate();break;
+    case"mobswap":ui.mobMsg=mobSwap(+b.dataset.i);break;
+    case"mobmode":plan.mobility.mode=b.dataset.v;break;
+    case"mobchip":{const k=b.dataset.k,arr=plan.mobility[k]=plan.mobility[k]||[],v=b.dataset.v,i=arr.indexOf(v);i>=0?arr.splice(i,1):arr.push(v);break}
+    case"stdstats":plan.stats=STD_STATS();break;
+    case"stdq":plan.checkin.questions=STD_Q();break;
+    case"publish":publish(b.dataset.v==="confirm");return;
+    case"pubcancel":ui.pubConfirm=null;render();keep();return;
+    case"copywelcome":{const t=document.getElementById("pb-welcome");try{await navigator.clipboard.writeText(t.value);b.textContent="Copied"}catch(err){t.select();b.textContent="Select and copy"}return}
+    case"gsug":{try{await rpc("mg_coach_game_status",{p_id:b.dataset.id,p_status:b.dataset.v});await loadSuggestions();renderPlans()}catch(err){setStatus("Couldn't update: "+err.message,true)}return}
     case"copylink":copyLink(b.dataset.v,b);return;
     case"print":printPlan();return;
     case"status":plan.status=b.dataset.v;break;
@@ -760,7 +819,7 @@ function renderPlans(){
   const fresh=intakePeople().filter(x=>!withPlan.has(x.email)&&(!q||x.email.includes(q)||(x.name||"").toLowerCase().includes(q)));
   $("#pb-plList").innerHTML=list.length?list.map(g=>{const last=g[g.length-1];return `<div class="pl"><h3>${esc(last.playerName||"Unnamed")}</h3><div class="em">${esc(last.playerEmail||"No email")}${last.coach?" · "+esc(last.coach):""}</div>
     <div class="phases">${g.map(p=>`<button type="button" data-open="${esc(p.id)}" class="${plan&&plan.id===p.id?"cur":""}"><b>P${esc(p.phase)}</b>${p.status==="ready"?"Ready":"Draft"} · ${esc(fmtDate(p.startDate))}</button>`).join("")}</div>
-    <button class="btn sm gold" type="button" data-next="${esc(last.id)}">Start Phase ${(+last.phase||1)+1} (week ${(+last.phase||1)*(+last.weeks||6)} review)</button></div>`}).join("")+freshHTML(fresh):freshHTML(fresh)+`<div class="empty">${plans.size?"No players match that search.":"No plans yet. Build the first one with + New plan, or from a form below."}</div>`;
+    <button class="btn sm gold" type="button" data-next="${esc(last.id)}">Start Phase ${(+last.phase||1)+1} (week ${(+last.phase||1)*(+last.weeks||6)} review)</button></div>`}).join("")+freshHTML(fresh)+suggHTML():freshHTML(fresh)+suggHTML()+`<div class="empty">${plans.size?"No players match that search.":"No plans yet. Build the first one with + New plan, or from a form below."}</div>`;
 }
 $("#pb-plList").addEventListener("click",async e=>{
   const o=e.target.closest("[data-open]"),n=e.target.closest("[data-next]");
@@ -803,7 +862,7 @@ async function save(){
 }
 async function refreshData(){
   try{
-    const [pl,ik]=await Promise.all([rpc("mg_coach_plans_list"),rpc("mg_coach_intake")]);
+    const [pl,ik]=await Promise.all([rpc("mg_coach_plans_list"),rpc("mg_coach_intake"),loadSuggestions()]);
     plans.clear();(pl.rows||[]).forEach(p=>plans.set(p.id,p));INTAKE=ik.rows||[];
     if($("#pb-drawer").classList.contains("open"))renderPlans();
     if(plan){renderRail();const c=document.getElementById("pb-intakechip");if(c)c.innerHTML=intakeChip()}
@@ -894,7 +953,6 @@ function applyIntake(){
     ["Habits now",[a.meditate&&"meditates: "+a.meditate,a.journal&&"journals: "+a.journal,a.breathwork&&"breathwork: "+a.breathwork].filter(Boolean).join(", ")],["Morning routine",a.morning],["Mind",a.mental_health],
     ["Time each week",o.time_commit],["Normal week",o.normal_week],["Busy week",o.busy_week],["Commitments",o.commitments],["Training location",o.gym],["Physical sessions",o.phys_sessions],["Rounds this block",o.rounds],["Events",o.events],["Other programmes",o.other_programmes],["Existing work",o.existing_work],["Barriers",o.barriers],["Feedback",o.feedback_pref],["Consistency risks",o.consistency],["Stats link",a.stats_link]]),"coach notes");
   if(a.weight_kg&&!plan.weight.start){plan.weight.start=String(a.weight_kg);plan.weight.unit="kg";done.push("starting weight")}
-  const hc=parseFloat(a.handicap);if(!isNaN(hc)){let s=plan.stats.find(x=>/handicap/i.test(x.name));if(!s){s={id:uid(),name:"Handicap index",baseline:"",target:"",how:"England Golf record"};plan.stats.unshift(s)}if(!s.baseline){s.baseline=String(hc);done.push("handicap baseline")}}
   const ps=String(o.phys_sessions||"").match(/\b([1-7])\b/);if(ps){plan.weekly.physical=+ps[1];if(!plan.physical.dayList.length)plan.physical.days=+ps[1];done.push(ps[1]+" physical sessions a week")}
   if(L.tpi){applyTPI(L.tpi.answers||{tests:[],swing:[]});done.push("TPI results")}
   return (done.length?"Filled: "+done.join(", ")+".":"Nothing new to fill.")+(kept.length?" Kept what you had already written for: "+kept.join(", ")+".":"");
@@ -909,31 +967,74 @@ function freshHTML(list){
   return `<h6 style="font:10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:14px 2px 2px">Forms received, no plan yet</h6>`+list.map(x=>`<div class="pl"><h3>${esc(x.name||x.email)}</h3><div class="em">${esc(x.email)}</div><div class="phases">${[...x.forms].map(f=>`<span class="chip ok">${FORM_LABEL[f]}</span>`).join("")}<span class="chip">${fmtTS(x.last)}</span></div><button class="btn sm gold" type="button" data-fromform="${esc(x.email)}">Build their first plan</button></div>`).join("");
 }
 
-/* ---------- mobility from TPI (rule-based starting point; coach edits) ---------- */
-const TPI_MOB={
-  "pelvictilt":[["Pelvic tilts","Pelvic control","2 x 10"],["Cat cow","Thoracic spine","2 x 8"]],
-  "pelvicrotation":[["Pelvic rotations with club","Pelvic control","2 x 10 each way"]],
-  "torsorotation":[["Open books","Thoracic spine","2 x 8 each side"],["Quadruped thoracic rotation","Thoracic spine","2 x 8 each side"]],
-  "overheaddeepsquat":[["Deep squat hold","Hips","3 x 30s"],["Ankle rocks","Ankles","2 x 10 each side"]],
-  "toetouch":[["Toe touch progression","Hamstrings","2 x 8"]],
-  "9090":[["Banded shoulder external rotation","Shoulders","2 x 12 each side"],["Banded shoulder dislocates","Shoulders","2 x 10"]],
-  "singlelegbalance":[["Single leg balance holds","Pelvic control","3 x 30s each side"]],
-  "lattest":[["Bench lat stretch","Lats","3 x 30s"]],
-  "lowerquarterrotation":[["90/90 hip switches","Hips","2 x 8 each side"],["Pigeon stretch","Hips","2 x 45s each side"]],
-  "seatedtrunkrotation":[["Seated trunk rotations","Thoracic spine","2 x 10 each side"],["Open books","Thoracic spine","2 x 8 each side"]],
-  "bridgewithlegextension":[["Glute bridge march","Pelvic control","2 x 10 each side"]],
-  "cervicalrotation":[["Neck rotations","Neck","2 x 8 each side"]],
-  "forearmrotation":[["Forearm rotations with club","Wrists / forearms","2 x 12"]],
-  "wristhinge":[["Wrist flexor and extensor stretch","Wrists / forearms","2 x 30s each"]],
-  "wristflexionextension":[["Wrist flexor and extensor stretch","Wrists / forearms","2 x 30s each"]],
-  "setupposture":[["Half kneeling hip flexor stretch","Hips","2 x 45s each side"],["Cat cow","Thoracic spine","2 x 8"]]
-};
+/* ---------- mobility: follow-along videos from the app library (src/mg-library.js) ---------- */
+const TPI_AREAS={pelvictilt:["Lower back","Core"],pelvicrotation:["Hips"],torsorotation:["Upper back"],overheaddeepsquat:["Hips","Lower legs"],toetouch:["Hamstrings","Lower back"],"9090":["Shoulders"],singlelegbalance:["Hips","Lower legs"],lattest:["Upper back","Shoulders"],lowerquarterrotation:["Hips"],seatedtrunkrotation:["Upper back"],bridgewithlegextension:["Hips","Core"],cervicalrotation:["Neck"],forearmrotation:["Wrists & forearms"],wristhinge:["Wrists & forearms"],wristflexionextension:["Wrists & forearms"],setupposture:["Upper back","Hips"]};
+function mobPool(){const m=plan.mobility,ar=m.areas||[],eq=m.equip||[];
+  return MGLib.MOB_VIDEOS.filter(v=>(!ar.length||v[4].some(a=>ar.includes(a)))&&v[3].every(e=>e==="No equipment"||eq.includes(e)))}
+const vidItem=v=>({id:uid(),kind:"video",name:v[0],wistia:v[1],mins:v[2],area:v[4].join(", "),equip:v[3].join(", "),dose:"Follow along",cue:""});
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function mobGenerate(){const m=plan.mobility,pool=mobPool(),n=Math.max(1,Math.min(8,parseInt(m.count)||3));
+  if(!pool.length)return "No videos match those areas and equipment. Add equipment or pick more areas.";
+  const ar=m.areas||[],pick=[];
+  if(ar.length){shuffle(ar).forEach(a=>{const c=shuffle(pool.filter(v=>v[4].includes(a)&&!pick.includes(v)))[0];if(c&&pick.length<n)pick.push(c)})}
+  shuffle(pool).forEach(v=>{if(pick.length<n&&!pick.includes(v))pick.push(v)});
+  m.items=m.items.filter(x=>x.kind!=="video").concat(pick.map(vidItem));m.mode="follow";
+  return `Picked ${pick.length} video${pick.length>1?"s":""} (${pick.reduce((a,v)=>a+v[2],0)} min). Swap any that don't suit them.`}
+function mobSwap(i){const m=plan.mobility,cur=m.items[i],have=new Set(m.items.map(x=>x.wistia));
+  let pool=mobPool().filter(v=>!have.has(v[1]));const curA=(cur.area||"").split(", ");const near=pool.filter(v=>v[4].some(a=>curA.includes(a)));
+  const c=shuffle(near.length?near:pool)[0];if(!c)return "No other videos match. Add equipment or areas.";m.items[i]=vidItem(c);return "Swapped for "+c[0]+"."}
 function suggestMobility(){
-  const fails=plan.intake.tpi.filter(t=>t.result&&t.result!=="Pass").sort((a,b)=>(a.result==="Fail"||a.result==="Pain"?0:1)-(b.result==="Fail"||b.result==="Pain"?0:1));
-  let added=0;const have=new Set(plan.mobility.items.map(m=>norm(m.name)));
-  fails.forEach(f=>{(TPI_MOB[norm(f.test)]||[]).forEach(([name,area,dose])=>{if(have.has(norm(name))||plan.mobility.items.length>=8)return;have.add(norm(name));plan.mobility.items.push({id:uid(),name,area,dose,cue:f.test+" "+f.result.toLowerCase()});added++})});
-  return added?`Added ${added} exercises, worst results first. Check doses and swap anything that doesn't suit them.`:"No new suggestions: these are already covered, or the routine is full (8).";
+  const fails=plan.intake.tpi.filter(t=>t.result&&t.result!=="Pass"),m=plan.mobility,set=new Set(m.areas||[]);
+  fails.forEach(f=>(TPI_AREAS[norm(f.test)]||[]).forEach(a=>set.add(a)));m.areas=[...set];m.mode="follow";
+  if(!m.count||m.count<Math.min(5,m.areas.length))m.count=Math.min(5,Math.max(3,m.areas.length));
+  return "Areas set from the TPI results ("+m.areas.join(", ")+"). "+mobGenerate();
 }
+
+/* ---------- new game suggestions for Jack (mg_game_suggestions) ---------- */
+let SUGG=[];
+async function loadSuggestions(){try{const r=await fetch(API+"mg_game_suggestions",{method:"POST",headers:{apikey:KEY,"Content-Type":"application/json"},body:"{}"});SUGG=r.ok?await r.json():[]}catch(e){SUGG=[]}}
+async function suggestGame(d){
+  if(!d||!d.newGame)return;const n=(d.name||"").trim(),t=(d.detail||"").trim(),sig=n+"|"+t;
+  if(n.length<2||t.length<6||d.suggestedSig===sig)return;
+  try{await rpc("mg_coach_game_suggest",{p_name:n,p_desc:t,p_coach:plan.coach||""});d.suggested=true;d.suggestedSig=sig;loadSuggestions();changed(true)}
+  catch(e){setStatus("Couldn't send the game to Jack: "+e.message,true)}
+}
+function suggHTML(){const open=SUGG.filter(x=>x.status==="new");if(!SUGG.length)return"";
+  return `<h6 style="font:10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:14px 2px 2px">New game suggestions for the app (${open.length})</h6>`+SUGG.slice(0,12).map(x=>`<div class="sugg"><b>${esc(x.name)}</b><span class="hint" style="margin:0">${esc(x.description||"")}</span><div class="row"><span class="chip${x.status==="added"?" ok":""}">${esc(x.status==="new"?"Waiting for Jack":x.status)}${x.coach?" · from "+esc(x.coach):""}</span><span class="spacer"></span>${x.status==="new"?`<button class="btn sm" type="button" data-act="gsug" data-id="${esc(x.id)}" data-v="added">Added to app</button><button class="btn sm ghost" type="button" data-act="gsug" data-id="${esc(x.id)}" data-v="declined">Decline</button>`:""}</div></div>`).join("")}
+
+/* ---------- put the plan in the player's app (mg_coach_plan_publish) ---------- */
+async function publish(confirm){
+  await flush();
+  if(!plans.has(plan.id)){ui.pubMsg="Save the plan first: it needs a player name.";render();return}
+  ui.pubMsg="Putting it in the app";render();
+  try{const r=await rpc("mg_coach_plan_publish",{p_id:plan.id,p_confirm:!!confirm});
+    if(r.confirm){ui.pubConfirm={code:r.code,path:r.path};ui.pubMsg="";render();return}
+    ui.pubConfirm=null;plan.appCode=r.code;plan.publishedAt=Date.now();
+    ui.pubMsg=r.created?"Created. Send them the welcome message below.":"Updated. They'll see the changes next time they open their plan.";changed(true);
+  }catch(e){ui.pubMsg="Couldn't put it in the app: "+e.message;render()}
+}
+function welcomeText(){
+  const first=(plan.playerName||"").trim().split(/\s+/)[0]||"there",code=plan.appCode||"",coach=(plan.coach||"").trim()||"The Macro Golf team";
+  return `Hi ${first},
+
+Your personalised Macro Golf performance plan is ready.
+
+Your plan code:
+*${code}*
+
+To open it:
+1. Open the Macro Golf app and tap *My Plan*.
+2. Enter your email address.
+3. Tap *First time here?* and type your plan code: *${code}*
+4. Choose a 4-digit PIN you'll remember.
+
+That's it. From then on, tapping My Plan opens your plan straight away. If you change phones, just log in with your email and PIN.
+
+Every session you log saves automatically, and your coach can see how you're getting on.
+
+Any questions, just reply to this message.
+
+${coach}`}
 
 /* ---------- export ---------- */
 function planFileName(){return `${(plan.playerName||"Player").replace(/[^\w]+/g,"_")}_Performance_Plan_Phase_${plan.phase}.html`}
@@ -954,7 +1055,7 @@ document.addEventListener("click",e=>{if(e.target.closest('[data-act="tpireuse"]
 $("#pb-login").addEventListener("submit",async e=>{
   e.preventDefault();const err=$("#pb-loginerr"),btn=$("#pb-loginbtn");pass=$("#pb-pw").value;$("#pb-pw").value="";err.textContent="";btn.disabled=true;btn.textContent="Opening";
   try{
-    const [pl,ik]=await Promise.all([rpc("mg_coach_plans_list"),rpc("mg_coach_intake")]);
+    const [pl,ik]=await Promise.all([rpc("mg_coach_plans_list"),rpc("mg_coach_intake"),loadSuggestions()]);
     plans.clear();(pl.rows||[]).forEach(p=>plans.set(p.id,p));INTAKE=ik.rows||[];loggedIn=true;
     $("#pb-gate").hidden=true;$("#pb-app").hidden=false;
     let draft=null;try{draft=JSON.parse(localStorage.getItem("mg-planbuilder-draft")||"null")}catch(x){}

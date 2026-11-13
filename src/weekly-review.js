@@ -27,6 +27,8 @@ var Q=[
  {k:'avail',q:'Is anything happening next week that will affect your availability?',t:'text',ph:'Holiday, work trip, tournament\u2026 or "no".'},
  {k:'focus',q:'What is the one thing you\u2019d most like your coaching team to focus on or explain next week?',t:'text'}
 ];
+/* Coach-built plans (pages/coach-plan.html) pass their own questions in CLIENT.weeklyQuestions (same shape as Q). */
+if(window.CLIENT&&Array.isArray(window.CLIENT.weeklyQuestions)&&window.CLIENT.weeklyQuestions.length)Q=window.CLIENT.weeklyQuestions;
 function played(a){return a.rounds&&a.rounds!=='0'}
 function on(){try{return typeof CLIENT==='object'&&!window.MGBuild&&CLIENT.key!=='build-my-plan'&&!(CLIENT.features&&CLIENT.features.review===false)&&document.getElementById('p-report')}catch(e){return false}}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
