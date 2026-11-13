@@ -1,0 +1,95 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* App homepage (Jack, 13 Nov meeting): the first bottom tab in VidApp, a website tab, so the app opens here.
+   Plans first (Practice Plan, My Training, MG Athletes log-in), then My Numbers, tests, games and Warm Up.
+   First-time players get a "Start here" checklist that ticks itself off from what's on the phone:
+   a test done (macroResults), My Numbers opened, a Practice Plan made (mgPracticePlan). No sign-in on this page.
+   The videos (Games & Drills, Training Library, Golf Drills) stay in VidApp's Library tab. */
+.ah{min-height:100vh;background:#0B0B0B;color:#F4F1EA;font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  padding:18px max(16px,env(safe-area-inset-right,0px)) calc(110px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));box-sizing:border-box}
+.ah *{box-sizing:border-box}
+.ah-in{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.ah-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ah-top img{height:40px;width:auto}
+.ah-k{font-weight:700;font-size:11.5px;letter-spacing:2.4px;text-transform:uppercase;color:#FFD900}
+.ah .ah-h{font-family:'Anton',Impact,sans-serif!important;font-weight:400!important;text-transform:uppercase;font-size:40px!important;line-height:1!important;margin:2px 0 0!important;color:#F4F1EA!important}
+.ah .ah-h y{color:#FFD900}
+.ah .ah-p{margin:0!important;color:#c9c4b7;font-size:14.5px;line-height:1.5}
+.ah .ah-sec{font-family:'Anton',Impact,sans-serif!important;font-weight:400!important;text-transform:uppercase;font-size:22px!important;margin:12px 0 0!important;color:#F4F1EA!important;display:flex;align-items:center;gap:10px}
+.ah .ah-sec:before{content:"";width:22px;height:5px;background:#FFD900}
+.ah a{color:inherit;text-decoration:none}
+.ah a:focus-visible,.ah button:focus-visible{outline:3px solid #FFD900;outline-offset:2px}
+/* start here */
+.ah-start{background:#171613;border-left:6px solid #FFD900;padding:16px;display:flex;flex-direction:column;gap:10px}
+.ah-start .row{display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid rgba(244,241,234,.1)}
+.ah-start .n{width:36px;height:36px;display:grid;place-items:center;background:#0B0B0B;border:2px solid #FFD900;color:#FFD900;font:400 18px Anton,Impact,sans-serif}
+.ah-start .row.done .n{background:#1f8a4c;border-color:#1f8a4c;color:#fff}
+.ah-start b{display:block;font:400 18px/1.1 Anton,Impact,sans-serif;text-transform:uppercase}
+.ah-start small{display:block;color:#a9a497;font-size:12.5px;line-height:1.4;margin-top:2px}
+.ah-start .go{font-weight:700;font-size:13px;color:#0B0B0B;background:#FFD900;padding:9px 12px;white-space:nowrap}
+.ah-start .row.done .go{background:#2b2a25;color:#9C988C}
+.ah-start .row.next{background:rgba(255,217,0,.06);margin:0 -16px;padding:10px 16px}
+.ah-hide{align-self:flex-start;background:none;border:0;color:#9C988C;font:600 12.5px Inter,system-ui,sans-serif;text-decoration:underline;padding:4px 0;cursor:pointer}
+/* plan cards */
+.ah-plans{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ah-plan{display:flex;flex-direction:column;justify-content:space-between;gap:16px;min-height:132px;padding:14px;background:#171613;border-top:4px solid #FFD900}
+.ah-plan b{font:400 22px/1.02 Anton,Impact,sans-serif;text-transform:uppercase}
+.ah-plan small{color:#a9a497;font-size:12.5px;line-height:1.4}
+.ah-plan span.ar{color:#FFD900;font-weight:700;font-size:13px}
+.ah-plan.wide{grid-column:1/-1;min-height:0;flex-direction:row;align-items:center;border-top:0;border-left:4px solid #3a3833}
+.ah-plan.wide b{font-size:18px}
+/* image tiles */
+.ah-tile{display:block;position:relative;line-height:0;border:1px solid rgba(244,241,234,.08)}
+.ah-tile img{width:100%;height:auto;display:block}
+.ah-tile i{position:absolute;right:12px;bottom:12px;width:30px;height:30px;border-radius:50%;background:#FFD900;color:#0B0B0B;display:grid;place-items:center;font:700 18px/1 Inter,system-ui,sans-serif;font-style:normal}
+.ah-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ah-grid a{display:block;line-height:0;border:1px solid rgba(244,241,234,.08)}
+.ah-grid img{width:100%;height:auto;display:block}
+.ah-grid.three{grid-template-columns:1fr 1fr 1fr}
+.ah-note{background:#171613;border-left:6px solid #3a3833;padding:12px 14px;color:#c9c4b7;font-size:13.5px;line-height:1.45}
+</style>
+<div class="ah"><div class="ah-in" id="ah"></div></div>
+<script charset="utf-8" src="{{BASE}}src/day-streak.js"></script>
+<script>
+(function(){
+var BASE="{{BASE}}",W="https://www.macro.golf/";
+function js(k,d){try{var v=JSON.parse(localStorage.getItem(k)||"null");return v==null?d:v}catch(e){return d}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function first(){var g=js("mgsync-group:golf",null),n=(g&&g.name)||"";if(!n){var r=js("mgPracticePlan",null);n=(r&&(r.player||(r.practice&&r.practice.profile&&r.practice.profile.name)))||""}return String(n).trim().split(/\s+/)[0]||""}
+function hello(){var h=new Date().getHours();return h<12?"Good morning":h<18?"Good afternoon":"Good evening"}
+/* what this player has done already (on this phone) */
+function state(){var R=js("macroResults",{})||{},rec=js("mgPracticePlan",null),P=rec&&rec.practice||{};
+  var test=Object.keys(R).some(function(k){return R[k]&&R[k].t})||Object.keys(P.tests||{}).some(function(k){return P.tests[k]&&P.tests[k].raw});
+  return {test:test,numbers:!!js("mg-home-numbers",false),plan:!!(P.plan&&P.plan.week&&P.plan.week.length)}}
+var GAMES=[["hole-out","p-151044","Hole Out"],["money-stealers","p-529063","Money Stealers"],["insanity","p-208731","Insanity"],["par-18","p-615974","Par 18"],["fifty-ft-bank","p-472096","50ft Bank"],
+  ["wedge-darts","p-386417","Wedge Darts"],["lava","p-740258","Lava"],["driver-corridor","p-937452","Driver Corridor"],["three-strikes","p-863140","3 Strikes"]];
+var TESTS=[["long-game","p-524617","Long Game Test"],["short-game","p-791364","Short Game Test"],["putting","p-350829","Putting Test"]];
+function startCard(s){if(js("mg-home-start-hide",false))return "";if(s.test&&s.numbers&&s.plan)return "";
+  var rows=[[s.test,"Take your first test","15 minutes. The Putting Test is the easiest place to start.",W+"p-350829","Start"],
+    [s.numbers,"See your numbers","Where you gain and lose shots against your target handicap.",W+"my-numbers","Open"],
+    [s.plan,"Get your practice plan","A weekly plan built from your tests. It tells you what to practise.",W+"my-practice","Build"]],nx=-1;
+  rows.forEach(function(r,i){if(nx<0&&!r[0])nx=i});
+  return '<div class="ah-start" aria-label="Start here"><span class="ah-k">New here? Start here</span>'+rows.map(function(r,i){return '<a class="row'+(r[0]?" done":"")+(i===nx?" next":"")+'" href="'+r[3]+'"'+(i===1?' data-numbers="1"':'')+'><span class="n">'+(r[0]?"✓":i+1)+'</span><span><b>'+r[1]+'</b><small>'+r[2]+'</small></span><span class="go">'+(r[0]?"Done":r[4])+'</span></a>'}).join("")+
+    '<button type="button" class="ah-hide" data-hide="1">Hide this</button></div>'}
+function render(){var s=state(),nm=first();
+  var h='<div class="ah-top"><img src="'+BASE+'assets/icons/macro-golf-coaching.png" alt="Macro Golf"><span class="ah-k">Practice &amp; stats</span></div>'+
+   '<div><div class="ah-k">'+hello()+(nm?", "+esc(nm):"")+'</div><h1 class="ah-h">Gain shots <y>today</y></h1></div>'+
+   startCard(s)+
+   '<h2 class="ah-sec">Your plans</h2><div class="ah-plans">'+
+    '<a class="ah-plan" href="'+W+'my-practice"><b>Practice plan</b><small>Your week of golf practice, built from your tests.</small><span class="ar">Open ›</span></a>'+
+    '<a class="ah-plan" href="'+W+'my-training"><b>My training</b><small>Gym or home sessions for a faster, stronger swing.</small><span class="ar">Open ›</span></a>'+
+    '<a class="ah-plan wide" href="'+W+'my-plan"><span><b>MG Athletes</b><small style="display:block">Coached by Macro Golf? Your coach\'s plan is here.</small></span><span class="ar" style="margin-left:auto">Log in ›</span></a></div>'+
+   '<h2 class="ah-sec">Your numbers</h2><a class="ah-tile" href="'+W+'my-numbers" data-numbers="1"><img src="'+BASE+'assets/thumbs/tile-numbers.png" alt="My Numbers: your game in strokes gained"><i>›</i></a>'+
+   '<h2 class="ah-sec">Testing centre</h2><p class="ah-p">Three tests show where you lose shots. Retest every 6 weeks.</p><div class="ah-grid three">'+TESTS.map(function(t){return '<a href="'+W+t[1]+'"><img src="'+BASE+'assets/web/test-'+t[0]+'.jpg" alt="'+t[2]+'" loading="lazy"></a>'}).join("")+'</div>'+
+   '<h2 class="ah-sec">Games</h2><p class="ah-p">Scored practice games. Warm up first, then beat your best.</p><div class="ah-grid">'+GAMES.map(function(g){return '<a href="'+W+g[1]+'"><img src="'+BASE+'assets/web/game-'+g[0]+'.jpg" alt="'+g[2]+'" loading="lazy"></a>'}).join("")+'</div>'+
+   '<h2 class="ah-sec">Warm up</h2><a class="ah-tile" href="'+W+'warm-up"><img src="'+BASE+'assets/thumbs/tile-warmup.png" alt="Warm up" loading="lazy"><i>›</i></a>'+
+   '<div class="ah-note">Every drill and exercise video is in the <b style="color:#F4F1EA">Library</b> tab at the bottom.</div>';
+  document.getElementById("ah").innerHTML=h}
+document.getElementById("ah").addEventListener("click",function(e){var a=e.target.closest("[data-numbers]");if(a){try{localStorage.setItem("mg-home-numbers","true")}catch(x){}}
+  if(e.target.closest("[data-hide]")){try{localStorage.setItem("mg-home-start-hide","true")}catch(x){}render()}});
+render();
+window.addEventListener("pageshow",render);
+})();
+</script>

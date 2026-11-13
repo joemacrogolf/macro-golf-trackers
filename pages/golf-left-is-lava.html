@@ -64,6 +64,8 @@ h1,h2{font-family:var(--display);margin:0;text-wrap:balance}
 .pill.shift{background:var(--gold);color:#111}
 .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fields label,.fields .fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+/* square the two boxes up: inputs line up at the bottom even if one label wraps (Jack, 13 Nov) */
+.fields>label{justify-content:flex-end}
 .fields input{font:inherit;font-size:24px;font-weight:700;padding:10px 12px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--fg);width:100%;min-width:0}
 .dir{grid-column:1/-1}
 input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
@@ -438,7 +440,7 @@ body.gated{overflow:hidden}
     <div class="fields">
       <label><span class="label" id="carryLbl">Carry (yds)</span>
         <input id="carry" type="number" inputmode="decimal" step="0.1" placeholder="e.g. 131.4"></label>
-      <label id="offWrap"><span class="label">Offline (yds left or right)</span>
+      <label id="offWrap"><span class="label">Offline (yds)</span>
         <input id="off" type="number" inputmode="decimal" step="0.1" min="0" placeholder="e.g. 6.2"></label>
       <div class="fld dir" id="resWrap" hidden><span class="label">Where did it finish?</span>
         <div class="seg" role="group" aria-label="Where it finished">
