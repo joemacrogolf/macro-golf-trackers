@@ -6,6 +6,9 @@
 (function(){
 if(window.MGBoard)return;
 var ME=document.currentScript&&document.currentScript.src;
+/* MG players (logged in through MG Athletes, or on the MG pros list) come back with r.mg (supabase/013-leaderboard-mg.sql) */
+var MGIMG=ME?ME.replace(/src\/leaderboard\.js.*$/,'assets/icons/mg-mark-yellow-44.png'):'';
+function mgMark(r){return r&&r.mg?'<span class="lb-mg" title="MG Athlete">'+(MGIMG?'<img src="'+MGIMG+'" alt="MG Athlete">':'MG')+'</span>':''}
 var URL='https://zhcgwtlyqriwlhbzkxcl.supabase.co/rest/v1/rpc/mg_leaderboard',APIKEY='sb_publishable__IBhmrVHOXsLHruU7XJB-g_OSN9Ljne';
 var view='month',cache={};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -44,7 +47,7 @@ function paint(soft){var o=document.querySelector('.lb-wrap');if(!o)return;var l
     (signed?'<p class="lb-small">Changes show on the board after your next save.</p>':'');
   load(view).then(function(j){var rows=j.rows||[];
     if(!rows.length){list.innerHTML='<p class="lb-msg">No scores yet '+(view==='month'?'this month':'')+'. Finish a round to be first on the board.</p>';return}
-    list.innerHTML='<ol class="lb-rows">'+rows.map(function(r,i){return '<li class="'+(r.me?'me':'')+(i<3?' top':'')+'"><span class="lb-rank">'+(i+1)+'</span><span class="lb-name">'+esc(r.n)+(r.me?' <em>you</em>':'')+'</span><span class="lb-date">'+esc(nice(r.d))+'</span><b class="lb-score">'+esc(fmt(r.s,j.unit))+'</b></li>'}).join('')+'</ol>'+
+    list.innerHTML='<ol class="lb-rows">'+rows.map(function(r,i){return '<li class="'+(r.me?'me':'')+(i<3?' top':'')+'"><span class="lb-rank">'+(i+1)+'</span><span class="lb-name">'+esc(r.n)+mgMark(r)+(r.me?' <em>you</em>':'')+'</span><span class="lb-date">'+esc(nice(r.d))+'</span><b class="lb-score">'+esc(fmt(r.s,j.unit))+'</b></li>'}).join('')+'</ol>'+
       '<p class="lb-small">'+(j.unit==='hc'?'Scores are handicaps (+ is a plus handicap). ':j.unit==='SG'?'Scores are strokes gained off the tee. ':'')+(j.better==='low'?'Lowest':'Highest')+' score wins · best finished round per player</p>'})
   .catch(function(){list.innerHTML='<p class="lb-msg">Could not load the leaderboard. Check your connection and try again.</p>'})}
 
@@ -69,6 +72,7 @@ function css(){var s=document.createElement('style');s.textContent=[
  '.lb-name{font-weight:600;font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lb-name em{font-style:normal;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:#FFD900;color:#0B0B0B;padding:2px 6px;margin-left:6px}',
  '.lb-date{font-size:12.5px;color:#9C988C}.lb-score{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:20px;color:#F4F1EA;text-align:right;min-width:64px}',
  '.lb-rows li.me{background:rgba(255,217,0,.1)}',
+ '.lb-mg{display:inline-flex;align-items:center;vertical-align:-3px;margin-left:7px;color:#FFD900;font:400 15px/1 Anton,Impact,sans-serif}.lb-mg img{height:18px;width:auto;display:block}',
  '.lb-msg{color:#cfcabd;margin:6px 0}.lb-small{color:#9C988C;font-size:12.5px;margin:8px 0 0}',
  '.lb-foot{border-top:1px solid rgba(244,241,234,.15);padding-top:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}.lb-foot p{margin:0;color:#cfcabd;font-size:14px}',
  '.lb-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(120px + env(safe-area-inset-bottom,0px));z-index:70;width:min(440px,calc(100vw - 24px));display:flex;align-items:center;gap:12px;padding:14px;background:#0B0B0B;color:#F4F1EA;border-left:6px solid #FFD900;box-shadow:0 12px 30px rgba(0,0,0,.35);font-family:Inter,system-ui,sans-serif;animation:lbIn .45s cubic-bezier(.2,1.4,.4,1)}',
