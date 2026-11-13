@@ -323,7 +323,7 @@ const PHYS_TEMPLATE=[
 ];
 function fillDatalists(){
   const put=(id,arr)=>{document.getElementById(id).innerHTML=arr.map(v=>`<option value="${esc(v)}"></option>`).join("")};
-  put("dl-drills",DRILLS);put("dl-ex",EXERCISES);put("dl-mob",MGLib.MOB_EX.map(x=>x[0]));put("dl-habit",HABITS);put("dl-stat",STATS);put("dl-tpi",TPI);
+  put("dl-drills",DRILLS);put("dl-ex",EXERCISES);put("dl-mob",MGLib.MOB_EX.filter(x=>x[3].every(e=>e==="No equipment"||["Foam roller","Massage ball","Resistance band"].includes(e))).map(x=>x[0]));put("dl-habit",HABITS);put("dl-stat",STATS);put("dl-tpi",TPI);
 }
 
 /* ---------- utils ---------- */
@@ -371,7 +371,7 @@ function newPlan(){
     practice:{intro:"",sessions:[]},
     oncourse:{games:[],technical:"",intention:"",strategy:"",preround:"",postround:"Complete statistics for full rounds. Send the reflection and relevant statistics to the coaching team. Rather than diagnosing poor shots, look for patterns: what performed well, what became more difficult, what changed when performance changed, which parts of practice transferred.",balance:4},
     physical:{days:4,structure:"Supersets · A1 / A2 pairs",rest:"45–60s between rounds",strength:"3 sets: 12 / 10 / 8 reps @ RPE 7 / 8 / 9",power:"3 x 5 @ RPE 10 (maximal intent, not failure)",progression:"Keep exercises, sets and reps consistent through the block. Progress through load using the prescribed RPE. Do not add fatigue for the sake of progression.",note:"This plan should assist your golf performance. If at any time your training is limiting your ability to practise or play, notify your coach immediately.",dayList:[]},
-    mobility:{frequency:"Daily",when:"Evenings before sleep",mode:"follow",areas:[],equip:["No equipment"],count:3,items:[]},
+    mobility:{frequency:"Daily",when:"Evenings before sleep",mode:"follow",areas:[],equip:[],count:3,items:[]},
     weight:{unit:"kg",start:"",target:"",direction:"Maintain",frequency:"Weekly",day:"Monday",conditions:"First thing in the morning, before food",waist:false,notes:""},
     stats:STD_STATS(),
     recovery:{sleep:"8",routine:"",notes:""},
@@ -526,7 +526,7 @@ physical(){
 },
 mobility(){
   const m=plan.mobility,mode=m.mode||"follow",fails=plan.intake.tpi.filter(t=>t.result&&t.result!=="Pass"),pool=mobPool();
-  const chips=(key,vals)=>`<div class="chips">${vals.map(v=>{const on=(m[key]||[]).includes(v);return `<button type="button" data-act="mobchip" data-k="${key}" data-v="${esc(v)}" class="${on?"on":""}" aria-pressed="${on}">${esc(v)}</button>`}).join("")}</div>`;
+  const chips=(key,vals)=>`<div class="chips">${vals.map(v=>{const on=(m[key]||[]).includes(v);return `<button type="button" data-act="mobchip" data-k="${key}" data-v="${esc(v)}" class="${on?"on":""}" aria-pressed="${on}">${esc(MOB_EQUIP_LABEL[v]||v)}</button>`}).join("")}</div>`;
   const total=m.items.reduce((a,x)=>a+(+x.mins||0),0);
   const rows=m.items.map((x,i)=>x.kind==="video"?`<div class="mobv"><div><b>${esc(x.name)}</b><div class="hint" style="margin:2px 0 0">${x.mins} min follow-along · ${esc(x.area)} · ${esc(x.equip)}</div></div><div class="row" style="gap:0"><button class="btn sm ghost" type="button" data-act="mobswap" data-i="${i}">Swap</button>${mv("mobility.items."+i,-1)}${mv("mobility.items."+i,1)}${del("mobility.items."+i)}</div></div>`
     :`<div class="listrow lr-mob">${T(`mobility.items.${i}.name`,i?"":"Exercise (from the app)","Start typing","","dl-mob")}${T(`mobility.items.${i}.dose`,i?"":"Dose","e.g. 2 x 8 each side")}${T(`mobility.items.${i}.area`,i?"":"Area","")}${T(`mobility.items.${i}.cue`,i?"":"Why","e.g. Lower quarter rotation fail")}<div style="padding-top:${i?0:20}px">${del("mobility.items."+i)}</div></div>`).join("");
@@ -536,7 +536,7 @@ mobility(){
     <div class="f"><span>Routine type</span><div class="seg"><button type="button" data-act="mobmode" data-v="follow" class="${mode==="follow"?"on":""}">Follow-along videos</button><button type="button" data-act="mobmode" data-v="manual" class="${mode==="manual"?"on":""}">Manual</button></div></div></div></div>`+
   (mode==="follow"?`<div class="card"><div class="card-h"><h3>Build the routine</h3></div>
     <div class="f"><span>Body areas (none picked = any)</span></div>${chips("areas",MGLib.AREAS)}
-    <div class="f" style="margin-top:14px"><span>Equipment they have</span></div>${chips("equip",MGLib.EQUIP)}
+    <div class="f" style="margin-top:14px"><span>Equipment they have (no-equipment routines are always included)</span></div>${chips("equip",MOB_EQUIP)}
     <div class="row" style="margin-top:14px;align-items:flex-end">${N("mobility.count","Number of videos")}<span class="hint" style="margin:0 0 10px">${pool.length} follow-along videos of 3 minutes or more match</span><span class="spacer"></span><button class="btn gold" type="button" data-act="mobgen" ${pool.length?"":"disabled"}>Generate routine</button></div></div>`:"")+
   `${ui.mobMsg?`<div class="banner">${esc(ui.mobMsg)}</div>`:""}<div class="card"><div class="card-h"><h3>Routine</h3>${total?`<span class="chip">${total} min</span>`:""}<span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="mobility.items">+ Add exercise by hand</button></div><div class="stack">${rows||'<p class="hint">No mobility yet. Pick areas and equipment above, then Generate routine.</p>'}</div></div>`;
 },
@@ -1013,6 +1013,8 @@ function freshHTML(list){
 
 /* ---------- mobility: follow-along videos from the app library (src/mg-library.js) ---------- */
 const TPI_AREAS={pelvictilt:["Lower back","Core"],pelvicrotation:["Hips"],torsorotation:["Upper back"],overheaddeepsquat:["Hips","Lower legs"],toetouch:["Hamstrings","Lower back"],"9090":["Shoulders"],singlelegbalance:["Hips","Lower legs"],lattest:["Upper back","Shoulders"],lowerquarterrotation:["Hips"],seatedtrunkrotation:["Upper back"],bridgewithlegextension:["Hips","Core"],cervicalrotation:["Neck"],forearmrotation:["Wrists & forearms"],wristhinge:["Wrists & forearms"],wristflexionextension:["Wrists & forearms"],setupposture:["Upper back","Hips"]};
+/* mobility kit (Joe, 13 Nov): only foam roller, massage ball and band. Routines and exercises that need anything else are left out. */
+const MOB_EQUIP=["Foam roller","Massage ball","Resistance band"],MOB_EQUIP_LABEL={"Resistance band":"Band"},MOB_OK=e=>e==="No equipment"||MOB_EQUIP.includes(e);
 function mobPool(){const m=plan.mobility,ar=m.areas||[],eq=m.equip||[];
   return MGLib.MOB_VIDEOS.filter(v=>(!ar.length||v[4].some(a=>ar.includes(a)))&&v[3].every(e=>e==="No equipment"||eq.includes(e)))}
 const vidItem=v=>({id:uid(),kind:"video",name:v[0],wistia:v[1],mins:v[2],area:v[4].join(", "),equip:v[3].join(", "),dose:"Follow along",cue:""});
