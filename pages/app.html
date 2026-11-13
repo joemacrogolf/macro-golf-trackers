@@ -15,6 +15,15 @@
 #mga p{margin:0 0 14px}
 #mga .lead{font-size:20px;max-width:560px}
 #mga .btn{display:inline-flex;align-items:center;gap:8px;min-height:54px;padding:0 22px;font-family:Anton,Impact,sans-serif;text-transform:uppercase;font-size:17px;letter-spacing:.5px;text-decoration:none;border:2px solid var(--ink);background:var(--ink);color:#fff}
+#mga .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:30px;max-width:760px}
+#mga .plan{position:relative;background:#fff;border:2px solid var(--ink);padding:26px 24px 22px;display:flex;flex-direction:column}
+#mga .plan.best{background:var(--ink);color:#fff;border-color:var(--ink)}
+#mga .plan .pk{font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--mute)}
+#mga .plan.best .pk{color:var(--y)}
+#mga .plan b{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:64px;line-height:1;margin-top:10px}
+#mga .plan .per{font-size:16px;color:var(--mute);margin-top:4px}#mga .plan.best .per{color:#cfcabd}
+#mga .plan p{margin:14px 0 0;font-size:16px}
+#mga .plan .flag{position:absolute;top:-14px;right:18px;background:var(--y);color:var(--ink);font-family:Anton,Impact,sans-serif;text-transform:uppercase;font-size:14px;letter-spacing:.5px;padding:4px 10px}
 #mga .btn.y{background:var(--y);border-color:var(--y);color:var(--ink)}
 #mga .btn.o{background:transparent;color:inherit;border-color:currentColor}
 #mga .btn:focus-visible,#mga a:focus-visible{outline:3px solid var(--y);outline-offset:3px}
@@ -192,7 +201,7 @@
 <section class="dark"><div class="w">
   <p class="k">Step 4 · Play</p>
   <h2>Games that make <span class="hl">practice count</span></h2>
-  <p class="lead">Nine scored games, every shot measured in strokes gained.</p>
+  <p class="lead">Scored games for every part of your game, every shot measured in strokes gained. New games are added all the time.</p>
   <div class="games">
     <figure><img src="{{BASE}}assets/web/game-hole-out.jpg" alt="Hole Out" loading="lazy"></figure>
     <figure><img src="{{BASE}}assets/web/game-insanity.jpg" alt="Insanity" loading="lazy"></figure>
@@ -253,6 +262,16 @@
     <p class="lead">Strokes gained compares every shot with what a golfer of your target handicap would take from the same spot. It's the measure the tour uses, and it tells you where your shots really go. The app explains it in under a minute.</p>
   </div>
   <div class="video"><video src="{{BASE}}assets/video/sg-explainer.mp4" poster="{{BASE}}assets/video/sg-explainer.jpg" controls playsinline preload="none" aria-label="What is strokes gained? Short explainer video"></video></div>
+</div></section>
+
+<section class="cream" id="price"><div class="w">
+  <p class="k">Pricing</p>
+  <h2>One subscription. <span class="hl">Everything included.</span></h2>
+  <p class="lead">Tests, your practice plan, every game, leaderboards, My Numbers and Build My Plan. No extra charges for features.</p>
+  <div class="plans">
+    <div class="plan"><span class="pk">Monthly</span><b>£9.99</b><span class="per">a month</span><p>Cancel any time.</p></div>
+    <div class="plan best"><span class="flag">Best value</span><span class="pk">Yearly</span><b>£99</b><span class="per">a year</span><p>Two months free. Works out at £8.25 a month.</p></div>
+  </div>
 </div></section>
 
 <section class="cta" id="get"><div class="w">

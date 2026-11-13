@@ -43,6 +43,7 @@
 #mgc .tag.one{background:var(--ink);color:var(--y)}
 #mgc .tag.golf{background:var(--y)}
 #mgc .tag.swap{background:var(--warn);color:#fff}
+#mgc .wrv{border:1px solid var(--line,#ddd);border-left:4px solid #FFD900;padding:10px 14px;margin:6px 0 10px;background:#fff}#mgc .wrv-h{display:flex;justify-content:space-between;gap:10px;margin-bottom:4px}#mgc .wrv-h span{color:var(--mute,#777);font-size:13px}#mgc .wrv-q{padding:6px 0;border-top:1px solid #eee}#mgc .wrv-q span{display:block;font-size:12px;font-weight:700;color:var(--mute,#777)}#mgc .wrv-q p{margin:2px 0 0;white-space:pre-wrap;font-size:14px}
 #mgc .v{font-family:Anton,Impact,sans-serif;font-size:22px;line-height:1}
 #mgc .v small{display:block;font-family:Inter,system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--mute);margin-bottom:5px}
 #mgc .row.quiet .v.last{color:var(--warn)}
@@ -201,7 +202,7 @@ function finish(p){var t=[],g=[],pl=[],last=null,upd=null;
 /* ---------- list ---------- */
 function tags(p){var a=[];p.recs.forEach(function(x){if(x.one)a.push('<span class="tag one">1-to-1'+(x.r.plan?': '+esc(x.r.plan):'')+'</span>')});
   var seen={};p.recs.forEach(function(x){if(x.pure&&!x.golf&&!seen[x.id]){seen[x.id]=1;a.push('<span class="tag">'+esc(planName(x.id))+'</span>')}});
-  if(p.swap14)a.push('<span class="tag swap">Swapped '+p.swap14+'</span>');var gs=p.recs.filter(function(x){return x.golf});if(gs.length)a.push('<span class="tag golf">Golf: '+gs.length+' game'+(gs.length>1?'s':'')+'/plan</span>');return a.join('')}
+  if(p.swap14)a.push('<span class="tag swap">Swapped '+p.swap14+'</span>');var rv=0;p.recs.forEach(function(x){var r=x.data&&x.data.reviews;if(r)Object.keys(r).forEach(function(k){if(r[k]&&r[k].at&&daysAgo(r[k].at)<8)rv++})});if(rv)a.push('<span class="tag" style="background:#FFD900;color:#0B0B0B">Weekly review in</span>');var gs=p.recs.filter(function(x){return x.golf});if(gs.length)a.push('<span class="tag golf">Golf: '+gs.length+' game'+(gs.length>1?'s':'')+'/plan</span>');return a.join('')}
 function bars(wk){var mx=Math.max.apply(null,wk.map(function(w){return w.t+w.g}).concat([1]));
   return '<div class="wk" aria-label="Last 8 weeks, training / golf: '+wk.map(function(w){return w.t+'/'+w.g}).join(', ')+'">'+wk.map(function(w){
     if(!w.t&&!w.g)return '<span><i class="z"></i></span>';return '<span>'+(w.t?'<i style="height:'+(w.t/mx*100)+'%"></i>':'')+(w.g?'<i class="g" style="height:'+(w.g/mx*100)+'%"></i>':'')+'</span>'}).join('')+'</div>'}
@@ -309,8 +310,12 @@ function trainingHtml(p,R,f){var recs=p.recs.filter(function(x){return !x.golf})
       if(act.length)h+='<p style="margin:4px 0 8px;font-size:14px"><b>Swapped for the rest of the plan:</b> '+act.map(function(id){var o=d.swaps.plan[id];return esc(o.from)+' → '+esc(o.n)}).join(' · ')+'</p>';
       if(SW.length)h+='<table class="t"><thead><tr><th>Date</th><th>Swap</th><th>For</th></tr></thead><tbody>'+SW.map(function(w){var m=String(w.k||'').match(/^w(\d+)-s(\d+)/);
         return '<tr><td>'+nice(w.d)+(m?'<br><small style="color:var(--mute)">Week '+m[1]+' · Session '+(+m[2]+1)+'</small>':'')+'</td><td>'+(w.scope==='back'?'Back to '+esc(w.to):esc(w.from)+' → <b>'+esc(w.to)+'</b>')+'</td><td>'+(w.scope==='plan'?'Rest of the plan':w.scope==='day'?'That session only':'Undo')+'</td></tr>'}).join('')+'</tbody></table>'}
+    var RV=d.reviews&&typeof d.reviews==='object'?Object.keys(d.reviews).filter(function(k){var r=d.reviews[k];return r&&r.at&&r.a}).sort(function(a,b){return d.reviews[a].at<d.reviews[b].at?1:-1}):[];
+    if(RV.length){var inR=RV.filter(function(k){var at=d.reviews[k].at;return at>=R.from&&at<=R.to}),show=(inR.length?inR:RV.slice(0,1));
+      h+='<div class="lab" style="margin-top:14px">Weekly reviews'+(inR.length?'':' (latest, outside this period)')+'</div>'+show.map(function(k){var r=d.reviews[k];
+        return '<div class="wrv"><div class="wrv-h"><b>Week '+esc(k.replace(/^w/,''))+'</b><span>Sent '+esc(nice(r.at))+'</span></div>'+Object.keys(r.a).map(function(q){return '<div class="wrv-q"><span>'+esc((r.q&&r.q[q])||q)+'</span><p>'+esc(r.a[q])+'</p></div>'}).join('')+'</div>'}).join('')}
     var B=(x.sum&&x.sum.bests)||[];if(B.length)h+='<div class="lab" style="margin-top:14px">Best lifts (all time)</div><div class="bests">'+B.map(function(b){return '<div><b>'+esc(b.n)+'</b><span>'+esc(b.w)+(b.u?' '+esc(b.u):'')+' × '+esc(b.r)+(b.d?' · '+esc(nice(b.d)):'')+(b.gain>0?'<em>+'+esc(b.gain)+'</em>':'')+'</span></div>'}).join('')+'</div>';
-    if(d.notes&&typeof d.notes==='object'){var nt=Object.keys(d.notes).filter(function(k){return d.notes[k]&&String(d.notes[k]).trim()});if(nt.length)h+='<div class="lab" style="margin-top:14px">Their notes</div><table class="t"><tbody>'+nt.slice(-12).map(function(k){return '<tr><td>'+esc(k)+'</td><td>'+esc(d.notes[k])+'</td></tr>'}).join('')+'</tbody></table>'}
+    if(d.notes&&typeof d.notes==='object'){var nt=Object.keys(d.notes).filter(function(k){return d.notes[k]&&String(d.notes[k]).trim()&&!(d.reviews&&d.reviews[k]&&d.reviews[k].at)});if(nt.length)h+='<div class="lab" style="margin-top:14px">Their notes</div><table class="t"><tbody>'+nt.slice(-12).map(function(k){return '<tr><td>'+esc(k)+'</td><td>'+esc(d.notes[k])+'</td></tr>'}).join('')+'</tbody></table>'}
     h+='<p class="meta">Last saved '+esc(fmtTs(x.updated))+' · record '+esc(x.code)+'</p></div>'});
   return h}
 

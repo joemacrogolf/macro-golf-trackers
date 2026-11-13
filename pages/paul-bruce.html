@@ -218,6 +218,7 @@ button,input,select{font:inherit;color:inherit}
 .habitwrap.on{background:var(--cream);border-left-color:var(--yellow)}
 .habitwrap .habit{border:0;background:transparent}
 .mobpick{padding:0 16px 16px;display:flex;flex-direction:column;gap:10px}
+.mobroutine{gap:0}.mobrow{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line,#ddd);padding:6px 0}.mobrow label{display:flex;align-items:center;gap:12px;flex:1;min-height:48px;cursor:pointer}.mobrow input{width:22px;height:22px;flex:none;accent-color:var(--ink)}.mobrow em{font-style:normal;opacity:.65;font-size:13px;margin-left:6px}.mobrow.on b{text-decoration:line-through;opacity:.6}.mobrow .btn{min-height:40px;padding:0 14px}
 .checkin.nudge{animation:nudge .5s 2}
 @keyframes nudge{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 @media (prefers-reduced-motion:reduce){.checkin.nudge{animation:none}}
@@ -766,7 +767,19 @@ function habitTicks(w){var n=0;weekDays(w).forEach(function(d){habitList().forEa
 function mobOn(d){var y=S.mobDay[d];return !!(y&&y.done)}
 function mobRec(d){d=d||todayIso();return S.mobDay[d]=S.mobDay[d]||{}}
 function pastVideos(){var seen={},out=[];Object.keys(S.mobDay).sort().reverse().forEach(function(d){var v=(S.mobDay[d]&&S.mobDay[d].video||'').trim();if(v&&!seen[v.toLowerCase()]){seen[v.toLowerCase()]=1;out.push(v)}});return out.slice(0,12)}
+/* Mobility routine: CLIENT.mobilityRoutine=[{name,mins?,wistia?}] shows every video with its own tick.
+   The day counts as done (streak, habit grid) once every video is ticked. */
+function mobRoutineSync(r){var it=r.items||{},names=CLIENT.mobilityRoutine.map(function(v){return v.name}),got=names.filter(function(n){return it[n]});r.done=got.length===names.length;r.video=got.join(', ')}
+function mobRoutineHtml(){
+  var d=todayIso(),y=S.mobDay[d]||{},it=y.items||{},list=CLIENT.mobilityRoutine,st=streak('mobility'),n=list.filter(function(v){return it[v.name]}).length;
+  var h='<div class="habitwrap'+(y.done?' on':'')+'"><div class="habit"><span class="txt"><span class="disp">Mobility</span><p>'+esc(CLIENT.mobilityDesc||'Tick off each video as you do it.')+'</p><p><b style="color:var(--ink)">'+n+' of '+list.length+' done today</b></p></span><span class="streak"><b>'+st+'</b><span>day'+(st===1?'':'s')+'</span></span></div><div class="mobpick mobroutine">';
+  list.forEach(function(v,i){var on=!!it[v.name];
+    h+='<div class="mobrow'+(on?' on':'')+'"><label for="mr-'+i+'"><input type="checkbox" id="mr-'+i+'" data-mritem="'+i+'"'+(on?' checked':'')+'><span><b>'+(i+1)+'. '+esc(v.name)+'</b>'+(v.mins?' <em>'+esc(v.mins)+'</em>':'')+'</span></label>'+
+      (v.wistia?'<button type="button" class="btn primary mobplay" data-mrplay="'+i+'">Watch</button>':'')+'</div>'});
+  return h+(list.some(function(v){return !v.wistia})&&CLIENT.mobilityWhere?'<p class="small" style="margin:0">'+esc(CLIENT.mobilityWhere)+'</p>':'')+'</div></div>';
+}
 function mobHtml(){
+  if(CLIENT.mobilityRoutine)return mobRoutineHtml();
   if(CLIENT.mobilityVideos)return mobLibHtml();
   var d=todayIso(),y=S.mobDay[d]||{},st=streak('mobility');
   var h='<div class="habitwrap'+(y.done?' on':'')+'"><label class="habit" for="mobDone"><input type="checkbox" id="mobDone"'+(y.done?' checked':'')+'><span class="txt"><span class="disp">Mobility</span><p>'+esc(CLIENT.mobilityDesc||'One of your mobility videos. Note which one you did.')+'</p></span><span class="streak"><b>'+st+'</b><span>day'+(st===1?'':'s')+'</span></span></label>';
@@ -834,11 +847,13 @@ function renderToday(){
 }
 $('habits').addEventListener('change',function(e){var t=e.target;
   if(t.id==='mobDone'){var mr=mobRec();if(CLIENT.mobilityVideos&&t.checked)mr.video=mobToday(todayIso());mr.done=t.checked;mobChoose=false;save();renderToday();if(t.checked){var n=$('mobVid');if(n&&!n.value)n.focus()}return}
+  if(t.dataset.mritem!==undefined){var rr=mobRec(),rv=CLIENT.mobilityRoutine[+t.dataset.mritem];rr.items=rr.items||{};if(t.checked)rr.items[rv.name]=true;else delete rr.items[rv.name];mobRoutineSync(rr);save();renderToday();return}
   if(t.id==='mobSel'){if(t.value){var mr2=mobRec();mr2.video=t.value;mr2.own=true;mobChoose=false;save();renderToday()}return}
   if(!t.dataset.habit)return;setHabit(todayIso(),t.dataset.habit,t.checked);renderToday()});
 $('habits').addEventListener('input',function(e){if(e.target.id!=='mobVid')return;mobRec().video=e.target.value;save()});
 $('habits').addEventListener('click',function(e){
   var v=e.target.closest('[data-mvid]');if(v){mobRec().video=v.dataset.mvid;save();renderToday();return}
+  var mp=e.target.closest('[data-mrplay]');if(mp){var rv2=CLIENT.mobilityRoutine[+mp.dataset.mrplay];if(rv2&&rv2.wistia){if(window.MGVideo&&MGVideo.open)MGVideo.open(rv2.name,rv2.wistia,'Watch now · follow along');else window.open('https://fast.wistia.net/embed/iframe/'+rv2.wistia,'_blank')}return}
   var ml=e.target.closest('[data-mlib]');if(ml&&ml.dataset.mlib==='play'){var pv0=mobFind(mobToday(todayIso()));if(pv0&&pv0.wistia){if(window.MGVideo&&MGVideo.open)MGVideo.open(pv0.name+' · '+pv0.area,pv0.wistia,'Watch now · follow along');else window.open('https://fast.wistia.net/embed/iframe/'+pv0.wistia,'_blank')}return}
   if(ml){if(ml.dataset.mlib==='another'){var r0=mobRec();r0.own=false;r0.video='';r0.alt=(r0.alt||0)+1;mobChoose=false}else mobChoose=!mobChoose;save();renderToday();return}
   var a=e.target.closest('[data-alc]');if(a){var d=todayIso();S.alcohol[d]=alc(d)===a.dataset.alc?'':a.dataset.alc;save();renderToday()}});
@@ -1453,4 +1468,5 @@ UX.init({family:'dan',home:true});
 <script src="{{BASE}}src/workout-selfie.js"></script>
 <script src="{{BASE}}src/swap.js"></script>
 <script src="{{BASE}}src/plan-stats.js"></script>
+<script src="{{BASE}}src/weekly-review.js"></script>
 <script>MGSync.init({code:"318462",name:"Paul Bruce"})</script>

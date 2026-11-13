@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-13 22:40 · Joe's Claude · (1) Weekly review tab for 1-to-1 template plans (new src/weekly-review.js; Report tab renamed Weekly; answers in S.reviews, shown on the coach dashboard). (2) /app: pricing section £9.99/month or £99/year, 'Nine scored games' claim removed. · built, pinning
 2026-11-13 22:05 · Joe's Claude · supabase/012-intake-plans.sql RUN in Supabase (Joe asked); old Google Form answers imported into mg_intake (15 matchup, 4 onboarding, source 'google-form'). Forms and Plan Builder fully live · done
 2026-11-13 21:56 · Joe's Claude · PUBLISHED (Joe's go-ahead) match-up-questionnaire, onboarding and plan-builder-529481, all hidden from search, pinned a6e265e. They need supabase/012-intake-plans.sql run (loaded in Joe's SQL editor, Joe to confirm) before forms send or the builder opens · live, waiting on 012
 2026-11-13 22:05 · Sam's Claude · Mobility checklist (Sam): new optional CLIENT.mobilityRoutine=[{name,mins?,wistia?}] in templates/parts/20-core.html + 10-css.html. Shows every mobility video with its own tick and a Watch button once a wistia id is set; the day (streak, habit grid) counts as done when all are ticked. Opt-in, no other client changed, only ross-king rebuilt. Ross's 8 mobility videos have no Wistia IDs in the repo yet (Joe: add them to clients/ross-king.js mobilityRoutine, or tell me the IDs). Re-pinned p-538206 to 38eacbc (Kajabi theme 2168275462) · done
