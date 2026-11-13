@@ -190,7 +190,8 @@ function renderPractice(el){
       dr.map(function(d){var isG=d.env!=='Technical',g=gameFor(d),on=!!done[d.id],id='cp-'+esc(d.id);
         return '<div class="cp-row"><input type="checkbox" id="'+id+'" data-cpd="'+esc(d.id)+'"'+(on?' checked':'')+'><div><label for="'+id+'"><span class="cp-tag'+(isG?' g':'')+'">'+(isG?'Game':'Technical')+'</span><b>'+esc(d.name||'Drill')+'</b></label>'+
           (d.volume?'<div class="cp-meta">'+esc(d.volume)+' '+esc(String(d.volume).trim()==='1'?String(d.unit||'').replace(/s$/,''):(d.unit||''))+'</div>':'')+(d.detail?'<p class="cp-note" style="margin-top:4px">'+esc(d.detail)+'</p>':'')+attHtml(d.attention)+
-          (g?'<button type="button" class="cp-go'+(on?' done':'')+'" data-cpg="'+esc(d.game)+'" data-cpid="'+esc(d.id)+'">'+(on?'Play '+esc(g[0])+' again':'Start '+esc(g[0]))+' <span aria-hidden="true">›</span></button>':'')+'</div></div>'}).join('')+
+          (g?'<button type="button" class="cp-go'+(on?' done':'')+'" data-cpg="'+esc(d.game)+'" data-cpid="'+esc(d.id)+'">'+(on?'Play '+esc(g[0])+' again':'Start '+esc(g[0]))+' <span aria-hidden="true">›</span></button>':'')+
+          (window.MGDrills&&MGDrills.has(d.game)?drillBtn(d,on):'')+'</div></div>'}).join('')+
       (s.close?'<p class="cp-note" style="margin-top:6px">'+esc(s.close)+'</p>':'')+'</div>'}).join('');
   }
   var oc=p.oncourse||{},games=inc.oncourse===false?[]:(oc.games||[]).filter(function(g){return g.name});
@@ -210,6 +211,14 @@ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.c
   ls('mgplan-return',JSON.stringify({url:location.href,g:b.dataset.cpg,t:Date.now()}));
   ls('cp-pending',JSON.stringify({id:b.dataset.cpid,g:b.dataset.cpg,w:(window.S&&S.week)||1,t:Date.now()}));
   location.href=SITE+b.dataset.cpg+'?from=plan'});
+/* Jack's scored drills (src/plan-drills.js): played in the app, results in S.practice['w<n>'].drills[<drill id>] */
+function drillRec(id){var w=wk();w.drills=w.drills||{};return w.drills[id]=w.drills[id]||{res:[]}}
+function drillBtn(d,on){var r=(wk().drills||{})[d.id],sm=r&&MGDrills.summary(d.game,r),mid=r&&r.res&&r.res.length&&!r.done;
+  return (sm?'<div class="cp-meta" style="margin-top:6px">'+(r.done?'\u2713 ':'')+esc(sm)+(r.newPB?' \u00b7 new personal best':'')+'</div>':'')+
+    '<button type="button" class="cp-go'+(on?' done':'')+'" data-cpdr="'+esc(d.game)+'" data-cpid="'+esc(d.id)+'">'+(on?'Play again':mid?'Carry on':'Start '+esc(d.name||'drill'))+' <span aria-hidden="true">›</span></button>'}
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-cpdr]');if(!b||!window.MGDrills)return;
+  var id=b.dataset.cpid,kind=b.dataset.cpdr,rec=drillRec(id);if(rec.done){rec.res=[];rec.done=false;rec.pb=false;rec.newPB=false}
+  MGDrills.open(kind,rec,function(r,closed){var w=wk();if(r.done)w[id]=true;window.save&&save();if(closed)rerender()})});
 function rerender(){var el=document.getElementById('p-practice');if(el&&!el.hidden)renderPractice(el)}
 /* back from a game: src/plan-return.js left 'mgplan-done' = {g, done} */
 function returned(){var pd=js('cp-pending'),dn=js('mgplan-done');if(!pd||!dn)return;

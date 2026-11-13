@@ -70,7 +70,7 @@ so leave out what you don't want to change. Drop all `id`s: they are made on imp
 
 - **Practice games:** `env` is `Technical` or `Game`. For a game in the app, `game` is its Kajabi path (`MGLib.GAMES` in
   `src/mg-library.js`, plus any added in the Plan Builder's "Games in the app"). This gives the player a Start button. Jack's scored drills
-  (no page, the player ticks them off) are `drill-ladder`, `drill-strike` and `drill-landing-ladder` (`MGLib.DRILLS`). A game that isn't
+  (played interactively in the plan's Practice tab) are `drill-ladder`, `drill-strike` and `drill-landing-ladder` (`MGLib.DRILLS`). A game that isn't
   in the app: `"newGame": true` with a `name` and a `detail`. It's sent to Jack as a suggestion. `attention` is 0 (internal) to 100 (external).
 - **Physical:** `type` is one of `Strength`, `Power`, `Accessory`, `Core`, `Stability`, `Mobility`. Blank `reps` uses the plan's
   scheme (strength 12/10/8 @ RPE 7/8/9, power 3 x 5 @ max intent). Use exercise names from the exercise library

@@ -1,8 +1,8 @@
 /* Macro Golf library for coach-built plans (13 Nov 2026). Shared by pages/plan-builder.html and pages/coach-plan.html.
    GAMES: the golf games in the Macro Golf app [name, Kajabi path, area]. Games added later live in the database (mg_app_games,
      supabase/015-app-games.sql): coaches add them in the Plan Builder (All plans > Games in the app) and MGLib.loadGames() merges them in.
-   DRILLS: Macro Golf scored drills that live inside plans, not on a page of their own (no Start button; the player follows the steps
-     and ticks them off). From Jack's golf personal plan (pages/golf-paul-goddard.html) and the Practice Plan.
+   DRILLS: Jack's scored drills from Paul Goddard's plan and the Practice Plan. No page of their own: the player plays them inside
+     the Practice tab of their coach-built plan (src/plan-drills.js: tap the face, ladder carries, landing zones).
    MOB_VIDEOS: Follow Along mobility videos of 3 minutes or more from the exercise library (Drive: Macro_Golf_VidApp_Library_Audited_v5.xlsm)
      [name, wistia id, minutes, [equipment], [body areas]]. Lengths read from Wistia.
    MOB_EX: the shorter follow-along mobility videos (under 3 minutes) [name, wistia id, dose, [equipment], [body areas]].
