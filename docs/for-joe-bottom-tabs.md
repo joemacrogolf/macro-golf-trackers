@@ -28,6 +28,8 @@ Jack would like the 1 ON 1 ONLY version shown at the top of my-plan and my-train
 
 ## One thing for Joe to decide
 
+**DECIDED (Joe, 13 Nov): Build My Plan stays under My Training. The tab keeps the neutral name 'My Training' (already put back on 12 Nov).**
+
 My Training isn't only for 1-on-1 fitness clients: it's also where app users reach **Build My Plan**. If the tab says "Fitness 1 on 1", those users may think it isn't for them. Either:
 - move Build My Plan somewhere else (a Home › Train tile), or
 - keep a neutral label such as **Training** for that tab.
