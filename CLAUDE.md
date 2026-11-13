@@ -6,14 +6,6 @@ Three people work on this repo with their own Claude: **Joe** (founder, fitness 
 
 Joe, Jack and Sam meet tonight. **Ask your human now:** "Joe has a list of decisions for tonight's meeting. Is there anything you want to add?" Read them the list in `docs/meeting-2026-11-13.md`. Add their items under **Added by Jack** / **Added by Sam** (or a note against an existing number). If they have nothing, write "Nothing to add" there. Then commit, push and log a line in `WORKLOG.md`. Joe's Claude collects everything at 17:00 and removes this section after the meeting.
 
-## FOR JACK'S CLAUDE (from Joe, 13 Nov): App Store screenshots to update
-
-1. **Tablet sizes and Android extras:** iPad JPG 2048x2732 (up to 7); Android 10-inch tablet JPG 1536x2048 (up to 7); a new Android feature graphic JPG/PNG 1024x500 (the current one is the 2023 logo-only banner).
-2. **Fix two things in the slides:** the 'Move better, swing faster' slide shows a parked Pure plan (Pure Power); use Build My Plan or a 1-to-1 template plan instead. The bottom tab bar still says '6 Week Plan'; it's 'Practice' now. Slides 1 ('Find where you lose shots') and 3 ('A 6 week plan from your tests') show a white surround around the cards inside the phone; remove it so the screen is dark edge to edge like the other slides.
-3. **Website phone pictures** (`assets/web/phone-*.webp`, used on www.macro.golf/app and /download): remake them from the fixed slides (phone only, transparent background, about 560 px wide).
-
-Pack on the `app-store-pack` branch (not `main`); the small web pictures go on `main`. Log it in `WORKLOG.md`; Joe's Claude uploads to VidApp and re-pins the pages. Remove this section once done.
-
 ## First run for Jack's Claude (one time only)
 
 If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude has picked up CLAUDE.md", do this first:
