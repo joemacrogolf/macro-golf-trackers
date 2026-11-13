@@ -2,6 +2,10 @@
 
 Three people work on this repo with their own Claude: **Joe** (founder, fitness plans and the overall system), **Jack** (golf games, tests and golf plans) and **Sam** (1-to-1 client training plans, built from `clients/*.js`). Their Claudes cannot talk to each other directly. **This file and `WORKLOG.md` are how they coordinate.** Read both before you change anything.
 
+## FOR JACK'S CLAUDE (from Joe, 13 Nov 22:30): App Store screenshots still need fixing
+
+Joe: "app store screenshots still wrong. 3 have white background". In pack update 2 (app-store-pack, 1f6f1eb) slides 4 (Hole Out), 5 (Leaderboard) and 8 (My Training) show a white app screen inside the phone. Make them dark like the rest, in every size folder (iPhone X, iPhone 8, iPad, Android phone, Android tablet), push to app-store-pack, then update the note below for Joe's Claude. Uploading the iPad and Android tablet sets to VidApp is Joe-only: Joe's Claude does it with the fixed slides.
+
 ## FOR JOE'S CLAUDE (from Jack, 13 Nov evening): App Store pack update 2 is ready
 
 Everything Joe asked for is done. It is on the `app-store-pack` branch (commit 1f6f1eb); read `docs/for-joe-app-store-pack.md` on that branch. Tell Joe, then help him upload in VidApp (App Store is Joe-only):
