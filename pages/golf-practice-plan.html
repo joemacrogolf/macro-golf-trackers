@@ -1206,6 +1206,19 @@ function blockResult(b){
   return null}
 
 /* ---------- events ---------- */
+/* the plan's warm-up counts as the day's warm-up on every golf game page (src/golfwarm.js unlocks the games) */
+function warmMark(){try{const b=S&&S.step==="run"?cur():null;if(!b||!["body","pwarm","warm"].includes(b.id))return;const d=new Date(),m=d.getMonth()+1,dd=d.getDate();localStorage.setItem("mg-golfwarm",d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(dd<10?"0":"")+dd)}catch(e){}}
+/* back from a game opened by the plan (src/plan-return.js leaves mgplan-done): carry straight on, ticking the game off if it was finished */
+function backFromGame(){let d=null;try{d=JSON.parse(localStorage.getItem("mgplan-done")||"null")}catch(e){}if(!d||Date.now()-(+d.t||0)>6*3600e3)return false;
+  const ip=rd(KEY);if(!ip||ip.step!=="run"||!ip.blocks)return false;const b=ip.blocks[ip.bi];if(!b||b.type!=="play"||GAME_URL[b.game]!==d.g)return false;
+  try{localStorage.removeItem("mgplan-done")}catch(e){}
+  S=norm2(ip);ui={};const nm=MacroPlan.GAMES[b.game]?MacroPlan.GAMES[b.game].name:"Game";
+  if(d.done){b.opened=true;b.played=true;save();const last=S.bi>=S.blocks.length-1;goNext();if(!last)toast("\u2713 "+nm+" done and saved. Next: "+cur().title)}
+  else{render();window.scrollTo(0,0)}
+  return true}
+function toast(t){try{const e=document.createElement("div");e.className="mgpr-toast";e.setAttribute("role","status");e.textContent=t;
+  e.style.cssText="position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:70;max-width:92vw;background:#0B0B0B;color:#F4F1EA;border-left:6px solid #FFD900;padding:12px 16px;font:600 14px/1.4 Inter,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.35)";
+  document.body.appendChild(e);setTimeout(()=>e.remove(),5000)}catch(e){}}
 function goNext(){ui={entry:ui.entry};if(S.bi>=S.blocks.length-1)return finish();S.bi++;save();render();window.scrollTo(0,0)}
 function bindRun(b){
   const face=$("face");if(face)face.querySelector("svg").addEventListener("click",e=>{if(b.hits.length>=b.balls)return;const p=svgPt(e);b.hits.push({x:Math.round(p.x),y:Math.round(p.y)});save();render()});
@@ -1235,7 +1248,7 @@ function handle(act,v,el){
     case "resume":S=norm2(rd(KEY));break;
     case "discard":S=null;wr(KEY,null);break;
     case "new":hview="home";draft=Object.assign(defaultCfg(),{areas:[],focus:{}});S=null;wr(KEY,null);window.scrollTo(0,0);break;
-    case "next":clearInterval(tmrId);tmrId=null;return goNext();
+    case "next":clearInterval(tmrId);tmrId=null;warmMark();return goNext();
     case "skip":clearInterval(tmrId);tmrId=null;return goNext();
     case "back":clearInterval(tmrId);tmrId=null;if(S.bi>0){S.bi--;ui={};save()}break;
     case "quit":return finish();
@@ -1562,7 +1575,7 @@ function whyCard(){const P=PG(),p=P.plan,T=hcName(p.target||"10");
    ${p.lava?`<div class="recnote"><b>Lava ideas, ${({L:"left",R:"right",S:"short",G:"long"})[p.lava.side]} is lava.</b> ${esc(p.lava.why)} Your approach${p.lava.side==="L"||p.lava.side==="R"?" and driving":""} drills practise keeping the ball off that side.</div>`:""}
    ${p.strengths.length?`<p class="muted" style="margin:0">Already strong: ${p.strengths.map(s=>esc(s.name).toLowerCase()).join(", ")}.</p>`:""}
    ${p.totalLoss>0.1?`<div class="recnote">These areas cost you about <b>${p.totalLoss.toFixed(1)} shots a round</b> against a ${T} player. Halve that and you're ${(p.totalLoss/2).toFixed(1)} shots better.</div>`:""}</details>`}
-function renderHome(){const P=PG();stripHome();hiLine();fetchTests();try{loadStreak()}catch(e){}
+function renderHome(){if(backFromGame())return;const P=PG();stripHome();hiLine();fetchTests();try{loadStreak()}catch(e){}
   let h="";const ip=rd(KEY);
   if(ip&&ip.step==="run"&&ip.blocks){const b=ip.blocks[ip.bi]||{};h+=`<div class="resume"><b>${ip.plan?"Session "+(ip.plan.idx+1)+" is in progress":"You have a session in progress"}</b><span class="muted">${b.type==="play"&&b.opened?"Back from "+esc(b.title)+"? Carry on to tick it off.":"Block "+(ip.bi+1)+" of "+ip.blocks.length+": "+esc(b.title||"")}</span><div class="btns"><button class="dark" data-act="resume">Carry on</button><button class="ghost" data-act="discard">Start again</button></div></div>`}
   if(!P.profile||ui.editProf)h+=profileCard();
@@ -1590,7 +1603,7 @@ function homeAct(act,v,el){const P=PG();
     case "resetYes":{const P=PG();delete P.plan;P.weeks={};const ip=rd(KEY);if(ip&&ip.plan)wr(KEY,null);window.save();ui={tests:true};render();window.scrollTo(0,0);return true}
     case "mkPlan":case "mkPlanAnyway":makePlan();ui={why:true};render();window.scrollTo(0,0);return true;
     case "startPlan":startPlanSession(+v);return true;
-    case "play":{const b=S&&S.step==="run"?cur():null;if(b){b.opened=true;save()}return true}
+    case "play":{const b=S&&S.step==="run"?cur():null;if(b){b.opened=true;save();try{localStorage.setItem("mgplan-return",JSON.stringify({url:location.href.split("#")[0],g:GAME_URL[b.game],t:Date.now()}))}catch(e){}}return true}
     case "vid":if(window.MGVideo)MGVideo.open("Express 5 Minute Golf Warm Up","rxkqwwoq0t");return true;
     case "gvid":{const g=GAME_VID[v];if(g&&window.MGVideo)MGVideo.open("How to play "+MacroPlan.GAMES[v].name,g);return true}
   }
@@ -1604,7 +1617,7 @@ function runPlay(b){const G=MacroPlan.GAMES[b.game];
   return (b.game==="strikes"?SPEEDWARN:"")+`<div class="viz">${gameArt(b.game)}</div><p class="vizcap">${esc(G.what)}</p>
    ${G.set?`<div class="recnote">Play it on the <b>${G.set}</b> setting.</div>`:""}
    ${vidBtn(b.game)}
-   <ul class="steps"><li>Tap Play. ${esc(G.name)} opens with its own scorecard.</li><li>Your score saves to your record and counts on the ${esc(G.name)} leaderboard.</li><li>When you've finished, come back here and tick it off.</li></ul>
+   <ul class="steps"><li>Tap Play. ${esc(G.name)} opens with its own scorecard.</li><li>Your score saves to your record and counts on the ${esc(G.name)} leaderboard.</li><li>When the game is done, it brings you straight back here to the next block.</li></ul>
    ${b.opened?`<div class="resume"><b>Back from ${esc(G.name)}?</b><span class="muted">Tick it off and move on to the next block.</span></div>`:""}
    <a class="${b.opened?"ghost":"dark"} playbtn" href="${site(GAME_URL[b.game])}?from=plan" data-act="play">▶ ${b.opened?"Open":"Play"} ${esc(G.name)}</a>`+nextBtn(b.opened?"✓ Played it, next block":"✓ Already played it, next block")}
 /* end of a planned session: tick it off for the week */

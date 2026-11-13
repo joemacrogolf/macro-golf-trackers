@@ -4,6 +4,8 @@
 window.MGV_NOAUTO=true;
 /* golf leaderboards live in their own file next to this one */
 (function(){var me=document.currentScript;if(!me||!me.src||window.MGBoard)return;var s=document.createElement('script');s.src=me.src.replace(/golfwarm\.js(\?.*)?$/,'leaderboard.js');document.head.appendChild(s)})();
+/* opened from the Practice Plan: "Back to plan", and straight back to the plan when the round is done (src/plan-return.js) */
+(function(){var me=document.currentScript;if(!me||!me.src||window.MGPlanReturn||!/[?&]from=plan\b/.test(location.search))return;var s=document.createElement('script');s.src=me.src.replace(/golfwarm\.js(\?.*)?$/,'plan-return.js');document.head.appendChild(s)})();
 var MGWarm=(function(){
 var VID='rxkqwwoq0t',TITLE='Express 5 Minute Golf Warm Up';
 /* "How to play" videos from the Practice Games library, by page */
@@ -42,7 +44,19 @@ function css(){if(document.getElementById('mgw-css'))return;var s=document.creat
 /* In-app browsers (VidApp) and phones: keep floating buttons clear of the browser's bottom toolbar (same rule as review.js) */
 function lift(){if(document.getElementById('mgw-lift'))return;var u=navigator.userAgent||'',app=(/iPhone|iPad|iPod/.test(u)&&!/Safari\//.test(u))||/; wv\)/.test(u)||/VidApp/i.test(u)||!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);if(!app)return;
   document.documentElement.classList.add('mg-inapp');var s=document.createElement('style');s.id='mgw-lift';s.textContent='html.mg-inapp .mgs-pill,html.mg-inapp .ux-pbtab{bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}html.mg-inapp body{padding-bottom:96px}html.mg-inapp .mgv-wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}';document.head.appendChild(s)}
-function init(){lift();var how=document.getElementById('howto');if(!how||document.querySelector('.mgw'))return;if(NOWARM[page()]&&!game())return;css();
+/* Games are locked until the player confirms the warm-up (once a day, shared by every golf page on this phone).
+   The Practice Plan sets the same day mark when its warm-up block is done, so players coming from their plan go straight in. */
+var LOCK={'golf-hole-out':1,'golf-money-stealers':1,'golf-insanity':1,'golf-fifty-ft-bank':1,'golf-par-18':1,'golf-wedge-darts':1,'golf-left-is-lava':1,'golf-driver-corridor':1,'golf-three-strikes':1};
+function lock(){if(!LOCK[page()]||isDone()||document.getElementById('mgw-lock'))return;css();
+  var st=document.createElement('style');st.id='mgw-lock-css';st.textContent='#mgw-lock{position:fixed;inset:0;z-index:66;background:#0B0B0B;color:#F4F1EA;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) 20px max(24px,env(safe-area-inset-bottom,0px))}#mgw-lock .mgw{max-width:460px;width:100%}#mgw-lock .mgw-body{padding:24px 20px}#mgw-lock .mgw-h{font-size:34px}#mgw-lock .mgw-btns{flex-direction:column}#mgw-lock .mgw-btns button{width:100%;justify-content:center;min-height:52px}.mgv-wrap{z-index:70!important}body.mgw-locked{overflow:hidden}';document.head.appendChild(st);
+  var w=document.createElement('div');w.id='mgw-lock';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');w.setAttribute('aria-label','Warm up first');var g=game();
+  w.innerHTML='<section class="mgw"><div class="mgw-body"><div class="mgw-k">Locked until you warm up</div><div class="mgw-h">Warm up first</div><p>Every game unlocks once you have done the Express 5-minute golf warm-up. It gets your body ready to swing at full speed and helps protect your back.</p><p>Done the warm-up in your practice plan today? Then this unlocks on its own.</p>'+
+   '<div class="mgw-btns"><button type="button" class="mgw-y" data-w="watch">'+PLAY+'Watch the warm-up</button><button type="button" class="mgw-ghost" data-w="done">I\u2019ve done my warm-up</button>'+(g?'<button type="button" class="mgw-link" data-w="game">How to play '+g[0]+'</button>':'')+'</div></div></section>';
+  document.body.appendChild(w);document.body.classList.add('mgw-locked');
+  w.addEventListener('click',function(e){var b=e.target.closest('[data-w]');if(!b)return;var k=b.dataset.w;
+    if(k==='watch')watch();else if(k==='game'){if(g&&window.MGVideo)MGVideo.open(g[0]+': how to play',g[1])}
+    else if(k==='done'){setDone(true);w.remove();document.body.classList.remove('mgw-locked');var c=document.querySelector('.mgw');if(c)paint(c)}})}
+function init(){lift();lock();var how=document.getElementById('howto');if(!how||document.querySelector('.mgw'))return;if(NOWARM[page()]&&!game())return;css();
   var card=document.createElement('section');card.setAttribute('aria-label','Golf warm-up');var pad=how.classList.contains('pad');
   card.className='mgw'+(pad?' pad':'');card.innerHTML=pad?'<div class="inner"><div class="mgw-body"></div></div>':'<div class="mgw-body"></div>';
   how.parentNode.insertBefore(card,how.nextSibling);paint(card);
