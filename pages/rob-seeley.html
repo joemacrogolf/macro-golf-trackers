@@ -700,7 +700,10 @@ function wkLabel(w){return 'Week '+w+(CLIENT.weeks?' of '+CLIENT.weeks:'')}
 (function(){if(!S._wset)S.week=CLIENT.weeks?Math.min(CLIENT.weeks,nowWeek()):nowWeek()})();
 
 /* ---------- TABS ---------- */
-var TABS=[['today','Today'],['gym',CLIENT.gymTab||'Gym']];if(F.weight)TABS.push(['weight','Weight']);TABS.push(['report','Report']);
+var TABS=[['today','Today'],['gym',CLIENT.gymTab||'Gym']];
+/* CLIENT.extraTabs=[{id,label,render(panelEl)}] adds tabs after Gym (coach-built plans: Practice). Plans without it are unchanged. */
+var XTABS=CLIENT.extraTabs||[];XTABS.forEach(function(t){TABS.push([t.id,t.label]);if(!$('p-'+t.id)){var sec=document.createElement('section');sec.className='panel';sec.id='p-'+t.id;sec.setAttribute('role','tabpanel');sec.hidden=true;$('p-gym').parentNode.insertBefore(sec,$('p-gym').nextSibling)}});
+if(F.weight)TABS.push(['weight','Weight']);TABS.push(['report','Report']);
 $('tabs').style.gridTemplateColumns='repeat('+TABS.length+',minmax(0,1fr))';
 $('tabs').innerHTML=TABS.map(function(t,i){return '<button type="button" role="tab" data-tab="'+t[0]+'" aria-selected="'+(i===0)+'">'+esc(t[1])+'</button>'}).join('');
 function unlocked(){if(!F.checkin)return true;var t=todayIso();return !!(ciVal(t,'energy')&&ciVal(t,'motivation'))}
@@ -712,7 +715,7 @@ function showTab(t){
   if(t!=='today'&&!unlocked()){t='today';if(S.tab==='today'||document.readyState==='complete')setTimeout(nudgeCheckin,50)}
   S.tab=t;save();
   Array.prototype.forEach.call(document.querySelectorAll('#tabs [data-tab]'),function(b){b.setAttribute('aria-selected',String(b.dataset.tab===t))});
-  ['today','gym','weight','report'].forEach(function(id){$('p-'+id).hidden=id!==t});
+  ['today','gym','weight','report'].concat(XTABS.map(function(x){return x.id})).forEach(function(id){$('p-'+id).hidden=id!==t});
   render();
 }
 $('tabs').addEventListener('click',function(e){var b=e.target.closest('[data-tab]');if(b){showTab(b.dataset.tab);window.scrollTo({top:$('tabs').offsetTop-4,behavior:'smooth'})}});
@@ -1118,7 +1121,7 @@ $('repCopy').addEventListener('click',function(){var txt=buildReport();
   try{navigator.clipboard.writeText(txt).then(function(){markSent();$('repStatus').textContent='Report copied. Paste it into an email or message to your coach.'},fb)}catch(e){fb()}});
 
 /* ---------- RENDER ---------- */
-function render(){renderHeader();var t=S.tab;if(t==='today')renderToday();else if(t==='gym')renderGym();else if(t==='weight')renderWeight();else renderReport()}
+function render(){renderHeader();var t=S.tab,xt=XTABS.filter(function(x){return x.id===t})[0];if(t==='today')renderToday();else if(t==='gym')renderGym();else if(xt)xt.render($('p-'+t));else if(t==='weight')renderWeight();else renderReport()}
 if(S.day>=SESSIONS.length)S.day=0;
 showTab(S.tab||'today');
 </script>
