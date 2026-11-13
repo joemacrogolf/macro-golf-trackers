@@ -38,7 +38,8 @@ function boot(){
   fetch(API+'mg_plan_content',{method:'POST',headers:{apikey:APIKEY,'Content-Type':'application/json'},body:JSON.stringify({p_code:c.code,p_pin:c.pin})})
   .then(function(r){return r.json()}).then(function(j){
     if(!j||j.error||!j.plan){var e=(j&&(j.error||j.message))||'Could not load your plan.';msg('Your plan',/PIN/i.test(e)?'That PIN did not match. Open My Plan and sign in again.':e,/PIN|code/i.test(e));return}
-    window.MGCP_CODE=c.code;window.MGCP_DATA=j.plan;clearMsg();runDeferred();
+    window.MGCP_CODE=c.code;window.MGCP_DATA=j.plan;var ran=0,go=function(){if(ran++)return;clearMsg();runDeferred()};
+    if(window.MGLib&&MGLib.loadGames){setTimeout(go,2500);MGLib.loadGames().then(go,go)}else go();
   }).catch(function(){msg('No connection','Your plan could not load. Check your connection and try again.',true)});
 }
 function runDeferred(){
@@ -101,7 +102,10 @@ function build(){
 }
 
 /* ---------- Practice tab ---------- */
-var GAME={};(window.MGLib&&MGLib.GAMES||[]).forEach(function(g){GAME[g[1]]=g});
+/* a game from the app (static list + mg_app_games); a scored drill (drill-…) has no page, so no Start button.
+   A game path saved in the plan but not in the list still gets its Start button, with the name the coach saw. */
+function gameFor(d){if(!d.game||/^drill-/.test(d.game))return null;var g=(window.MGLib&&MGLib.GAMES||[]).filter(function(x){return x[1]===d.game})[0];
+  return g||(/^[a-z0-9-]{3,60}$/.test(d.game)?[d.name||'the game',d.game]:null)}
 function css(){if(document.getElementById('cp-css'))return;var s=document.createElement('style');s.id='cp-css';s.textContent=[
  '.cp-card{background:var(--paper,#fff);border:1px solid var(--hair,rgba(11,11,11,.13));border-left:6px solid var(--yellow,#FFD900);padding:16px;display:flex;flex-direction:column;gap:10px}',
  '.cp-card h3{margin:0;font:400 22px/1.05 var(--display,Anton,Impact,sans-serif);text-transform:uppercase;color:var(--ink,#0B0B0B)}',
@@ -140,7 +144,7 @@ function renderPractice(el){
   if(sessions.length){
     h+=sec('This week','Practice sessions')+'<p class="cp-prog">'+full+' of '+(target||sessions.length)+' sessions done this week'+(p.practice.intro?' · '+esc(p.practice.intro):'')+'</p>';
     h+=sessions.map(function(s,si){var dr=s.drills||[];return '<div class="cp-card" style="margin-top:10px"><h3>'+esc(s.name||('Session '+(si+1)))+'</h3>'+(s.warmup?'<p class="cp-note">'+esc(s.warmup)+'</p>':'')+
-      dr.map(function(d){var isG=d.env!=='Technical',g=d.game&&GAME[d.game],on=!!done[d.id],id='cp-'+esc(d.id);
+      dr.map(function(d){var isG=d.env!=='Technical',g=gameFor(d),on=!!done[d.id],id='cp-'+esc(d.id);
         return '<div class="cp-row"><input type="checkbox" id="'+id+'" data-cpd="'+esc(d.id)+'"'+(on?' checked':'')+'><div><label for="'+id+'"><span class="cp-tag'+(isG?' g':'')+'">'+(isG?'Game':'Technical')+'</span><b>'+esc(d.name||'Drill')+'</b></label>'+
           (d.volume?'<div class="cp-meta">'+esc(d.volume)+' '+esc(String(d.volume).trim()==='1'?String(d.unit||'').replace(/s$/,''):(d.unit||''))+'</div>':'')+(d.detail?'<p class="cp-note" style="margin-top:4px">'+esc(d.detail)+'</p>':'')+attHtml(d.attention)+
           (g?'<button type="button" class="cp-go'+(on?' done':'')+'" data-cpg="'+esc(d.game)+'" data-cpid="'+esc(d.id)+'">'+(on?'Play '+esc(g[0])+' again':'Start '+esc(g[0]))+' <span aria-hidden="true">›</span></button>':'')+'</div></div>'}).join('')+

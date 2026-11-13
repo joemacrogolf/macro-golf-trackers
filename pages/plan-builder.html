@@ -249,6 +249,8 @@
 #pb .mobv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--ink)}
 #pb .mobv b{font-size:13.5px}
 #pb .welcome{width:100%;min-height:300px;font:13px/1.5 var(--body);background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:6px;padding:12px}
+#pb-sug{position:fixed;z-index:9999;background:#1a1916;border:1px solid rgba(244,241,234,.18);border-radius:8px;max-height:280px;overflow:auto;box-shadow:0 10px 30px rgba(0,0,0,.45);font:14px/1.3 "Inter",system-ui,-apple-system,"Segoe UI",sans-serif;color:#F4F1EA}
+#pb-sug div{padding:8px 11px;cursor:pointer}#pb-sug div.on,#pb-sug div:hover{background:rgba(255,218,0,.16)}#pb-sug b{color:#FFDA00;font-weight:600}
 #pb .sugg{border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--ink);display:grid;gap:4px}
 #pb .mgdoc .sbar{display:inline-block;position:relative;width:74px;height:8px;border-radius:4px;background:linear-gradient(90deg,#d8d4c8,#0c0c0b);vertical-align:middle;margin:0 5px}
 #pb .mgdoc .sbar i{position:absolute;top:-3px;width:5px;height:14px;background:#FFD900;border:1px solid #0c0c0b;transform:translateX(-50%)}
@@ -342,7 +344,10 @@ const reviewWeek=p=>(p.phase||1)*(p.weeks||6);
 
 /* ---------- plan model ---------- */
 function blankDrill(env="Technical",name="",o={}){return Object.assign({id:uid(),env,name,game:"",newGame:false,detail:"",volume:env==="Technical"?15:"",unit:env==="Technical"?"balls":"rounds",attention:env==="Technical"?25:80},o)}
-const GAME_BY_PATH=Object.fromEntries(MGLib.GAMES.map(g=>[g[1],g]));
+let GAME_BY_PATH={};const DRILL_BY_ID=Object.fromEntries((MGLib.DRILLS||[]).map(d=>[d.id,d]));
+function indexGames(){GAME_BY_PATH=Object.fromEntries(MGLib.GAMES.map(g=>[g[1],g]))}indexGames();
+async function loadGames(force){await MGLib.loadGames(force);indexGames()}
+const GAME_AREAS=["Driving","Approach","Short game","Putting","Test","On course","Other"];
 const gameDrill=(path,o={})=>blankDrill("Game",GAME_BY_PATH[path][0],Object.assign({game:path,volume:1},o));
 const STD_STATS=()=>STATS.map(n=>({id:uid(),name:n,baseline:"",target:"",how:/strokes gained/.test(n)?"Strokes gained in My Numbers (Macro Golf app tests and games)":n==="Score killers per round"?"Doubles or worse, 3-putts, penalties and duffed chips per round":"Last 5 full rounds"}));
 const STD_Q=()=>[
@@ -508,7 +513,7 @@ physical(){
   const ph=plan.physical;
   const days=ph.dayList.map((d,di)=>`<div class="card"><div class="card-h"><span class="num">D${di+1}</span><input type="text" data-b="physical.dayList.${di}.title" value="${esc(d.title)}" placeholder="Day focus, e.g. Arm chop + upper body" style="flex:1;font-weight:600">${mv("physical.dayList."+di,-1)}${mv("physical.dayList."+di,1)}${del("physical.dayList."+di,"Remove day")}</div>
     <div class="pair pairhead"><span></span><span>Exercise</span><span>Type</span><span>Reps (blank = scheme)</span><span>Each side</span><span></span></div>
-    <div class="stack" style="margin-top:6px">${d.pairs.map((pr,pi)=>{const L=String.fromCharCode(65+pi);return ["a","b"].map((s,j)=>`<div class="pair"><span class="lab">${L}${j+1}</span><input type="text" list="dl-ex" data-b="physical.dayList.${di}.pairs.${pi}.${s}.name" value="${esc(pr[s].name)}" placeholder="Exercise"><select data-b="physical.dayList.${di}.pairs.${pi}.${s}.type">${["Strength","Power","Accessory","Core","Mobility"].map(o=>`<option${pr[s].type===o?" selected":""}>${o}</option>`).join("")}</select><input type="text" data-b="physical.dayList.${di}.pairs.${pi}.${s}.reps" value="${esc(pr[s].reps)}" placeholder="${pr[s].type==="Power"?"3 x 5 @ 10":"12/10/8"}"><label class="check"><input type="checkbox" data-t="bool" data-b="physical.dayList.${di}.pairs.${pi}.${s}.each"${pr[s].each?" checked":""}> Each side</label>${j===1?del(`physical.dayList.${di}.pairs.${pi}`,"Remove superset"):"<span></span>"}</div>`).join("")}).join('<div style="height:4px"></div>')}</div>
+    <div class="stack" style="margin-top:6px">${d.pairs.map((pr,pi)=>{const L=String.fromCharCode(65+pi);return ["a","b"].map((s,j)=>`<div class="pair"><span class="lab">${L}${j+1}</span><input type="text" list="dl-ex" data-b="physical.dayList.${di}.pairs.${pi}.${s}.name" value="${esc(pr[s].name)}" placeholder="Exercise"><select data-b="physical.dayList.${di}.pairs.${pi}.${s}.type">${["Strength","Power","Accessory","Core","Stability","Mobility"].map(o=>`<option${pr[s].type===o?" selected":""}>${o}</option>`).join("")}</select><input type="text" data-b="physical.dayList.${di}.pairs.${pi}.${s}.reps" value="${esc(pr[s].reps)}" placeholder="${pr[s].type==="Power"?"3 x 5 @ 10":"12/10/8"}"><label class="check"><input type="checkbox" data-t="bool" data-b="physical.dayList.${di}.pairs.${pi}.${s}.each"${pr[s].each?" checked":""}> Each side</label>${j===1?del(`physical.dayList.${di}.pairs.${pi}`,"Remove superset"):"<span></span>"}</div>`).join("")}).join('<div style="height:4px"></div>')}</div>
     <div class="row" style="margin-top:10px"><button class="btn sm" type="button" data-act="addpair" data-d="${di}">+ Superset</button></div></div>`).join("");
   const mismatch=ph.dayList.length&&+ph.days!==ph.dayList.length;
   return head("07 / Physical","Physical plan","Training days built as A1/A2 supersets. Strength work uses the pyramid, power work uses maximal intent.")+
@@ -582,7 +587,9 @@ export(){
 
 function drillRow(si,di,d){
   const b=`practice.sessions.${si}.drills.${di}`,isGame=d.env!=="Technical";
-  const gameSel=`<label class="f"><span>Game from the app</span><select data-b="${b}.game">${[["","Choose a game"],...MGLib.GAMES.map(g=>[g[1],g[0]+" · "+g[2]]),["new","New game (not in the app yet)"]].map(([v,l])=>`<option value="${esc(v)}"${(d.newGame?"new":(d.game||""))===v?" selected":""}>${esc(l)}</option>`).join("")}</select></label>`;
+  const gameSel=`<label class="f"><span>Game from the app</span><select data-b="${b}.game">${(()=>{const cur=d.newGame?"new":(d.game||""),o=([v,l])=>`<option value="${esc(v)}"${cur===v?" selected":""}>${esc(l)}</option>`;
+    return o(["","Choose a game"])+`<optgroup label="Games in the app (Start button)">${MGLib.GAMES.map(g=>o([g[1],g[0]+" · "+g[2]])).join("")}</optgroup>`+
+      ((MGLib.DRILLS||[]).length?`<optgroup label="Macro Golf scored drills (steps, tick off)">${MGLib.DRILLS.map(x=>o([x.id,x.name+" · "+x.area])).join("")}</optgroup>`:"")+o(["new","New game (not in the app yet)"])})()}</select></label>`;
   return `<div class="drill" data-env="${isGame?"Competitive":"Technical"}">
    <div class="top g-top">${S(b+".env","Type",ENVS)}${isGame?gameSel:T(b+".name","Drill","e.g. Drill supplied by Jack through CoachNow")}${T(b+".volume","Volume","")}${S(b+".unit","Unit",["balls","shots","mins","rounds","holes","reps"])}<div class="row" style="gap:0">${mv(b,-1)}${mv(b,1)}${del(b,"Remove drill")}</div></div>
    ${isGame&&d.newGame?`<div class="mid">${T(b+".name","New game name","")}${A(b+".detail","How the game works","Rules, scoring and what a good score looks like",2)}</div><p class="hint" style="margin:0">${d.suggested?"Sent to Jack as a new game to consider adding to the app.":"Once it has a name and a description, Jack gets it as a new game suggestion for the app."}</p>`
@@ -739,7 +746,8 @@ function onField(e){
   if(t==="num")v=v===""?"":+v;
   setPath(plan,path,v);
   const dm=path.match(/^(practice\.sessions\.\d+\.drills\.\d+)\.(game|env)$/);
-  if(dm){const d=getPath(plan,dm[1]);if(dm[2]==="game"){if(v==="new"){d.newGame=true;d.game="";d.name="";d.detail=""}else{d.newGame=false;const g=GAME_BY_PATH[v];d.name=g?g[0]:""}}
+  if(dm){const d=getPath(plan,dm[1]);if(dm[2]==="game"){if(v==="new"){d.newGame=true;d.game="";d.name="";d.detail=""}else{d.newGame=false;const g=GAME_BY_PATH[v],dr=DRILL_BY_ID[v],oldDr=Object.values(DRILL_BY_ID).some(x=>x.detail===d.detail);
+      if(oldDr)d.detail="";d.name=g?g[0]:dr?dr.name:"";if(dr){if(!d.detail)d.detail=dr.detail;d.volume=dr.volume;d.unit=dr.unit}}}
     else{d.game="";d.newGame=false;d.name=v==="Game"?"":d.name;d.attention=v==="Game"?80:25;d.unit=v==="Game"?"rounds":"balls"}}
   if(path==="weekly.physical"&&v!=="")plan.physical.days=v;
   if(path==="physical.days"&&v!=="")plan.weekly.physical=v;
@@ -782,6 +790,14 @@ document.addEventListener("click",async e=>{
     case"publish":publish(b.dataset.v==="confirm");return;
     case"pubcancel":ui.pubConfirm=null;render();keep();return;
     case"copywelcome":{const t=document.getElementById("pb-welcome");try{await navigator.clipboard.writeText(t.value);b.textContent="Copied"}catch(err){t.select();b.textContent="Select and copy"}return}
+    case"gadd-open":ui.gaddFor=b.dataset.id;ui.gaddMsg="";renderPlans();return;
+    case"gadd-cancel":ui.gaddFor=null;renderPlans();return;
+    case"gadd":{const name=$("#pb-ga-name").value.trim(),path=$("#pb-ga-path").value.trim(),area=$("#pb-ga-area").value,sid=b.dataset.id||null;
+      b.disabled=true;try{const r=await rpc("mg_coach_app_game_add",{p_name:name,p_path:path,p_area:area,p_coach:(plan&&plan.coach)||"",p_suggestion:sid});
+        await Promise.all([loadGames(true),loadSuggestions()]);
+        if(plan&&sid){const nm=name.toLowerCase();(plan.practice.sessions||[]).forEach(se=>(se.drills||[]).forEach(d=>{if(d.newGame&&(d.name||"").trim().toLowerCase()===nm){d.newGame=false;d.game=r.path;d.name=name}}));changed(true)}
+        ui.gaddFor=null;ui.gaddMsg="";setStatus(name+" added to the game list");renderPlans()}
+      catch(err){ui.gaddMsg=err.message;renderPlans()}return}
     case"gsug":{try{await rpc("mg_coach_game_status",{p_id:b.dataset.id,p_status:b.dataset.v});await loadSuggestions();renderPlans()}catch(err){setStatus("Couldn't update: "+err.message,true)}return}
     case"copylink":copyLink(b.dataset.v,b);return;
     case"print":printPlan();return;
@@ -819,7 +835,7 @@ function renderPlans(){
   const fresh=intakePeople().filter(x=>!withPlan.has(x.email)&&(!q||x.email.includes(q)||(x.name||"").toLowerCase().includes(q)));
   $("#pb-plList").innerHTML=list.length?list.map(g=>{const last=g[g.length-1];return `<div class="pl"><h3>${esc(last.playerName||"Unnamed")}</h3><div class="em">${esc(last.playerEmail||"No email")}${last.coach?" · "+esc(last.coach):""}</div>
     <div class="phases">${g.map(p=>`<button type="button" data-open="${esc(p.id)}" class="${plan&&plan.id===p.id?"cur":""}"><b>P${esc(p.phase)}</b>${p.status==="ready"?"Ready":"Draft"} · ${esc(fmtDate(p.startDate))}</button>`).join("")}</div>
-    <button class="btn sm gold" type="button" data-next="${esc(last.id)}">Start Phase ${(+last.phase||1)+1} (week ${(+last.phase||1)*(+last.weeks||6)} review)</button></div>`}).join("")+freshHTML(fresh)+suggHTML():freshHTML(fresh)+suggHTML()+`<div class="empty">${plans.size?"No players match that search.":"No plans yet. Build the first one with + New plan, or from a form below."}</div>`;
+    <button class="btn sm gold" type="button" data-next="${esc(last.id)}">Start Phase ${(+last.phase||1)+1} (week ${(+last.phase||1)*(+last.weeks||6)} review)</button></div>`}).join("")+freshHTML(fresh)+suggHTML()+gamesHTML():freshHTML(fresh)+suggHTML()+gamesHTML()+`<div class="empty">${plans.size?"No players match that search.":"No plans yet. Build the first one with + New plan, or from a form below."}</div>`;
 }
 $("#pb-plList").addEventListener("click",async e=>{
   const o=e.target.closest("[data-open]"),n=e.target.closest("[data-next]");
@@ -828,6 +844,34 @@ $("#pb-plList").addEventListener("click",async e=>{
   const f=e.target.closest("[data-fromform]");if(f){await flush();startFromForm(f.dataset.fromform);closeDrawer()}
 });
 $("#pb-plSearch").addEventListener("input",renderPlans);
+/* Search-as-you-type for every input with a list (exercises, drills, habits, mobility, KPIs, TPI). Matches anywhere in the name,
+   every word typed must appear ("press" finds "Dumbbell Bench Press"); names starting with the words come first.
+   Replaces the browser's own list, which on Safari / iPhone only matches the start of the name. */
+(function(){let box=null,inp=null,items=[],sel=-1;
+  const opts=id=>{const dl=document.getElementById(id);return dl?[...dl.options].map(o=>o.value||o.textContent).filter(Boolean):[]};
+  const hl=(t,ws)=>{let h=esc(t);ws.forEach(w=>{if(w)h=h.replace(new RegExp("("+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"),"<b>$1</b>")});return h};
+  function hide(){if(box){box.remove();box=null}items=[];sel=-1}
+  function show(el){inp=el;const q=el.value.trim().toLowerCase(),ws=q.split(/\s+/).filter(Boolean),all=opts(el.dataset.sug);
+    items=(ws.length?all.filter(o=>{const l=o.toLowerCase();return ws.every(w=>l.includes(w))}).sort((a,b)=>(b.toLowerCase().startsWith(q)?1:0)-(a.toLowerCase().startsWith(q)?1:0)):all).slice(0,40);
+    if(!items.length||(items.length===1&&items[0].toLowerCase()===q)){hide();return}
+    if(!box){box=document.createElement("div");box.id="pb-sug";document.body.appendChild(box);
+      box.addEventListener("mousedown",e=>{const d=e.target.closest("[data-i]");if(d){e.preventDefault();pick(+d.dataset.i)}})}
+    sel=-1;box.innerHTML=items.map((o,i)=>`<div data-i="${i}">${hl(o,ws)}</div>`).join("");place()}
+  function place(){if(!box||!inp)return;const r=inp.getBoundingClientRect();box.style.left=r.left+"px";box.style.top=(r.bottom+2)+"px";box.style.width=Math.max(r.width,220)+"px"}
+  function pick(i){const el=inp,v=items[i];if(!el||v==null)return;el.value=v;hide();el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))}
+  function mark(){[...box.children].forEach((d,i)=>d.classList.toggle("on",i===sel));const c=box.children[sel];if(c)c.scrollIntoView({block:"nearest"})}
+  document.addEventListener("focusin",e=>{const el=e.target;if(!(el instanceof HTMLInputElement))return;
+    if(el.hasAttribute("list")){el.dataset.sug=el.getAttribute("list");el.removeAttribute("list");el.setAttribute("autocomplete","off")}
+    if(el.dataset.sug)show(el)});
+  document.addEventListener("input",e=>{if(e.target.dataset&&e.target.dataset.sug&&e.isTrusted)show(e.target)});
+  document.addEventListener("focusout",e=>{if(e.target===inp)setTimeout(hide,120)});
+  document.addEventListener("keydown",e=>{if(!box||e.target!==inp)return;
+    if(e.key==="ArrowDown"){sel=Math.min(items.length-1,sel+1);mark();e.preventDefault()}
+    else if(e.key==="ArrowUp"){sel=Math.max(0,sel-1);mark();e.preventDefault()}
+    else if(e.key==="Enter"&&sel>=0){e.preventDefault();pick(sel)}else if(e.key==="Escape")hide()});
+  window.addEventListener("scroll",place,true);window.addEventListener("resize",place);
+})();
+
 $("#pb-openPlans").addEventListener("click",()=>{openDrawer();refreshData()});
 $("#pb-closePlans").addEventListener("click",closeDrawer);
 $("#pb-scrim").addEventListener("click",closeDrawer);
@@ -862,7 +906,7 @@ async function save(){
 }
 async function refreshData(){
   try{
-    const [pl,ik]=await Promise.all([rpc("mg_coach_plans_list"),rpc("mg_coach_intake"),loadSuggestions()]);
+    const [pl,ik]=await Promise.all([rpc("mg_coach_plans_list"),rpc("mg_coach_intake"),loadSuggestions(),loadGames(true)]);
     plans.clear();(pl.rows||[]).forEach(p=>plans.set(p.id,p));INTAKE=ik.rows||[];
     if($("#pb-drawer").classList.contains("open"))renderPlans();
     if(plan){renderRail();const c=document.getElementById("pb-intakechip");if(c)c.innerHTML=intakeChip()}
@@ -999,8 +1043,11 @@ async function suggestGame(d){
   try{await rpc("mg_coach_game_suggest",{p_name:n,p_desc:t,p_coach:plan.coach||""});d.suggested=true;d.suggestedSig=sig;loadSuggestions();changed(true)}
   catch(e){setStatus("Couldn't send the game to Jack: "+e.message,true)}
 }
+function gameForm(sid,name){const sel=`<select id="pb-ga-area">${GAME_AREAS.map(a=>`<option>${a}</option>`).join("")}</select>`;
+  return `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><input id="pb-ga-name" placeholder="Game name" value="${esc(name||"")}" style="flex:1;min-width:140px"><input id="pb-ga-path" placeholder="Page link, e.g. www.macro.golf/p-123456" style="flex:2;min-width:200px">${sel}<button class="btn sm gold" type="button" data-act="gadd" data-id="${esc(sid||"")}">Add to the plan builder</button><button class="btn sm ghost" type="button" data-act="gadd-cancel">Cancel</button></div><p class="hint" style="margin:2px 0 0">${esc(ui.gaddMsg||"The game shows in every coach's game dropdown and gets a Start button in players' plans straight away.")}</p>`}
+function gamesHTML(){return `<h6 style="font:10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:14px 2px 2px">Games in the app (${MGLib.GAMES.length})</h6><div class="sugg"><span class="hint" style="margin:0">${MGLib.GAMES.map(g=>esc(g[0])).join(" · ")}</span>${ui.gaddFor==="free"?gameForm(""):`<div class="row"><span class="spacer"></span><button class="btn sm" type="button" data-act="gadd-open" data-id="free">Add a game Jack has put in the app</button></div>`}</div>`}
 function suggHTML(){const open=SUGG.filter(x=>x.status==="new");if(!SUGG.length)return"";
-  return `<h6 style="font:10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:14px 2px 2px">New game suggestions for the app (${open.length})</h6>`+SUGG.slice(0,12).map(x=>`<div class="sugg"><b>${esc(x.name)}</b><span class="hint" style="margin:0">${esc(x.description||"")}</span><div class="row"><span class="chip${x.status==="added"?" ok":""}">${esc(x.status==="new"?"Waiting for Jack":x.status)}${x.coach?" · from "+esc(x.coach):""}</span><span class="spacer"></span>${x.status==="new"?`<button class="btn sm" type="button" data-act="gsug" data-id="${esc(x.id)}" data-v="added">Added to app</button><button class="btn sm ghost" type="button" data-act="gsug" data-id="${esc(x.id)}" data-v="declined">Decline</button>`:""}</div></div>`).join("")}
+  return `<h6 style="font:10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:14px 2px 2px">New game suggestions for the app (${open.length})</h6>`+SUGG.slice(0,12).map(x=>`<div class="sugg"><b>${esc(x.name)}</b><span class="hint" style="margin:0">${esc(x.description||"")}</span><div class="row"><span class="chip${x.status==="added"?" ok":""}">${esc(x.status==="new"?"Waiting for Jack":x.status)}${x.coach?" · from "+esc(x.coach):""}</span><span class="spacer"></span>${x.status==="new"?`<button class="btn sm" type="button" data-act="gadd-open" data-id="${esc(x.id)}">Added to app</button><button class="btn sm ghost" type="button" data-act="gsug" data-id="${esc(x.id)}" data-v="declined">Decline</button>`:""}</div>${ui.gaddFor===x.id?gameForm(x.id,x.name):""}</div>`).join("")}
 
 /* ---------- put the plan in the player's app (mg_coach_plan_publish) ---------- */
 async function publish(confirm){
@@ -1055,7 +1102,7 @@ document.addEventListener("click",e=>{if(e.target.closest('[data-act="tpireuse"]
 $("#pb-login").addEventListener("submit",async e=>{
   e.preventDefault();const err=$("#pb-loginerr"),btn=$("#pb-loginbtn");pass=$("#pb-pw").value;$("#pb-pw").value="";err.textContent="";btn.disabled=true;btn.textContent="Opening";
   try{
-    const [pl,ik]=await Promise.all([rpc("mg_coach_plans_list"),rpc("mg_coach_intake"),loadSuggestions()]);
+    const [pl,ik]=await Promise.all([rpc("mg_coach_plans_list"),rpc("mg_coach_intake"),loadSuggestions(),loadGames(true)]);
     plans.clear();(pl.rows||[]).forEach(p=>plans.set(p.id,p));INTAKE=ik.rows||[];loggedIn=true;
     $("#pb-gate").hidden=true;$("#pb-app").hidden=false;
     let draft=null;try{draft=JSON.parse(localStorage.getItem("mg-planbuilder-draft")||"null")}catch(x){}
