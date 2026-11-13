@@ -8,7 +8,9 @@ var CLIENT={
   habits:[
     {id:'golfwarmup',name:'Golf warm up',desc:'Tick this on any day you hit balls or play. Do the Express 5 Minute Golf Warm Up in the Macro Golf App before the range and again before the first tee.'}
   ],
-  mobilityDesc:'Do this every day, first thing in the morning before you sit down. Eight movements, 10 to 12 minutes: 90 90, Hip Capsule Mobilisation, Banded Ankle Mobilisation, Supported Pelvic Rotation, Pelvic Tilt with Assistance, Seated Spinal Rotation with Tilt, Thoracic Spine Mobilisation Roller and Praying Lat Stretch. Find each video in the Macro Golf App. Move slowly through a pain free range and never push into pain, especially through the lower back and left hip. Rate your left hip and lower back stiffness out of 10 before and after. Over time this shows what loosens you up. Tick it off and note which video you did.',
+  mobilityRoutine:[{name:'90 90'},{name:'Hip Capsule Mobilisation'},{name:'Banded Ankle Mobilisation'},{name:'Supported Pelvic Rotation'},{name:'Pelvic Tilt with Assistance'},{name:'Seated Spinal Rotation with Tilt'},{name:'Thoracic Spine Mobilisation Roller'},{name:'Praying Lat Stretch'}],
+  mobilityWhere:'Find each video in the Macro Golf App.',
+  mobilityDesc:'Do this every day, first thing in the morning before you sit down. Eight movements, 10 to 12 minutes. Tick each one off as you finish it. Move slowly through a pain free range and never push into pain, especially through the lower back and left hip. Rate your left hip and lower back stiffness out of 10 before and after. Over time this shows what loosens you up.',
   weekly:{gym:3},
   weekNote:'Alternate Session 1 and Session 2 across three days, with a rest day between where you can. Week A is Session 1, 2, 1. Week B is Session 2, 1, 2. The pattern carries over from one week to the next.',
   gymNote:'Every rep pain free. If your lower back, left hip or left knee pain rises, shorten the range, lighten the load or skip that exercise, and tell Sam. Low energy day: do the first exercise of each pair only.',
