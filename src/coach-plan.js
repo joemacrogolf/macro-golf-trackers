@@ -32,6 +32,15 @@ function clearMsg(){var m=document.getElementById('cp-msg');if(m)m.remove();var 
 
 /* ---------- boot: fetch the plan, then run the engine ---------- */
 function boot(){
+  /* coach preview (Plan Builder > Review & create > Preview the app plan): the builder leaves the plan in localStorage 'cp-preview'.
+     Runs on this device only: no sign-in, no cloud save, starts fresh each time, never touches the player's record. */
+  if(/[?&]preview=1/.test(location.search)){var pv=js('cp-preview');
+    if(!pv||!pv.plan){msg('Coach preview','Open the preview from the Plan Builder (Review & create).',false);return}
+    window.MGCP_PREVIEW=true;window.MGCP_CODE='preview';window.MGCP_DATA=pv.plan;
+    if(!/[?&]keep=1/.test(location.search)&&!sessionStorage.getItem('cp-pv-'+pv.t)){try{localStorage.removeItem('mg-plan-coach-preview-v1');sessionStorage.setItem('cp-pv-'+pv.t,'1')}catch(e){}}
+    var bar=document.createElement('div');bar.id='cp-pvbar';bar.setAttribute('style','position:sticky;top:0;z-index:9998;background:#FFD900;color:#0B0B0B;font:700 13px Inter,sans-serif;padding:9px 14px;text-align:center');
+    bar.textContent='Coach preview of '+(pv.plan.playerName||'the player')+'\u2019s plan \u00b7 nothing you do here is saved to their record';root().insertBefore(bar,root().firstChild);
+    var ran=0,go=function(){if(ran++)return;runDeferred()};if(window.MGLib&&MGLib.loadGames){setTimeout(go,2500);MGLib.loadGames().then(go,go)}else go();return}
   var c=creds();
   if(!c){msg('Your plan','Open your plan from My Plan in the Macro Golf app, so it knows who you are.',true);return}
   msg('','Loading your plan…');

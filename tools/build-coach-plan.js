@@ -10,7 +10,7 @@ const root = path.join(__dirname, '..'), parts = path.join(root, 'templates', 'p
 let tpl = fs.readdirSync(parts).filter(f => f.endsWith('.html')).sort().map(f => fs.readFileSync(path.join(parts, f), 'utf8')).join('');
 if (!tpl.includes('/*@@CLIENT@@*/') || !tpl.includes('@@SYNC@@')) throw new Error('template markers missing');
 tpl = tpl.replace('/*@@CLIENT@@*/', () => 'var __CP=MGCoachPlan.build();var CLIENT=__CP.CLIENT,SESSIONS=__CP.SESSIONS;')
-  .replace('@@SYNC@@', () => 'MGSync.init({code:String(window.MGCP_CODE),name:CLIENT.name})');
+  .replace('@@SYNC@@', () => 'if(!window.MGCP_PREVIEW)MGSync.init({code:String(window.MGCP_CODE),name:CLIENT.name})');
 let n = 0;
 tpl = tpl.replace(/<script([^>]*)>([\s\S]*?)<\/script>/g, (m, attrs, body) => {
   n++;

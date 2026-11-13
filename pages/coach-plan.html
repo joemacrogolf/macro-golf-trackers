@@ -1426,4 +1426,4 @@ UX.init({family:'dan',home:true});
 <script type="text/mg-defer" data-src="{{BASE}}src/swap.js"></script>
 <script type="text/mg-defer" data-src="{{BASE}}src/plan-stats.js"></script>
 <script type="text/mg-defer" data-src="{{BASE}}src/weekly-review.js"></script>
-<script type="text/mg-defer">MGSync.init({code:String(window.MGCP_CODE),name:CLIENT.name})</script>
+<script type="text/mg-defer">if(!window.MGCP_PREVIEW)MGSync.init({code:String(window.MGCP_CODE),name:CLIENT.name})</script>
