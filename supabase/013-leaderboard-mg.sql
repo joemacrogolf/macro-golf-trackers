@@ -1,7 +1,7 @@
 -- 013: MG badge on the golf leaderboards (13 Nov meeting, Jack).
 -- mg_leaderboard now also returns mg:true for MG players, and src/leaderboard.js shows the yellow MG mark next to their name.
--- An MG player is anyone who logs in through MG Athletes (My Plan): their email is linked to a 1-to-1 or golf personal plan
--- in mg_clients (005 / 006). MG pros who don't have a plan go on the small mg_lb_mg list by the name they type on the
+-- An MG player is anyone who has signed in through MG Athletes (My Plan) with their email + plan code + PIN: that links
+-- their email to a 1-to-1 or golf personal plan in mg_clients (005 / 006). A coach-entered email with no PIN yet doesn't count. MG pros who don't have a plan go on the small mg_lb_mg list by the name they type on the
 -- leaderboard (Ryan Harmer for now). Add one with:  insert into public.mg_lb_mg(name) values ('First Last');
 -- Includes the weekly board from 011, so running this also switches that on. 'all', 'month' and 'week' work as before.
 -- Pages without the new leaderboard.js just ignore the extra field. Run once in the Supabase SQL editor.
@@ -31,6 +31,7 @@ begin
            ( c.code !~ '^pure:'
              or exists (select 1 from public.mg_clients m
                          where m.email is not null and m.code !~ '^pure:'
+                           and (m.kind = 'golf' or m.pin_hash is not null)   -- signed in on MG Athletes (email + PIN set)
                            and lower(m.email) = lower(regexp_replace(c.code, '^pure:[^:]+:', '')))
              or exists (select 1 from public.mg_lb_mg x
                          where lower(regexp_replace(trim(x.name), '\s+', ' ', 'g')) =
