@@ -328,7 +328,7 @@ const PHYS_TEMPLATE=[
 ];
 function fillDatalists(){
   const put=(id,arr)=>{document.getElementById(id).innerHTML=arr.map(v=>`<option value="${esc(v)}"></option>`).join("")};
-  put("dl-drills",DRILLS);put("dl-ex",EXERCISES);put("dl-mob",[...new Set(MGLib.MOB_EX.map(x=>x[0]).concat(MGLib.MOB_VIDEOS.map(v=>v[0]+" (follow-along, "+v[2]+" min)")))]);put("dl-habit",HABITS);put("dl-stat",STATS);put("dl-tpi",TPI);
+  put("dl-drills",DRILLS);put("dl-ex",EXERCISES);put("dl-mob",[...new Set(mobAllVideos().map(mobLabel))]);put("dl-habit",HABITS);put("dl-stat",STATS);put("dl-tpi",TPI);
 }
 
 /* ---------- utils ---------- */
@@ -547,8 +547,8 @@ mobility(){
     <div class="stack">${ex.length?ex.map(v=>vidRow(vidItem(v))).join(""):'<p class="hint">No videos match. Pick more areas or add equipment.</p>'}</div></div>`}
   else{const total=m.items.reduce((a,x)=>a+(+x.mins||0),0);
     const rows=m.items.map((x,i)=>x.kind==="video"?vidRow(x,`<div class="row" style="gap:0"><button class="btn sm ghost" type="button" data-act="mobswap" data-i="${i}">Swap</button>${mv("mobility.items."+i,-1)}${mv("mobility.items."+i,1)}${del("mobility.items."+i)}</div>`)
-      :`<div class="listrow lr-mob">${T(`mobility.items.${i}.name`,i?"":"Exercise or video (from the app)","Start typing","","dl-mob")}${T(`mobility.items.${i}.dose`,i?"":"Dose","e.g. 2 x 8 each side")}${T(`mobility.items.${i}.area`,i?"":"Area","")}${T(`mobility.items.${i}.cue`,i?"":"Why","e.g. Lower quarter rotation fail")}<div style="padding-top:${i?0:20}px">${del("mobility.items."+i)}</div></div>`).join("");
-    body=`<div class="card"><div class="card-h"><h3>Routine</h3>${total?`<span class="chip">${total} min of videos</span>`:""}<span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="mobility.items">+ Add exercise or video</button></div><p class="hint" style="margin:0 0 10px">The same routine every day. Type any part of a name: every mobility and stability exercise and follow-along video in the app is listed (foam roller, massage ball, band or no kit).</p><div class="stack">${rows||'<p class="hint">Nothing yet. Press Add exercise or video.</p>'}</div></div>`}
+      :`<div class="listrow lr-mob">${T(`mobility.items.${i}.name`,i?"":"Follow-along video (from the app)","Start typing","","dl-mob")}${T(`mobility.items.${i}.dose`,i?"":"Dose","e.g. 2 x 8 each side")}${T(`mobility.items.${i}.area`,i?"":"Area","")}${T(`mobility.items.${i}.cue`,i?"":"Why","e.g. Lower quarter rotation fail")}<div style="padding-top:${i?0:20}px">${del("mobility.items."+i)}</div></div>`).join("");
+    body=`<div class="card"><div class="card-h"><h3>Routine</h3>${total?`<span class="chip">${total} min of videos</span>`:""}<span class="spacer"></span><button class="btn sm" type="button" data-act="add" data-list="mobility.items">+ Add video</button></div><p class="hint" style="margin:0 0 10px">The same routine every day. Type any part of a name: every mobility video tagged Follow Along in the app is listed (foam roller, massage ball, band or no kit).</p><div class="stack">${rows||'<p class="hint">Nothing yet. Press Add video.</p>'}</div></div>`}
   return head("08 / Mobility","Mobility","Random videos each day, a set time each day made up of one or more videos, or a routine you build by hand.")+
   (fails.length?`<div class="card hl"><div class="card-h"><h3>TPI limitations on file</h3><span class="spacer"></span><button class="btn sm gold" type="button" data-act="mobsuggest">Use these body areas</button></div><div class="chips">${fails.map(f=>`<button type="button" class="on" tabindex="-1">${esc(f.test)} · ${esc(f.result)}</button>`).join("")}</div></div>`:"")+
   `<div class="card"><div class="grid g3">${S("mobility.frequency","Frequency",["Daily","5x per week","3x per week","Before every session","Before practice and training"])}${S("mobility.when","When",WHEN)}
@@ -768,7 +768,7 @@ function onField(e){
   if(path==="weekly.physical"&&v!=="")plan.physical.days=v;
   if(path==="physical.days"&&v!=="")plan.weekly.physical=v;
   const mm=path.match(/^mobility\.items\.(\d+)\.name$/);
-  if(mm&&e.type==="change"){const vm=String(v).match(/^(.*) \(follow-along, \d+ min\)$/),vv=vm&&MGLib.MOB_VIDEOS.find(z=>z[0]===vm[1]);
+  if(mm&&e.type==="change"){const vv=mobAllVideos().find(z=>mobLabel(z)===String(v).trim()||z[0].toLowerCase()===String(v).trim().toLowerCase());
     if(vv){plan.mobility.items[+mm[1]]=vidItem(vv);changed(true);return}
     const x=MGLib.MOB_EX.find(z=>z[0].toLowerCase()===String(v).trim().toLowerCase()),it=plan.mobility.items[+mm[1]];if(x&&it){it.wistia=x[1];if(!it.dose)it.dose=x[2]||"";if(!it.area)it.area=x[4].join(", ");changed(true);return}}
   if(/^practice\.sessions\.\d+\.drills\.\d+\.(name|detail)$/.test(path)&&e.type==="change")suggestGame(getPath(plan,path.replace(/\.(name|detail)$/,"")));
@@ -1033,6 +1033,10 @@ function freshHTML(list){
 const TPI_AREAS={pelvictilt:["Lower back","Core"],pelvicrotation:["Hips"],torsorotation:["Upper back"],overheaddeepsquat:["Hips","Lower legs"],toetouch:["Hamstrings","Lower back"],"9090":["Shoulders"],singlelegbalance:["Hips","Lower legs"],lattest:["Upper back","Shoulders"],lowerquarterrotation:["Hips"],seatedtrunkrotation:["Upper back"],bridgewithlegextension:["Hips","Core"],cervicalrotation:["Neck"],forearmrotation:["Wrists & forearms"],wristhinge:["Wrists & forearms"],wristflexionextension:["Wrists & forearms"],setupposture:["Upper back","Hips"]};
 /* mobility kit (Joe, 13 Nov): only foam roller, massage ball and band. Routines and exercises that need anything else are left out. */
 const MOB_EQUIP=["Foam roller","Massage ball","Resistance band"],MOB_EQUIP_LABEL={"Resistance band":"Band"},MOB_OK=e=>e==="No equipment"||MOB_EQUIP.includes(e);
+/* every Follow Along mobility video that fits the kit (foam roller, massage ball, band or none), long and short. Mobility uses only these. */
+function mobAllVideos(){const ok=v=>v[3].every(e=>e==="No equipment"||MOB_EQUIP.includes(e));
+  return MGLib.MOB_VIDEOS.filter(ok).concat(MGLib.MOB_EX.filter(ok).map(x=>[x[0],x[1],parseInt(String(x[2]).replace(/\D+/g,""))||2,x[3],x[4]]))}
+const mobLabel=v=>v[0]+" (follow-along, "+v[2]+" min)";
 function mobSummary(m){if(!m)return "";if(m.mode==="time")return (m.minutes||10)+" min a day";if(m.mode==="random"||m.mode==="follow"&&!(m.items||[]).length)return (m.count||3)+" videos a day";
   const n=(m.items||[]).filter(x=>x.name).length,t=(m.items||[]).reduce((a,x)=>a+(+x.mins||0),0);return n?`${n} item${n>1?"s":""}${t?" · "+t+" min":""}`:""}
 function mobPool(){const m=plan.mobility;return MGLib.mobPool(m.areas,m.equip)}

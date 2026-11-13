@@ -48,7 +48,32 @@ function runDeferred(){
     if(src){s.src=src;s.charset='utf-8';s.onload=s.onerror=function(){next(i+1)};document.body.appendChild(s)}
     else{s.text=old.textContent;document.body.appendChild(s);next(i+1)}})(0);
 }
-function after(){returned()}
+function after(){returned();try{weeklyReminder()}catch(e){}}
+
+/* ---------- weekly report reminders (Joe, 13 Nov) ----------
+   Sunday: "complete your weekly report" for this plan week. Monday to Wednesday: if the week that ended on Sunday still has no
+   report, a second reminder. Shown in the app when the player opens their plan, once per day, after the daily check-in.
+   Reads S.reviews['w<week>'] (src/weekly-review.js). */
+function weeklyReminder(){
+  if(!window.S||typeof window.todayIso!=='function'||typeof window.planWeekOf!=='function'||!document.getElementById('p-report'))return;
+  var t=todayIso(),dow=new Date().getDay(),wk=null,late=false;
+  if(dow===0)wk=planWeekOf(t);
+  else if(dow>=1&&dow<=3){wk=planWeekOf(addDays(t,-dow));late=true}
+  var max=(window.CLIENT&&+CLIENT.weeks)||6;if(!wk||wk<1||wk>max)return;
+  var rv=(S.reviews||{})['w'+wk];if(rv&&rv.at)return;
+  var seen='cp-wr-'+(window.MGCP_CODE||'')+'-'+t;if(ls(seen))return;
+  var tries=0;(function wait(){var c=S.checkin&&S.checkin[t];if(!c&&++tries<180){setTimeout(wait,2000);return}
+    if((S.reviews||{})['w'+wk]&&S.reviews['w'+wk].at)return;show()})();
+  function show(){if(document.getElementById('cp-wr'))return;ls(seen,'1');css();
+    var d=document.createElement('div');d.id='cp-wr';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');
+    d.innerHTML='<div class="cp-wr-in"><div class="cp-wr-k">'+(late?'Reminder · week '+wk:'Sunday · week '+wk)+'</div><h3>'+(late?'Your weekly report is still to do':'Time for your weekly report')+'</h3>'+
+      '<p>'+(late?'Last week’s report hasn’t been sent yet. It only takes a few minutes, and your coach uses it to plan your next week.':'Take a few minutes to tell your coach how the week went. They use it to plan your next week.')+'</p>'+
+      '<button type="button" class="cp-wr-go">Do my weekly report <span aria-hidden="true">›</span></button><button type="button" class="cp-wr-later">Later</button></div>';
+    document.body.appendChild(d);
+    d.querySelector('.cp-wr-later').onclick=function(){d.remove()};
+    d.querySelector('.cp-wr-go').onclick=function(){d.remove();if(S.week!==wk){S.week=wk;if(typeof save==='function')save()}if(typeof render==='function')render();showTab('report');window.scrollTo({top:0})}}
+}
+
 
 /* ---------- plan JSON -> CLIENT + SESSIONS (runs inside the engine, where x(), MAX, DB… exist) ---------- */
 function incFor(name){var n=String(name).toLowerCase(),G=window;
@@ -109,6 +134,13 @@ function build(){
 function gameFor(d){if(!d.game||/^drill-/.test(d.game))return null;var g=(window.MGLib&&MGLib.GAMES||[]).filter(function(x){return x[1]===d.game})[0];
   return g||(/^[a-z0-9-]{3,60}$/.test(d.game)?[d.name||'the game',d.game]:null)}
 function css(){if(document.getElementById('cp-css'))return;var s=document.createElement('style');s.id='cp-css';s.textContent=[
+ '#cp-wr{position:fixed;inset:0;z-index:99999;background:rgba(11,11,11,.6);display:flex;align-items:flex-end;justify-content:center;padding:16px}',
+ '#cp-wr .cp-wr-in{background:#0B0B0B;color:#F4F1EA;border-top:6px solid #FFD900;max-width:460px;width:100%;padding:22px 20px;display:flex;flex-direction:column;gap:10px}',
+ '#cp-wr .cp-wr-k{font:700 11px Inter,sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:#FFD900}',
+ '#cp-wr h3{margin:0;font:400 28px/1.05 Anton,Impact,sans-serif;text-transform:uppercase;color:#F4F1EA}',
+ '#cp-wr p{margin:0;font:15px/1.5 Inter,sans-serif;color:rgba(244,241,234,.85)}',
+ '#cp-wr .cp-wr-go{margin-top:6px;min-height:54px;border:0;background:#FFD900;color:#0B0B0B;font:400 20px Anton,Impact,sans-serif;text-transform:uppercase;cursor:pointer}',
+ '#cp-wr .cp-wr-later{min-height:44px;border:1px solid rgba(244,241,234,.4);background:transparent;color:#F4F1EA;font:600 15px Inter,sans-serif;cursor:pointer}',
  '.cp-card{background:var(--paper,#fff);border:1px solid var(--hair,rgba(11,11,11,.13));border-left:6px solid var(--yellow,#FFD900);padding:16px;display:flex;flex-direction:column;gap:10px}',
  '.cp-card h3{margin:0;font:400 22px/1.05 var(--display,Anton,Impact,sans-serif);text-transform:uppercase;color:var(--ink,#0B0B0B)}',
  '.cp-note{margin:0;color:var(--body,#3B3830);font-size:14px;line-height:1.5}',
