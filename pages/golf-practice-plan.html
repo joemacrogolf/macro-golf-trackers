@@ -1607,3 +1607,8 @@ window.MacroPractice={E,shotSG,build,recommend,playsLike,combo};
 <script src="{{BASE}}src/sync.js"></script>
 <script src="{{BASE}}src/videos.js"></script>
 <script>MGSync.init({plan:'golf-practice-plan',planName:'Practice Plan',group:'golf'})</script>
+<style>/* fill the screen like the rest of the app: dark edge to edge, no white frame round the cards */
+html,body{background:#0B0B0B!important}</style>
+<script>/* the Kajabi wrappers (and the My Practice front door) can leave a light background behind the page: paint them dark */
+(function(){function dark(){var el=document.getElementById('app');while(el&&el!==document.documentElement){var bg=getComputedStyle(el).backgroundColor;if(bg&&!/rgba?\(0, 0, 0, 0\)|transparent/.test(bg)){var c=bg.match(/\d+/g);if(c&&(+c[0]+ +c[1]+ +c[2])>600)el.style.setProperty('background-color','#0B0B0B','important')}el=el.parentElement}}
+dark();setTimeout(dark,300);setTimeout(dark,1500);window.addEventListener('load',dark)})()</script>
