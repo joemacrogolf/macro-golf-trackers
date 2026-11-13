@@ -3,7 +3,8 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
-2026-11-13 09:03 · Jack's Claude · VidApp PUBLISHED TO PREVIEW: tab reorder + Practice rename + 19 new thumbnails. Live not pressed yet: waiting on Jack's OK · preview
+2026-11-13 09:05 · Jack's Claude · VidApp PUBLISHED TO LIVE APPS (Jack's go-ahead, preview built first): tab reorder + Practice rename + 19 new thumbnails. OUT OF VIDAPP · live
+2026-11-13 09:00 · Jack's Claude · VidApp PUBLISHED TO PREVIEW: tab reorder + Practice rename + 19 new thumbnails · preview
 2026-11-13 09:01 · Jack's Claude · VidApp THUMBNAILS REPLACED (Train group, Home): My Training Plan → inner-my-training-plan.png; Training Library 4183703 → inner-training-library.png · saved
 2026-11-13 09:00 · Jack's Claude · VidApp THUMBNAILS REPLACED (Testing group 4182255, website items): Long Game 4183591 (→ p-524617) → test-long-game.png; Short Game (→ p-791364) → test-short-game.png; Putting (→ p-350829) → test-putting.png · saved
 2026-11-13 08:59 · Jack's Claude · VidApp THUMBNAILS REPLACED on the game website items (URLs unchanged): Short Game 4182264: 50ft Bank, Par 18, Wedge Darts; Long Game 4182265: Lava, Driver Corridor, 3 Strikes; Putting 4182263: Money Stealers, Insanity, Hole Out 4183632 → game-*.png · saved
