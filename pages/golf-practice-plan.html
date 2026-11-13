@@ -145,6 +145,8 @@ input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visi
 .okno{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .okno button{font-family:var(--display);font-weight:400;font-size:22px;text-transform:uppercase;padding:16px}
 .okno .y{background:var(--good);color:#fff}.okno .x{background:var(--bad);color:#fff}
+.lad{background:#2d5a27;border:1px solid var(--line)}.lad svg{display:block;width:100%;height:auto}
+.ladpb{display:flex;gap:8px;flex-wrap:wrap}.ladpb span{border:1px solid var(--line);padding:6px 10px;font-size:13px;font-weight:700}.ladpb span.new{background:var(--gold);border-color:var(--gold);color:#0B0B0B}
 .zones{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
 .zones div{border:1px solid var(--line);padding:8px 2px;text-align:center;font-size:12px;font-weight:700;color:var(--muted)}
 .zones div b{display:block;font-family:var(--display);font-weight:400;font-size:18px;color:var(--fg)}
@@ -763,10 +765,14 @@ function build(c){
     B.push({type:"ladder",id:"ladder",title:"Ladder up to 70 yds",mins:5,shots:[]});
     B.push({type:"strike",id:"strike1",title:"Strike station",mins:2,balls:5,hits:[]});
   }
-  if(as.includes("short")){const wm=fam==="short"?T[0]:5;if(fam!=="short")gameM-=5;
+  /* short game sessions (Jack, 13 Nov): body warm up, 5 min tight lie strike (the technical bit), then the landing ladder
+     when there's time (45 min and up). That uses the technical minutes; anything short comes off the game. */
+  let techM=T[1];
+  if(fam==="short"){const lad=c.mins>=45,need=5+(lad?5:0);shortStart(B,lad);if(techM>=need)techM-=need;else{gameM-=need-techM;techM=0}if(techM<5){gameM+=techM;techM=0}}
+  else if(as.includes("short")){const wm=5;gameM-=5;
     B.push({type:"zones",id:"warm",title:"Warm-up ladder",mins:wm,zones:[[10,12],[12,14],[14,16],[16,18],[18,20]],rounds:2,res:[],area:"short",
     lines:["Land each ball in the next zone. Each zone is 2 yds deep.","Two trips up the ladder."]});}
-  if(T[1])B.push({type:"tick",id:"tech",title:"What you're working on technically",mins:T[1]-strikeMins,timer:true,
+  if(techM)B.push({type:"tick",id:"tech",title:"What you're working on technically",mins:techM-strikeMins,timer:true,
     lines:fam==="putt"?["Your own stroke work. Rehearse it, then bring it into a few putts.","Focus on the movement, not where the ball goes."]:["Your own swing work. Rehearse it with no ball, then bring it into the ball with slow motion swings.","Focus on the movement, not the ball flight."]});
   if(strikeMins)B.push({type:"strike",id:"strike2",title:"Strike station repeat",mins:2,balls:5,hits:[],lines:["Check the strike holds after the technical work."]});
   as.forEach((a,k)=>{const v=view(c,a),fs=v.focuses,dm=two?Math.round(drillM/2):drillM;let gm=two?(k===0?Math.ceil(gameM/2):Math.floor(gameM/2)):gameM;
@@ -1037,7 +1043,7 @@ function missing(c){
   return null;
 }
 function planList(B,cur){return `<div class="planlist">${B.map((b,i)=>`<div class="row ${i<cur?"done":""} ${i===cur?"cur":""}"><span class="n">${i<cur?"✓":String(i+1).padStart(2,"0")}</span><span class="t">${b.title}<small>${blockSub(b)}</small></span><span class="m">${b.mins} min</span></div>`).join("")}</div>`}
-function blockSub(b){return ({play:()=>"Real game · counts on the leaderboard",tick:()=>b.id==="body"?"Same for everyone":b.id==="tech"?"Your own focus":b.id==="pwarm"?"Feel the pace":"Finish well",ladder:()=>"7 to 8 shots",strike:()=>b.balls+" balls · tap the face",zones:()=>(b.zones.length*b.rounds)+" balls · tick or cross",count:()=>b.total+" balls · tick or cross",carry:()=>b.targets.length+" balls · carry the number",speed:()=>"Until 3 strikes",game:()=>b.shots.length+" shots · strokes gained"})[b.type]()}
+function blockSub(b){return ({play:()=>"Real game · counts on the leaderboard",tick:()=>b.id==="body"?"Same for everyone":b.id==="tech"?"Your own focus":b.id==="tight"?"Ball first off a tight lie":b.id==="pwarm"?"Feel the pace":"Finish well",ladder:()=>"7 to 8 shots",strike:()=>b.balls+" balls · tap the face",zones:()=>(b.zones.length*b.rounds)+" balls · tick or cross",lad5:()=>"10 balls · up and back",count:()=>b.total+" balls · tick or cross",carry:()=>b.targets.length+" balls · carry the number",speed:()=>"Until 3 strikes",game:()=>b.shots.length+" shots · strokes gained"})[b.type]()}
 function historyHTML(){if(!LOGS.length)return "";
   return `<section class="sec-h"><span class="eyebrow">Your sessions</span><h2>Practice history</h2></section><div class="card"><div class="stats"><div><span class="label">Streak</span><b>${streak()} day${streak()===1?"":"s"}</b></div><div><span class="label">Sessions</span><b>${LOGS.length}</b></div><div><span class="label">This week</span><b>${LOGS.filter(l=>Date.now()-l.t<7*864e5).length}</b></div></div>
    <div class="grid"><table><thead><tr><th>Date</th><th>Area</th><th class="r">Played like</th><th class="r">SG</th></tr></thead><tbody>${LOGS.slice(0,8).map(l=>`<tr><td>${new Date(l.t).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</td><td>${l.areas?areaNames(l.areas):AREAS[l.area]}</td><td class="r">${l.plan?"Plan":hcTxt(l.hc)}</td><td class="r ${l.sg==null?"":l.sg>=0?"up":"down"}">${l.sg==null?"–":fmt(l.sg)}</td></tr>`).join("")}</tbody></table></div></div>`}
@@ -1071,7 +1077,7 @@ function renderRun(){
     <div class="prog">${S.blocks.map((x,i)=>`<i class="${i<S.bi?"on":i===S.bi?"cur":""}"></i>`).join("")}</div>
     <div class="bstat">Block ${S.bi+1} of ${S.blocks.length}: ${b.title}. Plus is better than ${hcName(c.target)}, minus is worse.</div></div>`;
   h+=`<div class="card"><div class="blockhead"><div style="min-width:0"><span class="eyebrow">${String(S.bi+1).padStart(2,"0")} / ${blockSub(b)}</span><h2>${b.title}</h2></div><span class="mins">${b.mins}<small>MIN</small></span></div>`;
-  h+=({tick:runTick,ladder:runLadder,strike:runStrike,zones:runZones,count:runCount,carry:runCarry,speed:runSpeed,game:runGame,play:runPlay})[b.type](b,c);
+  h+=({tick:runTick,ladder:runLadder,strike:runStrike,zones:runZones,lad5:runLad5,count:runCount,carry:runCarry,speed:runSpeed,game:runGame,play:runPlay})[b.type](b,c);
   h+=`</div><div class="btns"><button class="ghost" data-act="back" ${S.bi===0?"disabled":""}>Previous block</button><button class="ghost" data-act="skip">${S.bi===S.blocks.length-1?"Finish session":"Skip this block"}</button></div>`;
   h+=`<details class="card"><summary class="label" style="cursor:pointer">Your plan</summary>${planList(S.blocks,S.bi)}<button class="linky" data-act="quit">End session and see the report</button></details>`;
   app.innerHTML=h;bindRun(b);
@@ -1092,6 +1098,38 @@ function runStrike(b){const n=b.hits.length,done=n>=b.balls;
   return (b.lines?lines(b):`<ul class="steps"><li>Strike set up station: low point check and strike spray (foot spray works too).</li></ul>`)+
    `<div class="call"><span class="label">${done?"Your strike map":"Ball "+(n+1)+" of "+b.balls}</span><span class="muted" style="font-size:14px">${done?faceSummary(b.hits):"Tap where it came off the face."}</span></div>
    <div class="viz" id="face">${faceSVG(b.hits,done||n>=3)}</div>${n?`<span class="muted">${faceSummary(b.hits)}</span><button class="linky" data-act="faceUndo">Undo last</button>`:""}`+nextBtn(done?"✓ Next block":"Tap the face "+(b.balls-n)+" more time"+(b.balls-n===1?"":"s"),!done)}
+/* ---------- short game session start: body warm up, tight lie strike, then the landing ladder (Jack, 13 Nov) ---------- */
+const LAD_Z=[[10,12],[12,14],[14,16],[16,18],[18,20]],LAD_SEQ=[0,1,2,3,4,4,3,2,1,0];
+function shortStart(B,withLadder){
+  B.push({type:"tick",id:"body",title:"Body warm up",mins:5,video:true,lines:["Play the Express 5 minute body warm up and follow along.","Tick it off when you're done."]});
+  B.push({type:"tick",id:"tight",title:"Technical: tight lie strike",mins:5,timer:true,lines:["Find a tight lie: bare, firm or wet ground, something that's hard to chip off.","Ball first, then the ground. Chip off it for 5 minutes and just find the strike.","No target to worry about. A clean, crisp contact is the only goal."]});
+  if(withLadder)B.push(ladBlock())}
+function ladBlock(){return {type:"lad5",id:"lad5",title:"Landing ladder",mins:5,zones:LAD_Z,seq:LAD_SEQ,res:[]}}
+/* the ladder picture: you and the ball at the bottom, six clubs on the ground from 10 yds, one every 6 ft (2 yds), the zone to land in lit up */
+function ladSVG(b){const W=340,H=410,top=46,k=24,y=d=>top+(20-d)*k,by=H-34,n=b.res.length,done=n>=b.seq.length,zi=done?-1:b.seq[n],up=n<5;
+  let g=`<rect width="${W}" height="${H}" fill="#2d5a27"/>`;for(let i=0;i<12;i++)g+=`<rect x="0" y="${i*36}" width="${W}" height="18" fill="#336530" opacity=".55"/>`;
+  b.zones.forEach((z,i)=>{const on=i===zi,y1=y(z[1]),y2=y(z[0]);g+=`<rect x="54" y="${y1}" width="232" height="${y2-y1}" fill="${on?"#FFD900":"#fff"}" opacity="${on?.85:.06}"/>`;
+    g+=`<text x="34" y="${(y1+y2)/2+7}" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="20" fill="${on?"#FFD900":"#F4F1EA"}">${i+1}</text>`;
+    const marks=b.res.map((r,j)=>({r,z:b.seq[j]})).filter(m=>m.z===i);marks.forEach((m,j)=>{const cx=254-j*22,cy=(y1+y2)/2;g+=`<circle cx="${cx}" cy="${cy}" r="8" fill="${m.r?"#1f8a4c":"#b3261e"}" stroke="#fff" stroke-width="1.5"/><text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">${m.r?"✓":"✕"}</text>`});
+    if(on)g+=`<text x="${W/2-30}" y="${(y1+y2)/2+6}" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="17" fill="#0B0B0B">LAND IT HERE</text>`});
+  [10,12,14,16,18,20].forEach(d=>{const yy=y(d);g+=`<line x1="60" y1="${yy}" x2="262" y2="${yy}" stroke="#C9C6BE" stroke-width="3" stroke-linecap="round"/><rect x="262" y="${yy-3}" width="20" height="6" rx="2" fill="#141414"/><text x="${W-8}" y="${yy+4}" text-anchor="end" font-size="11" font-weight="700" fill="#F4F1EA">${d} yds</text>`});
+  /* the gap from the ball to the first club is shortened */
+  g+=`<line x1="${W/2}" y1="${y(10)+10}" x2="${W/2}" y2="${by-14}" stroke="#F4F1EA" stroke-width="1.5" stroke-dasharray="4 5" opacity=".7"/><text x="${W/2-8}" y="${(y(10)+by)/2+4}" text-anchor="end" font-size="11" font-weight="700" fill="#F4F1EA">10 yds to the first club</text>`;
+  g+=`<circle cx="${W/2}" cy="${by}" r="7" fill="#fff" stroke="#999"/><text x="${W/2}" y="${by+24}" text-anchor="middle" font-size="11" font-weight="700" fill="#F4F1EA">YOU</text>`;
+  if(zi>=0){const z=b.zones[zi],ty=y((z[0]+z[1])/2);g+=`<path d="M${W/2} ${by-10} Q ${W/2+70} ${(by+ty)/2} ${W/2+40} ${ty+8}" fill="none" stroke="#FFD900" stroke-width="3" stroke-dasharray="7 5"/><path d="M${W/2+40} ${ty+8} l10 -2 l-6 9 z" fill="#FFD900"/>`;
+    g+=`<rect x="8" y="6" width="${up?118:134}" height="22" fill="#0B0B0B"/><text x="16" y="22" font-family="Anton,Impact,sans-serif" font-size="14" fill="#FFD900">${up?"GOING UP ↑":"COMING DOWN ↓"}</text>`}
+  g+=`<text x="${W-8}" y="22" text-anchor="end" font-size="11" font-weight="700" fill="#F4F1EA">6 ft between clubs</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Landing ladder: six clubs from 10 to 20 yards, ${zi>=0?"land in zone "+(zi+1):"ladder done"}">${g}</svg>`}
+function ladPB(){const P=PG();return P.lad||null}
+function ladSave(b){const P=PG(),pts=b.res.filter(Boolean).length,old=P.lad||{best:null,n:0};if(b.saved)return;b.saved=true;
+  b.newPB=old.best===null||pts>old.best;P.lad={best:old.best===null?pts:Math.max(old.best,pts),last:pts,n:(old.n||0)+1,t:Date.now()};window.save()}
+function runLad5(b){const tot=b.seq.length,n=b.res.length,done=n>=tot,zi=done?-1:b.seq[n],pts=b.res.filter(Boolean).length,pb=ladPB();
+  const setup=`<ul class="steps"><li>Lay a club on the ground 10 yds away. Then five more behind it, 6 ft (2 paces) apart. That makes 5 landing zones.</li><li>Chip one ball into zone 1, then 2, 3, 4 and 5. Then work back down: 5, 4, 3, 2, 1.</li><li>Tap ✓ if it landed in the zone, ✕ if it didn't, then go to the next zone either way. 1 point a zone. Just for the drill: it doesn't count towards strokes gained.</li></ul>`;
+  return (n?"":setup)+`<div class="lad">${ladSVG(b)}</div>
+   <div class="call"><span class="label">${done?"Ladder done":"Ball "+(n+1)+" of "+tot+" · "+(n<5?"going up":"coming down")}</span><div class="d">${done?pts+"<small>of "+tot+" points</small>":"Zone "+(zi+1)+"<small>"+b.zones[zi][0]+"–"+b.zones[zi][1]+" yds</small>"}</div></div>
+   ${done?(b.newPB?`<div class="ladpb"><span class="new">${pb&&pb.n>1?"★ New personal best: "+pts+"/"+tot:"First ladder: "+pts+"/"+tot+" is the score to beat"}</span></div>`:""):`<div class="okno"><button class="y" data-act="lr" data-v="1">✓ Hit</button><button class="x" data-act="lr" data-v="0">✕ Missed</button></div>`}
+   ${pb?`<div class="ladpb"><span>Personal best ${pb.best}/${tot}</span><span>Last time ${pb.last}/${tot}</span></div>`:""}
+   ${n?`<div class="tally">${b.res.map(r=>`<span class="${r?"ok":"no"}">${r?"✓":"✕"}</span>`).join("")}</div>${done?"":`<button class="linky" data-act="lUndo">Undo last</button>`}`:""}`+nextBtn(done?"✓ Next block":"Finish early",false)}
 function runZones(b){const tot=b.zones.length*b.rounds,n=b.res.length,done=n>=tot,zi=n%b.zones.length,hit=b.res.filter(Boolean).length;
   return lines(b)+`<div class="zones">${b.zones.map((z,i)=>`<div class="${!done&&i===zi?"cur":""}"><b>${i+1}</b>${z[0]}–${z[1]}</div>`).join("")}</div>
    <div class="call"><span class="label">${done?"Ladder done":"Ball "+(n+1)+" of "+tot+" · trip "+(Math.floor(n/b.zones.length)+1)}</span><div class="d">${done?hit+"<small>of "+tot+"</small>":"Zone "+(zi+1)+"<small>"+b.zones[zi][0]+"–"+b.zones[zi][1]+" yds</small>"}</div></div>
@@ -1207,6 +1245,7 @@ function keyStats(c,list,named){let rows=[];
 function blockResult(b){
   if(b.type==="ladder"&&b.shots.length)return [b.title,b.shots.filter(s=>s.ok).length+" of "+b.shots.length+" on target · "+b.shots.length+" shots to 70"];
   if(b.type==="strike"&&b.hits.length)return [b.title,faceSummary(b.hits)];
+  if(b.type==="lad5"&&b.res.length)return [b.title,b.res.filter(Boolean).length+" of "+b.seq.length+" points"+(b.newPB?" · new personal best":"")];
   if((b.type==="zones")&&b.res.length)return [b.title,b.res.filter(Boolean).length+" of "+b.res.length+" in the zone"];
   if(b.type==="count"&&b.res.length)return [b.title,b.res.filter(Boolean).length+" of "+b.res.length];
   if(b.type==="carry"&&b.res.length)return [b.title,sum(b.res.map((c,i)=>carryPts(b.targets[i],c)))+" of "+b.res.length*3+" points"];
@@ -1215,7 +1254,7 @@ function blockResult(b){
 
 /* ---------- events ---------- */
 /* the plan's warm-up counts as the day's warm-up on every golf game page (src/golfwarm.js unlocks the games) */
-function warmMark(){try{const b=S&&S.step==="run"?cur():null;if(!b||!["body","pwarm","warm"].includes(b.id))return;const d=new Date(),m=d.getMonth()+1,dd=d.getDate();localStorage.setItem("mg-golfwarm",d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(dd<10?"0":"")+dd)}catch(e){}}
+function warmMark(){try{const b=S&&S.step==="run"?cur():null;if(!b||!["body","pwarm","warm","tight"].includes(b.id))return;const d=new Date(),m=d.getMonth()+1,dd=d.getDate();localStorage.setItem("mg-golfwarm",d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(dd<10?"0":"")+dd)}catch(e){}}
 /* back from a game opened by the plan (src/plan-return.js leaves mgplan-done): carry straight on, ticking the game off if it was finished */
 function backFromGame(){let d=null;try{d=JSON.parse(localStorage.getItem("mgplan-done")||"null")}catch(e){}if(!d||Date.now()-(+d.t||0)>6*3600e3)return false;
   const ip=rd(KEY);if(!ip||ip.step!=="run"||!ip.blocks)return false;const b=ip.blocks[ip.bi];if(!b||b.type!=="play"||GAME_URL[b.game]!==d.g)return false;
@@ -1266,6 +1305,8 @@ function handle(act,v,el){
     case "faceUndo":b.hits.pop();save();break;
     case "zr":b.res.push(v==="1");save();break;
     case "zUndo":b.res.pop();save();break;
+    case "lr":if(b.res.length<b.seq.length){b.res.push(v==="1");if(b.res.length>=b.seq.length)ladSave(b)}save();break;
+    case "lUndo":if(b.res.length<b.seq.length)b.res.pop();save();break;
     case "cr":b.res.push(v==="1");save();break;
     case "cUndo":b.res.pop();save();break;
     case "carAdd":{const x=parseFloat($("carIn").value);if(!(x>0))return;const t=b.targets[b.res.length],p=carryPts(t,Math.round(x));b.res.push(Math.round(x));ui.flash={cls:p>=2?"p":p===1?"z":"m",txt:`Target ${t}, carried ${Math.round(x)}`,big:p+" pts"};save();break}
@@ -1356,7 +1397,7 @@ function makePlan(){const P=PG(),pr=P.profile,ents=testEntries(),used=TEST_ORDER
   /* three kinds of session: range (driving and approach), short game, putting. The player picks which one to do each day.
      Every kind the tests flag gets at least one session, the rest go where the most shots are lost. With fewer sessions than kinds,
      short game and putting share a session first. */
-  const KIND={app:"range",drive:"range",short:"short",putt:"putt"},warm={range:8,short:5,putt:5,green:5,mixed:8},lossOf=L=>sum(L.map(t=>t.loss));
+  const KIND={app:"range",drive:"range",short:"short",putt:"putt"},sw=pr.mins>=45?15:10,warm={range:8,short:sw,putt:5,green:sw,mixed:8},lossOf=L=>sum(L.map(t=>t.loss));
   let kinds=["range","short","putt"].filter(k=>T.some(t=>KIND[t.area]===k));const kindOf={};T.forEach(t=>kindOf[t.key]=KIND[t.area]);
   if(sessions<kinds.length&&kinds.includes("short")&&kinds.includes("putt")){kinds=kinds.filter(k=>k!=="putt").map(k=>k==="short"?"green":k);T.forEach(t=>{if(t.area==="short"||t.area==="putt")kindOf[t.key]="green"})}
   if(sessions<kinds.length){kinds=["mixed"];T.forEach(t=>kindOf[t.key]="mixed")}
@@ -1440,10 +1481,15 @@ function gameAreas(games){return ORDER.filter(a=>games.some(g=>GAME_AREA[g]===a)
 function sessAreas(s){const it=itemsOf(s);return ORDER.filter(a=>it.some(i=>i.area===a))}
 /* the blocks for one planned session: warm up (and a strike check on range days), then each area:
    a full game when the plan gave it one, otherwise a focused drill and, with 14+ minutes, a short strokes gained game; then your own work */
-function planBlocks(s,mins,cfg,idx){const B=[],it=itemsOf(s),areas=sessAreas(s),long=areas.includes("app")||areas.includes("drive");let u=0;const id=x=>x+(++u);
+function planBlocks(s,mins,cfg,idx){const B=[],it=itemsOf(s).map(x=>Object.assign({},x)),areas=sessAreas(s),long=areas.includes("app")||areas.includes("drive");let u=0,shortStarted=false;const id=x=>x+(++u);
   if(long){B.push({type:"tick",id:"body",title:"Body warm up",mins:5,video:true,lines:["Play the Express 5 minute body warm up and follow along.","Tick it off when you're done."]});
     B.push({type:"strike",id:"strike1",title:"Strike check",mins:3,balls:5,hits:[],lines:["Five balls with a mid iron, same target every time.","After each ball, tap where it came off the face. Foot spray on the face makes the mark easy to see."]})}
-  else if(areas.includes("short"))B.push({type:"zones",id:"warm",title:"Warm-up ladder",mins:5,zones:[[10,12],[12,14],[14,16],[16,18],[18,20]],rounds:1,res:[],area:"short",lines:["Land each ball in the next zone. Each zone is 2 yds deep.","One trip up the ladder."]});
+  else if(areas.includes("short")){
+    /* body warm up + 5 min tight lie strike, then the landing ladder when there's time (45 min sessions and up).
+       New plans leave 10 (15 from 45 min) for this; older plans left 5, so the extra comes off the focused blocks (never below 6 min). */
+    const room=()=>mins-sum(it.map(i=>i.mins)),trim=n=>{let need=n-room();if(need<=0)return true;const F=it.filter(i=>!i.full).sort((a,b)=>b.mins-a.mins);if(sum(F.map(i=>Math.max(0,i.mins-6)))<need)return false;
+      F.forEach(d=>{const t=Math.min(need,Math.max(0,d.mins-6));d.mins-=t;need-=t});return true};
+    trim(10);const lad=mins>=45&&trim(15);shortStart(B,lad);shortStarted=true}
   else B.push({type:"tick",id:"pwarm",title:"Putting warm up",mins:5,lines:["Five 3 ft putts through a gate of two tees, just wider than the ball.","Then three long putts to the fringe to feel the pace of the green."]});
   /* no repeats: never the same drill or game twice in a session, and an area's drill changes from session to session */
   const usedT=new Set(),gameDone=new Set();
@@ -1451,11 +1497,13 @@ function planBlocks(s,mins,cfg,idx){const B=[],it=itemsOf(s),areas=sessAreas(s),
     if(i.full){B.push({type:"play",id:id("play"),game:i.game,title:MacroPlan.GAMES[i.game].name+(MacroPlan.GAMES[i.game].set?" · "+MacroPlan.GAMES[i.game].set:""),mins:i.mins,opened:false,why:i.name});return}
     const a=i.area,base=cfg?JSON.parse(JSON.stringify(cfg)):defaultCfg();
     if(a==="app"){const z=recZones({area:"app",sub:i.key});if(z)base.zones=z}
-    if(i.lava)base.lavaSide=i.lava;
+    if(i.lava)base.lavaSide=i.lava;if(i.key==="sg.bunker")base.bunker=true;
     const REL={"lg.drv":["accuracy"],"lg.fwt":["accuracy"],"lg.speed":["speed"],"putt.s":["short","break"],"putt.m":["mid","break"],"putt.mid":["mid","pace","break"],"putt.l":["pace","break"],"putt.lag":["pace"]};
     let opts=(REL[i.key]||FOCUS[a].map(x=>x[0])).filter(f=>!(f==="speed"&&base.lm===false));const first=focusFor(i.key,a);if(!opts.length)opts=[first];
     opts=[first].concat(opts.filter(f=>f!==first));const r=(idx||0)%opts.length;opts=opts.slice(r).concat(opts.slice(0,r));
     if(i.lava&&a==="app")opts=["misses"].concat(opts.filter(f=>f!=="misses"));
+    /* the tight lie strike block already covers ball-first chipping, so the short game drills pick another focus (bunker play keeps its sand strike) */
+    if(shortStarted&&a==="short"&&i.key!=="sg.bunker"&&opts.some(f=>f!=="strike"))opts=opts.filter(f=>f!=="strike");
     const mk=f=>{const c=JSON.parse(JSON.stringify(base));c.focus={};c.focus[a]=[f];return c};
     let c=null,dm0=i.mins>=14&&!gameDone.has(a)?Math.max(5,Math.round(i.mins*0.4)):i.mins,d=null;
     for(const f of opts){const cc=mk(f),dd=drill(view(cc,a),dm0);if(!usedT.has(dd.title)){c=cc;d=dd;break}}
@@ -1636,6 +1684,8 @@ function renderPlanReport(){const P=PG(),c=S.cfg,done=doneThisWeek(),n=S.plan.n,
   let h=`<div class="verdict"><span class="k">Session ${S.plan.idx+1} done · ${new Date(S.t0).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})}</span><span class="hc">${done.length}/${n}</span><p>${done.length>=n?"That's every session this week. Brilliant work"+(firstName()?", "+esc(firstName()):"")+".":`${n-done.length} more this week. Keep it rolling.`}</p></div>`;
   if(played.length)h+=`<div class="card"><span class="eyebrow">Games played</span>${played.map(b=>`<div class="trow ok"><span class="tn">✓</span><div class="tt"><b>${esc(b.title)}</b><small>Score saved. Check the leaderboard on the game page.</small></div></div>`).join("")}</div>`;
   if(strikes.length)h+=`<div class="card"><span class="eyebrow">Your strike map</span>${strikes.map(b=>`<div class="viz">${faceSVG(b.hits,true)}</div><span class="muted">${faceSummary(b.hits)}</span>`).join("")}</div>`;
+  const lads=S.blocks.filter(b=>b.type==="lad5"&&b.res.length),pb=ladPB();
+  if(lads.length)h+=`<div class="card"><span class="eyebrow">Landing ladder</span>${lads.map(b=>`<div class="trow ok"><span class="tn">${b.res.filter(Boolean).length}</span><div class="tt"><b>${b.res.filter(Boolean).length} of ${b.seq.length} points${b.newPB?" · new personal best":""}</b><small>${pb?"Personal best "+pb.best+"/"+b.seq.length+". ":""}Just for the drill, not strokes gained.</small></div></div>`).join("")}</div>`;
   h+=`<div class="btns"><button class="primary" data-act="home">Back to my week</button></div>`+historyHTML();
   app.innerHTML=h}
 
