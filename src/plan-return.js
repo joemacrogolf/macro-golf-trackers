@@ -27,7 +27,7 @@ function css(){if(document.getElementById('mgpr-css'))return;var s=document.crea
  '.mgpr-cont{position:fixed;left:0;right:0;bottom:0;z-index:62;display:flex;align-items:center;justify-content:center;gap:10px;min-height:68px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));border:0;background:#FFD900;color:#0B0B0B;font:400 26px Anton,Impact,sans-serif;text-transform:uppercase;cursor:pointer;box-shadow:0 -8px 24px rgba(0,0,0,.35);animation:mgprPulse 1.6s ease-out infinite}',
  'html.mg-inapp .mgpr-cont{bottom:calc(68px + env(safe-area-inset-bottom,0px))}',
  '@media (prefers-reduced-motion:reduce){.mgpr-card .mgpr-go,.mgpr-cont{animation:none}}',
- '.mgpr-x{}.mgpr-stay{background:transparent;color:#F4F1EA;border:1px solid rgba(244,241,234,.35)!important;font-size:16px!important;min-height:44px!important}'
+ '.mgpr-share{background:transparent;color:#FFD900;border:2px solid #FFD900!important}.mgpr-x{}.mgpr-stay{background:transparent;color:#F4F1EA;border:1px solid rgba(244,241,234,.35)!important;font-size:16px!important;min-height:44px!important}'
  ].join('');document.head.appendChild(s)}
 
 function backBtn(){if(document.querySelector('.mgpr-back'))return;css();var b=document.createElement('button');b.type='button';b.className='mgpr-back';
@@ -44,9 +44,12 @@ function saving(){var p=document.querySelector('.mgs-pill');return p&&p.getAttri
 /* a new PB gets its celebration (and the share card / photo) first; the plan waits until the player closes it */
 function busy(){try{return !!(window.MGPB&&MGPB.busy())}catch(e){return false}}
 function done(){if(busy()){finished=true;setTimeout(function(){finished=false;done()},700);return}finished=true;mark(true);css();contBar();var w=document.createElement('div');w.className='mgpr-wrap';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');
-  w.innerHTML='<div class="mgpr-card"><small>Game done</small><h2>Nice one</h2><p id="mgprMsg">Saving your score\u2026</p><button type="button" class="mgpr-go">Continue with plan <span aria-hidden="true">&rarr;</span></button><button type="button" class="mgpr-stay">Stay and look at my results</button></div>';
+  w.innerHTML='<div class="mgpr-card"><small>Game done</small><h2>Nice one</h2><p id="mgprMsg">Saving your score\u2026</p><button type="button" class="mgpr-go">Continue with plan <span aria-hidden="true">&rarr;</span></button><button type="button" class="mgpr-share" hidden>Share my score</button><button type="button" class="mgpr-stay">Stay and look at my results</button></div>';
   document.body.appendChild(w);var msg=w.querySelector('#mgprMsg'),left=4,t0=Date.now();
   w.querySelector('.mgpr-go').addEventListener('click',function(){clearTimeout(timer);go(true)});
+  /* the game's own share button (game-done screen): share first, the plan waits */
+  var gs=document.querySelector('.ux-done .ux-share'),sb=w.querySelector('.mgpr-share');if(gs){sb.hidden=false;sb.textContent=gs.textContent}
+  sb.addEventListener('click',function(){clearTimeout(timer);w.remove();contBar();var g=document.querySelector('.ux-done .ux-share');if(g)g.click()});
   w.querySelector('.mgpr-stay').addEventListener('click',function(){clearTimeout(timer);w.remove();contBar()});
   (function tick(){if(saving()&&Date.now()-t0<8000){msg.textContent='Saving your score\u2026';timer=setTimeout(tick,400);return}
     msg.textContent='Score saved. Continuing with your plan in '+left+'\u2026';if(left<=0){go(true);return}left--;timer=setTimeout(tick,1000)})()}

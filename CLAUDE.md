@@ -102,6 +102,8 @@ Golf personal plans use exactly the same message and the same My Plan button.
 
 **Strokes gained explainer (13 Nov, Jack).** `assets/video/sg-explainer.mp4` (31 s). `src/sg-intro.js` (loaded by `golfwarm.js` and My Numbers) plays it once per player, full screen, the first time they open any golf page; not skippable the first time. Seen = localStorage `mg-sgintro` or `S.sgIntro` on the record. `MGSGIntro.open()` replays it (My Numbers' 'What is strokes gained?' button). Games are also locked until the day's warm-up is confirmed (`golfwarm.js`, the Practice Plan's warm-up block counts), and games opened from the plan (`?from=plan`) return to it when the round ends (`src/plan-return.js`).
 
+**Share and PBs on every golf game (13 Nov, Jack).** Every finished game, test and On-Course round has a "Share my score" button on the game-done screen (the MGS share card: game + score; `G.round()` in `mgsGolf`). A personal best gets `src/pb-party.js` (full-screen celebration, take a picture, gold PB border on the share picture via `MGPB.frame`). If the round is top 3 on the leaderboard (all time, or this week once `supabase/011-leaderboard-week.sql` is run; this month until then) the done screen shows it and the share picture gets a leaderboard badge (`MGBoard.rank()` in `src/leaderboard.js`, `w.rank`).
+
 **Golf leaderboards (live).** Each golf page exposes `window.MG_SCORE()`; `summary()` sends it as `_mgSummary.golf` plus `lbHide`. `src/leaderboard.js` (loaded by `golfwarm.js`) shows a Leaders tab with This month / All time boards, read from the public read-only `mg_leaderboard` function (`supabase/004-leaderboard.sql`). `MGSync.init({…, fixedName:'Name'})` skips the name box on one-person plans.
 
 ## Live Kajabi pages (site 2147673115)

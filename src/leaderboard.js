@@ -81,7 +81,7 @@ var seen=null;
 function sig(){var s=score();if(!s)return '';var R=Array.isArray(s.rounds)?s.rounds:[],l=R[R.length-1]||{};return R.length+'|'+(l.d||'')+'|'+l.s+'|'+s.best}
 function watch(){var now=sig();if(window.MG_H2H_GUEST){seen=now;return}if(seen===null){seen=now;return}if(now&&now!==seen){seen=now;if(myCode()&&!hidden())setTimeout(check,4500)}}
 function pos(j){var rows=(j&&j.rows)||[];for(var i=0;i<rows.length;i++)if(rows[i].me)return i+1;return 0}
-function check(){cache={};Promise.all([load('month'),load('all')]).then(function(r){var m=pos(r[0]),a=pos(r[1]),g=gameName(),msg=null;
+function check(){if(document.querySelector('.ux-acc'))return;cache={};Promise.all([load('month'),load('all')]).then(function(r){var m=pos(r[0]),a=pos(r[1]),g=gameName(),msg=null;
   if(a===1)msg=['You\'re number 1','Top of the all-time '+g+' leaderboard. Nobody has done better.'];
   else if(m===1)msg=['Top of the leaderboard','You\'re number 1 on '+g+' this month. Now hold on to it.'];
   else if(m===2||m===3)msg=[(m===2?'2nd':'3rd')+' this month','You\'re on the '+g+' podium. One more good round could take top spot.'];
@@ -92,6 +92,13 @@ function toast(h,p){var old=document.querySelector('.lb-toast');if(old)old.remov
 function init(){var g=game();if(!/^golf-/.test(g)||g==='golf-paul-goddard'||typeof window.MG_SCORE!=='function')return;css();tab();setInterval(watch,2000);
   /* head-to-head button on the games */
   if(ME&&!window.MGH2H){var h=document.createElement('script');h.src=ME.replace(/leaderboard\.js(\?.*)?$/,'h2h.js');document.head.appendChild(h)}}
-window.MGBoard={open:open};
+/* where the round just finished sits against everyone else's best (it doesn't wait for the cloud save):
+   {all:n, per:n, period:'week'|'month', game, score}. 'week' needs supabase/011-leaderboard-week.sql; until then this month is used. */
+function rank(){var s=score();if(!s||window.MG_H2H_GUEST||!myCode()||hidden())return Promise.resolve(null);
+  var R=Array.isArray(s.rounds)?s.rounds:[],l=R[R.length-1];if(!l||typeof l.s!=='number')return Promise.resolve(null);var lower=s.better==='low';
+  function place(j){if(!j||!Array.isArray(j.rows))return 0;var n=1;j.rows.forEach(function(r){if(!r.me&&(lower?r.s<l.s:r.s>l.s))n++});return n}
+  cache={};return Promise.all([load('all'),load('week').catch(function(){return null})]).then(function(r){var wk=r[1]&&r[1].period==='week'?r[1]:null;
+    return (wk?Promise.resolve(wk):load('month')).then(function(per){return {all:place(r[0]),per:place(per),period:wk?'week':'month',game:gameName(),score:fmt(l.s,s.unit)}})}).catch(function(){return null})}
+window.MGBoard={open:open,rank:rank};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else setTimeout(init,0);
 })();

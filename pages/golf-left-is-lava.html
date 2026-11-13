@@ -1167,6 +1167,11 @@ function paint(cv,w,op){
   ctx.fillStyle='#FFD900';ctx.fillRect(M,y-106-s*.92-ts,150,12);
   ctx.font='800 30px Inter, sans-serif';var kw=ctx.measureText(w.kick).width+36,ky=y-156-s*.92-ts-48;ctx.fillStyle='#FFD900';ctx.fillRect(M,ky,kw,56);ctx.fillStyle='#0B0B0B';ctx.fillText(w.kick,M+18,ky+38);
   ctx.fillStyle='rgba(244,241,234,.6)';ctx.font=I.replace('S',26);ctx.fillText(C.label,M,H-80);ctx.textAlign='right';ctx.fillText('MACRO.GOLF',W-M,H-80);ctx.textAlign='left';
+  /* leaderboard top 3 with this round */
+  if(w.rank){var rt='#'+w.rank.n+' '+String(w.rank.p).toUpperCase()+' \u00b7 LEADERBOARD';ctx.font='800 30px Inter, sans-serif';var rw=ctx.measureText(rt).width+90,ry=ky-86;
+    ctx.fillStyle='#0B0B0B';ctx.fillRect(M,ry,rw,62);ctx.strokeStyle='#FFD900';ctx.lineWidth=4;ctx.strokeRect(M+2,ry+2,rw-4,58);
+    ctx.fillStyle='#FFD900';ctx.beginPath();ctx.moveTo(M+22,ry+16);ctx.lineTo(M+50,ry+16);ctx.lineTo(M+48,ry+30);ctx.quadraticCurveTo(M+36,ry+42,M+24,ry+30);ctx.closePath();ctx.fill();ctx.fillRect(M+33,ry+38,4,8);ctx.fillRect(M+26,ry+45,18,5);
+    ctx.fillText(rt,M+64,ry+42)}
   /* personal best: gold border, PB medal and 'Personal best' ribbon */
   if(/PB/i.test(w.tag||'')&&window.MGPB)MGPB.frame(ctx,W,H,w);
 }
@@ -1240,7 +1245,9 @@ function mgsGolf(cfg){
   function weekNo(mon){var v=MGP.get(),ds=Object.keys(v.days).sort();return ds.length?MGS.weeksBetween(MGS.monday(ds[0]),mon)+1:1}
   function undone(rec){MGP.unlog(cfg.id,rec.date)}
   MGS.banners();
-  return {finished:finished,undone:undone,celebrate:function(w){MGS.celebrate(w)}};
+  /* the share card for any finished round: game and score (a PB uses its own PB card instead) */
+  function round(rec,o){o.tag=o.tag||'Score';o.who=whoLine(rec.date);o.title=o.title||cfg.game.toUpperCase();return o}
+  return {finished:finished,undone:undone,round:round,celebrate:function(w){MGS.celebrate(w)}};
 }
 
 /* golf-ux.js: the parts of Joe's ux.js that fit golf pages, using ux.css classes.
@@ -1256,12 +1263,26 @@ var GUX=(function(){
     document.body.appendChild(o);document.body.style.overflow='hidden';
     o.addEventListener('click',function(e){var b=e.target.closest('[data-x]');if(on&&b&&on(b.dataset.x,o,b)===false)return;if(b||e.target===o){o.remove();if(!document.querySelector('.ux-done,.mgs-sheet:not([hidden])'))document.body.style.overflow=''}});return o}
   /* sp: {title, cells:[[label,value]], next:{k,v}, onBests, onResults} */
-  function done(sp){
-    return overlay('Game done','<div class="ux-kick">'+esc(sp.kick||'Game done')+'</div><div class="ux-h">'+esc(sp.title)+'</div><div class="ux-bar"></div>'+
+  function done(sp){var sh=sp.share,pb=!!(sh&&/PB/i.test(sh.tag||''));
+    var o=overlay('Game done','<div class="ux-kick">'+esc(sp.kick||'Game done')+'</div><div class="ux-h">'+esc(sp.title)+'</div><div class="ux-bar"></div>'+
       '<div class="ux-cells">'+sp.cells.slice(0,4).map(function(c){return '<div><span>'+esc(c[0])+'</span><b>'+esc(c[1])+'</b></div>'}).join('')+'</div>'+
       (sp.next?'<div class="ux-next"><span>'+esc(sp.next.k)+'</span><b>'+esc(sp.next.v)+'</b></div>':'')+
-      '<button type="button" class="ux-btn y" data-x="bests">See my bests</button><button type="button" class="ux-btn" data-x="results">See full results</button>',
-      function(x){if(x==='bests'&&sp.onBests)setTimeout(sp.onBests,0);if(x==='results'&&sp.onResults)setTimeout(sp.onResults,0)})}
+      '<div class="ux-acc-slot" aria-live="polite"></div>'+
+      (sh?'<button type="button" class="ux-btn y ux-share" data-x="share">'+CAM+(pb?'Share my PB':'Share my score')+'</button>':'')+
+      '<button type="button" class="ux-btn'+(sh?'':' y')+'" data-x="bests">See my bests</button><button type="button" class="ux-btn" data-x="results">See full results</button>',
+      function(x){if(x==='share'&&sh){setTimeout(function(){MGS.open(sh)},0);return false}if(x==='bests'&&sp.onBests)setTimeout(sp.onBests,0);if(x==='results'&&sp.onResults)setTimeout(sp.onResults,0)});
+    /* in the leaderboard top 3 (all time, or this week) with this round: say so here and on the share picture */
+    if(sh&&window.MGBoard&&MGBoard.rank)MGBoard.rank().then(function(r){if(!r||!o.isConnected)return;var L=[];
+      if(r.all>=1&&r.all<=3)L.push([r.all,'all time']);if(r.per>=1&&r.per<=3)L.push([r.per,r.period==='week'?'this week':'this month']);if(!L.length)return;
+      sh.rank={n:L[0][0],p:L[0][1]};accCss();var slot=o.querySelector('.ux-acc-slot');if(!slot)return;
+      slot.innerHTML='<div class="ux-acc"><div class="ux-acc-n">#'+L[0][0]+'</div><div class="ux-acc-t"><b>'+L.map(function(x){return (x[0]===1?'1st':x[0]===2?'2nd':'3rd')+' '+x[1]}).join(' \u00b7 ')+'</b><span>'+
+        (L[0][0]===1?'Top of the '+esc(r.game)+' leaderboard. ':'On the '+esc(r.game)+' leaderboard podium. ')+(pb?'':'Share it.')+'</span></div></div>'}).catch(function(){})}
+  var CAM='<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" aria-hidden=\"true\" style=\"vertical-align:-3px;margin-right:8px\"><path d=\"M4 8h3l2-3h6l2 3h3v11H4z\" stroke=\"currentColor\" stroke-width=\"2.2\"/><circle cx=\"12\" cy=\"13\" r=\"3.6\" stroke=\"currentColor\" stroke-width=\"2.2\"/></svg>';
+  function accCss(){if(document.getElementById('ux-acc-css'))return;var s=document.createElement('style');s.id='ux-acc-css';s.textContent=[
+    '.ux-acc{display:flex;align-items:center;gap:14px;padding:14px;margin:4px 0 2px;background:linear-gradient(135deg,#fff1a0,#FFD900 45%,#c9a400);color:#0B0B0B;animation:uxAcc .6s cubic-bezier(.2,1.6,.4,1) both;box-shadow:0 0 30px rgba(255,217,0,.35)}',
+    '.ux-acc-n{flex:0 0 auto;width:62px;height:62px;border-radius:50%;background:#0B0B0B;color:#FFD900;display:flex;align-items:center;justify-content:center;font:400 30px Anton,Impact,sans-serif}',
+    '.ux-acc-t{display:flex;flex-direction:column;gap:3px;min-width:0}.ux-acc-t b{font:400 22px/1.05 Anton,Impact,sans-serif;text-transform:uppercase}.ux-acc-t span{font-size:13.5px;font-weight:600}',
+    '@keyframes uxAcc{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}@media (prefers-reduced-motion:reduce){.ux-acc{animation:none}}'].join('');document.head.appendChild(s)}
   /* items: [{name, best, sub, vals:[numbers oldest→newest], lower}] */
   function bests(items,empty){
     function week(){var per=MGP.perWeek(),mon=MGS.monday(MGS.today()),n=MGP.sessions(mon),k=MGP.streak(mon)||MGP.streak(MGS.shift(mon,-7));
@@ -1304,8 +1325,8 @@ function golfWins(cfg){
   function cells(rec){var per=MGP.perWeek(),n=MGP.sessions(MGS.monday(MGS.today()));
     var L=Z.hist.filter(function(r){return vOf(r)===vOf(rec)}),b=bestOf(L);
     return {w:[n,per],c:[[cfg.scoreLabel||'Score',rec.t||cfg.fmt(rec.s)],['Your best'+(rec.vn?' · '+rec.vn:''),cfg.fmt(b)],[cfg.test?'Tests taken':'Games played',String(Z.hist.length)],['Practice this week',Math.min(n,per)+' of '+per]]}}
-  function showDone(rec){var x=cells(rec),w=x.w;
-    GUX.done({kick:cfg.game+(cfg.test?' · test done':' · game done'),title:rec.t||cfg.fmt(rec.s),cells:x.c,
+  function showDone(rec,sh){var x=cells(rec),w=x.w;
+    GUX.done({share:sh,kick:cfg.game+(cfg.test?' · test done':' · game done'),title:rec.t||cfg.fmt(rec.s),cells:x.c,
       next:w[0]>=w[1]?{k:'This week',v:'Week complete: every planned session done'}:{k:'Next up',v:(w[1]-w[0])+' more practice session'+(w[1]-w[0]===1?'':'s')+' to complete your week'},
       onBests:bests,onResults:function(){fin.scrollIntoView({block:'start'})}})}
   function bests(){var groups={},order=[];
@@ -1324,7 +1345,9 @@ function golfWins(cfg){
     var sig=rec.v+'|'+t+'|'+rec.date;if(Z.sig===sig)return;Z.sig=sig;Z.openN=cfg.progress();
     var prev=Z.hist.slice();Z.hist.push(rec);rec.n=Z.hist.length;Z.open=1;Z.hist=Z.hist.slice(-200);zsave();
     var wins=G.finished(rec,prev,Z.hist.length);zsave();
-    showDone(rec);if(wins.length)setTimeout(function(){G.celebrate(wins[0])},400)}
+    var L0=prev.filter(function(r){return vOf(r)===vOf(rec)}),b0=bestOf(L0);
+    showDone(rec,wins.filter(function(w){return /PB/i.test(w.tag||'')})[0]||G.round(rec,{kick:cfg.test?'TEST DONE':'GAME DONE',big:String(rec.t||cfg.fmt(rec.s)).toUpperCase(),
+      line:(rec.vn?rec.vn+' \u00b7 ':'')+(b0===null?'First '+(cfg.test?'test':'game')+' on the board':'Personal best '+cfg.fmt(b0))}));if(wins.length)setTimeout(function(){G.celebrate(wins[0])},400)}
   /* hidden again: an undo of the last shot takes the game back off; a new game clears the marker; anything else (another version) leaves it */
   function unfinish(){var p=cfg.progress(),v=cfg.variant?String(cfg.variant()):'';
     if(Z.open&&p===Z.openN-1&&Z.sig&&Z.sig.indexOf(v+'|')===0){var r=Z.hist.pop();if(r)G.undone(r);Z.sig=null;Z.open=0}
