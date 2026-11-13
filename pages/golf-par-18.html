@@ -478,7 +478,7 @@ body.gated{overflow:hidden}
       <div class="facts" id="shotFacts"></div>
       <p id="shotDesc" hidden></p>
     </div>
-    <div class="prox"><label class="label" for="proxIn">First shot finished (ft, optional)</label><input id="proxIn" type="number" inputmode="decimal" min="0" step="0.5" placeholder="e.g. 4"></div>
+    <div class="prox"><label class="label" for="proxIn">How close did your chip finish? (ft, optional: splits strokes gained into the chip and the putt)</label><input id="proxIn" type="number" inputmode="decimal" min="0" step="0.5" placeholder="e.g. 4"></div>
     <div class="label">Strokes to hole out</div>
     <div class="strokes" id="strokes">
       <button data-s="1"><b>1</b><small>chip-in</small></button>
@@ -578,6 +578,13 @@ function gapToNum(g){ // numeric handicap (negative = plus)
 }
 function numToTxt(n){const r=Math.round(n);if(r<=-5)return"Tour";return r<0?"+"+(-r):r===0?"Scratch":(r>36?"36+":r)+" hc"}
 var expShot=(s,h)=>s.base+gapOf(h)*s.k;
+/* strokes gained split into the chip and the putt when the player gave the chip's distance from the hole:
+   chip = expected for the hole - 1 - expected putts from where it finished; putt = expected putts from there - putts taken.
+   Putts are the same footage averages as the Putting Test (GSG.puttE), so the two add up to the hole's strokes gained. */
+function holeSplit(i){const x=S.scores[i],s=S.plan[i];if(!x||!s)return null;const e=expShot(s,S.target);
+  if(x===1)return {chip:e-1,putt:null};const p=S.prox&&S.prox[i];
+  if(p==null||!(p>0)||!window.GSG||!GSG.puttE)return null;const pe=GSG.puttE(GSG.num(S.target),p);return {chip:e-1-pe,putt:pe-(x-1),ft:p}}
+function sg2(v){return (v>=0?"+":"−")+Math.abs(v).toFixed(2)}
 
 /* ---------- Shot library ---------- */
 var ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
@@ -711,11 +718,12 @@ function renderCard(){
   if(!S.started){$("card").innerHTML=`<tr><td class="l muted">Your 9 holes appear here once the round starts.</td></tr>`;$("cardNote").textContent="";return}
   let h=`<thead><tr><th>#</th><th class="l">Shot</th><th>Yds</th><th>Score</th><th>${hcName(S.target)}</th><th>+/−</th></tr></thead><tbody>`;
   S.plan.forEach((s,i)=>{const x=S.scores[i],e=expShot(s,S.target);
-    h+=`<tr><td><span class="diffpill d${s.diff}" style="padding:2px 6px">${i+1}</span></td><td class="l">${s.name}</td><td>${s.d}</td><td>${x?`<span class="chip ${scoreCls(x)}">${x>=6?"6+":x}</span>`:`<span class="chip cx">·</span>`}</td><td>${e.toFixed(2)}</td><td class="${x?(x<=e?"up":"down"):""}">${x?(x<=e?"+":"−")+Math.abs(e-x).toFixed(2):"–"}</td></tr>`});
+    h+=`<tr><td><span class="diffpill d${s.diff}" style="padding:2px 6px">${i+1}</span></td><td class="l">${s.name}${(()=>{const sp=holeSplit(i);return sp&&sp.putt!=null?`<br><small class="muted">Chip ${sg2(sp.chip)} · Putt ${sg2(sp.putt)}</small>`:""})()}</td><td>${s.d}</td><td>${x?`<span class="chip ${scoreCls(x)}">${x>=6?"6+":x}</span>`:`<span class="chip cx">·</span>`}</td><td>${e.toFixed(2)}</td><td class="${x?(x<=e?"up":"down"):""}">${x?(x<=e?"+":"−")+Math.abs(e-x).toFixed(2):"–"}</td></tr>`});
   const k=n(),tot=sum(S.scores),e=expSoFar(S.target);
   h+=`<tr><td></td><td class="l"><b>Total</b></td><td></td><td><b>${k?tot:"–"}</b></td><td>${fmt(sum(S.plan.map(s=>expShot(s,S.target))))}</td><td class="${k?(tot<=e?"up":"down"):""}">${k?(tot<=e?"+":"−")+fmt(Math.abs(e-tot)):"–"}</td></tr></tbody>`;
   $("card").innerHTML=h;
-  $("cardNote").textContent="+/− is strokes gained against your target handicap on each shot: plus means you beat it.";
+  const SP=S.scores.map((x,i)=>holeSplit(i)).filter(v=>v&&v.putt!=null);
+  $("cardNote").textContent="+/− is strokes gained against your target handicap on each shot: plus means you beat it."+(SP.length?` Where you entered how close the chip finished: chipping ${sg2(SP.reduce((a,v)=>a+v.chip,0))}, putting ${sg2(SP.reduce((a,v)=>a+v.putt,0))} over ${SP.length} hole${SP.length===1?"":"s"}.`:"");
 }
 function hcIndex(){const r=S.history.slice(0,5);if(!r.length)return null;return {g:r.reduce((a,x)=>a+x.gap,0)/r.length,n:r.length}}
 function renderTracker(){
@@ -754,8 +762,8 @@ function enter(x){
   if(n()===9&&!S.saved){const g=roundGap();S.history.unshift({date:new Date().toISOString().slice(0,10),level:S.level,score:sum(S.scores),ud:S.scores.filter(v=>v<=2).length,gap:g});S.history=S.history.slice(0,20);S.saved=true}
   save();$("proxIn").value="";
   const word=x===1?"Chip-in! Birdie":x===2?"Up and down":x===3?"Bogey":x===4?"Double bogey":"Big number";
-  const sg=e-x;
-  $("flash").innerHTML=`<div class="flash ${scoreCls(x)}"><span>Hole ${k+1} · ${s.name}<br>${word} · ${sg>=0?"gained "+sg.toFixed(2):"lost "+(-sg).toFixed(2)} vs ${hcName(S.target)}</span><b>${x>=6?"6+":x}</b></div>`;
+  const sg=e-x,sp=holeSplit(k),spl=sp&&sp.putt!=null?`<br>Chip ${sg2(sp.chip)} · Putt ${sg2(sp.putt)}`:"";
+  $("flash").innerHTML=`<div class="flash ${scoreCls(x)}"><span>Hole ${k+1} · ${s.name}<br>${word} · ${sg>=0?"gained "+sg.toFixed(2):"lost "+(-sg).toFixed(2)} vs ${hcName(S.target)}${spl}</span><b>${x>=6?"6+":x}</b></div>`;
   renderAll();
 }
 function undo(){if(!n())return;if(S.saved){S.history.shift();S.saved=false}S.scores.pop();S.prox.pop();save();$("flash").innerHTML="";renderAll()}
@@ -1415,7 +1423,12 @@ UX.init({family:'golf',home:false});
 <script>var KEY="par18";</script>
 <script src="{{BASE}}src/golf-sg.js"></script>
 <script>/* strokes gained alongside the game score */
-GSG.init({target:()=>S.target,unit:"hole",flash:false,card:false,shots:()=>S.scores.map((x,i)=>({n:S.plan[i].name,sg:expShot(S.plan[i],S.target)-x}))});
+/* each hole is one short-game shot; with the chip's distance it becomes a chip (Short game) and a putt (Putting) for My Numbers */
+GSG.init({target:()=>S.target,unit:"hole",flash:false,card:false,
+  summary:(L,t)=>{const k=S.scores.length,tot=L.reduce((a,x)=>a+x.sg,0);return {big:k?GSG.fmt(tot):"–",line:k?GSG.fmt(tot/k)+" per hole over "+k+" hole"+(k===1?"":"s"):"Each hole is scored as you go."}},
+  shots:()=>{const L=[];S.scores.forEach((x,i)=>{const s=S.plan[i],sp=holeSplit(i);
+    if(sp&&sp.putt!=null){L.push({n:s.name,sg:sp.chip,a:"Short game"});L.push({n:"Putt from "+sp.ft+" ft",sg:sp.putt,a:"Putting",sub:true})}
+    else L.push({n:s.name,sg:expShot(s,S.target)-x,a:"Short game"})});return L}});
 </script>
 <script>/* standard leaderboard score: read by sync.js as _mgSummary.golf. Finished rounds only (S.history), from window.S alone */
 (function(){var GAME="golf-par-18",UNIT="strokes",BETTER="low";

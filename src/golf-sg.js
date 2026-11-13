@@ -11,6 +11,15 @@
 var GSG=(function(){
 var FW=[[50,2.66],[60,2.70],[70,2.72],[80,2.75],[90,2.78],[100,2.80],[120,2.85],[140,2.91],[160,2.98],[180,3.05],[200,3.19],[220,3.32],[240,3.45],[260,3.55],[280,3.65],[300,3.71],[350,3.87],[400,4.00]];
 var SHORT={fw:[[0,1.0],[5,2.05],[10,2.18],[20,2.40],[30,2.52],[40,2.60],[50,2.66]],rough:[[0,1.0],[5,2.2],[10,2.34],[20,2.59],[30,2.70],[40,2.78],[50,2.87]],sand:[[0,1.0],[5,2.37],[10,2.43],[20,2.53],[30,2.66],[40,2.82],[50,2.92]]};
+/* expected putts by distance for each handicap: the same table as the Putting Test, Short Game Test and every other golf page
+   (Tour row = Broadie; handicap rows from Shot Scope make rates and leave distances). Distance only: no slope or break. */
+var PT={"grid": [2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60], "tab": {"Tour": [1.01, 1.04, 1.13, 1.23, 1.34, 1.5, 1.61, 1.68, 1.78, 1.87, 1.93, 1.98, 2.06, 2.14, 2.21], "0": [1.03, 1.114, 1.2, 1.288, 1.381, 1.543, 1.647, 1.723, 1.828, 1.9, 1.96, 2.01, 2.09, 2.17, 2.24], "5": [1.04, 1.156, 1.279, 1.379, 1.458, 1.594, 1.668, 1.744, 1.848, 1.92, 1.985, 2.03, 2.11, 2.19, 2.26], "10": [1.05, 1.17, 1.301, 1.415, 1.507, 1.672, 1.765, 1.823, 1.888, 1.976, 2.021, 2.059, 2.13, 2.21, 2.28], "15": [1.06, 1.2, 1.355, 1.492, 1.576, 1.735, 1.846, 1.903, 1.957, 2.044, 2.093, 2.126, 2.218, 2.272, 2.324], "20": [1.07, 1.222, 1.394, 1.54, 1.647, 1.803, 1.927, 1.984, 2.025, 2.13, 2.183, 2.228, 2.312, 2.368, 2.407], "25": [1.09, 1.262, 1.463, 1.623, 1.73, 1.906, 2.028, 2.088, 2.158, 2.253, 2.315, 2.376, 2.438, 2.487, 2.532], "30": [1.11, 1.294, 1.517, 1.687, 1.793, 2.03, 2.152, 2.216, 2.281, 2.389, 2.445, 2.486, 2.544, 2.596, 2.656]}};
+var PLV=[["Tour",-5],["0",0],["5",5],["10",10],["15",15],["20",20],["25",25],["30",30]];
+function rowE(row,ft){var g=PT.grid;if(ft<=1)return 1;if(ft<=g[0])return 1+(row[0]-1)*(ft-1)/(g[0]-1);
+  for(var i=1;i<g.length;i++)if(ft<=g[i])return row[i-1]+(row[i]-row[i-1])*(ft-g[i-1])/(g[i]-g[i-1]);
+  var k=g.length;return row[k-1]+(row[k-1]-row[k-2])/(g[k-1]-g[k-2])*(ft-g[k-1])}
+function puttE(n,ft){var i=1;while(i<PLV.length-1&&n>PLV[i][1])i++;var a=PLV[i-1],b=PLV[i],t=(n-a[1])/(b[1]-a[1]);
+  var ea=rowE(PT.tab[a[0]],ft),eb=rowE(PT.tab[b[0]],ft);return Math.max(1,ea+(eb-ea)*t)}
 var PUTT=[[0,1.0],[2,1.01],[3,1.04],[4,1.13],[5,1.23],[6,1.34],[7,1.42],[8,1.50],[10,1.61],[15,1.78],[20,1.87],[30,1.98],[40,2.06],[50,2.14],[60,2.21],[90,2.35]];
 /* [name, number, approach gap at 150 yds, putting gap at 20 ft, drive total, fairway %, penalty %] */
 var LV=[["Tour",-5,0,0,300,.60,.03],["0",0,.15,.06,270,.55,.05],["5",5,.32,.09,255,.52,.06],["10",10,.48,.12,240,.48,.08],["15",15,.63,.15,228,.45,.10],["20",20,.78,.18,215,.42,.12],["25",25,.93,.21,200,.40,.14],["30",30,1.08,.24,185,.38,.16]];
@@ -24,7 +33,7 @@ function hname(h){h=h==null||h===""?"10":String(h);return h==="Tour"?"Tour":h===
 function lieOf(x){x=String(x||"").toLowerCase();return /sand|bunk/.test(x)?"sand":/fair|fw|fringe|apron|tight/.test(x)?"fw":/green/.test(x)?"green":"rough"}
 /* expected strokes to hole out for handicap number n, from a lie, at a distance in yards */
 function E(n,lie,yds){var p=P(n);
-  if(lie==="green"){var ft=yds*3;return interp(PUTT,ft)+p.gp*Math.min(1.3,0.4+ft/20)}
+  if(lie==="green"){var ft=yds*3;return ft<=0?0:puttE(n,ft)}
   if(yds<=50){var tab=lie==="fw"?SHORT.fw:lie==="sand"?SHORT.sand:SHORT.rough;return interp(tab,yds)+p.g*0.75*(lie==="fw"?1:lie==="sand"?1.3:1.15)}
   var base=interp(FW,yds)+(lie==="fw"?0:lie==="rough"?0.15+0.1*Math.min(1,(yds-100)/100):0.45);
   return base+p.g*(0.6+0.4*Math.min(yds,300)/150)*(lie==="fw"?1:lie==="rough"?1.15:1.3)}
@@ -87,18 +96,23 @@ var AREA={'golf-insanity':'Putting','golf-money-stealers':'Putting','golf-hole-o
 function pageName(){var s=document.querySelector('script[data-page]');return s?s.getAttribute('data-page'):''}
 function today(){var d=new Date(),m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd}
 function logRound(L,area,hc){try{var S=window.S;area=area||AREA[pageName()];if(!S||!area||!L||!L.length)return;
-  var n=L.length,t=L.reduce(function(a,x){return a+(+x.sg||0)},0),cur=S._sgRound;
+  /* n counts holes/shots for spotting a new round; a putt split off a hole (sub:true) doesn't count */
+  var n=L.filter(function(x){return !x.sub}).length,t=L.reduce(function(a,x){return a+(+x.sg||0)},0),cur=S._sgRound;
   /* a new round starts when the shot list goes back to one shot after a longer round (an undo only ever drops one shot) */
   if(!cur||!cur.id||(n===1&&cur.n>=3)||n<cur.n-1)cur=S._sgRound={id:today()+'|'+Date.now().toString(36),n:n};cur.n=n;var id=cur.id;
-  S.sgLog=Array.isArray(S.sgLog)?S.sgLog:[];var e=S.sgLog.filter(function(x){return x&&x.id===id})[0];
-  if(e&&e.n===n&&Math.abs(e.sum-t)<1e-6)return;
-  if(!e){e={id:id};S.sgLog.unshift(e)}e.d=id.slice(0,10);e.a=area;e.n=n;e.sum=Math.round(t*1000)/1000;e.hc=String(hc!=null&&hc!==''?hc:tgt());
-  S.sgLog=S.sgLog.slice(0,60);if(typeof window.save==='function')window.save()}catch(e){}}
+  S.sgLog=Array.isArray(S.sgLog)?S.sgLog:[];
+  /* shots can name their own area ({a:'Putting'}): each area gets its own row for this round */
+  var groups={},order=[];L.forEach(function(x){var k=x.a||area;if(!groups[k]){groups[k]=[];order.push(k)}groups[k].push(x)});
+  var split=order.length>1||order[0]!==area,changed=false;
+  order.forEach(function(k){var G=groups[k],gn=G.length,gt=G.reduce(function(a,x){return a+(+x.sg||0)},0),rid=split?id+'|'+k:id;
+    var e=S.sgLog.filter(function(x){return x&&x.id===rid})[0];if(e&&e.n===gn&&Math.abs(e.sum-gt)<1e-6)return;
+    if(!e){e={id:rid};S.sgLog.unshift(e)}e.d=id.slice(0,10);e.a=k;e.n=gn;e.sum=Math.round(gt*1000)/1000;e.hc=String(hc!=null&&hc!==''?hc:tgt());changed=true});
+  if(!changed)return;S.sgLog=S.sgLog.slice(0,60);if(typeof window.save==='function')window.save()}catch(e){}}
 function paint(){if(!C)return;var L=list();paintBoard(L);paintFlash(L);paintCard(L);if(C.log!==false)logRound(L)}
 function reportLines(){var L=list();if(!L.length)return [];var h=head(L);return ["","Strokes gained vs "+hname(tgt())+": "+h.big+" ("+h.line+")"]}
 function init(o){C=o;css();last=list().length;
   if(typeof window.renderAll==="function"){var r=window.renderAll;window.renderAll=function(){var x=r.apply(this,arguments);try{paint()}catch(e){}return x}}
   if(typeof window.buildReport==="function"){var b=window.buildReport;window.buildReport=function(){var t=b.apply(this,arguments);try{var add=reportLines();if(add.length&&typeof t==="string")t=t.replace(/\s+$/,"")+"\n"+add.join("\n")}catch(e){}return t}}
   paint()}
-return {init:init,paint:paint,logRound:logRound,E:E,num:num,name:hname,lieOf:lieOf,putt:putt,puttSG:puttSG,shortSG:shortSG,approachSG:approachSG,driveSG:driveSG,driveTotal:driveTotal,fmt:fmt,P:P};
+return {init:init,paint:paint,logRound:logRound,puttE:puttE,E:E,num:num,name:hname,lieOf:lieOf,putt:putt,puttSG:puttSG,shortSG:shortSG,approachSG:approachSG,driveSG:driveSG,driveTotal:driveTotal,fmt:fmt,P:P};
 })();
