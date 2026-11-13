@@ -237,6 +237,7 @@ td.r,th.r{text-align:right}
 .wrap{max-width:580px;margin:0 auto}
 .cover h1 .hello{display:block;font-family:var(--text);font-weight:700;font-size:16px;letter-spacing:0;text-transform:none;color:var(--gold);margin-bottom:6px}
 html,body{background:#0B0B0B!important}
+.sgvid{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:#141414;border:1px solid rgba(244,241,234,.14);border-left:6px solid #FFD900;color:#F4F1EA;padding:14px 16px;cursor:pointer;font:inherit}.sgvid i{flex:0 0 auto;width:42px;height:42px;border-radius:50%;background:#FFD900;display:flex;align-items:center;justify-content:center}.sgvid i:after{content:"";margin-left:4px;border-left:14px solid #0B0B0B;border-top:9px solid transparent;border-bottom:9px solid transparent}.sgvid b{display:block;font:400 20px Anton,Impact,sans-serif;text-transform:uppercase}.sgvid small{display:block;font-size:13px;color:#9C988C;margin-top:2px}
 .addname{font:700 12px var(--text);letter-spacing:1px;text-transform:uppercase;color:#0B0B0B;background:var(--gold);border:0;padding:6px 10px;vertical-align:middle;cursor:pointer}
 .nmin{font:600 16px var(--text);width:150px;padding:6px 8px;border:1px solid rgba(244,241,234,.35);background:#1a1916;color:#F4F1EA;vertical-align:middle;margin-right:6px}
 .signin{background:var(--ink);color:var(--on-ink);padding:20px;display:flex;flex-direction:column;gap:12px;border-left:6px solid var(--gold)}
@@ -266,6 +267,7 @@ html,body{background:#0B0B0B!important}
   </footer>
 </div>
 <script src="{{BASE}}src/golf-numbers.js"></script>
+<script src="{{BASE}}src/sg-intro.js"></script>
 <script>
 /* My Numbers: the player's own strokes gained dashboard. Signs in with the same golf email + PIN as the games
    (localStorage 'mgsync-group:golf'), reads their records and shows them. Read-only: it never saves anything. */
@@ -299,7 +301,9 @@ function paint(d){greet(d.name);var H=d.history,last=function(k){var h=H[k];retu
   var per='3m';try{per=localStorage.getItem('mgn-period')||'3m'}catch(e){}
   var st=N.streak(d);
   app.innerHTML=N.streakCard(st)+N.sgCard(d.tests,{live:N.live?N.live(d.tests,d.records,d.practice):null})+'<div id="trendWrap">'+N.trendsCard(d,per)+'</div>'+N.planCard(d.practice)+N.testsCard(H)+N.gamesCard(d.games)+
+   '<button type="button" class="sgvid" id="sgVid"><i></i><span><b>What is strokes gained?</b><small>Watch the 30-second video</small></span></button>'+
    '<div class="foot"><span>Signed in as '+N.esc((creds()||{}).em||'')+'</span><button type="button" id="out">Not you?</button></div>';
+  {const sv=document.getElementById('sgVid');if(sv)sv.addEventListener('click',function(){if(window.MGSGIntro)MGSGIntro.open()})}
   /* period chips: redraw only the trend card, remember the choice on this phone */
   $('trendWrap').addEventListener('click',function(e){var b=e.target.closest('[data-per]');if(!b)return;per=b.getAttribute('data-per');try{localStorage.setItem('mgn-period',per)}catch(x){}$('trendWrap').innerHTML=N.trendsCard(d,per)});
   $('out').addEventListener('click',function(){signin('')});
