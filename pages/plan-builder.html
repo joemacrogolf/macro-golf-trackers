@@ -810,6 +810,7 @@ document.addEventListener("click",async e=>{
       window.open((/macro\.golf$/.test(location.hostname)?location.origin:"https://www.macro.golf")+"/coach-plan?preview=1","_blank");return}
     case"pubcancel":ui.pubConfirm=null;render();keep();return;
     case"copywelcome":{const t=document.getElementById("pb-welcome");try{await navigator.clipboard.writeText(t.value);b.textContent="Copied"}catch(err){t.select();b.textContent="Select and copy"}return}
+    case"importplan":{try{const p=importPlan($("#pb-import").value);ui.importMsg="";plan=p;plans.set(p.id,p);closeDrawer();section="player";dirty=true;render();save();setStatus("Imported "+p.playerName+"'s plan. Check each section, then Review & create.")}catch(err){ui.importMsg=err.message;renderPlans()}return}
     case"gadd-open":ui.gaddFor=b.dataset.id;ui.gaddMsg="";renderPlans();return;
     case"gadd-cancel":ui.gaddFor=null;renderPlans();return;
     case"gadd":{const name=$("#pb-ga-name").value.trim(),path=$("#pb-ga-path").value.trim(),area=$("#pb-ga-area").value,sid=b.dataset.id||null;
@@ -855,7 +856,7 @@ function renderPlans(){
   const fresh=intakePeople().filter(x=>!withPlan.has(x.email)&&(!q||x.email.includes(q)||(x.name||"").toLowerCase().includes(q)));
   $("#pb-plList").innerHTML=list.length?list.map(g=>{const last=g[g.length-1];return `<div class="pl"><h3>${esc(last.playerName||"Unnamed")}</h3><div class="em">${esc(last.playerEmail||"No email")}${last.coach?" · "+esc(last.coach):""}</div>
     <div class="phases">${g.map(p=>`<button type="button" data-open="${esc(p.id)}" class="${plan&&plan.id===p.id?"cur":""}"><b>P${esc(p.phase)}</b>${p.status==="ready"?"Ready":"Draft"} · ${esc(fmtDate(p.startDate))}</button>`).join("")}</div>
-    <button class="btn sm gold" type="button" data-next="${esc(last.id)}">Start Phase ${(+last.phase||1)+1} (week ${(+last.phase||1)*(+last.weeks||6)} review)</button></div>`}).join("")+freshHTML(fresh)+suggHTML()+gamesHTML():freshHTML(fresh)+suggHTML()+gamesHTML()+`<div class="empty">${plans.size?"No players match that search.":"No plans yet. Build the first one with + New plan, or from a form below."}</div>`;
+    <button class="btn sm gold" type="button" data-next="${esc(last.id)}">Start Phase ${(+last.phase||1)+1} (week ${(+last.phase||1)*(+last.weeks||6)} review)</button></div>`}).join("")+freshHTML(fresh)+suggHTML()+gamesHTML()+importHTML():freshHTML(fresh)+suggHTML()+gamesHTML()+importHTML()+`<div class="empty">${plans.size?"No players match that search.":"No plans yet. Build the first one with + New plan, or from a form below."}</div>`;
 }
 $("#pb-plList").addEventListener("click",async e=>{
   const o=e.target.closest("[data-open]"),n=e.target.closest("[data-next]");
@@ -1026,6 +1027,15 @@ function startFromForm(email){
   plan=newPlan();plan.playerEmail=email;plan.playerName=(r&&r.name)||"";
   section="intake";ui.fillMsg=applyIntake();ui.tpiMsg="";ui.mobMsg="";changed(true);
 }
+/* Import a plan written elsewhere (Jack's or Sam's Claude, docs/coach-plan-format.md): paste the plan JSON, it becomes a new draft here.
+   Then Review & create > Create app plan puts it on the player's app (www.macro.golf/coach-plan). No new Kajabi page. */
+function importHTML(){return `<h6 style="font:10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:14px 2px 2px">Import a plan from Claude</h6><div class="sugg"><span class="hint" style="margin:0">Paste the plan data Jack's or Sam's Claude wrote (format: docs/coach-plan-format.md). It opens here as a new draft to check, then Create app plan.</span><textarea id="pb-import" rows="4" placeholder='{"playerName": "…", "playerEmail": "…", …}' style="width:100%;font:12px var(--mono)"></textarea><div class="row"><span class="hint" style="margin:0">${esc(ui.importMsg||"")}</span><span class="spacer"></span><button class="btn sm gold" type="button" data-act="importplan">Import plan</button></div></div>`}
+function importPlan(text){const t=String(text||"").trim(),a=t.indexOf("{"),b=t.lastIndexOf("}");if(a<0||b<a)throw new Error("No plan data found. Paste the whole block, starting with {");
+  const raw=JSON.parse(t.slice(a,b+1));if(!raw||typeof raw!=="object"||!raw.playerName)throw new Error("The plan data needs at least a playerName");
+  ["id","appCode","code","publishedAt","published_at","updated_at"].forEach(k=>delete raw[k]);
+  const reid=o=>{if(Array.isArray(o))o.forEach(reid);else if(o&&typeof o==="object"){if("id" in o||o.name!==undefined||o.title!==undefined||o.q!==undefined)o.id=uid();Object.values(o).forEach(reid)}};
+  ["priorities","habits","stats"].forEach(k=>reid(raw[k]));reid((raw.practice||{}).sessions);reid((raw.oncourse||{}).games);reid((raw.mobility||{}).items);reid((raw.checkin||{}).questions);reid((raw.physical||{}).dayList);
+  const p=normalise(Object.assign(raw,{id:uid(),status:"draft",createdAt:Date.now(),imported:Date.now()}));return p}
 function freshHTML(list){
   if(!list.length)return"";
   return `<h6 style="font:10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:14px 2px 2px">Forms received, no plan yet</h6>`+list.map(x=>`<div class="pl"><h3>${esc(x.name||x.email)}</h3><div class="em">${esc(x.email)}</div><div class="phases">${[...x.forms].map(f=>`<span class="chip ok">${FORM_LABEL[f]}</span>`).join("")}<span class="chip">${fmtTS(x.last)}</span></div><button class="btn sm gold" type="button" data-fromform="${esc(x.email)}">Build their first plan</button></div>`).join("");

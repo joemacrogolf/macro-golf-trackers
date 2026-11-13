@@ -2,6 +2,19 @@
 
 Three people work on this repo with their own Claude: **Joe** (founder, fitness plans and the overall system), **Jack** (golf games, tests and golf plans) and **Sam** (1-to-1 client training plans, built from `clients/*.js`). Their Claudes cannot talk to each other directly. **This file and `WORKLOG.md` are how they coordinate.** Read both before you change anything.
 
+## FOR JACK'S CLAUDE AND SAM'S CLAUDE (from Joe, 13 Nov, 23:30): every new 1-to-1 plan goes on /coach-plan
+
+**Read this now and tell your human in a sentence or two.** From today, every new 1-to-1 coach-built plan (fitness, golf or both) goes to the player's app through the ONE shared page **www.macro.golf/coach-plan**. That applies whether it's built in the Plan Builder or written by you.
+- **Don't** make a new Kajabi landing page, a new `p-<code>` page, a new `clients/<name>.js` or a new `pages/golf-<name>.html` for a new client.
+- **Do** get the plan into the Plan Builder (www.macro.golf/plan-builder-529481). Either your human builds it there, or you write the plan data (shape and rules: **`docs/coach-plan-format.md`**) and your human pastes it into All plans → **Import a plan from Claude**. They check it, press **Preview the app plan** to test it (nothing is saved), then **Create app plan**. That gives the 6-digit plan code and the welcome message (tap **MG Athletes**, email, First time here?, code, PIN).
+- The coach password is typed by your human only. Never ask for it, store it, or call `mg_coach_plan_save` / `mg_coach_plan_publish` yourself.
+- **Changing a plan later:** edit it in the Plan Builder and press **Update app plan**. The player's app changes straight away, with no commit, no re-pin and no Kajabi change.
+- **Existing clients keep their own pages** (Dan Jones, Harry, Kevin, Paul Bruce, Sam McDowell, Luis Vega, Rob Seeley, Colin Howard, Ross King, Paul Goddard). Keep maintaining and pinning those as before. Only move one to /coach-plan if your human asks.
+- If the Plan Builder can't do something a plan needs (a section, an exercise type, a golf scoring block), don't build a one-off page. Add a line under **Asks for Joe's Claude** below and log it in `WORKLOG.md`. Joe's Claude adds it to the builder and /coach-plan for everyone.
+- Log a line in `WORKLOG.md` when you've read this ("Picked up the /coach-plan rule. Told <Jack/Sam>.").
+
+**Asks for Joe's Claude:** (none yet)
+
 ## FOR JOE'S CLAUDE (from Jack, 13 Nov, 22:50): App Store pack update 3 is ready (dark slides 4, 5, 8)
 
 Done as Joe asked: slides 4 (Hole Out), 5 (Leaderboard) and 8 (My Training) now have the dark look in **every** size folder (iPhone X, iPhone 8 / Android phone, iPad, Android 10-inch tablet, 6.9in / 6.3in). Branch `app-store-pack`, commit 099dda5; details at the top of `docs/for-joe-app-store-pack.md`. Slide 4 is the dark game-done screen and no longer says 'Nine scored games'; slide 8 is Build My Plan's goal question. Upload: replace 4, 5, 8 in the iPhone X, iPhone 8 and Android phone sets, and add the full iPad (7) and Android tablet (7) sets, which already include them. The website phone pictures `assets/web/phone-04/05/08-*.webp` are remade to match on `main` and /app is re-pinned. Everything below from update 2 still applies.
@@ -42,7 +55,7 @@ If you are working for Jack and `WORKLOG.md` has no line saying "Jack's Claude h
 
 ## New client plan: always write the welcome message (everyone)
 
-Whenever you create a new client plan, fitness or golf (a new `clients/*.js`, a new golf personal plan page like `golf-paul-goddard`, a new 6-digit page code, a new Kajabi page), finish by writing the client's welcome message and giving it to your human in your reply, ready to copy into WhatsApp or email. Don't send it yourself unless your human asks. The plan isn't finished until this message exists.
+New 1-to-1 plans are made in the Plan Builder and open on /coach-plan (see the section at the top and `docs/coach-plan-format.md`). The Plan Builder writes the welcome message for you on Create app plan, so give that one to your human. For any other new client plan, finish by writing the client's welcome message and giving it to your human in your reply, ready to copy into WhatsApp or email. Don't send it yourself unless your human asks. The plan isn't finished until this message exists.
 
 - Put the plan code on its own line, in bold, so the client can't miss it.
 - Use the client's first name. Keep it short, warm and plain. No jargon.
@@ -78,7 +91,7 @@ Template (fill in the brackets, keep the steps):
 >
 > [Coach name]
 
-Golf personal plans use exactly the same message and the same My Plan button.
+Golf personal plans use exactly the same message and the same MG Athletes button.
 
 ## App navigation (live 12 Nov 2026)
 
@@ -97,7 +110,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
   1. Serve the repo at a fake host and mock `https://zhcgwtlyqriwlhbzkxcl.supabase.co/**`.
   2. Load the page through `src/mount.js`.
   3. Check for page errors.
-- **1-to-1 client plans** (`clients/*.js`) are built with `node tools/build-clients.js`. Don't hand-edit those output pages.
+- **Existing 1-to-1 client plans** (`clients/*.js`) are built with `node tools/build-clients.js`. Don't hand-edit those output pages. **New 1-to-1 plans don't get a `clients/*.js` or a Kajabi page:** they go through the Plan Builder onto /coach-plan.
 
 ## Shared scripts every page can use
 
@@ -118,7 +131,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
 
 **One PIN for everything (live).** `mg_whoami` (009) returns `mixed:true` when an email's records use different PINs; My Training / My Practice then offer `mg_onepin` to set one PIN on all of them. If you replace `mg_whoami`, start from `supabase/009-one-pin.sql`.
 
-**My Plan (live).** www.macro.golf/my-plan: one email + PIN log-in for every 1-to-1 plan and golf personal plan (first time adds the 6-digit plan code). It loads the loader live on the client's own page, so keep each client's page pinned as usual. New client plans need nothing extra; see README.
+**My Plan (live).** www.macro.golf/my-plan: one email + PIN log-in for every 1-to-1 plan and golf personal plan (first time adds the 6-digit plan code). It loads the loader live on the client's own page, so keep each client's page pinned as usual. Coach-built plans (`path = coach-plan`) all open on /coach-plan.
 
 **Live strokes gained (13 Nov, Jack).** My Numbers and the Practice Plan show strokes gained a round per area as the player's tests moved by every practice shot since (`MGNumbers.live` in `src/golf-numbers.js`; tests keep 40%+, recent sessions count most, last 60 days). Every golf record can add rows to `S.sgLog` = `[{id, d:'YYYY-MM-DD', a:'Driving'|'Approach'|'Short game'|'Putting', n:shots, sum:strokes gained, hc}]`: games do it through `GSG.logRound` (`src/golf-sg.js`), the Practice Plan in `practice.sgLog`. **Coach-built golf plans (MG Athletes, like `golf-paul-goddard`) must do the same:** keep `S.sgLog` rows per session and area (see `logSG` in `pages/golf-paul-goddard.html`) and keep sessions in `S.history` as `{date, blocks}` so they count for the weekly streak. Use the same email + PIN record as the games so My Numbers finds it.
 
@@ -144,7 +157,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
   ```
   Read only: never create, edit, email or delete anything in TPI Pro.
 - **Plan in the app (14 Nov, Joe).** "Create app plan" (Plan Builder, Review & create) calls `mg_coach_plan_publish`: the player gets a 6-digit plan code (new `mg_clients` row, `path = 'coach-plan'`, email set; or the code their email already has). My Plan then opens www.macro.golf/coach-plan (`pages/coach-plan.html`), ONE page for every coach-built plan: `src/coach-plan.js` signs in from the My Plan hand-off, loads the latest published plan with `mg_plan_content` (code + PIN) and runs the normal 1-to-1 engine on it (CLIENT/SESSIONS built from the plan; Practice tab with Start buttons for app games, `?from=plan` + `src/plan-return.js` tick the game off; mobility follow-along videos; coach's weekly check-in questions via `CLIENT.weeklyQuestions`). Coaches test a plan with 'Preview the app plan' (Review & create): /coach-plan?preview=1, this device only, no cloud save. Weekly report reminders: a pop-up on Sunday, and again Monday to Wednesday if that week's report isn't sent (once a day, after the check-in; `weeklyReminder` in `src/coach-plan.js`). Mobility uses only Follow Along videos (random each day, time each day or manual; `MGLib.mobDay`). Editing a plan and pressing Update app plan changes the player's app straight away, no commit or Kajabi change. `pages/coach-plan.html` is GENERATED: `node tools/build-coach-plan.js` after any change to `templates/parts`. Engine hook: `CLIENT.extraTabs=[{id,label,render(el)}]` in `templates/parts/20-core.html`. Database: `supabase/014-coach-plan-app.sql`.
-- **Library for coach plans:** `src/mg-library.js`: `GAMES` (the app's golf games and their Kajabi paths; games added since live in `mg_app_games`, `supabase/015-app-games.sql`, merged in by `MGLib.loadGames()`), `DRILLS` (Macro Golf scored drills with no page of their own: Ladder up to 70 yds, Strike station, Landing ladder; players follow the steps and tick off, no Start button), `MOB_VIDEOS` (154 follow-along mobility videos of 3+ minutes with equipment and body areas, from the exercise library; lengths from Wistia), `MOB_EX` (single mobility exercises).
+- **Library for coach plans:** `src/mg-library.js`: `GAMES` (the app's golf games and their Kajabi paths; games added since live in `mg_app_games`, `supabase/015-app-games.sql`, merged in by `MGLib.loadGames()`), `DRILLS` (Macro Golf scored drills with no page of their own: Ladder up to 70 yds, Strike station, Landing ladder; players follow the steps and tick off, no Start button), `MOB_VIDEOS` (154 follow-along mobility videos of 3+ minutes with equipment and body areas, from the exercise library; lengths from Wistia), `MOB_EX` (the shorter Follow Along mobility videos, under 3 minutes).
 - **FOR JACK'S CLAUDE: new game suggestions.** When a coach puts a game that isn't in the app into a practice plan, it lands in `mg_game_suggestions`. At the start of each session with Jack, read them (public, no password): `fetch('https://zhcgwtlyqriwlhbzkxcl.supabase.co/rest/v1/rpc/mg_game_suggestions',{method:'POST',headers:{apikey:'<publishable key from src/sync.js>','Content-Type':'application/json'},body:'{}'})` (from Chrome on any page). Tell Jack about any with status `new`: name, description, which coach. Jack marks them Added to app / Decline in the Plan Builder (All plans, bottom). **When Jack adds any new game to the app** (suggested or not), register it in the Plan Builder: All plans → bottom → 'Added to app' on the suggestion, or 'Add a game Jack has put in the app' (name, page link www.macro.golf/p-…, area). That puts it in every coach's game dropdown and gives players a Start button straight away, no code change (`mg_coach_app_game_add`).
 
 ## Live Kajabi pages (site 2147673115)
