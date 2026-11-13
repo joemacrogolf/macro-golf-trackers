@@ -63,7 +63,7 @@ Golf personal plans use exactly the same message and the same My Plan button.
 
 ## App navigation (live 12 Nov 2026)
 
-`docs/app-navigation-plan.md` has the background. Live in the app: bottom tabs Home · MG Athletes (/my-plan) · My Training (/my-training) · 6 Week Plan (/my-practice) · Playlists. Build My Plan lives under My Training (Joe, 13 Nov), so that tab keeps a neutral name; one email + PIN across them (mg_whoami / mg_onepin). Still to do: coach dashboard view of each member's training and practice choice.
+`docs/app-navigation-plan.md` has the background. Live in the app (13 Nov): bottom tabs Home · MG Athletes (/my-plan) · Practice (/my-practice, header Your Practice Plan; was 6 Week Plan) · My Training (/my-training) · Playlists. Build My Plan lives under My Training (Joe, 13 Nov), so that tab keeps a neutral name; one email + PIN across them (mg_whoami / mg_onepin). Still to do: coach dashboard view of each member's training and practice choice.
 
 ## How pages work (short version; README.md has the detail)
 
