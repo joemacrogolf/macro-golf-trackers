@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-13 20:30 · Jack's Claude · App homepage Train tile now uses the gym version (barbell, dumbbell, kettlebell; 'Gym & home workouts for golf'; assets/web/home/tile-train-gym.jpg). Pinned app-home · done
 2026-11-13 20:25 · Jack's Claude · App homepage: Gym · Training plan button background now a barbell + dumbbell (assets/web/home/quick-train.jpg). Pinned app-home · done
 2026-11-13 20:20 · Jack's Claude · App homepage quick buttons: emojis removed (Jack); plain text 'Golf · Practice plan' / 'Gym · Training plan' / 'MG Athlete · My coach's plan' on picture backgrounds (assets/web/home/quick-*.jpg). Pinned app-home · done
 2026-11-13 20:15 · Jack's Claude · App homepage quick buttons: '⛳ Golf · Practice plan' and '🏋 Gym · Training plan'. An MG Athlete signed in on My Plan (localStorage mgplan:me) gets 'MG Athlete · My coach's plan' (→ /my-plan) in place of the practice plan button, until they log out there. Pinned app-home · done
