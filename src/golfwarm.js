@@ -6,6 +6,8 @@ window.MGV_NOAUTO=true;
 (function(){var me=document.currentScript;if(!me||!me.src||window.MGBoard)return;var s=document.createElement('script');s.src=me.src.replace(/golfwarm\.js(\?.*)?$/,'leaderboard.js');document.head.appendChild(s)})();
 /* strokes gained explainer: once per player, the first time they open a golf page (src/sg-intro.js) */
 (function(){var me=document.currentScript;if(!me||!me.src||window.MGSGIntro)return;var s=document.createElement('script');s.src=me.src.replace(/golfwarm\.js(\?.*)?$/,'sg-intro.js');document.head.appendChild(s)})();
+/* personal best celebration and the PB border on share pictures (src/pb-party.js) */
+(function(){var me=document.currentScript;if(!me||!me.src||window.MGPB)return;var s=document.createElement('script');s.src=me.src.replace(/golfwarm\.js(\?.*)?$/,'pb-party.js');document.head.appendChild(s)})();
 /* opened from the Practice Plan: "Back to plan", and straight back to the plan when the round is done (src/plan-return.js) */
 (function(){var me=document.currentScript;if(!me||!me.src||window.MGPlanReturn||!/[?&]from=plan\b/.test(location.search))return;var s=document.createElement('script');s.src=me.src.replace(/golfwarm\.js(\?.*)?$/,'plan-return.js');document.head.appendChild(s)})();
 var MGWarm=(function(){

@@ -903,7 +903,9 @@ function open(w){if(!sheet)build();cur=w;img=null;st.textContent='';sheet.queryS
   var h=sheet.querySelector('.mgs-hide');h.hidden=!w.bigHide;sheet.hidden=false;document.body.style.overflow='hidden';
   var f=document.fonts&&document.fonts.load?Promise.all([document.fonts.load('400 100px Anton'),document.fonts.load('700 30px Inter'),document.fonts.load('800 30px Inter')]):Promise.resolve();
   draw();f.then(draw,draw)}
-function celebrate(w){open(w);confetti()}
+function celebrate(w){/* a new personal best gets the big moment first (src/pb-party.js), then the share card */
+  if(w&&/PB/i.test(w.tag||'')&&window.MGPB){MGPB.party(w,function(a){if(!a)return;open(w);if(a==='photo'){var i=sheet.querySelector('.mgs-photo input');if(i)i.click()}});return}
+  open(w);confetti()}
 function confetti(){try{if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return}catch(e){}
   var c=el('canvas','mgs-confetti'),x=c.getContext('2d'),W=c.width=innerWidth,H=c.height=innerHeight,P=[],cols=['#FFD900','#F4F1EA','#FFFFFF','#FFD900'],t0=Date.now();
   for(var i=0;i<140;i++)P.push({x:W/2+(Math.random()-.5)*W*.3,y:H*.35,vx:(Math.random()-.5)*14,vy:-Math.random()*16-4,s:6+Math.random()*7,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[i%4]});
@@ -938,6 +940,8 @@ function paint(cv,w,op){
   ctx.fillStyle='#FFD900';ctx.fillRect(M,y-106-s*.92-ts,150,12);
   ctx.font='800 30px Inter, sans-serif';var kw=ctx.measureText(w.kick).width+36,ky=y-156-s*.92-ts-48;ctx.fillStyle='#FFD900';ctx.fillRect(M,ky,kw,56);ctx.fillStyle='#0B0B0B';ctx.fillText(w.kick,M+18,ky+38);
   ctx.fillStyle='rgba(244,241,234,.6)';ctx.font=I.replace('S',26);ctx.fillText(C.label,M,H-80);ctx.textAlign='right';ctx.fillText('MACRO.GOLF',W-M,H-80);ctx.textAlign='left';
+  /* personal best: gold border, PB medal and 'Personal best' ribbon */
+  if(/PB/i.test(w.tag||'')&&window.MGPB)MGPB.frame(ctx,W,H,w);
 }
 function monday(iso){var p=String(iso).split('-'),d=new Date(+p[0],+p[1]-1,+p[2],12),k=(d.getDay()+6)%7;d.setDate(d.getDate()-k);var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(dd<10?'0':'')+dd}
 function weeksBetween(a,b){var pa=a.split('-'),pb=b.split('-');return Math.round((new Date(+pb[0],+pb[1]-1,+pb[2],12)-new Date(+pa[0],+pa[1]-1,+pa[2],12))/604800000)}

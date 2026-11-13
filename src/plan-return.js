@@ -41,7 +41,9 @@ function watch(){if(finished)return;var r=rounds();
   if(base===null){base=r}else if(r!==null&&r!==base&&count(r)>=count(base)){done();return}
   setTimeout(watch,1000)}
 function saving(){var p=document.querySelector('.mgs-pill');return p&&p.getAttribute('data-s')==='saving'}
-function done(){finished=true;mark(true);css();contBar();var w=document.createElement('div');w.className='mgpr-wrap';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');
+/* a new PB gets its celebration (and the share card / photo) first; the plan waits until the player closes it */
+function busy(){try{return !!(window.MGPB&&MGPB.busy())}catch(e){return false}}
+function done(){if(busy()){finished=true;setTimeout(function(){finished=false;done()},700);return}finished=true;mark(true);css();contBar();var w=document.createElement('div');w.className='mgpr-wrap';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');
   w.innerHTML='<div class="mgpr-card"><small>Game done</small><h2>Nice one</h2><p id="mgprMsg">Saving your score\u2026</p><button type="button" class="mgpr-go">Continue with plan <span aria-hidden="true">&rarr;</span></button><button type="button" class="mgpr-stay">Stay and look at my results</button></div>';
   document.body.appendChild(w);var msg=w.querySelector('#mgprMsg'),left=4,t0=Date.now();
   w.querySelector('.mgpr-go').addEventListener('click',function(){clearTimeout(timer);go(true)});
