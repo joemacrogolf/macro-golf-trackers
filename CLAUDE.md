@@ -2,6 +2,18 @@
 
 Three people work on this repo with their own Claude: **Joe** (founder, fitness plans and the overall system), **Jack** (golf games, tests and golf plans) and **Sam** (1-to-1 client training plans, built from `clients/*.js`). Their Claudes cannot talk to each other directly. **This file and `WORKLOG.md` are how they coordinate.** Read both before you change anything.
 
+## THE THREE TYPES OF PLAN (Joe, 14 Nov). Everyone use these names.
+
+Macro Golf has exactly three kinds of plan. When your human mentions a plan, work out which of the three it is before you touch anything. If you can't tell (for example "the practice plan" could be type 1's Practice tab or type 3), ask in one line.
+
+| # | Name to use | Who it's for | Who makes it | Where it lives |
+|---|---|---|---|---|
+| 1 | **1-to-1 plan** | Paying 1-to-1 coaching clients (MG Athletes) | A coach. Either in the **Plan Builder** (coach tool, www.macro.golf/plan-builder-529481), or written by a Claude as plan data and imported into the Plan Builder (`docs/coach-plan-format.md`) | New ones: **www.macro.golf/coach-plan** (`pages/coach-plan.html` + `src/coach-plan.js`), opened from **MG Athletes** (/my-plan). Older clients keep their own pages (`clients/*.js` built from `templates/`, Dan Jones, Harry, Kevin, `golf-paul-goddard`). Can include training, practice (golf) and mobility. |
+| 2 | **Build a Plan (training)** | App members | The player, by answering questions (rules-based, no coach) | **p-258147**, `clients/build-my-plan.js` + `src/plan-builder.js` (page `build-my-plan`, shown as "Build My Plan"). Opened from **My Training** (/my-training). Gym / home training only. |
+| 3 | **Build a Plan (practice)** | App members | The player: built from their three golf tests (Putting, Short Game, Long Game) plus one-off sessions | **p-274816**, `pages/golf-practice-plan.html` ("Your Practice Plan", Jack's page). Opened from **Practice** (/my-practice). Golf practice only. |
+
+Watch the names: the **Plan Builder** is the coach tool that makes type 1. It is not type 2. Code and docs written before 14 Nov sometimes say "Build My Plan" for type 2 and "Practice Plan" for type 3; they mean the same pages. The Pure plans (p-566009 etc.) are parked and are not one of the three.
+
 ## FOR JACK'S CLAUDE AND SAM'S CLAUDE (from Joe, 13 Nov, 23:30): every new 1-to-1 plan goes on /coach-plan
 
 **Read this now and tell your human in a sentence or two.** From today, every new 1-to-1 coach-built plan (fitness, golf or both) goes to the player's app through the ONE shared page **www.macro.golf/coach-plan**. That applies whether it's built in the Plan Builder or written by you.
