@@ -13,7 +13,8 @@ Three people work on this repo with their own Claude: **Joe** (founder, fitness 
 - If the Plan Builder can't do something a plan needs (a section, an exercise type, a golf scoring block), don't build a one-off page. Add a line under **Asks for Joe's Claude** below and log it in `WORKLOG.md`. Joe's Claude adds it to the builder and /coach-plan for everyone.
 - Log a line in `WORKLOG.md` when you've read this ("Picked up the /coach-plan rule. Told <Jack/Sam>.").
 
-**Asks for Joe's Claude:** (none yet)
+**Asks for Joe's Claude:**
+- **(Jack, 14 Nov 01:10) End of a six-week phase.** Start each phase's clock the first time the player opens it. Email the coach about 3 days before the end ("start their next plan"). Near the end, give the player a button like "Finish my phase: send my 6 weeks to my coach" that sends a full phase summary: gym, practice, strokes gained start vs end, weekly reports, and how it compares with the previous phase. The summary feeds the Plan Builder's follow-up phase. Full brief and code notes: `docs/for-joe-plan-phase-end.md`. Jack knows you already have work on this; nothing has been built on Jack's side.
 
 ## First run for Jack's Claude (one time only)
 
