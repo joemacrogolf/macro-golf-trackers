@@ -1,0 +1,68 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap">
+<!-- Help desk (www.macro.golf/help, Kajabi landing page 2152406482). The top of the page; the form underneath is the
+     native Kajabi form "Help Desk (app + website)" (2149784131), whose submissions email Joe, Jack and Sam.
+     Links can pass ?topic=pain|training|golf|speed|app|coaching|other and ?from=<page> to fill the form in.
+     After sending, Kajabi returns to /help?sent=1 and this shows the thank-you. -->
+<style>
+#mgh{--ink:#0B0B0B;--y:#FFD900;--cream:#F4F1EA;--mute:#6f6b62;--line:#D9D4C7;font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--cream)}
+#mgh *{box-sizing:border-box}
+#mgh .top{background:#0B0B0B;color:#F4F1EA;padding:28px 20px 34px}
+#mgh .w{max-width:760px;margin:0 auto}
+#mgh .brand{display:flex;justify-content:space-between;align-items:center;gap:12px}
+#mgh .wm{font-family:Anton,Impact,sans-serif;text-transform:uppercase;font-size:22px;line-height:.95;color:var(--y);text-decoration:none}
+#mgh .back{color:#cfcabd;font-size:14px;text-decoration:none;font-weight:600}
+#mgh .bar{width:72px;height:6px;background:var(--y);margin:26px 0 14px}
+#mgh h1{font-family:Anton,Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(40px,8vw,64px);line-height:1;margin:0}
+#mgh .lead{font-size:18px;line-height:1.55;color:#e8e4d8;margin:14px 0 0;max-width:620px}
+#mgh .tips{padding:26px 20px 6px}
+#mgh .k{font-weight:700;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#8a7f00;margin:0 0 10px}
+#mgh .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+#mgh .tip{background:#fff;border:1px solid var(--line);border-left:5px solid var(--ink);padding:14px 16px}
+#mgh .tip.warn{border-left-color:#D0021B}
+#mgh .tip b{display:block;font-size:15px;margin-bottom:4px}
+#mgh .tip p{margin:0;font-size:14px;line-height:1.5;color:#3B3830}
+#mgh .tip a{color:var(--ink);font-weight:700}
+#mgh .done{display:none;margin:26px auto 0;max-width:760px;background:#0B0B0B;color:#F4F1EA;border-left:8px solid var(--y);padding:24px 22px}
+#mgh .done h2{font-family:Anton,Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:32px;margin:0 0 8px}
+#mgh .done p{margin:0;font-size:16px;line-height:1.5}
+#mgh .done a{color:var(--y);font-weight:700}
+#mgh.sent .done{display:block}#mgh.sent .tips{display:none}
+/* the Kajabi form below */
+body.mgh-on [data-nova-role="form-fields"] input,body.mgh-on [data-nova-role="form-fields"] select,body.mgh-on [data-nova-role="form-fields"] textarea{border-radius:0!important;border:1px solid #D9D4C7!important;background:#fff!important;font:16px Inter,system-ui,sans-serif!important;min-height:50px}
+body.mgh-on [data-nova-role="form-fields"] textarea{min-height:150px}
+body.mgh-on [data-nova-role="form-submit"]{border-radius:0!important;background:#FFD900!important;color:#0B0B0B!important;font-family:Anton,Impact,sans-serif!important;text-transform:uppercase;letter-spacing:.5px;font-size:18px!important;min-height:56px;border:0!important}
+body.mgh-sent .mgh-formsec{display:none!important}
+</style>
+<div id="mgh">
+  <div class="top"><div class="w">
+    <div class="brand"><a class="wm" href="https://www.macro.golf">Macro<br>Golf</a><a class="back" href="javascript:history.back()">&lsaquo; Back</a></div>
+    <div class="bar" aria-hidden="true"></div>
+    <h1>Speak to a coach</h1>
+    <p class="lead">Questions about your plan, your golf, the app or an injury. Send us a message and one of the Macro Golf coaches will get back to you, usually within one working day.</p>
+  </div></div>
+  <div class="tips"><div class="w">
+    <p class="k">Before you write</p>
+    <div class="grid">
+      <div class="tip warn"><b>Pain or injury</b><p>Stop any exercise that causes pain and tell us what happened below. If it's sharp, getting worse or came with swelling or numbness, see a doctor or physio first.</p></div>
+      <div class="tip"><b>Can't log in?</b><p>Use the same email each time. If your PIN won't work, tell us your email below and we'll reset it.</p></div>
+      <div class="tip"><b>Want 1-to-1 coaching?</b><p>See how it works on the <a href="https://www.macro.golf/coaching">coaching page</a>, or ask us anything below.</p></div>
+    </div>
+  </div></div>
+  <div class="done" role="status"><h2>Message sent</h2><p>Thanks. The coaches have your message and one of us will reply by email, usually within one working day. <a href="javascript:history.go(-2)">Back to where you were</a></p></div>
+</div>
+<script>
+(function(){
+  var q=new URLSearchParams(location.search),root=document.getElementById('mgh');document.body.classList.add('mgh-on');
+  if(q.get('sent')){root.classList.add('sent');document.body.classList.add('mgh-sent')}
+  var TOPIC={training:'My training plan',golf:'Golf practice and games',practice:'Golf practice and games',pain:'Pain or injury',injury:'Pain or injury',speed:'Speed training',app:'The app (log-in, PIN, something not working)',coaching:'Coaching with Macro Golf',other:'Something else'};
+  function fill(){var sel=document.querySelector('select[name*="custom_48"]'),from=document.querySelector('[name*="custom_50"]');
+    if(!sel&&!from)return false;
+    var t=TOPIC[(q.get('topic')||'').toLowerCase()];if(sel&&t){for(var i=0;i<sel.options.length;i++)if(sel.options[i].text.trim()===t){sel.selectedIndex=i;sel.dispatchEvent(new Event('change',{bubbles:true}))}}
+    if(from){var f=q.get('from')||document.referrer||'Direct';from.value=f.slice(0,240);var w=from.closest('.form-group,[class*="field"],div');if(w&&w!==document.body)w.style.display='none'}
+    var fs=document.querySelector('[data-nova-role="form-fields"]'),sec=fs&&fs.closest('section,[data-section-id],.section');if(sec)sec.classList.add('mgh-formsec');
+    return true}
+  var n=0;(function go(){if(fill()||++n>40)return;setTimeout(go,150)})();
+})();
+</script>
