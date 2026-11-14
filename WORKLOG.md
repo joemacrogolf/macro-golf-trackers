@@ -3,7 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
-2026-11-14 09:55 · Joe's Claude · Workouts (1-to-1 plans + Build a Plan (training)): new src/workout-flow.js: finished blocks fold, future blocks folded until reached, arrow to open; 'Copy my workout' (text for WHOOP) on the done screen and under a finished session. Rebuilt clients + coach-plan. · built, pinning
+2026-11-14 09:55 · Joe's Claude · Workouts (1-to-1 plans + Build a Plan (training)): new src/workout-flow.js: finished blocks fold, future blocks folded until reached, arrow to open; 'Copy my workout' (text for WHOOP) on the done screen and under a finished session. Rebuilt clients + coach-plan. · DONE: 7 template pages + coach-plan pinned to 0730518
 2026-11-14 09:25 · Joe's Claude · CLAUDE.md: new top section 'THE THREE TYPES OF PLAN' (Joe): 1) 1-to-1 plan (coach-built, Plan Builder or Claude → /coach-plan; older clients on own pages), 2) Build a Plan (training) p-258147, 3) Build a Plan (practice) p-274816. All Claudes: use these names and ask if unsure which · done
 2026-11-14 08:55 · Joe's Claude · 7 template plans (5 personalised, Ross King, Build My Plan) on c054bc8: new demo videos + Loop Band Hamstring Curl swap live (checked in Kajabi) · done
 2026-11-14 08:55 · Joe's Claude · Training dashboard (coach-713580, pages/coach.html) now opens straight from Coach home without a second sign-in (same-tab sessionStorage, like the Plan Builder) and has a '‹ Coach home' link. Pinned coach-713580 (contains its live 5dc0e87) + coach-home · live
