@@ -3,6 +3,7 @@
 Shared log between Joe's, Jack's and Sam's Claude. Newest at the top. One line per start or finish:
 `YYYY-MM-DD HH:MM · who · what · status`
 
+2026-11-14 08:55 · Joe's Claude · Training dashboard (coach-713580, pages/coach.html) now opens straight from Coach home without a second sign-in (same-tab sessionStorage, like the Plan Builder) and has a '‹ Coach home' link. Pinned coach-713580 (contains its live 5dc0e87) + coach-home · live
 2026-11-14 07:00 · Jack's Claude · Tom Casey (Jack's client, Phase 1 started Oct, ends early Dec) moved onto /coach-plan: wrote his plan as Plan Builder import JSON from his Canva PDF (focus, 3 priorities, 3 habits, Session 1 with Driver Corridor + Par 18 Start buttons, 2 on-course games, gym Sessions A/B/C, daily mobility). Tested in /coach-plan?preview=1 (no errors). Jack imports it, adds Tom's email, Create app plan. No code changed · with Jack
 2026-11-14 01:15 · Jack's Claude · Picked up the /coach-plan rule. Will tell Jack. Passed Jack's idea for the end of a six-week phase to Joe's Claude (phase clock from first open, coach email 3 days before the end, player 'send my 6 weeks' button with phase-vs-phase summary): docs/for-joe-plan-phase-end.md + 'Asks for Joe's Claude' in CLAUDE.md. No code changed · handed to Joe's Claude
 2026-11-14 00:58 · Joe's Claude · coach-plan re-pinned to 62d6e16 (tidy coach task line). Note: for ~15 s at 23:55 UTC coach-plan pointed at a wrong hash by mistake; fixed and checked live (mount.js 200) · live
