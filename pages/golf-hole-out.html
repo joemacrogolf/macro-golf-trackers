@@ -1248,7 +1248,7 @@ function homeSetup(){try{$a('link[rel="apple-touch-icon"],link[rel="apple-touch-
   [['apple-mobile-web-app-capable','yes'],['mobile-web-app-capable','yes'],['apple-mobile-web-app-title','Macro Golf'],['apple-mobile-web-app-status-bar-style','black']].forEach(function(m){var x=document.createElement('meta');x.name=m[0];x.content=m[1];h.appendChild(x)})}catch(e){}
   var standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone;if(standalone)return;
   var ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua),android=/Android/.test(ua);if(!ios&&!android)return;
-  try{if(localStorage.getItem('ux-a2hs-off'))return}catch(e){}
+  return;/* 'Add your plan to your home screen' card switched off (Joe, 14 Nov) */
   var deferred=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferred=e});
   setTimeout(function(){var c=el('div','ux-a2hs');c.setAttribute('role','dialog');c.setAttribute('aria-label','Add to home screen');
     c.innerHTML='<img src="'+ICON+'" alt=""><div class="ux-a2hs-t"><b>Add your plan to your home screen</b><span>'+(ios?'Tap the Share button <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v7h14v-7" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></svg> at the bottom of Safari, then <b>Add to Home Screen</b>.':'Tap the <b>⋮</b> menu at the top of Chrome, then <b>Add to Home screen</b>.')+' It opens full screen like an app.</span></div>'+
