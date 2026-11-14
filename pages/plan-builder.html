@@ -324,6 +324,7 @@
 <datalist id="dl-tpi"></datalist>
 
 </div>
+<script charset="utf-8" src="{{BASE}}src/coach-login.js"></script>
 <script charset="utf-8" src="{{BASE}}src/mg-library.js"></script>
 <script charset="utf-8" src="{{BASE}}src/plan-builder.js"></script>
 <script>window.MGW_NOAUTO=1</script>
@@ -387,7 +388,7 @@ const STD_Q=()=>[
 const WHEN=["Evenings before sleep","Morning","Before practice","Before training","Before a round","Any time in the day"];
 function newPlan(){
   return {
-    id:uid(),attV2:true,playerName:"",playerEmail:"",coach:"",phase:1,isFirst:true,startDate:nextMonday(),weeks:6,status:"draft",createdAt:Date.now(),
+    id:uid(),attV2:true,playerName:"",playerEmail:"",coach:((window.MGCoach&&MGCoach.me())||{}).name||"",phase:1,isFirst:true,startDate:nextMonday(),weeks:6,status:"draft",createdAt:Date.now(),
     include:{habits:true,practice:true,oncourse:true,physical:true,mobility:true,weight:true,stats:true,recovery:false,checkin:true},
     intake:{source:"Match Up Session",fileName:"",summary:"",handicap:"",homeClub:"",goals:"",history:"",injuries:"",equipment:"",tpi:[],swing:[],notes:""},
     review:{progress:"",learned:"",nextStep:"",nextStepDetail:"",adherence:{practice:"",physical:"",habits:""},priorityReview:[],notes:""},
@@ -1260,6 +1261,7 @@ function printPlan(){
 /* ---------- log in + boot ---------- */
 fillDatalists();
 document.addEventListener("click",e=>{if(e.target.closest('[data-act="tpireuse"]')){const t=latestIntake(plan).tpi;if(t){applyTPI(t.answers||{tests:[],swing:[]});ui.tpiMsg="Used the TPI results on file.";changed(true)}}});
+MGCoachLogin.attach({form:$("#pb-login"),input:$("#pb-pw"),button:$("#pb-loginbtn")});
 $("#pb-login").addEventListener("submit",async e=>{
   e.preventDefault();const err=$("#pb-loginerr"),btn=$("#pb-loginbtn");pass=$("#pb-pw").value;$("#pb-pw").value="";err.textContent="";btn.disabled=true;btn.textContent="Opening";
   try{
@@ -1271,7 +1273,7 @@ $("#pb-login").addEventListener("submit",async e=>{
     if(draft&&draft.playerName&&!(want&&draft.id!==want.id)){plan=normalise(draft);dirty=true;render();setStatus("Restored unsaved changes");save()}
     else if(want){openPlan(want.id)}
     else{plan=newPlan();render();setStatus(plans.size+" plans · "+intakePeople().length+" players with forms");openDrawer()}
-  }catch(x){pass="";err.textContent=/Wrong password/.test(x.message)?"Wrong password.":/Too many/.test(x.message)?x.message:"Couldn't open: "+x.message}
+  }catch(x){pass="";if(/log in again/i.test(x.message)){try{sessionStorage.removeItem("mg-coach-s")}catch(y){}}err.textContent=/Wrong password/.test(x.message)?"Wrong password.":/Too many|log in again/i.test(x.message)?x.message:"Couldn't open: "+x.message}
   btn.disabled=false;btn.textContent="Open";
 });
 window.addEventListener("beforeunload",e=>{if(dirty&&loggedIn){e.preventDefault();e.returnValue=""}});

@@ -129,6 +129,7 @@
 <div class="wrap" id="person" hidden></div>
 </div>
 
+<script src="{{BASE}}src/coach-login.js"></script>
 <script src="{{BASE}}src/golf-numbers.js"></script>
 <script>
 (function(){
@@ -353,6 +354,7 @@ function golfHtml(p,R,f,shape){var recs=p.recs.filter(function(x){return x.golf}
   else if(!M)h+='<p class="meta">Golf cards could not load (golf-numbers.js).</p>';
   return h}
 
+MGCoachLogin.attach({form:$('login'),input:$('pw'),button:$('login').querySelector('button[type=submit]')});
 $('login').addEventListener('submit',function(e){e.preventDefault();pass=$('pw').value;$('pw').value='';load()});
 /* signed in on Coach home in this tab (sessionStorage 'mg-coach-s', coach-home.html): open straight away; a sign-in here carries back too */
 (function(){var sp=null;try{sp=sessionStorage.getItem('mg-coach-s')}catch(e){}if(sp){pass=sp;load()}})();

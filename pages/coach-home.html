@@ -115,12 +115,13 @@
   </form></div>
   <div id="ch-app" hidden>
     <header><div class="brand"><b>MACRO <i>GOLF</i></b><span>Coach</span></div><nav class="crumbs" id="ch-crumbs" aria-label="Where you are"></nav><span class="spacer"></span>
-      <label class="hint" for="ch-coach" style="margin:0">Coach</label><select id="ch-coach" class="btn sm" style="min-height:34px"><option>Joe</option><option>Jack</option><option>Sam</option><option>James</option></select>
+      <span class="hint" id="ch-who" style="margin:0"></span><button class="btn sm ghost" type="button" data-act="coaches" id="ch-coachesbtn" hidden>Coaches</button><button class="btn sm ghost" type="button" data-act="mypass">Password</button>
       <button class="btn sm ghost" type="button" data-act="signout">Sign out</button></header>
     <main id="ch-main"></main>
   </div>
 </div>
 
+<script src="{{BASE}}src/coach-login.js"></script>
 <script>
 (function(){
 "use strict";
@@ -131,8 +132,17 @@ var pass="",ATH={},PEOPLE=[],PLANS=[],SUM={},view="home",cur=null,BOARD=null,fil
 function ss(k,v){try{if(v===undefined)return sessionStorage.getItem(k);if(v===null)sessionStorage.removeItem(k);else sessionStorage.setItem(k,v)}catch(e){return null}}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 function rpc(fn,body){return fetch(API+fn,{method:"POST",headers:{apikey:KEY,"Content-Type":"application/json"},body:JSON.stringify(Object.assign({p_pass:pass},body||{}))})
-  .then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(!r.ok)throw new Error((j&&j.message)||("Error "+r.status));if(j&&j.error)throw new Error(j.error);return j})})}
-function coach(){return $("#ch-coach").value}
+  .then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(!r.ok)throw new Error((j&&j.message)||("Error "+r.status));if(j&&j.error){if(/Please log in again/.test(j.error)&&!$("#ch-app").hidden){MGCoach.logout();location.reload()}throw new Error(j.error)}return j})})}
+function coach(){var m=window.MGCoach&&MGCoach.me();return (m&&m.name)||"Coach"}
+function me(){return (window.MGCoach&&MGCoach.me())||{}}
+var ASG={},COACHES=[],ROLE_N={admin:"Admin · full access",coach:"Coach · all players",limited:"Own players only"};
+function coachName(id){var c=COACHES.filter(function(x){return x.id===id})[0];return c?c.name:id}
+/* lead and supporting coaches on a player: assignments are keyed by plan code or email:<email>, so merge both */
+function coachesOf(p){var out={},add=function(k){(ASG[k]||[]).forEach(function(a){if(!out[a.coach]||a.role==="lead")out[a.coach]=a.role})};add(p.ref);if(p.code)add(p.code);if(p.email)add("email:"+p.email);
+  return Object.keys(out).map(function(k){return {coach:k,role:out[k]}}).sort(function(a,b){return (a.role==="lead"?0:1)-(b.role==="lead"?0:1)})}
+function mine(p){var id=me().id;return coachesOf(p).some(function(a){return a.coach===id})}
+function coachLine(p){var cs=coachesOf(p);if(!cs.length)return "";var l=cs.filter(function(a){return a.role==="lead"})[0],sp=cs.filter(function(a){return a.role!=="lead"});
+  return '<div class="hint" style="margin-top:6px">'+(l?'Lead <b style="color:var(--paper)">'+esc(coachName(l.coach))+'</b>':'No lead coach')+(sp.length?' · Supporting '+sp.map(function(a){return esc(coachName(a.coach))}).join(", "):'')+'</div>'}
 function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function today(){return iso(new Date())}
 function addDays(s,n){var d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return iso(d)}
@@ -141,7 +151,7 @@ function ago(t){if(!t)return "never";var d=Math.floor((Date.now()-new Date(t).ge
 function initials(n){return String(n||"?").trim().split(/\s+/).map(function(w){return w[0]}).slice(0,2).join("").toUpperCase()}
 
 /* ---------- data ---------- */
-function load(){return Promise.all([rpc("mg_coach_people"),rpc("mg_coach_plans_list"),rpc("mg_coach_board_summary").catch(function(){return {}}),rpc("mg_coach_athletes").catch(function(){return {rows:[]}})]).then(function(r){
+function load(){return Promise.all([rpc("mg_coach_assignments").then(function(a){ASG={};COACHES=a.coaches||[];(a.rows||[]).forEach(function(x){(ASG[x.ref]=ASG[x.ref]||[]).push(x)})}).catch(function(){ASG={};COACHES=[]}),rpc("mg_coach_people"),rpc("mg_coach_plans_list"),rpc("mg_coach_board_summary").catch(function(){return {}}),rpc("mg_coach_athletes").catch(function(){return {rows:[]}})]).then(function(r){r=r.slice(1);
   ATH={};((r[3]&&r[3].rows)||[]).forEach(function(a){ATH[a.email]=a});
   var rows=(r[0]&&r[0].rows)||[],plans=(r[1]&&r[1].rows)||[];PLANS=plans;SUM=r[2]||{};
   var byEmail={};rows.forEach(function(x){if(x.email)(byEmail[String(x.email).toLowerCase()]=byEmail[String(x.email).toLowerCase()]||[]).push(x);var m=/^pure:[^:]+:(.+)$/.exec(x.code||"");if(m)(byEmail[m[1].toLowerCase()]=byEmail[m[1].toLowerCase()]||[]).push(x)});
@@ -211,9 +221,9 @@ function ring(v,max,col,label,pct){var p=pct?Math.min(1,v/100):max?Math.min(1,v/
   '<text x="38" y="43" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="18" fill="#f3f1ea">'+v+(pct?'%':max?'/'+max:'')+'</text></svg><div class="hint" style="font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase">'+esc(label)+'</div></div>'}
 
 /* ---------- views ---------- */
-function crumbs(){var c=[['home','Home']];if(view==='players'||view==='player')c.push(['players','MG Athletes']);if(view==='player'&&cur)c.push(['player',cur.name]);
+function crumbs(){var c=[['home','Home']];if(view==='coaches')c.push(['coaches','Coaches']);if(view==='mypass')c.push(['mypass','Your password']);if(view==='players'||view==='player')c.push(['players','MG Athletes']);if(view==='player'&&cur)c.push(['player',cur.name]);
   $("#ch-crumbs").innerHTML=c.map(function(x,i){return i===c.length-1?'<span>'+esc(x[1])+'</span>':'<button type="button" data-go="'+x[0]+'">'+esc(x[1])+'</button><span>/</span>'}).join("")}
-function render(){crumbs();try{reviewPop()}catch(e){}var m=$("#ch-main");m.innerHTML=view==="home"?homeV():view==="players"?playersV():playerV();if(view==="players"){var s=$("#ch-q");if(s){s.value=q;}}}
+function render(){crumbs();try{reviewPop()}catch(e){}var m=$("#ch-main");m.innerHTML=view==="home"?homeV():view==="players"?playersV():view==="coaches"?coachesV():view==="mypass"?passV():playerV();if(view==="players"){var s=$("#ch-q");if(s){s.value=q;}}}
 var DECO={plan:'<svg class="deco" viewBox="0 0 100 100"><rect x="10" y="14" width="80" height="76" rx="6" fill="none" stroke="#FFD900" stroke-width="6"/><path d="M10 34h80M30 6v16M70 6v16" stroke="#FFD900" stroke-width="6"/><path d="M24 52h20M24 68h40" stroke="#FFD900" stroke-width="6"/></svg>',
   players:'<svg class="deco" viewBox="0 0 100 100"><circle cx="36" cy="34" r="16" fill="none" stroke="#FFD900" stroke-width="6"/><path d="M8 88c4-20 16-30 28-30s24 10 28 30" fill="none" stroke="#FFD900" stroke-width="6"/><circle cx="72" cy="40" r="12" fill="none" stroke="#FFD900" stroke-width="6"/><path d="M64 62c14 0 24 8 28 24" fill="none" stroke="#FFD900" stroke-width="6"/></svg>',
   dash:'<svg class="deco" viewBox="0 0 100 100"><path d="M10 90V50M35 90V30M60 90V60M85 90V16" stroke="#7fb2e5" stroke-width="12" stroke-linecap="round"/></svg>'};
@@ -229,20 +239,42 @@ function attention(){var due=[];PEOPLE.forEach(function(p){var s=SUM[p.ref];if(s
   var quiet=PEOPLE.filter(function(p){return p.type!=="golf"&&p.S&&p.updated&&(Date.now()-new Date(p.updated).getTime())>7*864e5}).slice(0,12).map(function(p){return '<button class="chip warn" type="button" data-player="'+esc(p.key)+'">'+esc(p.name)+' · '+ago(p.updated)+'</button>'});
   if(!due.length&&!quiet.length)return "";
   return '<div class="card"><div class="card-h"><h3>Needs a nudge</h3></div>'+(due.length?'<div class="hint">Overdue tasks</div><div class="chips">'+due.join("")+'</div>':'')+(quiet.length?'<div class="hint">Haven’t opened their plan for a week</div><div class="chips">'+quiet.join("")+'</div>':'')+'</div>'}
-function playersV(){var list=PEOPLE.filter(function(p){return (filter==="all"||p.type===filter)&&(!q||(p.name+" "+p.email+" "+p.code).toLowerCase().indexOf(q.toLowerCase())>=0)});
-  return '<div class="card-h"><div><div class="kick">1-to-1 clients</div><h1>MG Athletes</h1></div><span class="spacer"></span><button class="btn gold" type="button" data-act="addath">+ Add an MG Athlete</button></div>'+
+function playersV(){var list=PEOPLE.filter(function(p){return (filter==="all"||(filter==="mine"?mine(p):p.type===filter))&&(!q||(p.name+" "+p.email+" "+p.code).toLowerCase().indexOf(q.toLowerCase())>=0)});
+  return '<div class="card-h"><div><div class="kick">1-to-1 clients</div><h1>MG Athletes</h1></div><span class="spacer"></span><button class="btn gold" type="button" data-act="addath"'+(MGCoach.limited()?' hidden':'')+'>+ Add an MG Athlete</button></div>'+
    (ui.addAth?'<form class="form" id="ch-athform"><div class="row"><input type="text" id="af-name" placeholder="Name" style="flex:1;min-width:180px"><input type="text" id="af-email" placeholder="Email they use in the app" style="flex:2;min-width:240px"><button class="btn gold" type="submit">Add</button><button class="btn ghost" type="button" data-act="addath">Cancel</button></div><p class="hint">They get the MG badge on the leaderboards and a page here for notes, documents and tasks. Give them a 1-to-1 plan in the Plan Builder when you\u2019re ready.</p><div class="err" id="af-err"></div></form>':'')+
-   '<div class="tools"><input type="search" id="ch-q" placeholder="Search by name, email or plan code" aria-label="Search players"><div class="seg" role="group" aria-label="Show">'+[["all","All"],["coach","Coach-built plan"],["training","Training plan"],["golf","Golf plan"],["none","No app plan yet"]].map(function(x){return '<button type="button" data-filter="'+x[0]+'" class="'+(filter===x[0]?"on":"")+'">'+x[1]+'</button>'}).join("")+'</div></div>'+
+   '<div class="tools"><input type="search" id="ch-q" placeholder="Search by name, email or plan code" aria-label="Search players"><div class="seg" role="group" aria-label="Show">'+[["all","All"],["mine","My players"],["coach","Coach-built plan"],["training","Training plan"],["golf","Golf plan"],["none","No app plan yet"]].map(function(x){return '<button type="button" data-filter="'+x[0]+'" class="'+(filter===x[0]?"on":"")+'">'+x[1]+'</button>'}).join("")+'</div></div>'+
    (list.length?'<div class="plist">'+list.map(pcard).join("")+'</div>':'<p class="empty">No players match.</p>')}
 function typeName(p){return p.type==="coach"?"Coach-built plan":p.type==="golf"?"Golf plan":p.type==="none"?"No app plan yet":"Training plan"}
-function pcard(p){var st=stats(p),s=SUM[p.ref]||{};
-  return '<button class="pcard" type="button" data-player="'+esc(p.key)+'"><div class="top"><span class="av">'+esc(initials(p.name))+'</span><div style="min-width:0"><b>'+esc(p.name)+'</b><div class="hint">'+esc(p.type==="coach"?"Coach-built plan":p.type==="golf"?"Golf plan":"Training plan")+' · '+esc(p.code)+'</div></div></div>'+
+function pcard(p){var st=stats(p),s=SUM[p.ref]||{};var _cl=coachLine(p);
+  return '<button class="pcard" type="button" data-player="'+esc(p.key)+'"><div class="top"><span class="av">'+esc(initials(p.name))+'</span><div style="min-width:0"><b>'+esc(p.name)+'</b><div class="hint">'+esc(p.type==="coach"?"Coach-built plan":p.type==="golf"?"Golf plan":p.type==="none"?"No app plan yet":"Training plan")+(p.code?' · '+esc(p.code):'')+'</div>'+_cl+'</div></div>'+
    '<div class="chips"><span class="chip '+(p.updated&&(Date.now()-new Date(p.updated).getTime())<7*864e5?"ok":"warn")+'">Active '+esc(ago(p.updated))+'</span>'+(+s.open?'<span class="chip gold">'+s.open+' task'+(+s.open===1?'':'s')+'</span>':'')+(+s.overdue?'<span class="chip bad">'+s.overdue+' overdue</span>':'')+(s.lastNote?'<span class="chip">1-to-1 '+esc(nice(s.lastNote))+'</span>':'')+'</div>'+
    phaseBar(p)+(p.S&&p.type!=="golf"?'<div class="mini"><div><span>Gym wk</span><b>'+st.gym+(st.gymT?'/'+st.gymT:'')+'</b></div><div><span>Check-ins</span><b>'+st.checkins7+'/7</b></div><div><span>Energy</span><b>'+(st.energy?st.energy.toFixed(1):'–')+'</b></div></div>':'')+'</button>'}
+function coachCard(p){var cs=coachesOf(p),can=MGCoach.canAssign(),lead=(cs.filter(function(a){return a.role==="lead"})[0]||{}).coach||"",sup=cs.filter(function(a){return a.role!=="lead"}).map(function(a){return a.coach});
+  if(!can)return '<div class="card"><div class="card-h"><h3>Coaches</h3></div>'+(cs.length?coachLine(p):'<p class="hint">No coaches set yet.</p>')+'</div>';
+  return '<div class="card"><div class="card-h"><h3>Coaches</h3><span class="spacer"></span><span class="hint">Who works with '+esc(p.name.split(" ")[0])+'. Limited coaches only see players they lead or support.</span></div>'+
+    '<div class="row" style="display:flex;gap:14px;flex-wrap:wrap;align-items:center"><label class="hint" style="margin:0">Lead coach <select id="ch-lead" class="btn sm" style="min-height:34px;margin-left:6px"><option value="">None</option>'+COACHES.map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===lead?' selected':'')+'>'+esc(c.name)+'</option>'}).join("")+'</select></label>'+
+    '<span class="hint" style="margin:0">Supporting:</span><div class="chips">'+COACHES.filter(function(c){return c.id!==lead}).map(function(c){var on=sup.indexOf(c.id)>=0;return '<button type="button" class="chip'+(on?' gold':'')+'" data-sup="'+esc(c.id)+'" aria-pressed="'+on+'">'+(on?'✓ ':'+ ')+esc(c.name)+'</button>'}).join("")+'</div></div><div class="err" id="ch-asgerr"></div></div>'}
+function assign(coachId,role){var ref=cur.ref;$("#ch-asgerr")&&($("#ch-asgerr").textContent="");
+  return rpc("mg_coach_assign_set",{p_ref:ref,p_coach:coachId,p_role:role}).then(function(){return rpc("mg_coach_assignments")}).then(function(a){ASG={};COACHES=a.coaches||[];(a.rows||[]).forEach(function(x){(ASG[x.ref]=ASG[x.ref]||[]).push(x)});var y=window.scrollY;render();window.scrollTo(0,y)}).catch(function(e){var el=$("#ch-asgerr");if(el)el.textContent=e.message})}
+/* admin only: coach logins and access levels */
+var CADM=null;
+function coachesV(){if(!MGCoach.canEditAccess())return '<p class="empty">Only an admin can manage coach logins.</p>';
+  if(!CADM){rpc("mg_coach_admin_list").then(function(r){CADM=r.rows||[];render()}).catch(function(e){CADM=[];ui.msg=e.message;render()});return '<p class="hint">Loading coaches…</p>'}
+  return '<div><div class="kick">Admin</div><h1>Coaches</h1><p class="hint" style="max-width:70ch">Each coach logs in with their own name and password. <b>Admin</b>: everything, including this page. <b>Coach</b>: every player and the whole dashboard, but not coach logins. <b>Own players only</b>: just the players they are lead or supporting coach on (set on each athlete’s page). <b>Reset password</b> makes them choose a new one next time (with the old team password).</p></div>'+
+   (ui.msg?'<div class="err">'+esc(ui.msg)+'</div>':'')+
+   '<div class="card">'+CADM.map(function(c){var self=c.id===me().id;return '<div class="task" style="grid-template-columns:1fr auto auto auto;align-items:center"><div><b>'+esc(c.name)+'</b>'+(self?' <span class="chip gold">you</span>':'')+'<div class="hint">'+(c.ready?'Password set'+(c.pass_set_at?' '+esc(nice(c.pass_set_at)):''):'Not set up yet: they choose a password at first login')+(c.active?'':' · <span style="color:var(--bad)">switched off</span>')+'</div></div>'+
+     '<select class="btn sm" data-crole="'+esc(c.id)+'"'+(self?' disabled':'')+'>'+["admin","coach","limited"].map(function(r){return '<option value="'+r+'"'+(c.role===r?' selected':'')+'>'+ROLE_N[r]+'</option>'}).join("")+'</select>'+
+     '<button class="btn sm ghost" type="button" data-creset="'+esc(c.id)+'"'+(c.ready?'':' disabled')+'>Reset password</button>'+
+     '<button class="btn sm ghost" type="button" data-cactive="'+esc(c.id)+'"'+(self?' disabled':'')+'>'+(c.active?'Switch off':'Switch on')+'</button></div>'}).join("")+'</div>'+
+   '<form class="form" id="ch-coachform"><div class="row"><input type="text" id="cf-name" placeholder="New coach’s first name" style="flex:1;min-width:180px"><select id="cf-role" class="btn sm">'+["coach","limited","admin"].map(function(r){return '<option value="'+r+'">'+ROLE_N[r]+'</option>'}).join("")+'</select><button class="btn gold" type="submit">+ Add coach</button></div><p class="hint">They pick their name on the login screen and choose their own password the first time.</p></form>'}
+function coachAdmin(id,patch){var c=CADM.filter(function(x){return x.id===id})[0]||{};ui.msg="";
+  return rpc("mg_coach_admin_save",{p_id:id,p_name:patch.name||c.name||id,p_role:patch.role||c.role||"coach",p_active:patch.active==null?(c.active!==false):patch.active,p_reset:!!patch.reset}).then(function(){CADM=null;render()}).catch(function(e){ui.msg=e.message;render()})}
+function passV(){return '<div><div class="kick">'+esc(coach())+'</div><h1>Your password</h1></div><form class="form" id="ch-passform" style="max-width:420px"><input type="password" id="pf-old" placeholder="Current password" autocomplete="current-password"><input type="password" id="pf-new" placeholder="New password (8+ characters)" autocomplete="new-password"><input type="password" id="pf-new2" placeholder="New password again" autocomplete="new-password"><button class="btn gold" type="submit">Change password</button><div class="err" id="pf-err"></div></form>'}
 function playerV(){var p=cur;if(!p)return "";var S=p.S||{},st=stats(p),pd=planData(p),b=BOARD||{notes:[],tasks:[]};
   var h='<div class="phead"><span class="av">'+esc(initials(p.name))+'</span><div class="meta"><span class="kick">MG Athlete \u00b7 '+esc(typeName(p))+(pd?' · Phase '+esc(pd.phase||1):'')+'</span><h1>'+esc(p.name)+'</h1>'+phaseBar(p)+
     '<div class="chips">'+(p.code?'<span class="chip">Plan code '+esc(p.code)+'</span>':'<span class="chip warn">No 1-to-1 plan in the app yet</span>')+(p.email?'<span class="chip">'+esc(p.email)+'</span>':'')+'<span class="chip '+(p.updated&&(Date.now()-new Date(p.updated).getTime())<7*864e5?"ok":"warn")+'">Last active '+esc(ago(p.updated))+'</span>'+(pd&&pd.coach?'<span class="chip gold">Coach '+esc(pd.coach)+'</span>':'')+'</div></div><span class="spacer"></span>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap">'+(p.plan?'<a class="btn" href="'+SITE+'plan-builder-529481#plan='+encodeURIComponent(p.plan.id)+'" data-act="builder">Open in the Plan Builder</a>':'<a class="btn" href="'+SITE+'plan-builder-529481" data-act="builder">Build their 1-to-1 plan</a>')+'<a class="btn gold" href="#ch-notes">+ 1-to-1 notes</a>'+(p.email?'<button class="btn ghost" type="button" data-act="untag">'+(p.athlete?'Remove MG Athlete tag':'Tag as MG Athlete')+'</button>':'')+'</div></div>';
+  h+=coachCard(p);
   if(p.S&&p.type!=="golf"){
     var gw=[],labels=[],weeks=Math.max(st.week,(pd&&pd.weeks)||6),fin=S.finished||{};for(var w=1;w<=Math.min(weeks,12);w++){gw.push(Object.keys(fin).filter(function(k){return k.indexOf("w"+w+"-")===0}).length);labels.push("W"+w)}
     var days=[];for(var i=27;i>=0;i--)days.push(addDays(today(),-i));var ci=S.checkin||{};
@@ -302,12 +334,17 @@ function openPlayer(key){cur=PEOPLE.filter(function(p){return p.key===key||p.cod
 function refreshBoard(){var y=window.scrollY;return Promise.all([getBoard(cur),rpc("mg_coach_board_summary").catch(function(){return SUM})]).then(function(r){BOARD=r[0];SUM=r[1]||SUM;render();window.scrollTo(0,y)})}
 document.addEventListener("click",function(e){var t=e.target;
   var go=t.closest("[data-go]");if(go){view=go.dataset.go;if(view!=="player")cur=null;history.replaceState(null,"",view==="home"?"#":"#"+view);render();window.scrollTo(0,0);return}
+  var su=t.closest("[data-sup]");if(su&&cur){assign(su.dataset.sup,su.getAttribute("aria-pressed")==="true"?null:"support");return}
+  var cr=t.closest("[data-creset]");if(cr){if(confirm("Reset this coach\u2019s password? They\u2019ll choose a new one at their next login (with the old team password)."))coachAdmin(cr.dataset.creset,{reset:true});return}
+  var ca=t.closest("[data-cactive]");if(ca){var cc=(CADM||[]).filter(function(x){return x.id===ca.dataset.cactive})[0];if(cc)coachAdmin(cc.id,{active:!cc.active});return}
   var rp=t.closest("#ch-revpop");if(rp){var key="mg-revpop-min:"+today();if(t.closest("[data-act=revmin]")){ls(key,"1");reviewPop();return}if(rp.classList.contains("min")){ls(key,"0");reviewPop();return}}
   var pl=t.closest("[data-player]");if(pl){openPlayer(pl.dataset.player);return}
   var f=t.closest("[data-filter]");if(f){filter=f.dataset.filter;render();return}
   var en=t.closest("[data-editnote]");if(en){ui.editNote=(BOARD.notes||[]).filter(function(n){return n.id===en.dataset.editnote})[0]||null;render();var fm=$("#ch-noteform");if(fm)fm.scrollIntoView({block:"center"});return}
   var a=t.closest("[data-act]");if(a){var k=a.dataset.act;
-    if(k==="signout"){ss("mg-coach-s",null);location.reload();return}
+    if(k==="signout"){MGCoach.logout();location.hash="";location.reload();return}
+    if(k==="coaches"){view="coaches";CADM=null;ui.msg="";render();return}
+    if(k==="mypass"){view="mypass";render();return}
     if(k==="cancelnote"){ui.editNote=null;render();return}
     if(k==="allnotes"){ui.noteAll=true;render();return}
     if(k==="addath"){ui.addAth=!ui.addAth;render();var fe=$("#af-name");if(fe)fe.focus();return}
@@ -317,6 +354,8 @@ document.addEventListener("click",function(e){var t=e.target;
   var d=t.closest("[data-del]");if(d){if(!confirm(d.dataset.del==="note"?"Delete this note? This can’t be undone.":"Delete this task? This can’t be undone."))return;
     rpc("mg_coach_board_delete",{p_kind:d.dataset.del,p_id:d.dataset.id}).then(refreshBoard).catch(function(err){alert("Couldn’t delete: "+err.message)});return}});
 document.addEventListener("change",function(e){var t=e.target;
+  if(t.id==="ch-lead"&&cur){var old=(coachesOf(cur).filter(function(a){return a.role==="lead"})[0]||{}).coach;(t.value?assign(t.value,"lead"):old?assign(old,"support"):Promise.resolve());return}
+  if(t.dataset&&t.dataset.crole){coachAdmin(t.dataset.crole,{role:t.value});return}
   if(t.dataset&&t.dataset.task){var task=(BOARD.tasks||[]).filter(function(x){return x.id===t.dataset.task})[0];if(!task)return;
     rpc("mg_coach_task_save",{p_task:Object.assign({},task,{status:t.checked?"done":"open"})}).then(refreshBoard).catch(function(err){alert("Couldn’t update: "+err.message)});return}
   if(t.id==="ch-ncat"){ui.noteCat=t.value;var y2=window.scrollY;render();window.scrollTo(0,y2);return}
@@ -325,6 +364,9 @@ window.addEventListener("message",function(e){if(e.data&&e.data.mgEmbedH){var f=
 document.addEventListener("input",function(e){if(e.target.id==="ch-nq"){ui.noteQ=e.target.value;var y=window.scrollY,pos=e.target.selectionStart;render();window.scrollTo(0,y);var n=$("#ch-nq");if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}}return}
   if(e.target.id==="ch-q"){q=e.target.value;var p=e.target.selectionStart;render();var s=$("#ch-q");if(s){s.focus();try{s.setSelectionRange(p,p)}catch(x){}}}});
 document.addEventListener("submit",function(e){var f=e.target;
+  if(f.id==="ch-coachform"){e.preventDefault();var nm=$("#cf-name").value.trim();if(!nm)return;coachAdmin(nm.toLowerCase().replace(/[^a-z0-9]+/g,"-"),{name:nm,role:$("#cf-role").value,active:true});return}
+  if(f.id==="ch-passform"){e.preventDefault();var er=$("#pf-err");er.textContent="";if($("#pf-new").value.length<8){er.textContent="At least 8 characters.";return}if($("#pf-new").value!==$("#pf-new2").value){er.textContent="The new passwords don\u2019t match.";return}
+    rpc("mg_coach_password",{p_old:$("#pf-old").value,p_new:$("#pf-new").value}).then(function(){f.innerHTML='<p class="hint" style="color:var(--ok)">\u2713 Password changed.</p>'}).catch(function(x){er.textContent=x.message});return}
   if(f.id==="ch-noteform"){e.preventDefault();var body=$("#nf-body").value.trim();if(!body&&!$("#nf-title").value.trim()){$("#nf-err").textContent="Write something first.";return}
     var n={id:ui.editNote&&ui.editNote.id||"",code:ui.editNote&&ui.editNote.code||cur.ref,meet_date:$("#nf-date").value,title:$("#nf-title").value.trim(),body:body,coach:coach(),shared:$("#nf-shared").checked,category:$("#nf-cat").value,pinned:$("#nf-pin").checked};
     f.querySelector("[type=submit]").disabled=true;rpc("mg_coach_note_save",{p_note:n}).then(function(){ui.editNote=null;return refreshBoard()}).catch(function(err){$("#nf-err").textContent="Couldn’t save: "+err.message;f.querySelector("[type=submit]").disabled=false});return}
@@ -336,11 +378,11 @@ document.addEventListener("submit",function(e){var f=e.target;
     f.querySelector("[type=submit]").disabled=true;rpc("mg_coach_task_save",{p_task:tk}).then(refreshBoard).catch(function(err){$("#tf-err").textContent="Couldn’t add: "+err.message;f.querySelector("[type=submit]").disabled=false});return}});
 
 /* ---------- sign in ---------- */
-function start(){return load().then(function(){$("#ch-gate").hidden=true;$("#ch-app").hidden=false;ss("mg-coach-s",pass);var hs=location.hash;
+function start(){return load().then(function(){$("#ch-gate").hidden=true;$("#ch-app").hidden=false;ss("mg-coach-s",pass);var M=me();$("#ch-who").textContent=(M.name||"")+(M.role?" · "+(M.role==="admin"?"Admin":M.role==="coach"?"Coach":"Own players"):"");$("#ch-coachesbtn").hidden=!MGCoach.canEditAccess();var hs=location.hash;
   var m=/^#(?:player|athlete)=([^&]+)/.exec(hs);if(m){openPlayer(decodeURIComponent(m[1]).replace(/^code:/,""));return}view=hs==="#players"?"players":"home";render()})}
+MGCoachLogin.attach({form:$("#ch-login"),input:$("#ch-pw"),button:$("#ch-loginbtn")});
 $("#ch-login").addEventListener("submit",function(e){e.preventDefault();var b=$("#ch-loginbtn");pass=$("#ch-pw").value;$("#ch-pw").value="";$("#ch-err").textContent="";b.disabled=true;b.textContent="Opening";
   start().catch(function(err){pass="";$("#ch-err").textContent=/Wrong password/.test(err.message)?"Wrong password.":err.message;b.disabled=false;b.textContent="Open"})});
-var savedName=ls("mg-coach-name");if(savedName)$("#ch-coach").value=savedName;
 var sp=ss("mg-coach-s");if(sp){pass=sp;start().catch(function(){pass="";ss("mg-coach-s",null)})}
 })();
 </script>
