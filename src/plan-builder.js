@@ -399,7 +399,7 @@ function open(opts){
   var root=document.createElement('div');root.className='mgb';root.setAttribute('role','dialog');root.setAttribute('aria-label','Build my plan');document.body.appendChild(root);document.body.style.overflow='hidden';
   var STEPS=['name','goals','equip','level','days','minutes','pain','trackers','mobility','review'],i=0,painStop=false;
   function opt(val,on,label,desc,multi){return '<button type="button" class="mgb-opt" data-v="'+esc(val)+'" aria-pressed="'+on+'">'+(multi?'<span class="mgb-tick" aria-hidden="true">'+(on?'✓':'')+'</span>':'')+'<div><b>'+esc(label)+'</b>'+(desc?'<span>'+esc(desc)+'</span>':'')+'</div></button>'}
-  function coach(){return opts.coachUrl?'<a class="mgb-coach" href="'+esc(opts.coachUrl)+'" target="_blank" rel="noopener">Speak to a coach</a>':''}
+  function coach(topic){var u=opts.coachUrl;if(!u)return '';if(topic){u=u.replace(/([?&])topic=[^&]*&?/,'$1').replace(/[?&]$/,'');u+=(u.indexOf('?')<0?'?':'&')+'topic='+topic}return '<a class="mgb-coach" href="'+esc(u)+'">Speak to a coach</a>'}
   function valid(){var st=STEPS[i];if(st==='goals')return a.goals.length>0;if(st==='mobility')return !a.mobility||a.parts.length>0;if(st==='pain')return a.pain==='no';return true}
   function head(k,h,p){return '<div><div class="mgb-k">'+k+'</div><h2 class="mgb-h">'+h+'</h2></div><div class="mgb-bar"></div>'+(p?'<p class="mgb-p">'+p+'</p>':'')}
   function render(){
@@ -411,7 +411,7 @@ function open(opts){
     else if(st==='days')b=head('Question 4','How many days a week can you train?')+'<div class="mgb-grid mgb-opts" data-k="days">'+[2,3,4,5].map(function(d){return opt(d,+a.days===d,String(d),'days')}).join('')+'</div>';
     else if(st==='minutes')b=head('Question 5','How long can each session be?','Not counting your warm-up.')+'<div class="mgb-grid mgb-opts" data-k="minutes" style="grid-template-columns:repeat(3,minmax(0,1fr))">'+[30,45,60].map(function(m){return opt(m,+a.minutes===m,String(m),'minutes')}).join('')+'</div>';
     else if(st==='pain'){
-      if(painStop)b=head('Before you start','Speak to a coach first','Training around pain or an injury needs a plan built for you, so this is one for a coach rather than an automatic plan. Get in touch and we\'ll make sure your training helps rather than makes it worse.')+'<div style="display:flex;flex-direction:column;gap:8px">'+coach()+'<button type="button" class="mgb-back" data-x="painback">Go back</button></div>';
+      if(painStop)b=head('Before you start','Speak to a coach first','Training around pain or an injury needs a plan built for you, so this is one for a coach rather than an automatic plan. Get in touch and we\'ll make sure your training helps rather than makes it worse.')+'<div style="display:flex;flex-direction:column;gap:8px">'+coach('pain')+'<button type="button" class="mgb-back" data-x="painback">Go back</button></div>';
       else b=head('Question 6','Any pain or injuries right now?','Anything that hurts when you train or play, or an injury you are recovering from.')+'<div class="mgb-opts" data-k="pain">'+opt('no',a.pain==='no','No','I\'m good to go.')+opt('yes',a.pain==='yes','Yes','I have pain or an injury at the moment.')+'</div>';
     }
     else if(st==='trackers')b=head('Question 7','Daily trackers','Tick the ones you want on your plan each day. Add your own too.')+'<div class="mgb-opts" data-k="trackers" data-multi="1">'+TRACKERS.map(function(t){return opt(t.id,has(a.trackers,t.id),t.label,t.desc,1)}).join('')+'</div>'+

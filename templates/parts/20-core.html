@@ -274,7 +274,8 @@ $('tabs').addEventListener('click',function(e){var b=e.target.closest('[data-tab
   $('gridHint').textContent='Tap a square to fill in a day you missed.'+(F.checkin?' Tap an energy or motivation square to change that day\'s check-in.':'')+(F.alcohol?' Tap an alcohol square to switch between no, yes and blank.':'');
   $('guide').innerHTML=(CLIENT.guide||[]).map(function(g){return '<div class="note"><div class="kick">'+esc(g[0])+'</div><div>'+esc(g[1])+'</div></div>'}).join('');
   if(CLIENT.guideSub)$('guideSub').textContent=CLIENT.guideSub;
-  if(CLIENT.coachUrl){$('coachRow').hidden=false;$('coachBtn').hidden=false;$('coachBtn').href=CLIENT.coachUrl}
+  if(!CLIENT.coachUrl&&CLIENT.key!=='build-my-plan')CLIENT.coachUrl='https://www.macro.golf/help?from='+encodeURIComponent('1-to-1 plan: '+(CLIENT.name||''));
+  if(CLIENT.coachUrl){$('coachBtn').removeAttribute('target');$('coachRow').hidden=false;$('coachBtn').hidden=false;$('coachBtn').href=CLIENT.coachUrl}
   if(typeof CLIENT.onRebuild==='function'){$('coachRow').hidden=false;$('planBtnTop').hidden=false;$('rebuildBtn').hidden=false;[$('rebuildBtn'),$('planBtnTop')].forEach(function(b){b.addEventListener('click',function(){CLIENT.onRebuild()})})}
 })();
 function renderHeader(){

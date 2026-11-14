@@ -210,6 +210,7 @@ Golf personal plans use exactly the same message and the same MG Athletes button
 | Plan Builder, coaches (`pages/plan-builder.html`; landing page 2152404884; published 13 Nov, hidden from search) | plan-builder-529481 | 2168274068 | plan / mg_loader |
 | Coach-built plans in the app (`pages/coach-plan.html`, GENERATED; landing page 2152405286, hidden from search; opened by My Plan for every `path = coach-plan` client) | coach-plan | 2168278327 | plan / mg_loader |
 | Coach home + Player dashboard (`pages/coach-home.html`; landing page 2152405391; published 13 Nov, hidden from search) | coach-home | 2168278926 | plan / mg_loader |
+| Help desk / Speak to a coach (`pages/help.html` on top + native Kajabi form 'Help Desk (app + website)' 2149784131 below; submissions email Joe, Jack and Sam; `?topic=pain|training|golf|speed|app|coaching|other&from=…` fill the form; thank-you = /help?sent=1). Every 'Speak to a coach' button points here: Build a Plan (training) (`MGB_COACH`, pain stop adds topic=pain) and every 1-to-1 plan's header button (default `CLIENT.coachUrl` in 20-core). Landing page 2152406482, hidden from search | help | 2168284865 | helptop / mg_loader (+ helpform / help_form) |
 
 
 ## VidApp (builder.vidapp.com, app MacroGolfStudios)
