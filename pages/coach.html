@@ -106,7 +106,7 @@
 </style>
 <div class="top"><div class="wrap">
   <a href="https://www.macro.golf/coach-home" class="kick" style="display:inline-block;margin-bottom:8px;color:#FFD900;text-decoration:none">‹ Coach home</a>
-  <div class="kick">Macro Golf · Coach</div><h1>Coach dashboard</h1><div class="bar"></div>
+  <div class="kick">Macro Golf · Coach</div><h1>Player dashboard</h1><p class="lab" style="color:#c9c4b4;margin:6px 0 0">Every app user, 1-to-1 clients (MG Athletes) included.</p><div class="bar"></div>
   <form class="login" id="login"><label for="pw" class="lab" style="flex-basis:100%;color:#FFD900">Coach password</label>
     <input type="password" id="pw" autocomplete="current-password" required><button class="btn" type="submit">Open</button></form>
   <p class="err" id="err" role="alert"></p>
@@ -116,7 +116,7 @@
   <div class="stats" id="stats"></div>
   <div class="tools">
     <div class="seg" id="seg" role="group" aria-label="Show">
-      <button type="button" data-f="all" aria-pressed="true">Everyone</button><button type="button" data-f="one" aria-pressed="false">1-to-1</button><button type="button" data-f="app" aria-pressed="false">App members</button><button type="button" data-f="golf" aria-pressed="false">Golf</button><button type="button" data-f="nudge" aria-pressed="false">Need a nudge</button><button type="button" data-f="swap" aria-pressed="false">Swapped exercises</button></div>
+      <button type="button" data-f="all" aria-pressed="true">Everyone</button><button type="button" data-f="one" aria-pressed="false">MG Athletes</button><button type="button" data-f="app" aria-pressed="false">App members</button><button type="button" data-f="golf" aria-pressed="false">Golf</button><button type="button" data-f="nudge" aria-pressed="false">Need a nudge</button><button type="button" data-f="swap" aria-pressed="false">Swapped exercises</button></div>
     <span class="sp"></span>
     <label class="lab" for="q" style="position:absolute;left:-9999px">Search</label><input type="search" id="q" placeholder="Search name or email">
     <label class="lab" for="sort" style="position:absolute;left:-9999px">Sort</label><select id="sort"><option value="last">Last active</option><option value="busy">Most active (28 days)</option><option value="name">Name</option><option value="quiet">Quietest first</option></select>
@@ -133,7 +133,7 @@
 <script>
 (function(){
 var API='https://zhcgwtlyqriwlhbzkxcl.supabase.co/rest/v1/rpc/',KEY='sb_publishable__IBhmrVHOXsLHruU7XJB-g_OSN9Ljne';
-var pass='',people=[],filter='all',current=null,period='month',custom={from:'',to:''};
+var pass='',ATH={},people=[],filter='all',current=null,period='month',custom={from:'',to:''};
 function $(id){return document.getElementById(id)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function pad(n){return String(n).padStart(2,'0')}
@@ -154,14 +154,23 @@ function planName(id){var map={'build-my-plan':'Build My Plan','pure-muscle-stre
   return map[id]||(/^golf-/.test(id)?gameName(id):String(id||'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()}))}
 
 /* ---------- loading ---------- */
+function rpc2(fn,body){return fetch(API+fn,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(Object.assign({p_pass:pass},body||{}))}).then(function(r){return r.json()}).then(function(j){if(j&&j.error)throw new Error(j.error);return j})}
+/* embedded in the MG Athlete dashboard (coach-home): ?embed=1&person=<email or code:NNNNNN> opens that person straight away, no header */
+var EMBED=/[?&]embed=1/.test(location.search),EPERSON=(location.search.match(/[?&]person=([^&]+)/)||[])[1];EPERSON=EPERSON?decodeURIComponent(EPERSON).toLowerCase():null;
+function postH(){try{parent.postMessage({mgEmbedH:document.documentElement.scrollHeight},'*')}catch(e){}}
+if(EMBED){var es=document.createElement('style');es.textContent='#mgc .top{display:none!important}#mgc #main{display:none!important}';document.head.appendChild(es);setInterval(postH,1500)}
 function rpc(fn){return fetch(API+fn,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({p_pass:pass})})
   .then(function(r){return r.json().then(function(j){if(!r.ok){var e=new Error(j&&j.message||'Error');e.code=j&&j.code;e.status=r.status;throw e}return j})})}
 function load(){$('err').textContent='Loading…';
   /* mg_coach_people (010) gives emails so records group by person; mg_coach_all (003) is the fallback until 010 is run */
+  rpc('mg_coach_athletes').then(function(a){ATH={};((a&&a.rows)||[]).forEach(function(r){if(r.active)ATH[r.email]=r});if(people.length){people.forEach(finishAth);if(current)drawPerson();else if(!$('main').hidden)render()}}).catch(function(){});
   return rpc('mg_coach_people').catch(function(e){if(e.status===404||/PGRST202|Could not find/.test((e.code||'')+e.message))return rpc('mg_coach_all');throw e})
-  .then(function(j){if(j&&j.error)throw new Error(j.error);people=group((j&&j.rows)||[]);$('err').textContent='';try{sessionStorage.setItem('mg-coach-s',pass)}catch(x){}$('main').hidden=false;$('login').hidden=true;
+  .then(function(j){if(j&&j.error)throw new Error(j.error);people=group((j&&j.rows)||[]);people.forEach(finishAth);$('err').textContent='';try{sessionStorage.setItem('mg-coach-s',pass)}catch(x){}$('main').hidden=false;$('login').hidden=true;
+    if(EMBED&&EPERSON){var ep=find(EPERSON)||people.filter(function(x){return x.email===EPERSON||x.recs.some(function(r){return 'code:'+r.code===EPERSON})})[0];if(ep){showPerson(ep,true);return}$('person').hidden=false;$('person').innerHTML='<p class="empty">No app activity yet for this athlete.</p>';postH();return}
     if(current){var p=find(current.key);if(p){current=p;showPerson(p,true);return}}render()})
   .catch(function(e){$('err').textContent=/Wrong password/.test(e.message)?'Wrong password.':/Too many/.test(e.message)?e.message:'Could not load: '+e.message})}
+/* MG Athletes register (supabase/017): 1-to-1 clients by email, with or without a plan in the app */
+function finishAth(p){p.athlete=!!(p.email&&ATH[p.email]);p.one=p.recs.some(function(x){return x.one})||p.athlete}
 function find(k){for(var i=0;i<people.length;i++)if(people[i].key===k)return people[i];return null}
 
 /* ---------- one record → its activity ---------- */
@@ -201,7 +210,7 @@ function finish(p){var t=[],g=[],pl=[],last=null,upd=null;
   p.swap14=p.swaps.filter(function(o){return o.w.scope!=='back'&&daysAgo(o.w.d)<14}).length}
 
 /* ---------- list ---------- */
-function tags(p){var a=[];p.recs.forEach(function(x){if(x.one)a.push('<span class="tag one">1-to-1'+(x.r.plan?': '+esc(x.r.plan):'')+'</span>')});
+function tags(p){var a=[];if(p.athlete||p.recs.some(function(x){return x.one}))a.push('<span class="tag one" style="background:#0B0B0B;color:#FFD900">MG Athlete</span>');p.recs.forEach(function(x){if(x.one)a.push('<span class="tag one">1-to-1 plan'+(x.r.plan?': '+esc(x.r.plan):'')+'</span>')});
   var seen={};p.recs.forEach(function(x){if(x.pure&&!x.golf&&!seen[x.id]){seen[x.id]=1;a.push('<span class="tag">'+esc(planName(x.id))+'</span>')}});
   if(p.swap14)a.push('<span class="tag swap">Swapped '+p.swap14+'</span>');var rv=0;p.recs.forEach(function(x){var r=x.data&&x.data.reviews;if(r)Object.keys(r).forEach(function(k){if(r[k]&&r[k].at&&daysAgo(r[k].at)<8)rv++})});if(rv)a.push('<span class="tag" style="background:#FFD900;color:#0B0B0B">Weekly review in</span>');var gs=p.recs.filter(function(x){return x.golf});if(gs.length)a.push('<span class="tag golf">Golf: '+gs.length+' game'+(gs.length>1?'s':'')+'/plan</span>');return a.join('')}
 function bars(wk){var mx=Math.max.apply(null,wk.map(function(w){return w.t+w.g}).concat([1]));
@@ -252,7 +261,7 @@ function drawPerson(){var p=current,R=range(),f=inR(R),T=p.train.filter(f),G=p.g
   var gst=null;if(golfShape){try{gst=M.streak(golfShape)}catch(e){}}
   var h='<button type="button" class="ghost back" id="back">← All people</button>'+
    '<div class="phead"><div><div class="lab">'+(p.one?'1-to-1 client':'App member')+'</div><h2>'+esc(p.name)+'</h2><p>'+esc(p.email||'No email linked yet')+' · Last active: '+esc(p.never?'not started':ago(p.last)+(p.last?' ('+nice(p.last)+')':''))+' · Last saved: '+esc(fmtTs(p.updated))+'</p><div class="tags">'+tags(p)+'</div></div>'+
-   '<button type="button" class="ghost noprint" id="print">Print / save PDF</button></div>'+
+   '<div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap">'+(p.email?'<button type="button" class="ghost" id="ath">'+(p.athlete?'Remove from MG Athletes':'Mark as MG Athlete (1-to-1 client)')+'</button>':'')+(p.one&&!EMBED?'<a class="ghost" style="display:inline-flex;align-items:center;padding:0 14px;text-decoration:none" href="https://www.macro.golf/coach-home#athlete='+encodeURIComponent(p.email||'code:'+p.recs[0].code)+'">Open in MG Athlete dashboard</a>':'')+'<button type="button" class="ghost" id="print">Print / save PDF</button></div></div>'+
    '<div class="pbar"><div class="seg" id="pseg" role="group" aria-label="Period">'+[['week','This week'],['lastweek','Last week'],['month','This month'],['lastmonth','Last month'],['28','28 days'],['custom','Pick dates']].map(function(x){return '<button type="button" data-p="'+x[0]+'" aria-pressed="'+(period===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
    (period==='custom'?'<label class="lab" for="from">From</label><input type="date" id="from" value="'+R.from+'"><label class="lab" for="to">To</label><input type="date" id="to" value="'+R.to+'">':'')+
    '<span class="rng">'+esc(R.lab)+': '+nice(R.from)+' – '+nice(R.to)+'</span></div>';
@@ -264,7 +273,10 @@ function drawPerson(){var p=current,R=range(),f=inR(R),T=p.train.filter(f),G=p.g
   h+=golfHtml(p,R,f,golfShape);
   $('person').innerHTML=h;
   if(golfShape&&M){try{M.css()}catch(e){}}
-  $('back').addEventListener('click',function(){try{history.back()}catch(e){backToList()}});
+  $('back').addEventListener('click',function(){try{history.back()}catch(e){backToList()}});if(EMBED)$('back').hidden=true;
+  if($('ath'))$('ath').addEventListener('click',function(){var on=!p.athlete;if(!on&&!confirm('Remove '+p.name+' from MG Athletes? They lose the MG badge unless they have a 1-to-1 plan.'))return;
+    this.disabled=true;rpc2('mg_coach_athlete_set',{p_email:p.email,p_name:p.name,p_on:on,p_source:'player dashboard'}).then(function(){if(on)ATH[p.email]={email:p.email,name:p.name,active:true};else delete ATH[p.email];finishAth(p);drawPerson()}).catch(function(e){alert('Could not update: '+e.message);drawPerson()})});
+  if(EMBED)postH();
   $('print').addEventListener('click',function(){window.print()});
   [].forEach.call(document.querySelectorAll('#pseg button'),function(b){b.addEventListener('click',function(){period=b.dataset.p;drawPerson()})});
   if($('from')){var ch=function(){custom.from=$('from').value;custom.to=$('to').value;drawPerson()};$('from').addEventListener('change',ch);$('to').addEventListener('change',ch)}}
