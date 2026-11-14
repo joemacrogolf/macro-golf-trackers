@@ -317,7 +317,7 @@
 
 <datalist id="dl-coach"><option>Joe</option><option>Jack</option><option>Sam</option><option>James</option></datalist>
 <datalist id="dl-drills"></datalist>
-<datalist id="dl-ex"></datalist>
+<datalist id="dl-ex"></datalist><datalist id="dl-warm"></datalist>
 <datalist id="dl-mob"></datalist>
 <datalist id="dl-habit"></datalist>
 <datalist id="dl-stat"></datalist>
@@ -326,6 +326,8 @@
 </div>
 <script charset="utf-8" src="{{BASE}}src/mg-library.js"></script>
 <script charset="utf-8" src="{{BASE}}src/plan-builder.js"></script>
+<script>window.MGW_NOAUTO=1</script>
+<script charset="utf-8" src="{{BASE}}src/warmup.js"></script>
 <script>
 "use strict";
 (function(){
@@ -348,7 +350,7 @@ const PHYS_TEMPLATE=[
 ];
 function fillDatalists(){
   const put=(id,arr)=>{document.getElementById(id).innerHTML=arr.map(v=>`<option value="${esc(v)}"></option>`).join("")};
-  put("dl-drills",DRILLS);put("dl-ex",EXERCISES);put("dl-mob",[...new Set(mobAllVideos().map(mobLabel))]);put("dl-habit",HABITS);put("dl-stat",STATS);put("dl-tpi",TPI);
+  put("dl-drills",DRILLS);put("dl-ex",EXERCISES);put("dl-warm",(window.MGWarm?MGWarm.EX.map(e=>e[0]):[]));put("dl-mob",[...new Set(mobAllVideos().map(mobLabel))]);put("dl-habit",HABITS);put("dl-stat",STATS);put("dl-tpi",TPI);
 }
 
 /* ---------- utils ---------- */
@@ -395,7 +397,7 @@ function newPlan(){
     weekly:{practice:2,physical:4,oncourse:1,connected:""},
     practice:{intro:"",sessions:[]},
     oncourse:{games:[],technical:"",intention:"",strategy:"",preround:"",postround:"Complete statistics for full rounds. Send the reflection and relevant statistics to the coaching team. Rather than diagnosing poor shots, look for patterns: what performed well, what became more difficult, what changed when performance changed, which parts of practice transferred.",balance:4},
-    physical:{days:4,mode:"superset",gen:{goals:["strength","speed"],equip:"gym",level:"intermediate",minutes:45},structure:"Supersets · A1 / A2 pairs",rest:"45–60s between rounds",strength:"3 sets: 12 / 10 / 8 reps @ RPE 7 / 8 / 9",power:"3 x 5 @ RPE 10 (maximal intent, not failure)",progression:"Keep exercises, sets and reps consistent through the block. Progress through load using the prescribed RPE. Do not add fatigue for the sake of progression.",note:"This plan should assist your golf performance. If at any time your training is limiting your ability to practise or play, notify your coach immediately.",dayList:[]},
+    physical:{days:4,mode:"superset",warmup:{video:"auto",note:"",items:[["Standing Helicopters","10"],["Standing Straight Leg Hip Turns","8"],["Half Kneeling Spine Rotations","6 / side"],["Cat Cow","8"],["Aeroplanes","5 / side"],["Diagonal Bird Dogs","6 / side"]].map(([name,reps])=>({name,reps}))},gen:{goals:["strength","speed"],equip:"gym",level:"intermediate",minutes:45},structure:"Supersets · A1 / A2 pairs",rest:"45–60s between rounds",strength:"3 sets: 12 / 10 / 8 reps @ RPE 7 / 8 / 9",power:"3 x 5 @ RPE 10 (maximal intent, not failure)",progression:"Keep exercises, sets and reps consistent through the block. Progress through load using the prescribed RPE. Do not add fatigue for the sake of progression.",note:"This plan should assist your golf performance. If at any time your training is limiting your ability to practise or play, notify your coach immediately.",dayList:[]},
     mobility:{frequency:"Daily",when:"Evenings before sleep",mode:"random",areas:[],equip:[],count:3,minutes:10,items:[]},
     weight:{unit:"kg",start:"",target:"",direction:"Maintain",frequency:"Weekly",day:"Monday",conditions:"First thing in the morning, before food",waist:false,notes:""},
     stats:STD_STATS(),
@@ -549,6 +551,7 @@ physical(){
    ${A("physical.progression","Progression","",3,"span2")}${A("physical.note","Note to the player","",3)}</div></div>
    ${mismatch?`<div class="banner warn">You have ${ph.dayList.length} days built but ${ph.days} days per week set. Use <b>Replace with ${tplDays()}-day template</b> or add or remove days.</div>`:""}
    ${ui.confirmTpl?`<div class="banner warn">This replaces the ${ph.dayList.length} days below with the ${tplDays()}-day template. <button class="btn sm danger" type="button" data-act="tpl-phys" data-v="yes">Yes, replace</button> <button class="btn sm ghost" type="button" data-act="tpl-cancel">Cancel</button></div>`:""}
+   ${warmCard()}
    <div class="row" style="margin-bottom:12px"><h2 style="margin:0">Training days</h2><span class="spacer"></span><button class="btn${ph.dayList.length?"":" gold"}" type="button" data-act="tpl-phys">${ph.dayList.length?"Replace with":"Load"} ${tplDays()}-day superset template</button><button class="btn sm" type="button" data-act="addday">+ Add day</button></div>${days||`<p class="hint">No days yet. Load the ${tplDays()}-day template to start from the standard structure, then swap exercises.</p>`}`;
 },
 mobility(){
@@ -753,7 +756,7 @@ function docBody(p){
     ${(()=>{const c={};ph.dayList.forEach(d=>d.pairs.forEach(pr=>["a","b"].forEach(k=>{const e=pr[k];if(e&&e.name)c[e.type]=(c[e.type]||0)+1})));const parts=Object.keys(c).map(k=>({l:k,v:c[k],c:TYPE_C[k]||DC.mute,u:" ex"}));const tot=parts.reduce((a,x)=>a+x.v,0);return tot?chartBox("Your training mix",donut(parts,String(tot),"EXERCISES"),"Every exercise across your training days, by type."):""})()}
     <div class="cols c2"><div class="box"><h4>Strength / hypertrophy</h4><p>${esc(ph.strength)}</p></div><div class="box"><h4>Power / speed</h4><p>${esc(ph.power)}</p></div></div>
     ${ph.progression?`<div class="box gold"><h4>Progression</h4><p>${nl2br(ph.progression)}</p></div>`:""}`);
-    ph.dayList.forEach((d,di)=>{h+=`<section class="pg">${runner}<div class="sec">${String(n).padStart(2,"0")} / Your physical plan</div><h2>Day ${di+1}</h2><h3>${esc(d.title)}</h3><div class="chips2">${[...new Set(d.pairs.flatMap(pr=>[pr.a,pr.b]).filter(e=>e&&e.name).map(e=>e.type))].map(t=>`<span style="background:${TYPE_C[t]||"#0c0c0b"};color:#0c0c0b">${esc(t)}</span>`).join("")}</div><table><tr><th></th><th>Exercise</th><th>Type</th><th>Prescription</th></tr>${d.pairs.map((pr,pi)=>["a","b"].filter(s=>pr[s]&&pr[s].name).map((s,j0)=>{const e=pr[s],j=s==="a"?0:1;const rx=e.reps||(e.type==="Power"?ph.power:ph.strength);return `<tr><td class="k">${exLabel(ph.mode,pi,j)}</td><td><b>${esc(e.name)}</b></td><td>${esc(e.type)}</td><td>${esc(rx)}${e.each?" · each side":""}</td></tr>`}).join("")).join("")}</table>${ph.mode&&ph.mode!=="superset"?`<p style="font-size:12px;opacity:.75">${esc(ph.structure||"")}${ph.rest?" · "+esc(ph.rest):""}</p>`:""}</section>`});
+    ph.dayList.forEach((d,di)=>{h+=`<section class="pg">${runner}<div class="sec">${String(n).padStart(2,"0")} / Your physical plan</div><h2>Day ${di+1}</h2><h3>${esc(d.title)}</h3><div class="chips2">${[...new Set(d.pairs.flatMap(pr=>[pr.a,pr.b]).filter(e=>e&&e.name).map(e=>e.type))].map(t=>`<span style="background:${TYPE_C[t]||"#0c0c0b"};color:#0c0c0b">${esc(t)}</span>`).join("")}</div>${warmDoc(ph)}<table><tr><th></th><th>Exercise</th><th>Type</th><th>Prescription</th></tr>${d.pairs.map((pr,pi)=>["a","b"].filter(s=>pr[s]&&pr[s].name).map((s,j0)=>{const e=pr[s],j=s==="a"?0:1;const rx=e.reps||(e.type==="Power"?ph.power:ph.strength);return `<tr><td class="k">${exLabel(ph.mode,pi,j)}</td><td><b>${esc(e.name)}</b></td><td>${esc(e.type)}</td><td>${esc(rx)}${e.each?" · each side":""}</td></tr>`}).join("")).join("")}</table>${ph.mode&&ph.mode!=="superset"?`<p style="font-size:12px;opacity:.75">${esc(ph.structure||"")}${ph.rest?" · "+esc(ph.rest):""}</p>`:""}</section>`});
   }
   if(p.include.mobility&&p.mobility.mode!=="manual"&&mobSummary(p.mobility))h+=page("Your mobility",`<h2>Your mobility</h2><p><b>${esc(p.mobility.frequency)}</b>${p.mobility.when?" · "+esc(p.mobility.when):""}</p><p>${p.mobility.mode==="time"?`About ${esc(p.mobility.minutes)} minutes of follow-along mobility`:`${esc(p.mobility.count)} follow-along mobility videos`} a day${(p.mobility.areas||[]).length?", focused on "+esc(p.mobility.areas.join(", ").toLowerCase()):""}. Your plan in the Macro Golf app picks a new routine for you every day: open it, press play and follow along.</p>
     <div class="cols c3"><div class="box stat"><span>Every day</span><b>${p.mobility.mode==="time"?esc(p.mobility.minutes)+" min":esc(p.mobility.count)+" videos"}</b><span>follow along</span></div><div class="box stat"><span>Over ${p.weeks} weeks</span><b>${p.mobility.mode==="time"?Math.round((+p.mobility.minutes||10)*7*p.weeks/60)+" hrs":(+p.mobility.count||3)*7*p.weeks}</b><span>${p.mobility.mode==="time"?"of mobility":"videos"}</span></div><div class="box stat"><span>When</span><b style="font-size:20px;margin:8px 0">${esc(p.mobility.when||"Any time")}</b></div></div>
@@ -801,6 +804,18 @@ const tplDays=()=>Math.max(1,Math.min(5,parseInt(plan.physical.days)||parseInt(p
 /* ---------- generate a recommended training plan (the Build a Plan (training) engine, src/plan-builder.js) ---------- */
 const GEN_MINS=[30,45,60,75],MODES=[["superset","Supersets"],["circuit","Circuit"],["straight","Straight sets"]];
 function exLabel(mode,pi,j){if(mode==="straight")return String.fromCharCode(65+pi*2+j);if(mode==="circuit")return String(pi*2+j+1);return String.fromCharCode(65+pi)+(j+1)}
+/* ---------- warm-up before every session (src/warmup.js: library + the app's warm-up box with Demo videos) ---------- */
+const WARM_VID=[["auto","Auto: matches the day (upper / lower / full body)"],["express","Express 5 Minute Golf Warm Up"],["full","Full Body Warm Up"],["upper","Upper Body Warm Up"],["lower","Lower Body Warm Up"],["core","Core Warm Up"],["none","No follow-along video"]];
+function warmDoc(ph){const w=ph.warmup;if(!w)return"";const it=(w.items||[]).filter(x=>String(x.name||"").trim()),V=window.MGWarm&&MGWarm.VIDS[w.video]||null;if(!it.length&&!V&&w.video!=="auto")return"";
+  return `<div class="box"><h4 style="margin:0 0 6px">Warm-up first</h4><p style="margin:0">${it.map(x=>`<b>${esc(x.name)}</b>${x.reps?" "+esc(x.reps):""}`).join(" · ")}${it.length?"":"Follow-along warm-up video"}</p><p style="margin:6px 0 0;font-size:12px;opacity:.75">Each one has a demo video in your app${w.video&&w.video!=="none"?`. Short on time? Follow along with the ${w.video==="auto"?"warm-up video for the day":esc(V[0])}`:""}.${w.note?" "+esc(w.note):""}</p></div>`}
+function warmStd(){return (window.MGWarm?MGWarm.STD:[]).map(([name,reps])=>({id:uid(),name,reps}))}
+function warmCard(){const w=plan.physical.warmup||(plan.physical.warmup={video:"auto",note:"",items:warmStd()});
+  const ok=n=>window.MGWarm&&MGWarm.idFor(n);
+  return `<div class="card"><div class="card-h"><h3>Warm-up · before every session</h3><span class="spacer"></span><button class="btn sm" type="button" data-act="warmstd">Use the standard golf warm-up</button></div>
+   <p class="hint" style="margin-top:0">Shows as a tick-off Warm-up box above every gym session in their app, with a <b>Demo</b> video on each exercise. Pick from the exercise library so every one has its video.</p>
+   <div class="stack">${w.items.map((x,i)=>`<div class="pair" style="grid-template-columns:34px 1fr 140px 90px 30px"><span class="lab">W${i+1}</span><input type="text" list="dl-warm" data-b="physical.warmup.items.${i}.name" value="${esc(x.name)}" placeholder="Warm-up exercise"><input type="text" data-b="physical.warmup.items.${i}.reps" value="${esc(x.reps)}" placeholder="e.g. 8 / side"><span class="hint" style="margin:0">${x.name?(ok(x.name)?"\u25b6 Demo":"<span style=\"color:#e8a33c\">No video</span>"):""}</span>${del("physical.warmup.items."+i,"Remove")}</div>`).join("")}</div>
+   <div class="row" style="margin-top:10px"><button class="btn sm" type="button" data-act="add" data-list="physical.warmup.items">+ Warm-up exercise</button></div>
+   <div class="grid g2" style="margin-top:12px"><label class="f"><span>Follow-along warm-up video (shown under the list)</span><select data-b="physical.warmup.video">${WARM_VID.map(([v,l])=>`<option value="${v}"${(w.video||"auto")===v?" selected":""}>${l}</option>`).join("")}</select></label>${T("physical.warmup.note","Warm-up note (optional)","e.g. Then 1–2 lighter sets before your first big lift")}</div></div>`}
 function genCard(){const ph=plan.physical,g=ph.gen||(ph.gen={goals:["strength","speed"],equip:"gym",level:"intermediate",minutes:45}),B=window.MGBuild;
   if(!B)return '<div class="banner warn">The plan generator didn\u2019t load. Refresh the page.</div>';
   const chip=(v,l)=>`<button type="button" data-act="gengoal" data-v="${v}" class="${(g.goals||[]).includes(v)?"on":""}" aria-pressed="${(g.goals||[]).includes(v)}">${esc(l)}</button>`;
@@ -847,7 +862,7 @@ function genPlan(){const ph=plan.physical,g=ph.gen,B=window.MGBuild,mode=ph.mode
   const n=days.reduce((a,d)=>a+d.pairs.reduce((b,p)=>b+(p.a.name?1:0)+(p.b.name?1:0),0),0);
   return `Generated ${days.length} days, ${n} exercises (${out.client.summary.goals.join(", ")} · ${out.client.summary.equip} · ${g.minutes} min · ${MODES.filter(x=>x[0]===mode)[0][1].toLowerCase()}). Edit anything below to personalise it.`}
 function tplPhys(){const n=tplDays();plan.physical.dayList=PHYS_TEMPLATES[n].map(([title,pairs])=>({id:uid(),title,pairs:pairs.map(([a,b])=>({id:uid(),a:ex(a,"Strength"),b:ex(b,"Power")}))}));plan.physical.days=n;plan.weekly.physical=n}
-const BLANK={priorities:()=>({id:uid(),title:"",start:"",why:"",change:""}),habits:()=>({id:uid(),name:"",detail:"",dose:""}),"mobility.items":()=>({id:uid(),kind:"manual",name:"",area:"",dose:"",cue:""}),stats:()=>({id:uid(),name:"",baseline:"",target:"",how:""}),"intake.tpi":()=>({id:uid(),test:"",result:"",note:""}),"checkin.questions":()=>({id:uid(),q:"",type:"1–10"}),"review.priorityReview":()=>({id:uid(),title:"",rating:"0",note:""})};
+const BLANK={"physical.warmup.items":()=>({id:uid(),name:"",reps:""}),priorities:()=>({id:uid(),title:"",start:"",why:"",change:""}),habits:()=>({id:uid(),name:"",detail:"",dose:""}),"mobility.items":()=>({id:uid(),kind:"manual",name:"",area:"",dose:"",cue:""}),stats:()=>({id:uid(),name:"",baseline:"",target:"",how:""}),"intake.tpi":()=>({id:uid(),test:"",result:"",note:""}),"checkin.questions":()=>({id:uid(),q:"",type:"1–10"}),"review.priorityReview":()=>({id:uid(),title:"",rating:"0",note:""})};
 
 /* ---------- next phase ---------- */
 function startNext(src){
@@ -861,7 +876,7 @@ function startNext(src){
 
 /* ---------- events ---------- */
 function changed(rerender){dirty=true;setStatus("Unsaved changes");try{localStorage.setItem("mg-planbuilder-draft",JSON.stringify(plan))}catch(e){}clearTimeout(saveTimer);saveTimer=setTimeout(save,1200);if(rerender)render();else{renderRail();renderWho()}}
-function isStructural(path){return /\.game$/.test(path)||path==="weekly.physical"||path==="mobility.count"||path==="mobility.minutes"||/^mobility\.items\.\d+\.name$/.test(path)||path.startsWith("include.")||path==="phase"||path==="weeks"||path==="startDate"||/\.env$/.test(path)||path==="weight.start"||path==="weight.target"||path==="weight.unit"||path==="physical.days"}
+function isStructural(path){return /^physical\.warmup\.items\.\d+\.name$/.test(path)||/\.game$/.test(path)||path==="weekly.physical"||path==="mobility.count"||path==="mobility.minutes"||/^mobility\.items\.\d+\.name$/.test(path)||path.startsWith("include.")||path==="phase"||path==="weeks"||path==="startDate"||/\.env$/.test(path)||path==="weight.start"||path==="weight.target"||path==="weight.unit"||path==="physical.days"}
 function onField(e){
   const el=e.target.closest("[data-b]");if(!el)return;
   const path=el.dataset.b,t=el.dataset.t;let v=el.type==="checkbox"?el.checked:el.value;
@@ -882,7 +897,7 @@ function onField(e){
 }
 $("#pb-main").addEventListener("input",e=>{if(e.target.matches("[data-att]")){const o=e.target.parentElement.querySelector("output");if(o)o.textContent=attLabel(+e.target.value);return}if(e.target.matches("input[type=text],input[type=email],input:not([type]),textarea"))onField(e)});
 $("#pb-main").addEventListener("change",e=>{if(e.target.id==="pb-tpitext")return;
-  const gk=e.target.dataset.gen;if(gk){const ph=plan.physical,g=ph.gen;if(gk==="days"){ph.days=+e.target.value;plan.weekly.physical=ph.days}else g[gk]=gk==="minutes"?+e.target.value:e.target.value;const y=PBMAIN.scrollTop;changed(true);PBMAIN.scrollTop=y;return}const p=e.target.dataset.b||"";if(!e.target.matches("input[type=text],input[type=email],input:not([type]),textarea")||isStructural(p)||/^practice\.sessions\.\d+\.drills\.\d+\.(name|detail)$/.test(p)||/^mobility\.items\.\d+\.name$/.test(p))onField(e)});
+  const gk=e.target.dataset.gen;if(gk){const ph=plan.physical,g=ph.gen;if(gk==="days"){ph.days=+e.target.value;plan.weekly.physical=ph.days}else g[gk]=gk==="minutes"?+e.target.value:e.target.value;const y=PBMAIN.scrollTop;changed(true);PBMAIN.scrollTop=y;return}const p=e.target.dataset.b||"";if(!e.target.matches("input[type=text],input[type=email],input:not([type]),textarea")||isStructural(p)||/^practice\.sessions\.\d+\.drills\.\d+\.(name|detail)$/.test(p)||/^mobility\.items\.\d+\.name$/.test(p)||/^physical\.warmup\.items\.\d+\.name$/.test(p))onField(e)});
 function arrAt(path){const ks=path.split(".");const idx=+ks.pop();return [getPath(plan,ks.join(".")),idx]}
 document.addEventListener("click",async e=>{
   const sb=e.target.closest("[data-sec]");if(sb){go(sb.dataset.sec);return}
@@ -896,6 +911,7 @@ document.addEventListener("click",async e=>{
     case"mv":{const [arr,i]=arrAt(b.dataset.path),j=i+ +b.dataset.dir;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];break}
     case"adddrill":plan.practice.sessions[+b.dataset.s].drills.push(blankDrill(b.dataset.env));break;
     case"tpl-session":tplSession(b.dataset.v);break;
+    case"warmstd":plan.physical.warmup.items=warmStd();if(!plan.physical.warmup.video)plan.physical.warmup.video="auto";break;
     case"gengoal":{const g=plan.physical.gen,v=b.dataset.v,i=g.goals.indexOf(v);i>=0?g.goals.splice(i,1):g.goals.push(v);break}
     case"genmode":plan.physical.mode=b.dataset.v;if(plan.physical.dayList.length)plan.physical.rest=b.dataset.v==="circuit"?"60–90s between rounds":b.dataset.v==="straight"?"60–90s between sets":"45–60s between rounds";if(plan.physical.dayList.length)plan.physical.structure=b.dataset.v==="circuit"?"Circuit · every exercise in turn, 3 rounds":b.dataset.v==="straight"?"Straight sets · one exercise at a time":"Supersets · A1 / A2 pairs";break;
     case"genfill":ui.genMsg=genFromIntake();break;

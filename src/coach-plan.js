@@ -198,6 +198,7 @@ function build(){
     weekNote:wk.connected||'',gymNote:ph.note||'',
     objective:[ph.structure,ph.strength?'Strength: '+ph.strength:'',ph.power?'Power: '+ph.power:''].filter(Boolean).join('. ')+'.',
     restNote:ph.rest||'',
+    warmup:ph.warmup?(ph.warmup.video==='none'&&!(ph.warmup.items||[]).some(function(w){return String(w.name||'').trim()})?false:{video:ph.warmup.video||'auto',items:(ph.warmup.items||[]).filter(function(w){return String(w.name||'').trim()}),note:ph.warmup.note||''}):undefined,
     guide:[['RPE 7','About three reps left in the tank.'],['RPE 8','About two reps left.'],['RPE 9','About one rep left.'],
       ['Max intent','RPE 10 on power exercises means maximal explosive intent, not muscular failure.'],
       ['Progress',ph.progression||'Keep the exercises, sets and reps the same through the block and progress through load.'],
