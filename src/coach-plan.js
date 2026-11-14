@@ -86,7 +86,7 @@ function dashCss(){if(document.getElementById('cp-dash-css'))return;var s=docume
  '.cp-rings svg{width:100%;max-width:92px;height:auto}.cp-rings span{font:700 11px Inter,sans-serif;letter-spacing:.6px;text-transform:uppercase;color:#c9c4b4}',
  '.cp-spark{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cp-spark>div{background:#1a1916;padding:10px}.cp-spark svg{display:block;width:100%;height:auto}',
  '.cp-spark b{font:400 20px Anton,Impact,sans-serif;color:#FFD900;margin-left:6px}',
- '.cp-attc{background:#0B0B0B;padding:10px 10px 6px;margin:4px 0 2px}.cp-attc svg{display:block;width:100%;height:auto;max-height:190px}.cp-attc .k{display:flex;gap:14px;font:700 10px Inter,sans-serif;letter-spacing:1.4px;text-transform:uppercase;color:#c9c4b4;padding:6px 2px 2px}.cp-attc .k i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}',
+ '.cp-attc{background:#F7F5EF;border:1px solid rgba(11,11,11,.1);padding:10px 10px 6px;margin:4px 0 2px}.cp-attc svg{display:block;width:100%;height:auto;max-height:190px}.cp-attc .k{display:flex;gap:14px;font:700 10px Inter,sans-serif;letter-spacing:1.4px;text-transform:uppercase;color:#77715F;padding:6px 2px 2px}.cp-attc .k i{display:inline-block;width:10px;height:10px;border-radius:50%;border:1.5px solid #0B0B0B;margin-right:5px;vertical-align:-1px}',
  '.cp-coach{background:#fff;border:1px solid rgba(11,11,11,.13);border-left:6px solid #0B0B0B;padding:16px;display:flex;flex-direction:column;gap:8px}',
  '.cp-coach .k{font:700 11px Inter,sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:#8a7f00}.cp-coach h3{margin:0;font:400 22px/1 Anton,Impact,sans-serif;text-transform:uppercase;color:#0B0B0B}',
  '.cp-coach h3 small{font:600 13px Inter,sans-serif;color:#77715F;text-transform:none;margin-left:6px}.cp-cn{margin:0;color:#3B3830;font-size:14px}',
@@ -120,9 +120,9 @@ function dashSetup(){dashCss();var lastH='',put=function(force){var el=document.
 /* attention through a session, small chart for the Practice tab */
 function attSvg(dr){var n=dr.length;if(n<2)return '';var W=640,H=180,L=124,R=30,T=24,B=24,X=function(i){return L+i*(W-L-R)/(n-1)},Y=function(v){return T+(1-att(v)/100)*(H-T-B)};
   var tx=function(x,y,t,c,sz,a){return '<text x="'+x+'" y="'+y+'" text-anchor="'+(a||'start')+'" font-family="Inter,sans-serif" font-size="'+(sz||11)+'" font-weight="800" fill="'+c+'">'+t+'</text>'};
-  var g='<rect x="'+L+'" y="'+T+'" width="'+(W-L-R)+'" height="'+(H-T-B)/2+'" fill="#1d1c19"/><rect x="'+L+'" y="'+(T+(H-T-B)/2)+'" width="'+(W-L-R)+'" height="'+(H-T-B)/2+'" fill="#141311"/>'+
-    tx(L-12,T+18,'EXTERNAL','#F4F1EA',20,'end')+tx(L-12,H-B-2,'INTERNAL','#F4F1EA',20,'end');
-  var pts=dr.map(function(d,i){return [X(i),Y(d.attention)]});g+='<polyline points="'+pts.map(function(p){return p.join(',')}).join(' ')+'" fill="none" stroke="#F4F1EA" stroke-width="2.5" stroke-dasharray="6 5"/>';
+  var g='<rect x="'+L+'" y="'+T+'" width="'+(W-L-R)+'" height="'+(H-T-B)/2+'" fill="#ECE8DC"/><rect x="'+L+'" y="'+(T+(H-T-B)/2)+'" width="'+(W-L-R)+'" height="'+(H-T-B)/2+'" fill="#FFFFFF"/>'+
+    tx(L-12,T+18,'EXTERNAL','#0B0B0B',20,'end')+tx(L-12,H-B-2,'INTERNAL','#0B0B0B',20,'end');
+  var pts=dr.map(function(d,i){return [X(i),Y(d.attention)]});g+='<polyline points="'+pts.map(function(p){return p.join(',')}).join(' ')+'" fill="none" stroke="#0B0B0B" stroke-width="2.5" stroke-dasharray="6 5"/>';
   dr.forEach(function(d,i){var t=d.env==='Technical';g+='<circle cx="'+pts[i][0]+'" cy="'+pts[i][1]+'" r="17" fill="'+(t?'#E6E1D3':'#FFD900')+'" stroke="#0B0B0B" stroke-width="2"/>'+tx(pts[i][0],pts[i][1]+6,i+1,'#0B0B0B',18,'middle')});
   return '<div class="cp-attc"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Attention through the session: each number is a drill below">'+g+'</svg><div class="k" aria-hidden="true"><span><i style="background:#E6E1D3"></i>Technical</span><span><i style="background:#FFD900"></i>Game</span></div></div>'}
 
