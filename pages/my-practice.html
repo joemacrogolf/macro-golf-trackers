@@ -126,8 +126,8 @@ function fixCreds(codes,em,pin){try{for(var i=0;i<localStorage.length;i++){var k
 function route(j,em,pin){
   var name=j.name||'',pr=(j.plans||[]).filter(function(p){return p.plan===PRAC})[0];
   if(j.oneToOne&&(j.oneToOne.includes||['training']).indexOf('practice')>=0){
-    var m={em:em,name:name,target:{kind:'1to1',code:j.oneToOne.code,path:j.oneToOne.path}};save(m);
-    handoff1to1(m,pin);coachScreen(m);return}
+    var m={em:em,name:name,target:{kind:'1to1',code:j.oneToOne.code,path:j.oneToOne.path},hasPlan:!!(pr&&pr.hasPlan)};save(m);
+    handoff1to1(m,pin);coachScreen(m,pin);return}
   var b={em:em,name:name,target:{kind:'plan',plan:PRAC},hasPlan:!!(pr&&pr.hasPlan)};save(b);
   /* returning players with a plan go straight to this week (Joe, 12 Nov); 'Build a one-off session' is inside the plan */
   if(b.hasPlan){ls('mgprac:start',null);openPlan(b,pin)}else chooseScreen(b,pin);
@@ -135,14 +135,16 @@ function route(j,em,pin){
 
 /* 1-to-1 clients whose plan includes practice: it's set by their coach */
 function handoff1to1(m,pin){ls('mgsync-handoff',JSON.stringify({code:m.target.code,pin:pin,t:Date.now()}));ls('mgplan:me',JSON.stringify({code:m.target.code,path:m.target.path,name:m.name||''}));ls('mgplan:email',m.em)}
-function coachScreen(m){
+/* soft steer (Joe, 14 Nov): their coach's plan comes first, but they can still build extra practice */
+function coachScreen(m,pin){
   box.innerHTML='<div class="mt-k">My Practice</div><h1 class="mt-h">'+(m.name?'Hi '+esc(m.name):'Your practice')+'</h1><div class="mt-bar"></div>'+
     '<h2 class="mt-h2">Your practice is set by your coach</h2>'+
-    '<p class="mt-p">Your 1-to-1 plan has everything for your practice. Open it from the 1-to-1 Coaching tab, or here.</p>'+
+    '<p class="mt-p">Your 1-to-1 plan has your practice for this phase. Open it from the MG Athletes tab, or here.</p>'+
     '<a class="mt-go" href="/my-plan">Open my 1-to-1 plan</a>'+
-    '<div class="mt-note">Want to do something outside your plan? Head back to the Home page or use Search.</div>'+
+    '<div class="mt-note">Want some extra practice on top? <button type="button" class="mt-link" data-extra style="display:inline;padding:0">Build my own practice anyway</button>. Your coach\u2019s plan stays as it is.</div>'+
     '<p class="mt-help">Not '+esc(m.name||'you')+'? <button type="button" class="mt-link" data-out style="display:inline;padding:0">Log out</button></p>';
-  box.querySelector('[data-out]').addEventListener('click',logout)}
+  box.querySelector('[data-out]').addEventListener('click',logout);
+  box.querySelector('[data-extra]').addEventListener('click',function(){chooseScreen({em:m.em,name:m.name,target:{kind:'plan',plan:PRAC},hasPlan:!!m.hasPlan,extra:true},pin)})}
 
 /* everyone else: a weekly plan, or just today's session */
 function chooseScreen(m,pin){
@@ -177,7 +179,7 @@ function logout(){try{if(typeof window.KEY==='string')ls('mgsync:'+window.KEY,nu
 
 /* coming back: go straight to where they went last time */
 var m=me();
-if(m){if(m.target.kind==='1to1')coachScreen(m);else if(PLANS[m.target.plan]){if(m.hasPlan){ls('mgprac:start',null);openPlan(m)}else chooseScreen(m)}}
+if(m){if(m.target.kind==='1to1')coachScreen(m);else if(m.extra&&PLANS[m.target.plan]&&!m.hasPlan)chooseScreen(m);else if(PLANS[m.target.plan]){if(m.hasPlan){ls('mgprac:start',null);openPlan(m)}else chooseScreen(m)}}
 else setTimeout(function(){(f.email.value?f.pin:f.email).focus()},60);
 })();
 </script>

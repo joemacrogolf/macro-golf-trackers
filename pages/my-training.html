@@ -146,9 +146,9 @@ function handoff1to1(m,pin){ls('mgsync-handoff',JSON.stringify({code:m.target.co
 function coachScreen(m){
   box.innerHTML='<div class="mt-k">My Training</div><h1 class="mt-h">'+(m.name?'Hi '+esc(m.name):'Your training')+'</h1><div class="mt-bar"></div>'+
     '<h2 class="mt-h2">Your training is set by your coach</h2>'+
-    '<p class="mt-p">Your 1-to-1 plan has everything for your training. Open it from the 1-to-1 Coaching tab, or here.</p>'+
+    '<p class="mt-p">Your 1-to-1 plan has your training for this phase, so your coach can manage your load. Open it from the MG Athletes tab, or here.</p>'+
     '<a class="mt-go" href="/my-plan">Open my 1-to-1 plan</a>'+
-    '<div class="mt-note">Want to do something outside your plan? Head back to the Home page or use Search.</div>'+
+    '<div class="mt-note">Want to change something in your training? Message your coach and they\u2019ll update your plan.</div>'+
     '<p class="mt-help">Not '+esc(m.name||'you')+'? <button type="button" class="mt-link" data-out style="display:inline;padding:0">Log out</button></p>';
   box.querySelector('[data-out]').addEventListener('click',logout)}
 
