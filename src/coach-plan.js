@@ -86,7 +86,7 @@ function dashCss(){if(document.getElementById('cp-dash-css'))return;var s=docume
  '.cp-rings svg{width:100%;max-width:92px;height:auto}.cp-rings span{font:700 11px Inter,sans-serif;letter-spacing:.6px;text-transform:uppercase;color:#c9c4b4}',
  '.cp-spark{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cp-spark>div{background:#1a1916;padding:10px}.cp-spark svg{display:block;width:100%;height:auto}',
  '.cp-spark b{font:400 20px Anton,Impact,sans-serif;color:#FFD900;margin-left:6px}',
- '.cp-att{background:#0B0B0B;padding:10px 10px 6px;margin:4px 0 2px}.cp-att svg{display:block;width:100%;height:auto;max-height:150px}',
+ '.cp-attc{background:#0B0B0B;padding:10px 10px 6px;margin:4px 0 2px}.cp-attc svg{display:block;width:100%;height:auto;max-height:190px}.cp-attc .k{display:flex;gap:14px;font:700 10px Inter,sans-serif;letter-spacing:1.4px;text-transform:uppercase;color:#c9c4b4;padding:6px 2px 2px}.cp-attc .k i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}',
  '.cp-coach{background:#fff;border:1px solid rgba(11,11,11,.13);border-left:6px solid #0B0B0B;padding:16px;display:flex;flex-direction:column;gap:8px}',
  '.cp-coach .k{font:700 11px Inter,sans-serif;letter-spacing:1.6px;text-transform:uppercase;color:#8a7f00}.cp-coach h3{margin:0;font:400 22px/1 Anton,Impact,sans-serif;text-transform:uppercase;color:#0B0B0B}',
  '.cp-coach h3 small{font:600 13px Inter,sans-serif;color:#77715F;text-transform:none;margin-left:6px}.cp-cn{margin:0;color:#3B3830;font-size:14px}',
@@ -118,13 +118,13 @@ function dashSetup(){dashCss();var lastH='',put=function(force){var el=document.
   put();var tm=null;new MutationObserver(function(){clearTimeout(tm);tm=setTimeout(put,60)}).observe(document.getElementById('p-today')||document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','class','aria-pressed']});
   var o=window.save;if(typeof o==='function'&&!o._cp){window.save=function(){var r=o.apply(this,arguments);clearTimeout(tm);tm=setTimeout(put,60);return r};window.save._cp=1}}
 /* attention through a session, small chart for the Practice tab */
-function attSvg(dr){var n=dr.length;if(n<2)return '';var W=640,H=120,L=70,R=20,T=14,B=14,X=function(i){return L+i*(W-L-R)/(n-1)},Y=function(v){return T+(1-att(v)/100)*(H-T-B)};
+function attSvg(dr){var n=dr.length;if(n<2)return '';var W=640,H=170,L=124,R=20,T=16,B=16,X=function(i){return L+i*(W-L-R)/(n-1)},Y=function(v){return T+(1-att(v)/100)*(H-T-B)};
   var tx=function(x,y,t,c,sz,a){return '<text x="'+x+'" y="'+y+'" text-anchor="'+(a||'start')+'" font-family="Inter,sans-serif" font-size="'+(sz||11)+'" font-weight="800" fill="'+c+'">'+t+'</text>'};
-  var g='<rect x="'+L+'" y="'+T+'" width="'+(W-L-R)+'" height="'+(H-T-B)/2+'" fill="#16241a"/><rect x="'+L+'" y="'+(T+(H-T-B)/2)+'" width="'+(W-L-R)+'" height="'+(H-T-B)/2+'" fill="#241e10"/>'+
-    tx(L-8,T+12,'EXTERNAL','#5fbf7a',10,'end')+tx(L-8,H-B,'INTERNAL','#FFD900',10,'end');
+  var g='<rect x="'+L+'" y="'+T+'" width="'+(W-L-R)+'" height="'+(H-T-B)/2+'" fill="#1d1c19"/><rect x="'+L+'" y="'+(T+(H-T-B)/2)+'" width="'+(W-L-R)+'" height="'+(H-T-B)/2+'" fill="#141311"/>'+
+    tx(L-12,T+18,'EXTERNAL','#F4F1EA',20,'end')+tx(L-12,H-B-2,'INTERNAL','#F4F1EA',20,'end');
   var pts=dr.map(function(d,i){return [X(i),Y(d.attention)]});g+='<polyline points="'+pts.map(function(p){return p.join(',')}).join(' ')+'" fill="none" stroke="#F4F1EA" stroke-width="2.5" stroke-dasharray="6 5"/>';
-  dr.forEach(function(d,i){var t=d.env==='Technical';g+='<circle cx="'+pts[i][0]+'" cy="'+pts[i][1]+'" r="11" fill="'+(t?'#FFD900':'#5fbf7a')+'" stroke="#0B0B0B" stroke-width="2"/>'+tx(pts[i][0],pts[i][1]+4,i+1,'#0B0B0B',12,'middle')});
-  return '<div class="cp-att"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Attention through the session: each number is a drill below">'+g+'</svg></div>'}
+  dr.forEach(function(d,i){var t=d.env==='Technical';g+='<circle cx="'+pts[i][0]+'" cy="'+pts[i][1]+'" r="17" fill="'+(t?'#E6E1D3':'#FFD900')+'" stroke="#0B0B0B" stroke-width="2"/>'+tx(pts[i][0],pts[i][1]+6,i+1,'#0B0B0B',18,'middle')});
+  return '<div class="cp-attc"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Attention through the session: each number is a drill below">'+g+'</svg><div class="k" aria-hidden="true"><span><i style="background:#E6E1D3"></i>Technical</span><span><i style="background:#FFD900"></i>Game</span></div></div>'}
 
 /* ---------- weekly report reminders (Joe, 13 Nov) ----------
    Sunday: "complete your weekly report" for this plan week. Monday to Wednesday: if the week that ended on Sunday still has no
@@ -231,16 +231,16 @@ function css(){if(document.getElementById('cp-css'))return;var s=document.create
  '.cp-vol{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:72px;padding:6px 10px;background:#FFD900;color:#0B0B0B;font:700 11px Inter,sans-serif;letter-spacing:1px;text-transform:uppercase;line-height:1.1}',
  '.cp-vol b{font:400 30px/1 Anton,Impact,sans-serif!important;letter-spacing:0!important;display:block}',
  '.cp-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#0B0B0B;color:#FFD900;font:800 12px Inter,sans-serif;margin-right:6px;vertical-align:middle}',
- '.cp-att text{letter-spacing:0!important;text-transform:none!important}',
+ '.cp-attc text{letter-spacing:0!important;text-transform:none!important}',
  '.cp-row{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--hair,rgba(11,11,11,.13))}',
  '.cp-row input{width:22px;height:22px;accent-color:#0B0B0B;margin:2px 0 0}',
  '.cp-row b{font:600 15px var(--sans,Inter,sans-serif);color:var(--ink,#0B0B0B)}',
  '.cp-tag{display:inline-block;font:700 10px var(--sans,Inter,sans-serif);letter-spacing:1.6px;text-transform:uppercase;padding:2px 6px;margin-right:6px;background:var(--track,#E6E1D3);color:var(--ink,#0B0B0B);vertical-align:2px}',
  '.cp-tag.g{background:var(--yellow,#FFD900)}',
  '.cp-meta{font-size:13px;color:var(--muted,#77715F);margin-top:2px}',
- '.cp-att{display:flex;align-items:center;gap:8px;font:700 10px var(--sans,Inter,sans-serif);letter-spacing:1.4px;text-transform:uppercase;color:var(--muted,#77715F);margin-top:6px}',
+ '.cp-att{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font:700 10px var(--sans,Inter,sans-serif);letter-spacing:1.4px;text-transform:uppercase;color:var(--muted,#77715F);margin-top:8px;background:none;padding:0}',
  '.cp-att span.t{position:relative;flex:0 1 160px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--track,#E6E1D3),var(--ink,#0B0B0B))}',
- '.cp-att span.t i{position:absolute;top:-4px;width:6px;height:16px;background:var(--yellow,#FFD900);border:1px solid #0B0B0B;transform:translateX(-50%)}',
+ '.cp-att span.t i{position:absolute;top:-4px;width:6px;height:16px;background:var(--yellow,#FFD900);border:1px solid #0B0B0B;transform:translateX(-50%)}.cp-att span.r{display:flex;align-items:center;gap:8px;flex:1 1 230px}.cp-att span.r span.t{flex:1 1 auto;max-width:180px}.cp-att b.l{font:700 10px var(--sans,Inter,sans-serif);letter-spacing:1.2px;padding:3px 7px;background:var(--ink,#0B0B0B);color:var(--yellow,#FFD900);margin-left:auto}',
  '.cp-go{margin-top:8px;min-height:46px;width:100%;border:0;background:var(--ink,#0B0B0B);color:var(--yellow,#FFD900);font:400 18px var(--display,Anton,Impact,sans-serif);text-transform:uppercase;letter-spacing:.3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}',
  '.cp-go.done{background:var(--track,#E6E1D3);color:var(--ink,#0B0B0B)}',
  '.cp-go:focus-visible,.cp-row input:focus-visible{outline:3px solid var(--yellow,#FFD900);outline-offset:2px}',
@@ -253,7 +253,7 @@ function css(){if(document.getElementById('cp-css'))return;var s=document.create
 ].join('');document.head.appendChild(s)}
 function att(v){v=+v;return isNaN(v)?50:Math.max(0,Math.min(100,v))}
 function attHtml(v){v=att(v);var l=v<=15?'Fully internal':v<40?'Mostly internal':v<=60?'Balanced':v<85?'Mostly external':'Fully external';
-  return '<div class="cp-att" aria-label="Attention: '+l+'">Internal <span class="t"><i style="left:'+v+'%"></i></span> External · '+l+'</div>'}
+  return '<div class="cp-att" aria-label="Attention: '+l+'"><span class="r">Internal <span class="t"><i style="left:'+v+'%"></i></span> External</span><b class="l">'+l+'</b></div>'}
 function wk(){var S=window.S;S.practice=S.practice||{};var k='w'+(S.week||1);S.practice[k]=S.practice[k]||{};return S.practice[k]}
 function sec(kick,title){return '<div class="sec"><div class="kick">'+esc(kick)+'</div><h2>'+esc(title)+'</h2><div class="bar" aria-hidden="true"></div></div>'}
 function renderPractice(el){
