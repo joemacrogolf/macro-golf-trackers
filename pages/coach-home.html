@@ -12,6 +12,19 @@
 #ch{--ink:#0c0c0b;--panel:#161614;--panel2:#1d1d1a;--line:#2c2b27;--paper:#f3f1ea;--muted:#9b988d;--gold:#FFD900;--ok:#5fd38d;--warn:#ffb347;--bad:#ff6b5e;--blue:#7fb2e5;--red:#e2574c;
   --display:"Anton",Impact,"Arial Narrow",sans-serif;--body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"Space Mono",ui-monospace,Menlo,monospace;
   background:var(--ink);color:var(--paper);font:15px/1.5 var(--body);min-height:100vh;text-align:left;color-scheme:dark}
+#ch .phase{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+#ch .phase .pl{display:flex;justify-content:space-between;gap:8px;font:11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+#ch .phase .pl b{font:20px/1 var(--display);color:var(--paper);letter-spacing:.02em}
+#ch .phase .segs{display:grid;gap:4px}#ch .phase .segs i{height:8px;border-radius:3px;background:var(--line)}
+#ch .phase .segs i.done{background:var(--gold)}#ch .phase .segs i.now{background:var(--gold);box-shadow:0 0 0 2px rgba(255,217,0,.35)}
+#ch .phase.review .segs i.now,#ch .phase.review .segs i.done{background:var(--warn)}#ch .phase.over .segs i{background:var(--bad)}
+#ch .phead .phase{max-width:420px}
+#ch .revpop{position:fixed;top:74px;right:18px;z-index:30;width:min(360px,calc(100vw - 36px));background:#1f1a10;border:1px solid var(--warn);border-left:6px solid var(--warn);border-radius:10px;box-shadow:0 14px 40px rgba(0,0,0,.55);padding:14px 14px 10px}
+#ch .revpop .rh{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}#ch .revpop .rh b{font:18px/1.1 var(--display);text-transform:uppercase;letter-spacing:.02em;color:var(--warn);flex:1}
+#ch .revpop .rx{background:none;border:0;color:var(--muted);cursor:pointer;font-size:20px;line-height:1;padding:0 4px}
+#ch .revpop .ri{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-bottom:6px;cursor:pointer;color:var(--paper)}
+#ch .revpop .ri:hover{border-color:var(--warn)}#ch .revpop .ri span{font-size:12.5px;color:var(--muted)}#ch .revpop .ri.over span{color:var(--bad)}
+#ch .revpop .rmin{display:none}#ch .revpop.min{width:auto;padding:8px 12px;cursor:pointer}#ch .revpop.min .rh{margin:0}#ch .revpop.min .ri,#ch .revpop.min .rx{display:none}
 #ch *{box-sizing:border-box}#ch button,#ch input,#ch select,#ch textarea{font:inherit;color:inherit}
 #ch :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 #ch h1,#ch h2,#ch h3{font-family:var(--display)!important;font-weight:400!important;color:var(--paper)!important;text-transform:uppercase;letter-spacing:.02em;margin:0}
@@ -58,7 +71,7 @@
 #ch .chips{display:flex;flex-wrap:wrap;gap:6px}
 #ch .chip{display:inline-flex;align-items:center;gap:5px;font:11px var(--mono);letter-spacing:.06em;padding:3px 8px;border:1px solid var(--line);border-radius:20px;color:#c9c4b4;text-transform:uppercase}
 #ch .chip.ok{border-color:#2f6b45;color:var(--ok)}#ch .chip.warn{border-color:#7a5a20;color:var(--warn)}#ch .chip.bad{border-color:#7a2a24;color:var(--bad)}#ch .chip.gold{border-color:#5c5000;color:var(--gold)}
-#ch .mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:2px}
+#ch .mini{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;margin-top:2px}
 #ch .mini div{background:#0f0f0e;border-radius:6px;padding:6px 8px}#ch .mini span{display:block;font:9px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 #ch .mini b{font:400 18px var(--display);color:var(--paper);letter-spacing:0;text-transform:none}
 /* player view */
@@ -150,6 +163,29 @@ function stats(p){var S=p.S||{},w=weekOf(S)||1,fin=S.finished||{},gym=Object.key
   var gT=p.plan?(+((p.plan.weekly||{}).physical)||0):0;
   return {week:w,gym:gym,gymT:gT,allGym:allGym,checkins7:c7,energy:en.length?(en.reduce(function(a,b){return a+b},0)/en.length):null,drills:drills,reviews:rev}}
 function planData(p){return p.plan||null}
+/* ---------- where each athlete is in their 6-week phase (Joe, 14 Nov) ----------
+   Start: the date the player's own plan uses (S.start, set the first time they open it or in Plan settings), else the
+   block start in the Plan Builder. Length: the plan's weeks (6 by default). Review window: the last 10 days of the phase.
+   A next phase already built in the Plan Builder (later start or higher phase number) clears the warning. */
+var REVIEW_DAYS=10;
+function daysBetween(a,b){return Math.round((new Date(b+"T12:00:00")-new Date(a+"T12:00:00"))/864e5)}
+function phaseOf(p){var pd=p.plan,S=p.S||{},start=S.start||(pd&&pd.startDate)||null;if(!start||p.type==="golf"&&!pd)return null;
+  var weeks=+((pd&&pd.weeks)||6)||6,t=today(),d=daysBetween(start,t),week=Math.floor(d/7)+1,end=addDays(start,weeks*7-1),left=daysBetween(t,end);
+  var next=pd&&PLANS.some(function(x){return x.id!==pd.id&&String(x.playerEmail||"").toLowerCase()===String(p.email||"").toLowerCase()&&((+x.phase||1)>(+pd.phase||1)||(x.startDate&&x.startDate>=addDays(end,-7)))});
+  var st=d<0?"soon":week>weeks?"over":left<REVIEW_DAYS?"review":"ok";
+  return {start:start,weeks:weeks,week:week,end:end,left:left,status:st,next:!!next,phase:pd?(+pd.phase||1):null}}
+function phaseBar(p){var f=phaseOf(p);if(!f)return "";var w=Math.max(0,Math.min(f.week,f.weeks)),segs="";
+  for(var i=1;i<=f.weeks;i++)segs+='<i class="'+(f.status==="over"?"done":i<w?"done":i===w?"now":"")+'"></i>';
+  var lab=f.status==="soon"?'Starts <b>'+esc(nice(f.start))+'</b>':f.status==="over"?'<b>Phase finished</b>':'<b>Week '+f.week+' of '+f.weeks+'</b>';
+  var side=f.status==="soon"?'':f.status==="over"?(f.next?'next plan built':Math.abs(f.left)+' day'+(Math.abs(f.left)===1?'':'s')+' ago'):f.status==="review"?(f.next?'next plan built':'review due · ends '+esc(nice(f.end))):'ends '+esc(nice(f.end));
+  return '<div class="phase '+(f.next?"ok":f.status)+'"><div class="pl"><span>'+(f.phase?'Phase '+f.phase+' · ':'')+lab+'</span><span>'+side+'</span></div><div class="segs" style="grid-template-columns:repeat('+f.weeks+',1fr)">'+segs+'</div></div>'}
+function reviewsDue(){return PEOPLE.map(function(p){return {p:p,f:phaseOf(p)}}).filter(function(x){return x.f&&!x.f.next&&(x.f.status==="review"||x.f.status==="over")}).sort(function(a,b){return a.f.left-b.f.left})}
+function reviewPop(){var due=reviewsDue(),el=document.getElementById("ch-revpop"),key="mg-revpop-min:"+today();
+  if(!due.length){if(el)el.remove();return}
+  if(!el){el=document.createElement("div");el.id="ch-revpop";el.className="revpop";el.setAttribute("role","status");document.getElementById("ch").appendChild(el)}
+  var min=ls(key)==="1";el.classList.toggle("min",min);
+  el.innerHTML='<div class="rh"><b>⚠ '+due.length+' six-week review'+(due.length===1?'':'s')+(min?'':' due')+'</b><button class="rx" type="button" data-act="revmin" aria-label="Minimise">–</button></div>'+
+    due.map(function(x){var f=x.f;return '<button class="ri'+(f.status==="over"?' over':'')+'" type="button" data-player="'+esc(x.p.key)+'"><b>'+esc(x.p.name)+'</b><span>'+(f.status==="over"?'Phase '+(f.phase||'')+' finished '+esc(nice(f.end))+' · no next plan yet':'Week '+f.week+' of '+f.weeks+' · ends '+esc(nice(f.end))+' ('+(f.left<=0?'today':f.left+' day'+(f.left===1?'':'s')+' left')+')')+'</span></button>'}).join("")}
 
 /* ---------- charts ---------- */
 var C={gold:"#FFD900",cream:"#f3f1ea",mute:"#8f8a7c",grid:"#2c2b27",green:"#5fd38d",red:"#e2574c",blue:"#7fb2e5"};
@@ -177,7 +213,7 @@ function ring(v,max,col,label,pct){var p=pct?Math.min(1,v/100):max?Math.min(1,v/
 /* ---------- views ---------- */
 function crumbs(){var c=[['home','Home']];if(view==='players'||view==='player')c.push(['players','MG Athletes']);if(view==='player'&&cur)c.push(['player',cur.name]);
   $("#ch-crumbs").innerHTML=c.map(function(x,i){return i===c.length-1?'<span>'+esc(x[1])+'</span>':'<button type="button" data-go="'+x[0]+'">'+esc(x[1])+'</button><span>/</span>'}).join("")}
-function render(){crumbs();var m=$("#ch-main");m.innerHTML=view==="home"?homeV():view==="players"?playersV():playerV();if(view==="players"){var s=$("#ch-q");if(s){s.value=q;}}}
+function render(){crumbs();try{reviewPop()}catch(e){}var m=$("#ch-main");m.innerHTML=view==="home"?homeV():view==="players"?playersV():playerV();if(view==="players"){var s=$("#ch-q");if(s){s.value=q;}}}
 var DECO={plan:'<svg class="deco" viewBox="0 0 100 100"><rect x="10" y="14" width="80" height="76" rx="6" fill="none" stroke="#FFD900" stroke-width="6"/><path d="M10 34h80M30 6v16M70 6v16" stroke="#FFD900" stroke-width="6"/><path d="M24 52h20M24 68h40" stroke="#FFD900" stroke-width="6"/></svg>',
   players:'<svg class="deco" viewBox="0 0 100 100"><circle cx="36" cy="34" r="16" fill="none" stroke="#FFD900" stroke-width="6"/><path d="M8 88c4-20 16-30 28-30s24 10 28 30" fill="none" stroke="#FFD900" stroke-width="6"/><circle cx="72" cy="40" r="12" fill="none" stroke="#FFD900" stroke-width="6"/><path d="M64 62c14 0 24 8 28 24" fill="none" stroke="#FFD900" stroke-width="6"/></svg>',
   dash:'<svg class="deco" viewBox="0 0 100 100"><path d="M10 90V50M35 90V30M60 90V60M85 90V16" stroke="#7fb2e5" stroke-width="12" stroke-linecap="round"/></svg>'};
@@ -202,9 +238,9 @@ function typeName(p){return p.type==="coach"?"Coach-built plan":p.type==="golf"?
 function pcard(p){var st=stats(p),s=SUM[p.ref]||{};
   return '<button class="pcard" type="button" data-player="'+esc(p.key)+'"><div class="top"><span class="av">'+esc(initials(p.name))+'</span><div style="min-width:0"><b>'+esc(p.name)+'</b><div class="hint">'+esc(p.type==="coach"?"Coach-built plan":p.type==="golf"?"Golf plan":"Training plan")+' · '+esc(p.code)+'</div></div></div>'+
    '<div class="chips"><span class="chip '+(p.updated&&(Date.now()-new Date(p.updated).getTime())<7*864e5?"ok":"warn")+'">Active '+esc(ago(p.updated))+'</span>'+(+s.open?'<span class="chip gold">'+s.open+' task'+(+s.open===1?'':'s')+'</span>':'')+(+s.overdue?'<span class="chip bad">'+s.overdue+' overdue</span>':'')+(s.lastNote?'<span class="chip">1-to-1 '+esc(nice(s.lastNote))+'</span>':'')+'</div>'+
-   (p.S&&p.type!=="golf"?'<div class="mini"><div><span>Week</span><b>'+st.week+'</b></div><div><span>Gym wk</span><b>'+st.gym+(st.gymT?'/'+st.gymT:'')+'</b></div><div><span>Check-ins</span><b>'+st.checkins7+'/7</b></div><div><span>Energy</span><b>'+(st.energy?st.energy.toFixed(1):'–')+'</b></div></div>':'')+'</button>'}
+   phaseBar(p)+(p.S&&p.type!=="golf"?'<div class="mini"><div><span>Gym wk</span><b>'+st.gym+(st.gymT?'/'+st.gymT:'')+'</b></div><div><span>Check-ins</span><b>'+st.checkins7+'/7</b></div><div><span>Energy</span><b>'+(st.energy?st.energy.toFixed(1):'–')+'</b></div></div>':'')+'</button>'}
 function playerV(){var p=cur;if(!p)return "";var S=p.S||{},st=stats(p),pd=planData(p),b=BOARD||{notes:[],tasks:[]};
-  var h='<div class="phead"><span class="av">'+esc(initials(p.name))+'</span><div class="meta"><span class="kick">MG Athlete \u00b7 '+esc(typeName(p))+(pd?' · Phase '+esc(pd.phase||1):'')+(S.start?' · Week '+st.week+' of '+((pd&&pd.weeks)||6):'')+'</span><h1>'+esc(p.name)+'</h1>'+
+  var h='<div class="phead"><span class="av">'+esc(initials(p.name))+'</span><div class="meta"><span class="kick">MG Athlete \u00b7 '+esc(typeName(p))+(pd?' · Phase '+esc(pd.phase||1):'')+'</span><h1>'+esc(p.name)+'</h1>'+phaseBar(p)+
     '<div class="chips">'+(p.code?'<span class="chip">Plan code '+esc(p.code)+'</span>':'<span class="chip warn">No 1-to-1 plan in the app yet</span>')+(p.email?'<span class="chip">'+esc(p.email)+'</span>':'')+'<span class="chip '+(p.updated&&(Date.now()-new Date(p.updated).getTime())<7*864e5?"ok":"warn")+'">Last active '+esc(ago(p.updated))+'</span>'+(pd&&pd.coach?'<span class="chip gold">Coach '+esc(pd.coach)+'</span>':'')+'</div></div><span class="spacer"></span>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap">'+(p.plan?'<a class="btn" href="'+SITE+'plan-builder-529481#plan='+encodeURIComponent(p.plan.id)+'" data-act="builder">Open in the Plan Builder</a>':'<a class="btn" href="'+SITE+'plan-builder-529481" data-act="builder">Build their 1-to-1 plan</a>')+'<a class="btn gold" href="#ch-notes">+ 1-to-1 notes</a>'+(p.email?'<button class="btn ghost" type="button" data-act="untag">'+(p.athlete?'Remove MG Athlete tag':'Tag as MG Athlete')+'</button>':'')+'</div></div>';
   if(p.S&&p.type!=="golf"){
@@ -266,6 +302,7 @@ function openPlayer(key){cur=PEOPLE.filter(function(p){return p.key===key||p.cod
 function refreshBoard(){var y=window.scrollY;return Promise.all([getBoard(cur),rpc("mg_coach_board_summary").catch(function(){return SUM})]).then(function(r){BOARD=r[0];SUM=r[1]||SUM;render();window.scrollTo(0,y)})}
 document.addEventListener("click",function(e){var t=e.target;
   var go=t.closest("[data-go]");if(go){view=go.dataset.go;if(view!=="player")cur=null;history.replaceState(null,"",view==="home"?"#":"#"+view);render();window.scrollTo(0,0);return}
+  var rp=t.closest("#ch-revpop");if(rp){var key="mg-revpop-min:"+today();if(t.closest("[data-act=revmin]")){ls(key,"1");reviewPop();return}if(rp.classList.contains("min")){ls(key,"0");reviewPop();return}}
   var pl=t.closest("[data-player]");if(pl){openPlayer(pl.dataset.player);return}
   var f=t.closest("[data-filter]");if(f){filter=f.dataset.filter;render();return}
   var en=t.closest("[data-editnote]");if(en){ui.editNote=(BOARD.notes||[]).filter(function(n){return n.id===en.dataset.editnote})[0]||null;render();var fm=$("#ch-noteform");if(fm)fm.scrollIntoView({block:"center"});return}
