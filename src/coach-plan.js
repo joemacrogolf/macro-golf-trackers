@@ -156,6 +156,13 @@ function incFor(name){var n=String(name).toLowerCase(),G=window;
   if(/med ball|slam|throw|discus|scoop/.test(n))return G.MB;if(/landmine/.test(n))return G.PLATE;if(/kettle|\bkb\b/.test(n))return G.KB;
   if(/cable|pull down|pulldown|push down|pushdown|woodchop|chop|pallof|leg curl|lat pull/.test(n))return G.CABLE;
   if(/barbell|trap bar|\bbar\b/.test(n))return G.BAR;if(/dumbbell|\bdb\b|goblet|farmer|carry/.test(n))return G.DB;return G.BW}
+/* session structure from the Plan Builder: superset (A1/A2 pairs), circuit (one block, every exercise in turn) or straight (one exercise per block) */
+function physBlocks(d,di,ph){var mode=ph.mode||'superset',all=[],out=[];
+  (d.pairs||[]).forEach(function(pr,pi){var L=String.fromCharCode(65+pi),ex=[];['a','b'].forEach(function(s,j){var e=pr[s];if(e&&String(e.name||'').trim()){var o=window.x(slug(e.name)+'-'+(di+1)+L+(j+1),e.name,rx(e,ph));ex.push(o);all.push(o)}});
+    if(mode==='superset'&&ex.length)out.push({tag:L,label:ex.length>1?'Superset '+L:'Exercise '+L,rest:ph.rest||'45–60s',ex:ex})});
+  if(mode==='circuit'&&all.length){var r=Math.max.apply(null,all.map(function(e){return +e.sets||3}));return [{tag:'C',label:'Circuit · '+r+' rounds',rest:ph.rest||'60–90s between rounds',ex:all}]}
+  if(mode==='straight')return all.map(function(e,i){var L=String.fromCharCode(65+i);return {tag:L,label:'Exercise '+L,rest:ph.rest||'60–90s between sets',ex:[e]}});
+  return out}
 function rx(e,ph){
   var t=String(e.reps||'').trim(),type=e.type||'Strength',o;
   if(type==='Power')o={sets:3,reps:5,rpe:window.MAX,kind:'Power'};
@@ -181,8 +188,7 @@ function build(){
   var items=inc.mobility===false?[]:auto?MGLib.mobDay(mob,code+':'+today).map(function(v){return {kind:'video',name:v[0],wistia:v[1],mins:v[2]}}):(mob.items||[]).filter(function(m){return m&&m.name});
   var days=inc.physical===false?[]:(ph.dayList||[]);
   var SESSIONS=days.map(function(d,di){return {name:'Day '+(di+1),tab:'D'+(di+1),title:d.title||('Day '+(di+1)),short:d.title||('Day '+(di+1)),
-    blocks:(d.pairs||[]).map(function(pr,pi){var L=String.fromCharCode(65+pi),ex=[];['a','b'].forEach(function(s,j){var e=pr[s];if(e&&String(e.name||'').trim())ex.push(window.x(slug(e.name)+'-'+(di+1)+L+(j+1),e.name,rx(e,ph)))});
-      return {tag:L,label:'Superset '+L,rest:ph.rest||'45–60s',ex:ex}}).filter(function(b){return b.ex.length})}});
+    blocks:physBlocks(d,di,ph)}});
   var hasPractice=(inc.practice!==false&&((p.practice||{}).sessions||[]).length)||(inc.oncourse!==false&&((p.oncourse||{}).games||[]).length)||(inc.stats!==false&&(p.stats||[]).some(function(s){return s.baseline||s.target}));
   var CLIENT={name:p.playerName||'Player',first:first,key:'coach-'+code,weeks:+p.weeks||6,
     kicker:'Performance Plan',subtitle:'Phase '+(p.phase||1)+' · six-week plan',planName:'Performance Plan',

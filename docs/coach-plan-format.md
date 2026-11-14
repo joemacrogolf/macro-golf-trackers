@@ -50,7 +50,7 @@ so leave out what you don't want to change. Drop all `id`s: they are made on imp
   "oncourse": {"games": [{"name": "Mulligan", "holes": "9", "detail": "One mulligan per hole.", "target": "", "attention": 75}],
                "intention": "", "strategy": "", "preround": "", "postround": ""},
 
-  "physical": {"days": 2, "rest": "45-60s between rounds", "dayList": [
+  "physical": {"days": 2, "mode": "superset", "rest": "45-60s between rounds", "dayList": [
     {"title": "Full body A", "pairs": [
       {"a": {"name": "Trap bar deadlift", "type": "Strength", "reps": "", "each": false},
        "b": {"name": "Med ball scoop toss", "type": "Power", "reps": "", "each": true}}
@@ -81,3 +81,6 @@ so leave out what you don't want to change. Drop all `id`s: they are made on imp
 - **Check-in questions:** `type` is `Yes / No`, `Text` or `1–10`.
 
 The player's app shows Today (daily check-in first), Gym, Practice, Weight and Weekly, with reminders for the weekly report on Sunday and again Monday-Wednesday.
+
+### Session structure (14 Nov)
+`physical.mode` is `"superset"` (default: each pair is A1/A2), `"circuit"` (every exercise in the day runs as one circuit, numbered 1, 2, 3…) or `"straight"` (one exercise per block, A, B, C…). The data shape stays the same: `dayList[].pairs[]` with `a` and `b`; in circuit and straight modes `b` may have an empty name. Types: Strength, Power, Sequencing, Accessory, Core, Stability, Mobility. The Plan Builder's **Generate a recommended plan** card fills `dayList` from the Build a Plan (training) engine (`MGBuild.generate`, `src/plan-builder.js`) using goals, equipment, days, minutes, level and `mode` (saved in `physical.gen`).
