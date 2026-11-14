@@ -118,7 +118,7 @@ function dashSetup(){dashCss();var lastH='',put=function(force){var el=document.
   put();var tm=null;new MutationObserver(function(){clearTimeout(tm);tm=setTimeout(put,60)}).observe(document.getElementById('p-today')||document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','class','aria-pressed']});
   var o=window.save;if(typeof o==='function'&&!o._cp){window.save=function(){var r=o.apply(this,arguments);clearTimeout(tm);tm=setTimeout(put,60);return r};window.save._cp=1}}
 /* attention through a session, small chart for the Practice tab */
-function attSvg(dr){var n=dr.length;if(n<2)return '';var W=640,H=170,L=124,R=20,T=16,B=16,X=function(i){return L+i*(W-L-R)/(n-1)},Y=function(v){return T+(1-att(v)/100)*(H-T-B)};
+function attSvg(dr){var n=dr.length;if(n<2)return '';var W=640,H=180,L=124,R=30,T=24,B=24,X=function(i){return L+i*(W-L-R)/(n-1)},Y=function(v){return T+(1-att(v)/100)*(H-T-B)};
   var tx=function(x,y,t,c,sz,a){return '<text x="'+x+'" y="'+y+'" text-anchor="'+(a||'start')+'" font-family="Inter,sans-serif" font-size="'+(sz||11)+'" font-weight="800" fill="'+c+'">'+t+'</text>'};
   var g='<rect x="'+L+'" y="'+T+'" width="'+(W-L-R)+'" height="'+(H-T-B)/2+'" fill="#1d1c19"/><rect x="'+L+'" y="'+(T+(H-T-B)/2)+'" width="'+(W-L-R)+'" height="'+(H-T-B)/2+'" fill="#141311"/>'+
     tx(L-12,T+18,'EXTERNAL','#F4F1EA',20,'end')+tx(L-12,H-B-2,'INTERNAL','#F4F1EA',20,'end');
@@ -227,7 +227,7 @@ function css(){if(document.getElementById('cp-css'))return;var s=document.create
  '.cp-card{background:var(--paper,#fff);border:1px solid var(--hair,rgba(11,11,11,.13));border-left:6px solid var(--yellow,#FFD900);padding:16px;display:flex;flex-direction:column;gap:10px}',
  '.cp-card h3{margin:0;font:400 22px/1.05 var(--display,Anton,Impact,sans-serif);text-transform:uppercase;color:var(--ink,#0B0B0B)}',
  '.cp-note{margin:0;color:var(--body,#3B3830);font-size:14px;line-height:1.5}',
- '.cp-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.cp-hd label{flex:1}',
+ '.cp-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.cp-hd label{flex:1;display:grid;grid-template-columns:28px 1fr;column-gap:4px;align-items:start}.cp-hd label .cp-num{grid-row:span 2;margin:1px 0 0}.cp-hd label .cp-tag{justify-self:start;margin:0 0 4px}.cp-hd label b{grid-column:2;line-height:1.3}',
  '.cp-vol{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:72px;padding:6px 10px;background:#FFD900;color:#0B0B0B;font:700 11px Inter,sans-serif;letter-spacing:1px;text-transform:uppercase;line-height:1.1}',
  '.cp-vol b{font:400 30px/1 Anton,Impact,sans-serif!important;letter-spacing:0!important;display:block}',
  '.cp-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#0B0B0B;color:#FFD900;font:800 12px Inter,sans-serif;margin-right:6px;vertical-align:middle}',
@@ -238,9 +238,11 @@ function css(){if(document.getElementById('cp-css'))return;var s=document.create
  '.cp-tag{display:inline-block;font:700 10px var(--sans,Inter,sans-serif);letter-spacing:1.6px;text-transform:uppercase;padding:2px 6px;margin-right:6px;background:var(--track,#E6E1D3);color:var(--ink,#0B0B0B);vertical-align:2px}',
  '.cp-tag.g{background:var(--yellow,#FFD900)}',
  '.cp-meta{font-size:13px;color:var(--muted,#77715F);margin-top:2px}',
- '.cp-att{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font:700 10px var(--sans,Inter,sans-serif);letter-spacing:1.4px;text-transform:uppercase;color:var(--muted,#77715F);margin-top:8px;background:none;padding:0}',
- '.cp-att span.t{position:relative;flex:0 1 160px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--track,#E6E1D3),var(--ink,#0B0B0B))}',
- '.cp-att span.t i{position:absolute;top:-4px;width:6px;height:16px;background:var(--yellow,#FFD900);border:1px solid #0B0B0B;transform:translateX(-50%)}.cp-att span.r{display:flex;align-items:center;gap:8px;flex:1 1 230px}.cp-att span.r span.t{flex:1 1 auto;max-width:180px}.cp-att b.l{font:700 10px var(--sans,Inter,sans-serif);letter-spacing:1.2px;padding:3px 7px;background:var(--ink,#0B0B0B);color:var(--yellow,#FFD900);margin-left:auto}',
+ '.cp-att{display:block;margin-top:10px;background:none;padding:0}',
+ '.cp-att .h{display:flex;justify-content:space-between;align-items:baseline;font:700 10px var(--sans,Inter,sans-serif);letter-spacing:1.4px;text-transform:uppercase;color:var(--muted,#77715F)}.cp-att .h b{font:700 12px var(--sans,Inter,sans-serif);letter-spacing:.4px;text-transform:none;color:var(--ink,#0B0B0B)}',
+ '.cp-att .t{position:relative;display:block;height:8px;border-radius:4px;margin:7px 0 5px;background:linear-gradient(90deg,var(--track,#E6E1D3),var(--ink,#0B0B0B))}',
+ '.cp-att .t i{position:absolute;top:-5px;width:8px;height:18px;border-radius:2px;background:var(--yellow,#FFD900);border:2px solid #0B0B0B;transform:translateX(-50%);box-sizing:border-box}',
+ '.cp-att .e{display:flex;justify-content:space-between;font:700 9px var(--sans,Inter,sans-serif);letter-spacing:1.4px;text-transform:uppercase;color:var(--muted,#77715F)}',
  '.cp-go{margin-top:8px;min-height:46px;width:100%;border:0;background:var(--ink,#0B0B0B);color:var(--yellow,#FFD900);font:400 18px var(--display,Anton,Impact,sans-serif);text-transform:uppercase;letter-spacing:.3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}',
  '.cp-go.done{background:var(--track,#E6E1D3);color:var(--ink,#0B0B0B)}',
  '.cp-go:focus-visible,.cp-row input:focus-visible{outline:3px solid var(--yellow,#FFD900);outline-offset:2px}',
@@ -253,7 +255,7 @@ function css(){if(document.getElementById('cp-css'))return;var s=document.create
 ].join('');document.head.appendChild(s)}
 function att(v){v=+v;return isNaN(v)?50:Math.max(0,Math.min(100,v))}
 function attHtml(v){v=att(v);var l=v<=15?'Fully internal':v<40?'Mostly internal':v<=60?'Balanced':v<85?'Mostly external':'Fully external';
-  return '<div class="cp-att" aria-label="Attention: '+l+'"><span class="r">Internal <span class="t"><i style="left:'+v+'%"></i></span> External</span><b class="l">'+l+'</b></div>'}
+  return '<div class="cp-att" aria-label="Attention: '+l+'"><div class="h"><span>Attention</span><b>'+l+'</b></div><span class="t"><i style="left:'+Math.max(2,Math.min(98,v))+'%"></i></span><div class="e" aria-hidden="true"><span>Internal · body</span><span>External · target</span></div></div>'}
 function wk(){var S=window.S;S.practice=S.practice||{};var k='w'+(S.week||1);S.practice[k]=S.practice[k]||{};return S.practice[k]}
 function sec(kick,title){return '<div class="sec"><div class="kick">'+esc(kick)+'</div><h2>'+esc(title)+'</h2><div class="bar" aria-hidden="true"></div></div>'}
 function renderPractice(el){
